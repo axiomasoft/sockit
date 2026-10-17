@@ -1,0 +1,193 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P1.7",
+  "title": "Аудитория, floors, вердикты, право действия и AudienceEvaluator (Audience)",
+  "status": "todo",
+  "summary": "SocKit\\Audience: Scope (breadth только для floors), AudienceSpec (direct/group/contour/platform/public, версия 1.0), PrivacyFloor (F1–F9, narrowedBy, maxFor/defaultFor), PrivacyDescriptor (wire-совместим с Edufy), AudienceSubject, AudienceVerdict (allow/allow_read_only/deny + reason), ContourResolver/GroupMembershipResolver/AudienceResolver/ResolvesAudienceInBatch/ActionAuthorizer SPI, ActionRequest/AuthorizationDecision, встроенный AudienceEvaluator, AudienceGate (fail-closed обёртка), AllowAuthenticatedPersonAuthorizer, фейки; fixtures floor/, descriptor/, audience/ включая «класс A ≠ класс B», чужой не-школьный host и batch == scalar.",
+  "why": "Приватность — first-class механизм ядра (S-03, S-04, B-11); ошибка здесь раскрывает контент детей. Жёсткие риски: решение по рангу вместо множества (T-14), ошибка резолвера как allow (T-10), batch и scalar расходятся, родитель-наблюдатель получает запись (SN-03). Каждый риск закрыт fixture.",
+  "scope": {
+    "include": [
+      "packages/core/src/Audience/{Enums,Data,Contracts,Exceptions}/*, Audience/{AudienceEvaluator,AudienceGate,AllowAuthenticatedPersonAuthorizer}.php",
+      "packages/core/src/Testing/{FakeContourResolver,FakeGroupMembershipResolver,FakeActionAuthorizer,FakeAudienceResolver}.php",
+      "fixtures floor/*.json, descriptor/*.json, audience/*.json; handlers FloorHandler, DescriptorHandler, AudienceHandler",
+      "tests/Unit/Audience/*Test.php (включая тест: AudienceGate превращает Throwable резолвера в deny audience.resolver_error; отсутствующий ключ batch → deny audience.unknown)"
+    ],
+    "exclude": [
+      "кеш вердиктов (P4)",
+      "группы SocKit (P5 реализует GroupMembershipResolver)",
+      "комбинаторы allOf/anyOf/except (отложены, knowledge/perplexity-adoption)"
+    ]
+  },
+  "depends_on": [
+    "P1.6"
+  ],
+  "related": [],
+  "decisions": [
+    "D6",
+    "D8"
+  ],
+  "skills": [
+    "php:php-patterns"
+  ],
+  "reads": [
+    {
+      "ref": "knowledge/kernel-contracts#audience",
+      "why": "Точные типы, SPI и reason codes",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#authorization",
+      "why": "ActionAuthorizer и AuthorizationDecision",
+      "required": true
+    },
+    {
+      "ref": "knowledge/privacy-model#algorithm",
+      "why": "Эталонный алгоритм decideRead/decidePublish/batch",
+      "required": true
+    },
+    {
+      "ref": "knowledge/privacy-model#examples",
+      "why": "Fixtures Edufy и чужого хоста",
+      "required": true
+    },
+    {
+      "ref": "knowledge/privacy-model#model",
+      "why": "Floors, minor, архив, наблюдатель",
+      "required": true
+    },
+    {
+      "ref": "knowledge/edufy-consumer#contract",
+      "why": "Wire PrivacyDescriptor и contour_levels Edufy",
+      "required": true
+    },
+    {
+      "ref": "knowledge/ecosystem-facts#edufy",
+      "why": "Текущие enum Edufy SocialScope/PrivacyDescriptor (ключи wire)",
+      "required": true
+    },
+    {
+      "ref": "knowledge/ecosystem-facts#azguard",
+      "why": "Эталон deny-only расширений и reason codes",
+      "required": true
+    },
+    {
+      "ref": "knowledge/perplexity-audit#v2-25",
+      "why": "Audience evaluation и cache key",
+      "required": false
+    },
+    {
+      "ref": "knowledge/perplexity-audit#v2-37",
+      "why": "Обязательные проверки адаптера аудитории (контракт для fixtures)",
+      "required": true
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Audience/**",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Testing/FakeContourResolver.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Testing/FakeGroupMembershipResolver.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Testing/FakeActionAuthorizer.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Testing/FakeAudienceResolver.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/floor/*.json",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/descriptor/*.json",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/audience/*.json",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Contracts/Handlers/FloorHandler.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Contracts/Handlers/DescriptorHandler.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Contracts/Handlers/AudienceHandler.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Audience/**",
+      "change": "create"
+    }
+  ],
+  "rules": [
+    "`declare(strict_types=1);` во всех PHP-файлах; DTO/VO — `final readonly`; enums string-backed.",
+    "Каждый публичный тип вне `Internal\\` помечен `#[Api(since: '1.0')]` или `#[Spi(kind: SpiKind::…, since: '1.0')]`.",
+    "Именованные аргументы в вызовах с ≥2 аргументами внутри кода пакета.",
+    "Никаких импортов Chatom/AzGuard/Edufy/CoreX в packages/core (T-06).",
+    "Тест на каждое правило VO и каждый reason/problem code; fixture-файл на каждый wire-случай из knowledge/kernel-contracts#fixtures.",
+    "Решение чтения никогда не использует Scope::breadth(); breadth — только в PrivacyFloor/decidePublish.",
+    "AudienceGate — единственный вход для кода ядра/модулей; прямой вызов AudienceResolver вне AudienceGate запрещён (комментарий в phpdoc + будущий arch-гейт P2).",
+    "Reason codes — ровно словарь из knowledge/kernel-contracts#audience; новый код — только через план.",
+    "ContourMembership — enum Live|ReadOnly|Archived|None в SocKit\\Audience\\Enums."
+  ],
+  "guidance": "Fixture audience: `input` = {viewer: {actor:'user:1', kind:'person', installation:'i1', age_band:'adult'}, subject: {key:'p1', spec:{…wire…}, author:'user:9', surface:{kind:'edufy.class-feed',host:'edufy.class:42',incarnation:1}, surface_archived:false, archive_readers:false}, contours: [{actor:'user:1', level:'class', contour:'edufy.class:42', membership:'live'}], groups: [], resolver_throws: false}; `expect` = {decision:'allow', reason:'audience.allowed.contour_live'}. Обработчик собирает FakeContourResolver из `contours`, вызывает AudienceGate::read и сравнивает. Публикационные fixtures: `input.operation = 'publish'` + floor. Batch fixture: список subjects, expect — map key→{decision,reason}; обработчик проверяет readMany == поэлементный read. Обязательные случаи — knowledge/kernel-contracts#fixtures (audience, floor, descriptor). Descriptor round-trip: `PrivacyDescriptor::fromContractArray($edufyWire)->toContractArray() === $edufyWire` с ключами в том же наборе.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "vendor/bin/pest tests/Unit/Audience tests/Unit/Contracts",
+      "expect": "exit 0, 0 failed",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "vendor/bin/pest tests/Arch",
+      "expect": "exit 0",
+      "kind": "impact"
+    },
+    {
+      "id": "V90",
+      "cmd": "vendor/bin/phpstan analyse --no-progress",
+      "expect": "exit 0, [OK] No errors",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "vendor/bin/pint --test",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Контракты аудитории/floors/вердиктов/права действия",
+    "AudienceEvaluator + AudienceGate",
+    "≥ 30 fixtures аудитории/floors/descriptor"
+  ],
+  "route": {
+    "class": "implementation",
+    "effort": "high"
+  },
+  "review": {
+    "mode": "none"
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": null,
+  "updated_at": "2026-10-17T17:59:42Z"
+}

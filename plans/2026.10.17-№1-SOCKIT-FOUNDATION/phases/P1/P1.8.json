@@ -1,0 +1,105 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P1.8",
+  "title": "Результат операции и конверт команды (Operations)",
+  "status": "todo",
+  "summary": "SocKit\\Operations: OperationOutcome (confirmed/rejected/pending/unknown), OperationResult с инвариантами и wire, CommandEnvelope (key, namespace, digest, expected revision); fixtures outcome/; isSuccess() истинно только для Confirmed.",
+  "why": "Потребитель должен различать подтверждённый, отклонённый, отложенный и неизвестный исход (v1-06, B-08, T-10); unknown, принятый за успех, — источник дублей и потерь.",
+  "scope": {
+    "include": [
+      "packages/core/src/Operations/{Enums/OperationOutcome.php, Data/OperationResult.php, Data/CommandEnvelope.php, Exceptions/InvalidOperationResultException.php}",
+      "fixtures outcome/*.json; handler OutcomeHandler",
+      "tests/Unit/Operations/*Test.php"
+    ],
+    "exclude": [
+      "receipts/CAS/outbox runtime (P2)"
+    ]
+  },
+  "depends_on": [
+    "P1.5"
+  ],
+  "related": [],
+  "reads": [
+    {
+      "ref": "knowledge/kernel-contracts#operations",
+      "why": "Точные типы и инварианты",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#problems",
+      "why": "Коды, используемые в результатах",
+      "required": true
+    },
+    {
+      "ref": "knowledge/perplexity-audit#v2-09",
+      "why": "MutationResult аудита (поля совпадают, имена — как Chatom)",
+      "required": false
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Operations/**",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/outcome/*.json",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Contracts/Handlers/OutcomeHandler.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Operations/**",
+      "change": "create"
+    }
+  ],
+  "rules": [
+    "`declare(strict_types=1);` во всех PHP-файлах; DTO/VO — `final readonly`; enums string-backed.",
+    "Каждый публичный тип вне `Internal\\` помечен `#[Api(since: '1.0')]` или `#[Spi(kind: SpiKind::…, since: '1.0')]`.",
+    "Именованные аргументы в вызовах с ≥2 аргументами внутри кода пакета.",
+    "Никаких импортов Chatom/AzGuard/Edufy/CoreX в packages/core (T-06).",
+    "Тест на каждое правило VO и каждый reason/problem code; fixture-файл на каждый wire-случай из knowledge/kernel-contracts#fixtures.",
+    "Нарушение инварианта результата (Confirmed без resource, Rejected без problem, Unknown с другим кодом) — исключение `sockit.payload_invalid`."
+  ],
+  "guidance": "Wire: `{\"outcome\":\"confirmed\",\"receipt_id\":\"…\",\"resource\":{\"kind\":\"post\",\"id\":\"…\"},\"revision\":1,\"problem\":null,\"problem_detail\":{}}`. Fixtures: по одному на каждый outcome + три нарушения инвариантов.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "vendor/bin/pest tests/Unit/Operations tests/Unit/Contracts",
+      "expect": "exit 0, 0 failed",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V90",
+      "cmd": "vendor/bin/phpstan analyse --no-progress",
+      "expect": "exit 0, [OK] No errors",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "vendor/bin/pint --test",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Типы результата операции"
+  ],
+  "route": {
+    "class": "implementation",
+    "effort": "low"
+  },
+  "review": {
+    "mode": "none"
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": null,
+  "updated_at": "2026-10-17T17:59:42Z"
+}

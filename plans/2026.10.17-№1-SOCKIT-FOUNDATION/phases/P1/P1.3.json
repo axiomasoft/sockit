@@ -1,0 +1,140 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P1.3",
+  "title": "Маркеры Api/Spi и arch-гейты границ",
+  "status": "todo",
+  "summary": "Атрибуты SocKit\\Attributes\\{Api,Spi,SpiKind} и набор архитектурных тестов tests/Arch на собственном сканере исходников: маркеры публичной поверхности, запрет импортов соседей и Internal через границу, закрытый список модулей, именование, отсутствие tenant_id и edition-флагов, чистый composer require ядра, ownership-манифест, отсутствие Eloquent/Request/Closure в публичных сигнатурах; каждый гейт имеет негативный контроль на fixture-нарушении.",
+  "why": "Принципы фиксируются машиной, а не честным словом (M1 «жёстко зафиксировать»; Chatom: «extensibility must be proven»). Гейты появляются до кода контрактов, чтобы следующие пункты сразу им подчинялись. Жёсткий риск: гейт без негативного контроля молча пропускает нарушения — поэтому mutation-fixtures обязательны.",
+  "scope": {
+    "include": [
+      "packages/core/src/Attributes/{Api,Spi,SpiKind}.php по knowledge/kernel-contracts#attributes",
+      "tests/Arch/Support/SourceScanner.php — token_get_all-сканер: namespace, use-импорты (включая group use), объявленные class/interface/trait/enum, атрибуты по имени, строки composer.json",
+      "tests/Arch/Support/Gates.php — функции гейтов, принимающие список файлов и возвращающие нарушения (чтобы тест прогонялся и на реальном коде, и на fixtures)",
+      "tests/Arch/fixtures/violations/*.php.txt — по одному файлу-нарушению на гейт (расширение .txt, чтобы не автозагружались и не анализировались PHPStan)",
+      "tests/Arch/{PublicSurfaceMarkersTest,LayeringTest,ModuleListTest,NamingTest,TenancyNeutralTest,ComposerRequireTest,OwnershipManifestTest,PublicSignatureTest,NoEditionFlagsTest}.php"
+    ],
+    "exclude": [
+      "гейты для packages/comments и packages/forum — добавляются в P3/P7 тем же сканером",
+      "гейты таблиц (миграций ещё нет) — P2"
+    ]
+  },
+  "depends_on": [
+    "P1.1"
+  ],
+  "related": [],
+  "decisions": [
+    "D3",
+    "D4",
+    "D7"
+  ],
+  "skills": [
+    "php-packages:laravel-package-testing"
+  ],
+  "reads": [
+    {
+      "ref": "knowledge/kernel-contracts#attributes",
+      "why": "Точные атрибуты и правило arch-теста",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#rules",
+      "why": "Запреты в публичных сигнатурах",
+      "required": true
+    },
+    {
+      "ref": "knowledge/architecture#kernel-modules",
+      "why": "Закрытый список первых сегментов namespace",
+      "required": true
+    },
+    {
+      "ref": "knowledge/architecture#naming",
+      "why": "Суффиксы и namespaces",
+      "required": true
+    },
+    {
+      "ref": "knowledge/canon-rules#b-rules",
+      "why": "B-05/B-06/B-07/B-10/B-13/B-15 — что гейты защищают",
+      "required": true
+    },
+    {
+      "ref": "knowledge/ecosystem-facts#chatom-structure",
+      "why": "Эталон arch-гейтов Chatom (модули, дубли имён, Internal)",
+      "required": true
+    },
+    {
+      "ref": "knowledge/perplexity-audit#v2-07",
+      "why": "Список arch-проверок аудита",
+      "required": false
+    },
+    {
+      "ref": "knowledge/perplexity-audit#v2-31",
+      "why": "Security boundaries аудита",
+      "required": false
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Attributes/Api.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Attributes/Spi.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Attributes/SpiKind.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Arch/**",
+      "change": "create"
+    }
+  ],
+  "rules": [
+    "`declare(strict_types=1);` во всех PHP-файлах; DTO/VO — `final readonly`; enums string-backed.",
+    "Каждый публичный тип вне `Internal\\` помечен `#[Api(since: '1.0')]` или `#[Spi(kind: SpiKind::…, since: '1.0')]`.",
+    "Гейты: A1 маркер у каждого публичного типа и ни одного в Internal; A2 packages/core не импортирует `Chatom\\`, `AzGuard\\`, `Edufy\\`, `Social\\`, `CoreX\\`, `SocKit\\Comments\\`, `SocKit\\Forum\\`, `SocKit\\ChatomBridge\\`, `SocKit\\Posts\\`, `SocKit\\Reactions\\`, `SocKit\\Groups\\`; A3 импорт `SocKit\\<X>\\Internal\\…` разрешён только из того же модуля X; A4 первый сегмент ∈ {Attributes, Support, Actors, Audience, Surfaces, Operations, Errors, Modules, Configuration, Testing, Internal, Facades} или корневые SocKitServiceProvider/SocKit; A5 нет классов с суффиксом Service|Manager|Helper|Util, классы в `Data\\` — final readonly; A6 нет идентификаторов `tenant_id`/`tenantId`; A7 require packages/core без axiomasoft/*, edufy/*, corex/*; A8 extra.sockit.owners покрывает все namespaces src без пересечений; A9 публичные методы #[Api]/#[Spi]-типов не используют Eloquent\\*, Http\\Request/Response, Closure (через Reflection); A10 нет идентификаторов /(pro|premium|enterprise)_?(edition|enabled)/i.",
+    "Каждый гейт тестируется дважды: на реальном дереве (0 нарушений) и на своём fixture (≥1 нарушение с ожидаемым кодом)."
+  ],
+  "guidance": "Гейт возвращает `list<array{gate:string,file:string,line:int,message:string}>`. Тест реального дерева: `expect(Gates::markers(SourceScanner::php('packages/core/src')))->toBe([])`. Негативный контроль: `expect(Gates::markers(SourceScanner::fixture('violations/missing-marker.php.txt')))->not->toBe([])`. A9 через Reflection требует автозагрузки — гейт обходит только классы с атрибутами Api/Spi из packages/core/src (после P1.3 это только сами атрибуты; гейт обязан работать и на пустом наборе). Сообщения нарушений начинаются с кода гейта (`A3 …`).",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "vendor/bin/pest tests/Arch",
+      "expect": "exit 0, 0 failed; ≥ 20 tests (по 2 на гейт)",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V90",
+      "cmd": "vendor/bin/phpstan analyse --no-progress",
+      "expect": "exit 0, [OK] No errors",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "vendor/bin/pint --test",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Атрибуты Api/Spi/SpiKind",
+    "10 arch-гейтов с негативными контролями"
+  ],
+  "route": {
+    "class": "implementation",
+    "effort": "high"
+  },
+  "review": {
+    "mode": "none"
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": null,
+  "updated_at": "2026-10-17T17:59:41Z"
+}

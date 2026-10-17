@@ -1,0 +1,41 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:document:v1",
+  "id": "invariants",
+  "title": "Модель инвариантов: writers, транзакции, локи, мешающие операции",
+  "sections": [
+    {
+      "id": "core",
+      "title": "Базовые инварианты (I-xx)",
+      "text": "| ID | Инвариант | Enforcement | Bypass, который запрещён | Проверка |\n|:--|:--|:--|:--|:--|\n| I-01 | Один writer на state identity | ownership manifest + arch-тест владения таблицами | запись модулем/хостом в чужую таблицу; ALTER чужой таблицы | arch-тест, review миграций |\n| I-02 | Актор и контекст выводятся сервером | `ActorContexts` — единственный источник; команды не принимают author/installation из payload | конструктор команды с `ActorRef $author` | arch-тест сигнатур команд (P2), SN-02 |\n| I-03 | Текущая аудитория перед каждым защищённым выходом | `AudienceGate` на всех путях чтения/записи; проекции дают кандидатов | чтение тела в обход Gate (прямой Eloquent в публичном коде) | revoke-тесты на PHP/worker/feed (SN-11) |\n| I-04 | Идентичность мутации = namespace + key + digest | unique (namespace, key) в receipts; digest после канонизации | повтор с новым ключом при unknown | SN-09 |\n| I-05 | Состояние + ревизия + receipt + outbox атомарны | одна транзакция соединения владельца | outbox вне транзакции; сеть внутри транзакции | fault injection SN-08 |\n| I-06 | CAS: правка только по expected revision | `WHERE revision = :expected`; 0 строк → lookup, без авто-повтора | last-write-wins | barrier-тест параллельной правки |\n| I-07 | Tombstone + incarnation против воскрешения | удаление оставляет non-content tombstone; событие со старой revision/incarnation отбрасывается | upsert по событию без проверки tombstone | SN-14 reordered replay |\n| I-08 | Расширение только сужает | стадии/резолверы могут Deny/hold, но не Allow вместо Deny ядра | callback, меняющий deny на allow | тест «расширение пытается разрешить» |\n| I-09 | Rebuild проекций не повторяет side effects | ReplayMode::ProjectionOnly | уведомления при rebuild | SN-16 |\n| I-10 | Публичный API без Eloquent | arch-тест сигнатур | возврат модели | arch-тест |\n| I-11 | Unknown ≠ success | OperationResult::isSuccess только Confirmed | маппинг unknown → 200 | unit |\n| I-12 | Seat Chatom — кеш, не право | veto-стадия аудитории на каждой записи; ChannelPolicy::view на чтении | доступ «потому что есть seat» | P3 тест revoke при живом seat |"
+    },
+    {
+      "id": "pipeline",
+      "title": "Обязательный конверт операции ядра (P2)",
+      "text": "```text\n 1. decode + структурная валидация payload              (вне транзакции)\n 2. ActorContexts::current()/forWorker()                (вне)\n 3. surface instance: kind известен, incarnation активна, фича разрешена, backend binding совпадает (вне, перепроверка в 9)\n 4. ActionAuthorizer::decide → requireAllowed           (вне; remote verdict несёт generation, перепроверяется в 9)\n 5. AudienceGate::publish/read                          (вне)\n 6. safety/media preconditions                          (вне; hold → Pending)\n 7. BEGIN (соединение владельца)\n 8. receipt: SELECT … FOR UPDATE по (namespace, key); есть → digest равен ? replay (с текущей авторизацией шагов 2–5) : idempotency_conflict\n 9. lock ресурса/instance в порядке lock order; recheck state/revision/tombstone/incarnation; повтор 4–5 если verdict имел generation\n10. мутация владельца\n11. INSERT receipt (+result_payload) и outbox event(s)\n12. COMMIT\n13. after-commit: доставка/проекции, ответ\n```\nРасширения встраиваются только в именованные слоты: `validate` (после 1), `authorize` (после 4, только deny), `audience` (после 5, только deny/narrow), `safety` (6), `project` (между 10 и 11, Db-эффекты владельца), `after_commit` (13). Порядок обязательных стадий неизменяем (как L5 Chatom)."
+    },
+    {
+      "id": "locks",
+      "title": "Порядок локов и мешающие пары операций",
+      "text": "**Lock order ядра и модулей (всегда в этом порядке, никогда обратно):** receipt row → surface instance → group (если затронута) → post → reaction subject (post) → reaction row. Комментарии (транзакция Chatom space): порядок Chatom (channel → целевые сообщения → seats), стадии sockit-comments лочат свои side-строки только в Persist/Project, после core-локов (канал уже залочен core), итоговый порядок: channel → messages → seats → comment_threads → comment_nodes → comment_thread_stats.\n\n| Пара операций (конкурентно) | Что может сломаться | Защита | Тест |\n|:--|:--|:--|:--|\n| publish ×2 тем же ключом | два поста | unique (namespace,key) + lock receipt | DuplicatePublishTest (2 процесса, PG) |\n| edit поста ×2 с одной expected revision | lost update | CAS | ConcurrentEditTest |\n| reaction add ‖ hide/delete поста | реакция на скрытый пост; счётчик раскрывает | lock post до reaction; recheck state | ReactionVersusHideTest |\n| reaction add ‖ reaction remove того же актора | двойной счёт / отрицательный счётчик | unique (subject, actor, kind); счётчик в той же транзакции; CHECK ≥0 | ReactionToggleRaceTest |\n| comment post ‖ delete родителя | ответ к удалённому родителю | Chatom: parent должен быть показан отправителю (под локом канала); comment_nodes проверяет parent state | ReplyVsDeleteTest (P3) |\n| comment post ‖ revoke аудитории | запись после отзыва | Reauthorize-стадия sockit-comments повторяет AudienceGate под локом | RevokeDuringPostTest (P3) |\n| surface archive ‖ publish | пост в архивную surface | lock instance + recheck lifecycle | ArchiveVsPublishTest |\n| outbox claim ×N воркеров | двойная доставка | FOR UPDATE SKIP LOCKED + lease; consumer inbox PK | OutboxWorkersTest |\n| replay события ‖ delete | воскрешение | tombstone + revision guard | TombstoneReplayTest |"
+    },
+    {
+      "id": "announcement",
+      "title": "Последовательность анонса и неизвестного исхода",
+      "text": "Анонс (P8): outbox SocKit → bridge inbox (PK consumer,event_id + digest) → текущий snapshot поста через owner API → текущая аудитория канала ⊆ аудитории поста (иначе deny/quarantine) → durable send intent со stable key → вызов Chatom **вне** транзакции SocKit → при таймауте lookup по тому же ключу → mapping+receipt → AudienceShrunk/PostDeleted → idempotent redact/delete; stale событие отбрасывается по privacy revision/tombstone.\n\nНеизвестный внешний исход: owner пишет durable intent + digest → execute(originalKey) → ответ потерян → reconciler lookupOutcome(originalKey): confirmed → receipt; absent → retry тем же key/payload; conflict/unknown → quarantine. Если у backend нет idempotency/outcome lookup — мост не объявляет exactly-once эффекта."
+    },
+    {
+      "id": "failures",
+      "title": "Failure matrix → acceptance",
+      "text": "Каждая строка failure matrix аудита (knowledge/perplexity-audit#v1-09) — acceptance-тест фазы: concurrent same key/lost response → P2; parallel edit → P2/P4; reaction vs hide/delete → P4; body saved/outbox fails → P2; draft promotion repeated → P4; consent saved/hide failed → P4; stale membership projection → P3/P4; class A replaced by B → P1 (fixture) + P4; old event after delete → P2; same event id/different payload → P2; chat accept/lost response → P8; restore hidden → P4; old backup/clone → P9; erasure → P9; mixed id/event formats → P1 (fixtures) + P6; standalone install → P2 (core alone) + P9."
+    }
+  ],
+  "applies_to": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P8",
+    "P9"
+  ]
+}

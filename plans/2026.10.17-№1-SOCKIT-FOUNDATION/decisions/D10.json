@@ -1,0 +1,35 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D10",
+  "title": "Источник пакета axiomasoft/chatom для разработки и CI",
+  "date": "2026-10-17",
+  "status": "open",
+  "question": "Откуда SocKit получает axiomasoft/chatom (нужен с P3)? Пакет не опубликован в Packagist, тег последней публикации v0.5.0, текущий dev-release 1.0.0 в mirror-репозитории.",
+  "options": [
+    {
+      "id": "A",
+      "text": "VCS-репозиторий Chatom (mirror) в root composer.json, constraint на ветку/коммит до тега 1.0.0; локально — path override в незакоммиченном composer.local",
+      "pros": "Воспроизводимо в CI",
+      "cons": "Нужен доступ CI к репозиторию"
+    },
+    {
+      "id": "B",
+      "text": "Path-репозиторий на соседний checkout ../chatom/packages/core",
+      "pros": "Мгновенно для разработки",
+      "cons": "Не воспроизводимо в CI, путь вне репозитория"
+    },
+    {
+      "id": "C",
+      "text": "Ждать тега/публикации Chatom 1.0.0",
+      "cons": "Блокирует P3"
+    }
+  ],
+  "context": "Рекомендация агента: A. Решение не блокирует P1 и P2.",
+  "applies_to": [
+    "P3"
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  }
+}

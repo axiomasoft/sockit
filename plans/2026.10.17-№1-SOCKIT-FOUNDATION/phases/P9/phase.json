@@ -1,0 +1,28 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:phase:v1",
+  "id": "P9",
+  "title": "Квалификация, совместимость и релиз",
+  "design": "skeleton",
+  "goal": "Операционная квалификация и подготовка 1.0: публичный API snapshot + BC-check, compatibility matrix (PHP/Laravel/DB), consumer install smoke из артефактов, backup/restore/clone fence, erasure, документация VitePress, CHANGELOG; решение треков HTTP/SDK/UI.",
+  "context": "Skeleton. Релиз/тег/публикация — только по явному запросу владельца. Треки HTTP API, TS/Dart SDK, admin/UI — отдельные, условие включения: названный потребитель (knowledge/architecture#tracks).",
+  "scope": {
+    "include": [
+      "API snapshot и BC gate",
+      "matrix CI",
+      "restore/clone fence тесты SN-16",
+      "erasure SN-21",
+      "docs"
+    ],
+    "exclude": [
+      "push/tag/publish без запроса"
+    ]
+  },
+  "depends_on": [
+    "P6"
+  ],
+  "deliverables": [
+    "Release candidate checklist"
+  ],
+  "items": [],
+  "batches": []
+}

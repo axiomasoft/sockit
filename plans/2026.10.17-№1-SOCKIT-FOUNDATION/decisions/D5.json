@@ -1,0 +1,24 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D5",
+  "title": "Surface = Provider + fluent builder + compile/freeze, как Chatom space и AzGuard panel",
+  "date": "2026-10-17",
+  "status": "accepted",
+  "decision": "Surface kind объявляется классом SurfaceProvider (abstract, #[Spi(Implement)]) с методом surface(Surface $surface): Surface; Surface — mutable fluent builder до компиляции, materialize() возвращает frozen копию; провайдеры регистрируются FQCN в config('sockit.surfaces') или из модуля через ModuleRegistrar::surface(); реестр компилируется один раз, ошибки собираются и бросаются одним InvalidDefinitionException с кодами; генератор sockit:make-surface создаёт класс провайдера из стаба. Surface kind ≠ UI-панель: это серверная область с привязкой к типу host-сущности, политикой аудитории, разрешёнными модулями (feed/comments/reactions) и lifecycle.",
+  "rationale": "Единые принципы экосистемы (M1, B5): ChatSpaceProvider/Space и PanelProvider/PanelBuilder устроены одинаково; потребитель, знающий Chatom/AzGuard, сразу понимает SocKit.",
+  "applies_to": [
+    "P1",
+    "P2"
+  ],
+  "evidence": [
+    {
+      "kind": "repo",
+      "ref": "knowledge/ecosystem-facts#principles"
+    }
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  },
+  "answered_by": "agent"
+}

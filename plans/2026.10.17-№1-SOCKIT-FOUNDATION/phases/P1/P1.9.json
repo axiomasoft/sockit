@@ -1,0 +1,171 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P1.9",
+  "title": "Module SPI, типизированный config, service provider и SocKitFake",
+  "status": "todo",
+  "summary": "SocKit\\Modules (Module, ModuleManifest, ModuleRegistrar, Modules::add/module, ModuleGraphCompiler с кодами ошибок), SocKit\\Configuration (SocKitConfig с секциями и путём ключа в ошибке), расширенный SocKitServiceProvider (singletons, bindings SPI из sockit.resolvers с fallback только для tenant/audience), SocKit\\Testing\\SocKitFake::install(); Feature-тесты на Testbench: модуль не в sockit.modules — ничего не регистрирует; в списке, но не offered — boot-ошибка; config:cache-совместимость.",
+  "why": "Лёгкое ядро не знает имён модулей (T-03): модули и фичи приходят через registrar, как Plugin/PluginRegistrar Chatom. Типизированный config ловит ошибки при boot, а не на первой production-мутации (v2-30). Swap SPI через config — основа встраиваемости (B7).",
+  "scope": {
+    "include": [
+      "packages/core/src/Modules/{Contracts/Module.php, ModuleManifest.php, ModuleRegistrar.php, Modules.php, Exceptions/InvalidModuleException.php, Internal/ModuleGraphCompiler.php, Internal/CompiledModuleGraph.php}",
+      "packages/core/src/Configuration/{SocKitConfig.php, Data/*Config.php, Exceptions/InvalidConfigurationException.php}",
+      "packages/core/src/SocKitServiceProvider.php (расширение)",
+      "packages/core/config/sockit.php (финальная форма P1)",
+      "packages/core/src/Testing/SocKitFake.php",
+      "tests/Unit/Modules/*, tests/Unit/Configuration/*, tests/Feature/Modules/*, tests/Feature/Configuration/*, tests/Fixtures/Modules/{DemoModule,OtherModule}.php"
+    ],
+    "exclude": [
+      "migrations()/commands()/outboxConsumer() в registrar (P2, с потребителем)",
+      "surfaces-компиляция (P1.10 подключает registrar->surface())"
+    ]
+  },
+  "depends_on": [
+    "P1.7",
+    "P1.8"
+  ],
+  "related": [],
+  "decisions": [
+    "D3",
+    "D4"
+  ],
+  "reads": [
+    {
+      "ref": "knowledge/kernel-contracts#modules",
+      "why": "Точный Module SPI и коды ошибок",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#configuration",
+      "why": "SocKitConfig и правила провайдера",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#testing",
+      "why": "SocKitFake",
+      "required": true
+    },
+    {
+      "ref": "knowledge/architecture#config",
+      "why": "Целевой config",
+      "required": true
+    },
+    {
+      "ref": "knowledge/ecosystem-facts#chatom-plugin-spi",
+      "why": "Эталон Plugins::add/module, PluginManifest, PluginRegistrar",
+      "required": true
+    },
+    {
+      "ref": "knowledge/perplexity-audit#v2-30",
+      "why": "Что валидировать при boot",
+      "required": false
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Modules/**",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Configuration/**",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/SocKitServiceProvider.php",
+      "change": "any",
+      "note": "создаётся в P1.1"
+    },
+    {
+      "path": "packages/core/config/sockit.php",
+      "change": "any",
+      "note": "создаётся в P1.1"
+    },
+    {
+      "path": "packages/core/src/Testing/SocKitFake.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Modules/**",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Configuration/**",
+      "change": "create"
+    },
+    {
+      "path": "tests/Feature/Modules/**",
+      "change": "create"
+    },
+    {
+      "path": "tests/Feature/Configuration/**",
+      "change": "create"
+    },
+    {
+      "path": "tests/Fixtures/Modules/**",
+      "change": "create"
+    },
+    {
+      "path": "composer.json",
+      "change": "any",
+      "note": "autoload-dev для tests/Fixtures при необходимости; создаётся в P1.1"
+    }
+  ],
+  "rules": [
+    "`declare(strict_types=1);` во всех PHP-файлах; DTO/VO — `final readonly`; enums string-backed.",
+    "Каждый публичный тип вне `Internal\\` помечен `#[Api(since: '1.0')]` или `#[Spi(kind: SpiKind::…, since: '1.0')]`.",
+    "Именованные аргументы в вызовах с ≥2 аргументами внутри кода пакета.",
+    "Никаких импортов Chatom/AzGuard/Edufy/CoreX в packages/core (T-06).",
+    "Тест на каждое правило VO и каждый reason/problem code; fixture-файл на каждый wire-случай из knowledge/kernel-contracts#fixtures.",
+    "Регистрация модулей хранит только class-string; Modules::add после resolve definitions → LogicException('Modules must register before definitions are resolved.').",
+    "Отсутствующий обязательный резолвер (actor, contour, authorizer, groups) не подменяется тихим default: binding бросает ProviderUnavailableException (`sockit.provider_unavailable`) при resolve.",
+    "Ошибки конфигурации содержат detail key (путь) и rule."
+  ],
+  "guidance": "Testbench: `defineEnvironment($app)` задаёт `sockit.modules`. Тесты: (1) `Modules::module($app, DemoModule::class)` при пустом sockit.modules → false, ничего не зарегистрировано; (2) id в sockit.modules + offered → регистрации видны в CompiledModuleGraph; (3) `sockit.modules = ['acme.missing']` → при resolve графа InvalidModuleException с MODULE_LISTED_NOT_OFFERED; (4) два модуля с фичей 'posts' → MODULE_FEATURE_DUPLICATE; (5) `sockit.privacy.floor.max_scope = 'galaxy'` → InvalidConfigurationException detail key `sockit.privacy.floor.max_scope`; (6) `sockit.resolvers.contour = stdClass::class` → ошибка «не реализует ContourResolver»; (7) config:cache-совместимость: `var_export(config('sockit'))` + повторная загрузка даёт тот же SocKitConfig; (8) SocKitFake::install биндит все фейки, AudienceGate резолвится.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "vendor/bin/pest tests/Unit/Modules tests/Unit/Configuration tests/Feature",
+      "expect": "exit 0, 0 failed",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "vendor/bin/pest tests/Arch",
+      "expect": "exit 0",
+      "kind": "impact"
+    },
+    {
+      "id": "V90",
+      "cmd": "vendor/bin/phpstan analyse --no-progress",
+      "expect": "exit 0, [OK] No errors",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "vendor/bin/pint --test",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Module SPI",
+    "Типизированный config",
+    "Провайдер с bindings SPI",
+    "SocKitFake"
+  ],
+  "route": {
+    "class": "implementation",
+    "effort": "high"
+  },
+  "review": {
+    "mode": "none"
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": null,
+  "updated_at": "2026-10-17T18:00:26Z"
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:phase:v1",
+  "id": "P6",
+  "title": "Testkit, conformance хоста и пилот Edufy",
+  "design": "skeleton",
+  "goal": "packages/testkit (axiomasoft/sockit-testkit): фейки SPI, conformance suite для host-адаптеров (actor/contour/audience), пример чужого host без school-моделей; runbook пилота Edufy и предложение адаптера для Edufy (в репозитории Edufy, соседняя работа).",
+  "context": "Skeleton. B-06: пакет никогда не импортирует продукт — Edufy-адаптер живёт в Edufy. SocKit поставляет contract suite, по которому Edufy докажет адаптер. Факты о текущем Edufy (SocialPort, fake driver) — knowledge/edufy-consumer.",
+  "scope": {
+    "include": [
+      "testkit пакет",
+      "adapter contract suite",
+      "fixture-host (неучебный)",
+      "consumer install smoke",
+      "Edufy pilot runbook + список изменений Edufy"
+    ],
+    "exclude": [
+      "правки кода Edufy"
+    ]
+  },
+  "depends_on": [
+    "P3",
+    "P4",
+    "P5"
+  ],
+  "deliverables": [
+    "Testkit",
+    "Contract suite",
+    "Pilot runbook"
+  ],
+  "items": [],
+  "batches": []
+}

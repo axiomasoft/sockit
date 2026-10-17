@@ -1,0 +1,49 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D9",
+  "title": "Forum — зависимость SocKit: модуль axiomasoft/sockit-forum на публичном API Forum",
+  "date": "2026-10-17",
+  "status": "accepted",
+  "options": [
+    {
+      "id": "A",
+      "text": "Мост sockit-forum (B-04): только mapping/outcome, без бизнес-таблиц",
+      "cons": "Владелец: SocKit должен использовать Forum, а не только связываться с ним"
+    },
+    {
+      "id": "B",
+      "text": "Модуль SocKit axiomasoft/sockit-forum требует пакет Forum и строит на нём форумные surfaces (как sockit-comments на Chatom); ядро от Forum не зависит",
+      "pros": "Один принцип для Chatom и Forum; форумные функции SocKit без копий тел/голосов",
+      "cons": "Зависимость модуля от Forum и его будущего выделения"
+    },
+    {
+      "id": "C",
+      "text": "Ядро axiomasoft/sockit требует Forum",
+      "cons": "Тяжёлое ядро; хосты без форума платят за Forum (нарушает T-02)"
+    }
+  ],
+  "decision": "Вариант B. Пакет packages/forum (axiomasoft/sockit-forum, namespace SocKit\\Forum\\) — модуль SocKit: requires axiomasoft/sockit и пакет Forum (сейчас axiomasoft/chatom с активным модулем chatom.forum); предлагает surface-фичу `forum` (surface instance ↔ категория Forum, Q&A-режим обсуждения поста, кросс-ссылки); владеет своими side-таблицами привязок; темы, посты, голоса, accepted answer и модерация остаются у Forum. Используется только #[Api]/#[Spi] Forum, без \\Internal\\. Выделение Forum меняет только Composer-ребро и compat-строку модуля.",
+  "rationale": "Сообщение владельца M5: «не мост с forum, а он будет использовать forum как зависимость». Тот же паттерн, что D1 для Chatom: функция SocKit строится поверх движка соседа через публичную поверхность; ядро остаётся лёгким (T-02).",
+  "consequences": [
+    "P7 — модуль на Forum, а не мост; B-04 к нему не применяется, применяется B-03 (только публичный API).",
+    "Предусловие — публичный facade Forum (N-4)."
+  ],
+  "applies_to": [
+    "P7"
+  ],
+  "evidence": [
+    {
+      "kind": "owner",
+      "ref": "brief M5"
+    },
+    {
+      "kind": "repo",
+      "ref": "knowledge/forum-bridge#decision"
+    }
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  },
+  "answered_by": "owner"
+}

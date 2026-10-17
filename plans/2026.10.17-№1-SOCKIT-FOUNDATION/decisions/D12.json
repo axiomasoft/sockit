@@ -1,0 +1,31 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D12",
+  "title": "Авторизация комментариев в Chatom: lazy seat + veto-стадия или Chatom admission SPI",
+  "date": "2026-10-17",
+  "status": "proposed",
+  "options": [
+    {
+      "id": "A",
+      "text": "v1 без изменений Chatom: CommentsChannelPolicy::view спрашивает CommentAccess (текущая аудитория) — чтение без seat; перед записью стадия sockit-comments.admit (Authorize) спрашивает CommentAccess и при отсутствии seat выполняет вложенную core-операцию добавления участника; Reauthorize-стадия повторяет проверку аудитории под локом; seat — кеш, не право",
+      "pros": "Работает на текущем Chatom 1.0",
+      "cons": "Таблица members растёт; seat может пережить отзыв — компенсируется veto на каждом действии и pruner"
+    },
+    {
+      "id": "B",
+      "text": "Соседняя работа в Chatom: SPI выдачи виртуального seat по внешнему admission (без строки members) для space",
+      "pros": "Чище, без роста members",
+      "cons": "Изменение замороженного API Chatom — план Chatom"
+    }
+  ],
+  "context": "Факт (2026-10-17): core-стадия core.authorize-sender в Chatom требует активный member seat (NotAMemberException) и не удаляется плагином (L5); чтение канала проходит через ChannelPolicy::view, которую space может подменить (Space::policies). Аудитория комментариев — аудитория хоста, а не роспись канала.",
+  "decision": "Предложение: начать с A (P3), параллельно оформить B как соседнюю работу N-1 для Chatom; переключение на B — аддитивно, через тот же CommentAccess.",
+  "rationale": "Не блокирует SocKit изменениями чужого пакета; модель безопасности держится на veto-стадии, а не на seat.",
+  "applies_to": [
+    "P3"
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  }
+}

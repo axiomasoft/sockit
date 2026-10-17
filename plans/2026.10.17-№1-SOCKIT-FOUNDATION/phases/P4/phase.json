@@ -1,0 +1,31 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:phase:v1",
+  "id": "P4",
+  "title": "Посты, лента и социальные реакции",
+  "design": "skeleton",
+  "goal": "Модули ядра posts и reactions: посты с ревизиями и состояниями (draft/pending/held/published/hidden/deleted/erased), privacy descriptor и floors, хронологическая лента с keyset cursor и текущей аудиторией, социальные реакции на посты (unique + rebuildable counters), привязка комментариев к посту через surface kind 'post' модуля comments.",
+  "context": "Skeleton. Канон: посты не хранятся в Chatom (D2). Использует конверт P2 и privacy-модель P1. Комментарии к посту — тред модуля comments, host entity = SocKit post ref (через Integration\\\\SocKit P3).",
+  "scope": {
+    "include": [
+      "sockit_posts, sockit_post_revisions, sockit_reactions, sockit_reaction_counts",
+      "state machine поста",
+      "feed query + cursor (published_at,id)",
+      "batch audience filtering кандидатов",
+      "reaction add/remove с конкурентностью и видимостью",
+      "counter rebuild"
+    ],
+    "exclude": [
+      "ranking, search, follows",
+      "медиа-хранение (только media association SPI)"
+    ]
+  },
+  "depends_on": [
+    "P2",
+    "P3"
+  ],
+  "deliverables": [
+    "Модули posts/reactions с тестами SN-05, SN-11, SN-13, SN-15"
+  ],
+  "items": [],
+  "batches": []
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:phase:v1",
+  "id": "P3",
+  "title": "Комментарии на движке Chatom (axiomasoft/sockit-comments)",
+  "design": "skeleton",
+  "goal": "Пакет packages/comments (axiomasoft/sockit-comments) — Chatom companion plugin sockit.comments: собственный space SocKit для комментариев, schema component с side-таблицами (threads, nodes, stats), канал-на-сущность через тред, дерево на parent_id/thread_root_id Chatom + depth/path/reply_count, текущая аудитория хоста на чтение (ChannelPolicy::view) и на запись (veto-стадия + lazy seat), реакции = реакции сообщений Chatom, rebuilders счётчиков, query API для дерева/страниц; интеграция с surfaces ядра SocKit изолирована в Integration\\\\SocKit.",
+  "context": "Skeleton. Директива владельца (M1, D1): комментарии строятся на движке Chatom внутри репозитория SocKit и потом могут переехать в Chatom. Полный дизайн — knowledge/comments-module, факты швов — knowledge/ecosystem-facts#chatom, переносимость — D7. Первый item фазы — spike, подтверждающий швы тестами на установленном vendor/axiomasoft/chatom (зависит от D10 — источник пакета Chatom) и D12 (нужна ли соседняя работа в Chatom).",
+  "scope": {
+    "include": [
+      "composer-пакет packages/comments, plugin manifest sockit.comments, ownership manifest",
+      "CommentsSpaceProvider + per-space модели (стабы chatom:make-space)",
+      "CommentsSchemaComponent: comment_threads, comment_nodes, comment_thread_stats",
+      "операции sockit-comments.open-thread / post / edit / delete / hide / restore поверх core message.* операций",
+      "AudienceGate stage (Authorize+Reauthorize) и CommentsChannelPolicy::view",
+      "lazy seat (вложенная core member-операция) и revoke-семантика",
+      "CommentTree query API, keyset cursor, tombstone-плейсхолдеры",
+      "rebuilders reply_count/stats, health check",
+      "arch-тест переносимости (только Chatom public + свой namespace; SocKit-импорт только в Integration\\\\SocKit)"
+    ],
+    "exclude": [
+      "изменение кода Chatom (только предложения в knowledge/neighbor-work)",
+      "посты SocKit",
+      "анонсы в чат"
+    ]
+  },
+  "depends_on": [
+    "P2"
+  ],
+  "pitfalls": [
+    "ALTER таблиц ядра Chatom запрещён (Chatom L4 / 'zero ALTERs'): новые поля — только side-таблицы своей schema component.",
+    "Писать в таблицы Chatom напрямую нельзя — только через core операции.",
+    "Membership seat не является правом: каждое действие повторно спрашивает текущую аудиторию хоста."
+  ],
+  "deliverables": [
+    "axiomasoft/sockit-comments с тестами SN-06, SN-02/SN-11 для комментариев",
+    "Документ переноса модуля в Chatom (move-runbook)"
+  ],
+  "items": [],
+  "batches": []
+}

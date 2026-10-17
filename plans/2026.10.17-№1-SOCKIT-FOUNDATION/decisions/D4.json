@@ -1,0 +1,27 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D4",
+  "title": "Ядро = только механизмы; функции = модули; deletion test для каждого элемента",
+  "date": "2026-10-17",
+  "status": "accepted",
+  "decision": "Ядро SocKit содержит закрытый список модулей-механизмов: Attributes, Support (refs/ids/codec), Actors, Audience, Surfaces, Operations (конверт: receipts/CAS/outbox/tombstones), Errors, Modules, Configuration, Testing. Posts/Reactions/Groups — модули; Comments — отдельный пакет. Каждый элемент ядра имеет записанный deletion test (knowledge/architecture#deletion-tests); ответ «ничего не сломается для минимального потребителя» выносит элемент из ядра.",
+  "rationale": "Требование владельца «максимально лёгкое гибкое ядро» (M1) + Chatom counter-test: механизм расширения не может жить в опциональном модуле.",
+  "consequences": [
+    "Минимальный потребитель = host, которому нужны только комментарии к своей сущности: ядро (surfaces+actor+audience) + sockit-comments, без таблиц постов."
+  ],
+  "applies_to": [
+    "P1",
+    "P2"
+  ],
+  "evidence": [
+    {
+      "kind": "repo",
+      "ref": "knowledge/ecosystem-facts#chatom-boundary"
+    }
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  },
+  "answered_by": "agent"
+}

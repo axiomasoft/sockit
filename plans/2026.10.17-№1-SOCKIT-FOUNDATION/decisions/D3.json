@@ -1,0 +1,45 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D3",
+  "title": "Топология: монорепо с ядром, модулями и пакетами-мостами по образцу Chatom",
+  "date": "2026-10-17",
+  "status": "accepted",
+  "options": [
+    {
+      "id": "A",
+      "text": "Один Composer-пакет со всем, включая comments (chatom в require)",
+      "cons": "Ядро тянет Chatom всем хостам; нарушает лёгкость ядра"
+    },
+    {
+      "id": "B",
+      "text": "Монорепо: packages/core (axiomasoft/sockit: ядро + внутренние модули posts/reactions/groups, активация через sockit.modules), packages/comments (axiomasoft/sockit-comments, требует Chatom), packages/forum (axiomasoft/sockit-forum, требует Forum), packages/testkit, позже packages/chatom-bridge (axiomasoft/sockit-chatom, мост анонсов)",
+      "pros": "Как Chatom: модули внутри ядрового пакета там, где нет внешней зависимости; отдельный Composer-пакет там, где есть чужое семейство",
+      "cons": "Несколько composer.json"
+    },
+    {
+      "id": "C",
+      "text": "Отдельный Composer-пакет на каждый модуль",
+      "cons": "Release/compat tax без extraction evidence (B-12)"
+    }
+  ],
+  "decision": "Вариант B. Корень репозитория — dev-монорепо (root composer.json с path-репозиториями packages/*, self.version). Внутренние модули ядрового пакета живут в packages/core/modules/<module>/ со своим PSR-4 namespace SocKit\\<Module>\\ и активируются списком sockit.modules (как chatom.modules). Пакет требует отдельный Composer-пакет только при зависимости на другое семейство.",
+  "rationale": "Повторяет проверенную физическую поставку Chatom (engine + modules + testkit), выполняет B-04/B-05/B-13 и не создаёт пакеты без причины (B-12).",
+  "applies_to": [
+    "P1",
+    "P2",
+    "P3",
+    "P7",
+    "P8"
+  ],
+  "evidence": [
+    {
+      "kind": "repo",
+      "ref": "knowledge/ecosystem-facts#chatom-structure"
+    }
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  },
+  "answered_by": "agent"
+}

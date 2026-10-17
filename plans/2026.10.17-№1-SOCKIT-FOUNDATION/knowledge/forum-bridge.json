@@ -1,0 +1,35 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:document:v1",
+  "id": "forum-bridge",
+  "title": "Forum как зависимость SocKit: модуль axiomasoft/sockit-forum",
+  "sections": [
+    {
+      "id": "now",
+      "title": "Текущее положение Forum",
+      "text": "Forum — модуль `chatom.forum` внутри `axiomasoft/chatom` (knowledge/ecosystem-facts#chatom-forum): topic = канал Chatom типа `forum_topic`, пост = сообщение Chatom, side-таблицы topics/votes/categories/tags/subscriptions/moderation/…, 10 собственных операций `forum.*`, собственный space. Владелец планирует выделить Forum в отдельный репозиторий (M1). Публичного facade «создать тему для host-сущности» и outcome lookup пока нет — многие сервисы Forum Internal."
+    },
+    {
+      "id": "decision",
+      "title": "Решение владельца: Forum — зависимость SocKit, не мост",
+      "text": "Владелец (M5): SocKit **использует Forum как зависимость**, а не связывается с ним мостом. Это тот же принцип, что для комментариев: SocKit строит свою функцию **поверх** движка соседа через его публичную поверхность.\n\nСледствия:\n- Пакет `axiomasoft/sockit-forum` (каталог `packages/forum`, namespace `SocKit\\Forum\\`) — **модуль SocKit**, а не мост B-04: он требует пакет Forum и `axiomasoft/sockit`, предлагает surface-фичу `forum` и **может владеть своими side-таблицами** (привязка surface instance ↔ категория/тема Forum, свои агрегаты), как `sockit-comments` владеет `comment_*`.\n- Ядро `axiomasoft/sockit` от Forum не зависит (T-02, лёгкое ядро): хост без форума Forum не ставит.\n- Тела, голоса, accepted answer, модерация Forum остаются у Forum (один writer, T-04); SocKit не копирует их.\n- Используется только публичная поверхность Forum (`#[Api]/#[Spi]`, без `\\Internal\\`) — arch-тест.\n- Выделение Forum в отдельный репозиторий меняет у `sockit-forum` только Composer-ребро (`axiomasoft/chatom` с модулем `chatom.forum` → отдельный пакет Forum) и compat-строку; код SocKit не меняется, если Forum сохранит namespace/публичные типы (условие выделения, N-4)."
+    },
+    {
+      "id": "scenarios",
+      "title": "Что SocKit делает на Forum",
+      "text": "1. **Форумная surface host-сущности**: surface kind с фичей `forum` (например «форум школы», «Q&A курса»): instance surface ↔ категория Forum; темы создаются в этой категории от имени доверенного актора SocKit; аудитория категории = аудитория surface (текущая политика SocKit через AudienceGate + публичный ACL-вопрос Forum).\n2. **Обсуждение поста в Q&A-режиме** (по выбору surface kind): вместо обычного треда `sockit-comments` для поста создаётся тема Forum; binding immutable на incarnation (v1-05/v1-07): одна surface incarnation — один backend обсуждения (`comments` или `forum`), dual-write запрещён.\n3. **Кросс-навигация** пост ↔ тема: ссылки, без копий тела."
+    },
+    {
+      "id": "design",
+      "title": "Дизайн пакета axiomasoft/sockit-forum",
+      "text": "```text\npackages/forum/                       # axiomasoft/sockit-forum\n├── composer.json                     # require: axiomasoft/sockit self.version, пакет Forum (сейчас axiomasoft/chatom c chatom.forum в chatom.modules)\n├── config/sockit-forum.php\n└── src/                              # SocKit\\Forum\\\n    ├── ForumModule.php               # SocKit Module: feature 'forum', surfaces\n    ├── ForumServiceProvider.php      # Modules::module(); проверка, что модуль chatom.forum активен — иначе boot-ошибка sockit.provider_unavailable\n    ├── Bindings/{Contracts,Data,Internal}   # surface instance ↔ category/topic\n    ├── Access/                       # Forum-аудитория ⊆ аудитории surface: AudienceGate + Forum category ACL (N-4)\n    └── Internal/{Gateway,Models,Schema}\n```\n- Side-таблицы модуля (миграции SocKit, соединение SocKit): `sockit_forum_bindings(id, surface_instance_id, incarnation, forum_category_ref, state, created_at)` unique (surface_instance_id, incarnation); `sockit_forum_topic_links(id, resource_ref, forum_topic_ref, intent_key, outcome, created_at)` unique (resource_ref) и unique (intent_key).\n- Если Forum требует, чтобы данные жили в его space-соединении для атомарности (как comments) — решение spike P7.1.\n- `ForumGateway` (Internal) — единственная точка вызова публичного API Forum; две реализации по наличию классов: Forum внутри chatom / Forum отдельным пакетом.\n- Создание темы — операция SocKit с receipt (ключ+digest) → вызов Forum: если Forum в той же БД и транзакции — атомарно; иначе intent + lookup по ключу при потерянном ответе (I-04, B-08)."
+    },
+    {
+      "id": "prereq",
+      "title": "Предусловия (соседняя работа Forum)",
+      "text": "N-4 (Forum): публичная операция/facade `createTopicFor(host ref | category, actor, idempotency key)` + `findTopicByKey(key)` + публичный DTO темы; публичный вопрос `canView(actor, category)`; сохранение namespace/публичных типов при выделении. Без N-4 фаза P7 не стартует (условная). Выделение Forum не блокирует SocKit: ядро и комментарии от Forum не зависят."
+    }
+  ],
+  "applies_to": [
+    "P7"
+  ]
+}

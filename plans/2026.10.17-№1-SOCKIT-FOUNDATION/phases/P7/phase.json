@@ -1,0 +1,31 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:phase:v1",
+  "id": "P7",
+  "title": "Форум на зависимости Forum (axiomasoft/sockit-forum)",
+  "design": "skeleton",
+  "goal": "Модуль SocKit axiomasoft/sockit-forum использует Forum как зависимость: surface-фича `forum` (surface instance ↔ категория Forum), Q&A-режим обсуждения поста как тема Forum (binding immutable на incarnation, без dual-write с sockit-comments), кросс-ссылки пост ↔ тема; аудитория категории = аудитория surface текущей политикой; только публичный API Forum; переживает выделение Forum в отдельный репозиторий.",
+  "context": "Skeleton, условная фаза. Решение владельца M5/D9: Forum — зависимость, не мост. Дизайн — knowledge/forum-bridge, факты Forum — knowledge/ecosystem-facts#chatom-forum. Предусловие — публичный facade Forum (knowledge/neighbor-work N-4); первый item — spike: какие публичные типы Forum уже достаточны и где жить side-таблицам (соединение SocKit или forum space).",
+  "scope": {
+    "include": [
+      "пакет packages/forum (axiomasoft/sockit-forum), ForumModule, ForumServiceProvider с проверкой активного chatom.forum",
+      "side-таблицы sockit_forum_bindings, sockit_forum_topic_links",
+      "ForumGateway: Forum внутри chatom / Forum отдельным пакетом",
+      "операции SocKit с receipt: привязать surface к категории, открыть Q&A-тему для поста",
+      "аудитория категории ⊆/= аудитории surface; revoke-тест",
+      "arch-тест: нет Chatom\\Forum\\…\\Internal"
+    ],
+    "exclude": [
+      "выделение Forum (работа владельца Forum)",
+      "копии тел/голосов Forum",
+      "импорт Internal Forum"
+    ]
+  },
+  "depends_on": [
+    "P3"
+  ],
+  "deliverables": [
+    "Модуль sockit-forum с тестами на обоих вариантах поставки Forum (второй — когда пакет появится)"
+  ],
+  "items": [],
+  "batches": []
+}

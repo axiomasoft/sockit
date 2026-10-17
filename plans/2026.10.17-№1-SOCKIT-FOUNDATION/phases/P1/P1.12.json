@@ -1,0 +1,110 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P1.12",
+  "title": "Матрица трассировки в репозитории и закрытие фазы",
+  "status": "todo",
+  "summary": "docs/architecture/traceability.md связывает brief B1–B16, S-01…S-10, SN-01…SN-22 и B-правила с фазами, пунктами и доказательствами (что закрыто в P1 контрактом/fixture, что ждёт runtime); полный прогон composer check зелёный; README обновлён разделом «Статус и что дальше».",
+  "why": "B14: каждое требование трассируется к фазе и проверяемому результату; закрытие фазы — единый прогон всех гейтов (T-29: зелёное только прошедшее).",
+  "scope": {
+    "include": [
+      "docs/architecture/traceability.md",
+      "README.md — раздел статуса P1 и ссылка на docs/architecture/traceability.md",
+      "scripts/check-docs.php — добавить traceability.md и проверку, что в нём встречаются S-01…S-10 и SN-01…SN-22"
+    ],
+    "exclude": [
+      "новые контракты"
+    ]
+  },
+  "depends_on": [
+    "P1.10",
+    "P1.11"
+  ],
+  "related": [],
+  "reads": [
+    {
+      "ref": "knowledge/requirements-trace",
+      "why": "Матрица трассировки",
+      "required": true
+    },
+    {
+      "ref": "knowledge/canon-rules#sn-acceptance",
+      "why": "Полные формулировки SN-01…SN-22",
+      "required": true
+    },
+    {
+      "ref": "knowledge/canon-rules#s-rules",
+      "why": "S-01…S-10",
+      "required": true
+    }
+  ],
+  "task_files": [
+    {
+      "path": "docs/architecture/traceability.md",
+      "change": "create"
+    },
+    {
+      "path": "README.md",
+      "change": "any",
+      "note": "создаётся в P1.1"
+    },
+    {
+      "path": "scripts/check-docs.php",
+      "change": "any",
+      "note": "создаётся в P1.2"
+    },
+    {
+      "path": "tests/Unit/Docs/CheckDocsTest.php",
+      "change": "any",
+      "note": "дополнить случаи для новых проверок"
+    }
+  ],
+  "rules": [
+    "В матрице P1-строки помечаются «контракт/fixture», никогда «пройдено end-to-end» (T-29)."
+  ],
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "php scripts/check-docs.php",
+      "expect": "exit 0, prints OK",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "composer check",
+      "expect": "exit 0 (pint, phpstan, pest)",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V3",
+      "cmd": "composer validate --strict && composer validate --strict packages/core/composer.json",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V4",
+      "cmd": "vendor/bin/pest tests/Unit/Docs",
+      "expect": "exit 0, 0 failed",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "traceability.md",
+    "Зелёный composer check на границе фазы"
+  ],
+  "route": {
+    "class": "implementation",
+    "effort": "low"
+  },
+  "review": {
+    "mode": "none"
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": null,
+  "updated_at": "2026-10-17T18:00:34Z"
+}

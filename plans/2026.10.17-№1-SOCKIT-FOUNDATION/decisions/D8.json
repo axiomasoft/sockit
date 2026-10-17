@@ -1,0 +1,18 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D8",
+  "title": "Три разных реакции: социальная, реакция сообщения, голос форума",
+  "date": "2026-10-17",
+  "status": "accepted",
+  "decision": "Реакция на пост/объект SocKit — социальная реакция SocKit (sockit_reactions, unique (subject, actor, kind), счётчики rebuildable, видны только тем, кто видит субъект). Реакция на комментарий — реакция сообщения Chatom в space комментариев (её writer — Chatom; уникальность message_actor_emoji). Голос/accepted answer — Forum. Общее — только словарь kind (emoji/код) и conformance fixtures; общий пакет реакций не создаётся.",
+  "rationale": "Один writer на state (B-01); MessageId/channel-авторизация Chatom не универсальны для постов; канон запрещает общий reactions-пакет без extraction evidence.",
+  "applies_to": [
+    "P3",
+    "P4"
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  },
+  "answered_by": "agent"
+}

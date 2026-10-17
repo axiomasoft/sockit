@@ -1,0 +1,42 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D2",
+  "title": "Посты, лента, социальные реакции и группы — нативные таблицы SocKit",
+  "date": "2026-10-17",
+  "status": "accepted",
+  "options": [
+    {
+      "id": "A",
+      "text": "Посты как сообщения отдельного channel type в Chatom",
+      "pros": "Ещё меньше кода",
+      "cons": "Нарушает канон; лента/privacy-scopes/floors не membership-модель; посты станут chat-сущностью"
+    },
+    {
+      "id": "B",
+      "text": "Нативные posts/revisions/reactions/groups в ядре SocKit (модули posts/reactions/groups)",
+      "pros": "Соответствует канону и Edufy-контракту privacy-scopes; лента и аудитория — first-class",
+      "cons": "Собственная реализация receipts/outbox (по CD-09 это норма)"
+    }
+  ],
+  "context": "Маршрутизатор функций канона: «Лента/посты/комментарии → SocKit; нельзя — хранить посты в Chatom». Владелец в M1 говорит о комментариях и форуме, не о постах.",
+  "decision": "Вариант B: posts, post revisions, feed, social reactions, groups — модули пакета axiomasoft/sockit на собственных таблицах sockit_*. Комментарии к посту — тред модуля comments, host entity = ссылка на пост SocKit.",
+  "rationale": "Канон прямо запрещает хранить посты в Chatom; privacy-scopes/floors Edufy — модель аудитории, а не членства канала.",
+  "consequences": [
+    "Реакция на пост — социальная реакция SocKit; реакция на комментарий — реакция сообщения Chatom (D8)."
+  ],
+  "applies_to": [
+    "P4",
+    "P5"
+  ],
+  "evidence": [
+    {
+      "kind": "repo",
+      "ref": "knowledge/canon-rules#router"
+    }
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  },
+  "answered_by": "agent"
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:phase:v1",
+  "id": "P8",
+  "title": "Мост анонсов в чат (axiomasoft/sockit-chatom)",
+  "design": "skeleton",
+  "goal": "Мост sockit-chatom: link-only анонс поста в Chatom-канал при channel audience ⊆ post audience, stable keys/receipts, redact/delete при сужении/удалении, без превращения inbox/ACK в 'доставлено'.",
+  "context": "Skeleton, условная фаза. Анонс — проекция, не backend комментариев (knowledge/architecture#bridges). Эталонная последовательность — knowledge/invariants#announcement.",
+  "scope": {
+    "include": [
+      "mapping/intent/outcome таблицы",
+      "outbox consumer PostPublished/AudienceShrunk/PostDeleted",
+      "lookup по исходному ключу при потерянном ответе"
+    ],
+    "exclude": [
+      "excerpt/медиа в анонсе по умолчанию"
+    ]
+  },
+  "depends_on": [
+    "P4"
+  ],
+  "deliverables": [
+    "Мост sockit-chatom с тестами SN-17…SN-20"
+  ],
+  "items": [],
+  "batches": []
+}

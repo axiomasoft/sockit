@@ -1,0 +1,18 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:decision:v1",
+  "id": "D11",
+  "title": "Бизнес-политики, которые агент не придумывает",
+  "date": "2026-10-17",
+  "status": "open",
+  "question": "Нужны решения владельца: (1) читают ли выбывшие из класса архив класса и в каком объёме; (2) живут ли direct grants после смены parent link; (3) горизонт хранения tombstones/receipts/PII и legal hold; (4) лимиты тела/глубины/частоты и SLO; (5) лицензия SocKit (MIT как Chatom или иная); (6) поддерживаемые СУБД production (PostgreSQL ≥16 обязательно; нужен ли MySQL).",
+  "context": "Инженерные defaults для разработки: archive = только policy-eligible historical readers через ContourResolver (live-only по умолчанию); direct grant отзывается вместе с отношением; tombstone хранится бессрочно, тело purge по erasure; глубина треда 8 по умолчанию (конфиг, максимум 64 как у Chatom); MIT; PostgreSQL ≥16 + SQLite для тестов, MySQL — после решения. Зависимые фазы: P4 (archive/grants), P2/P9 (retention), P9 (license, DB matrix).",
+  "applies_to": [
+    "P2",
+    "P4",
+    "P9"
+  ],
+  "actor": {
+    "provider": "claude-code",
+    "model": "claude-opus-5-5"
+  }
+}

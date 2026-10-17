@@ -1,0 +1,203 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P1.1",
+  "title": "Монорепо и toolchain: Composer, Pest/Testbench, PHPStan max, Pint, Rector",
+  "status": "todo",
+  "summary": "Пустой репозиторий становится dev-монорепо: root composer.json с path-репозиторием packages/*, пакет packages/core (axiomasoft/sockit) с минимальным SocKitServiceProvider и config/sockit.php, Pest+Testbench, PHPStan level max (larastan), Pint, Rector; `vendor/bin/pest` проходит smoke-тест загрузки провайдера.",
+  "why": "Все следующие пункты пишут код и тесты; без воспроизводимого toolchain ни одна проверка плана не исполнима. Повторяет физическую поставку Chatom (engine + path-репозитории, self.version).",
+  "scope": {
+    "include": [
+      "root composer.json (name axiomasoft/sockit-monorepo, type project, license MIT — D11 default, minimum-stability dev + prefer-stable, path repo packages/*, require axiomasoft/sockit @dev, require-dev toolchain, autoload-dev SocKit\\Tests\\ → tests/, scripts test/analyse/lint/refactor:check/check)",
+      "packages/core/composer.json (axiomasoft/sockit, require php ^8.4, illuminate/support|contracts|container|config ^13.0, ramsey/uuid ^4.9; autoload SocKit\\ → src/; extra.laravel.providers; extra.sockit.owners.core)",
+      "packages/core/src/SocKitServiceProvider.php (register: mergeConfigFrom; boot: publishes config tag sockit-config) и packages/core/config/sockit.php (ключи из knowledge/architecture#config, пустые списки)",
+      "phpunit.xml (testsuites Arch, Unit, Feature), tests/Pest.php, tests/TestCase.php (Orchestra\\Testbench\\TestCase с SocKitServiceProvider), tests/Feature/BootTest.php",
+      "phpstan.neon (level max, paths packages/core/src + tests, includes larastan extension), pint.json, rector.php (dry-run набор PHP 8.4), testbench.yaml",
+      "README.md (назначение, статус «pre-1.0, планирование», ссылка на docs/architecture), CHANGELOG.md (Unreleased), LICENSE (MIT), .gitattributes (export-ignore tests, docs, plans, audits, dev-конфигов)",
+      "дополнить .gitignore: /composer.lock не игнорировать; /vendor уже игнорируется"
+    ],
+    "exclude": [
+      "любые доменные классы (P1.3+)",
+      "packages/comments, packages/forum, testkit",
+      "CI-файлы хостинга (решение владельца, P9)",
+      "публикация/теги"
+    ]
+  },
+  "depends_on": [],
+  "related": [],
+  "decisions": [
+    "D3",
+    "D11",
+    "D13"
+  ],
+  "skills": [
+    "php-packages:laravel-package-testing",
+    "php:static-analysis"
+  ],
+  "reads": [
+    {
+      "ref": "knowledge/architecture#repo-layout",
+      "why": "Точная структура каталогов и файлов",
+      "required": true
+    },
+    {
+      "ref": "knowledge/architecture#dependencies",
+      "why": "Список runtime/dev зависимостей и запреты",
+      "required": true
+    },
+    {
+      "ref": "knowledge/architecture#config",
+      "why": "Ключи config sockit",
+      "required": true
+    },
+    {
+      "ref": "knowledge/ecosystem-facts#chatom-structure",
+      "why": "Эталон: как Chatom раскладывает монорепо, owners-манифест и провайдеры",
+      "required": true
+    },
+    {
+      "ref": "knowledge/perplexity-adoption#map",
+      "why": "Строки v2-04, v2-05, v2-06: что принято из аудита для composer/config/provider",
+      "required": false
+    }
+  ],
+  "task_files": [
+    {
+      "path": "composer.json",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/composer.json",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/SocKitServiceProvider.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/config/sockit.php",
+      "change": "create"
+    },
+    {
+      "path": "phpunit.xml",
+      "change": "create"
+    },
+    {
+      "path": "phpstan.neon",
+      "change": "create"
+    },
+    {
+      "path": "pint.json",
+      "change": "create"
+    },
+    {
+      "path": "rector.php",
+      "change": "create"
+    },
+    {
+      "path": "testbench.yaml",
+      "change": "create"
+    },
+    {
+      "path": "tests/Pest.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/TestCase.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Feature/BootTest.php",
+      "change": "create"
+    },
+    {
+      "path": "README.md",
+      "change": "create"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "change": "create"
+    },
+    {
+      "path": "LICENSE",
+      "change": "create"
+    },
+    {
+      "path": ".gitattributes",
+      "change": "create"
+    },
+    {
+      "path": ".gitignore",
+      "change": "modify"
+    },
+    {
+      "path": "composer.lock",
+      "change": "create"
+    }
+  ],
+  "rules": [
+    "`declare(strict_types=1);` во всех PHP-файлах; DTO/VO — `final readonly`; enums string-backed.",
+    "Версии dev-инструментов выбрать совместимые с Laravel 13 / PHP 8.4 (ориентир Chatom: orchestra/testbench ^11.3, pestphp/pest ^5.0); если ^5.0 недоступна — последняя стабильная major, записать фактические версии в CHANGELOG Unreleased.",
+    "Не включать в composer.json пакеты axiomasoft/chatom и другие axiomasoft/*.",
+    "phpstan baseline не создавать: ошибки исправляются, не подавляются.",
+    "Конфиг sockit.php содержит только скаляры, массивы и class-string (config:cache)."
+  ],
+  "guidance": "Root `repositories`: `[{\"type\":\"path\",\"url\":\"packages/*\",\"options\":{\"symlink\":true}}]`; root `require`: `\"axiomasoft/sockit\": \"@dev\"`. `extra.sockit.owners.core`: `{namespaces:[\"SocKit\\\\\"], paths:[\"packages/core/src\",\"packages/core/config\",\"packages/core/resources\"], tables:[], config:[\"sockit\"], publish-tags:[\"sockit-config\"], commands:[], module-ids:[]}`. Scripts: `test` → `pest`, `analyse` → `phpstan analyse --no-progress`, `lint` → `pint --test`, `refactor:check` → `rector process --dry-run`, `check` → `[\"@lint\", \"@analyse\", \"@test\"]`. BootTest: `it('boots the provider', fn () => expect(config('sockit'))->toBeArray()->and(app()->getProviders(SocKit\\SocKitServiceProvider::class))->not->toBeEmpty());`. phpunit.xml: `<testsuite name=\"Arch\"><directory>tests/Arch</directory></testsuite>` и аналогично Unit/Feature; каталоги tests/Arch и tests/Unit создать с `.gitkeep`, если пусты. tests/Pest.php: `uses(SocKit\\Tests\\TestCase::class)->in('Feature');`.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "composer validate --strict && composer validate --strict packages/core/composer.json",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "composer install --no-interaction --no-progress",
+      "expect": "exit 0",
+      "kind": "impact"
+    },
+    {
+      "id": "V3",
+      "cmd": "vendor/bin/pest",
+      "expect": "exit 0, 1+ passed, 0 failed",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V4",
+      "cmd": "vendor/bin/rector process --dry-run",
+      "expect": "exit 0, no changes",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V90",
+      "cmd": "vendor/bin/phpstan analyse --no-progress",
+      "expect": "exit 0, [OK] No errors",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "vendor/bin/pint --test",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Работающий toolchain: composer check зелёный",
+    "Пакет axiomasoft/sockit с провайдером и config"
+  ],
+  "route": {
+    "class": "implementation",
+    "effort": "medium"
+  },
+  "review": {
+    "mode": "none"
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": null,
+  "updated_at": "2026-10-17T17:59:41Z"
+}

@@ -1,0 +1,169 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:phase:v1",
+  "id": "P1",
+  "title": "Фундамент: репозиторий, тезисы, контракты ядра и fixtures",
+  "design": "detailed",
+  "goal": "Пустой репозиторий превращается в монорепо SocKit с работающим toolchain (Pest/Testbench, PHPStan max, Pint), зафиксированными архитектурными документами/ADR, arch-гейтами и публичными контрактами ядра (refs, actor context, audience/privacy, surfaces compile, problems/outcome, module SPI) с wire-fixtures. Хранения, миграций и бизнес-операций ещё нет.",
+  "context": "Это первая фаза greenfield-пакета. Всё, что нужно исполнителю, лежит в knowledge-документах плана: тезисы (knowledge/theses), правила канона (knowledge/canon-rules), факты экосистемы (knowledge/ecosystem-facts), целевая архитектура (knowledge/architecture), дизайн контрактов ядра (knowledge/kernel-contracts), модель приватности (knowledge/privacy-model), требования и трассировка (knowledge/requirements-trace). Контракты фазы — чистый PHP без БД: value objects, интерфейсы SPI, enums, исключения, compile-time реестры и JSON-fixtures. Каждое правило, которое можно проверить машиной, становится arch-тестом в этой фазе, чтобы следующие фазы не могли его нарушить незаметно.",
+  "contract": {
+    "consumes": [
+      "Пустой git-репозиторий SocKit с каталогами агентов",
+      "knowledge/* документы плана"
+    ],
+    "produces": [
+      "Composer-монорепо: корень + packages/core (axiomasoft/sockit)",
+      "docs/architecture/* и docs/adr/0001…",
+      "Публичные контракты ядра SocKit\\\\{Attributes,Support,Actors,Audience,Surfaces,Operations,Errors,Modules}",
+      "packages/core/resources/contracts/fixtures/*.json + round-trip тесты",
+      "Arch-тесты границ (tests/Arch)"
+    ],
+    "boundaries": [
+      "Нет миграций и таблиц",
+      "Нет зависимости от axiomasoft/chatom в packages/core",
+      "Нет HTTP/UI"
+    ]
+  },
+  "scope": {
+    "include": [
+      "toolchain и структура монорепо",
+      "архитектурные документы, ADR, тезисы в репозитории",
+      "Api/Spi маркеры и arch-гейты",
+      "контракты refs/actor/audience/surfaces/problems/outcome/modules",
+      "wire-fixtures и тесты на них",
+      "документ швов Chatom и контракт модуля комментариев (без кода модуля)"
+    ],
+    "exclude": [
+      "персистентность, миграции, receipts runtime",
+      "пакет packages/comments и зависимость от Chatom",
+      "Edufy-адаптер",
+      "релиз/публикация"
+    ]
+  },
+  "pitfalls": [
+    "Не превращать фазу в реализацию ядра: никаких Eloquent-моделей и миграций.",
+    "Не копировать внутренние классы Chatom/AzGuard — только принципы (knowledge/ecosystem-facts).",
+    "Числовой rank scope не является включением аудитории — тесты должны это ловить.",
+    "Не вводить tenant_id ни в одном DTO."
+  ],
+  "validation": [
+    {
+      "id": "V101",
+      "cmd": "composer validate --strict && composer validate --strict packages/core/composer.json",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V102",
+      "cmd": "vendor/bin/pest",
+      "expect": "exit 0, 0 failed",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V103",
+      "cmd": "vendor/bin/phpstan analyse --no-progress",
+      "expect": "exit 0, [OK] No errors",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V104",
+      "cmd": "vendor/bin/pint --test",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Зелёный toolchain",
+    "Архитектурные документы и ADR",
+    "Контракты ядра + fixtures",
+    "Arch-гейты",
+    "Документ швов Chatom и контракт comments-модуля",
+    "Матрица трассировки в репозитории"
+  ],
+  "items": [
+    "P1.1",
+    "P1.2",
+    "P1.3",
+    "P1.4",
+    "P1.5",
+    "P1.6",
+    "P1.7",
+    "P1.8",
+    "P1.9",
+    "P1.10",
+    "P1.11",
+    "P1.12"
+  ],
+  "batches": [
+    {
+      "id": "B1",
+      "items": [
+        "P1.1"
+      ],
+      "mode": "recommended",
+      "note": "toolchain — основа всех проверок"
+    },
+    {
+      "id": "B2",
+      "items": [
+        "P1.2",
+        "P1.3"
+      ],
+      "mode": "recommended",
+      "note": "документы и arch-гейты: непересекающиеся файлы"
+    },
+    {
+      "id": "B3",
+      "items": [
+        "P1.4",
+        "P1.11"
+      ],
+      "mode": "recommended",
+      "note": "реестр ошибок и раннер fixtures; документы швов параллельно"
+    },
+    {
+      "id": "B4",
+      "items": [
+        "P1.5"
+      ],
+      "mode": "recommended"
+    },
+    {
+      "id": "B5",
+      "items": [
+        "P1.6",
+        "P1.8"
+      ],
+      "mode": "recommended",
+      "note": "актор и результат операции — независимы"
+    },
+    {
+      "id": "B6",
+      "items": [
+        "P1.7"
+      ],
+      "mode": "recommended"
+    },
+    {
+      "id": "B7",
+      "items": [
+        "P1.9"
+      ],
+      "mode": "recommended"
+    },
+    {
+      "id": "B8",
+      "items": [
+        "P1.10"
+      ],
+      "mode": "recommended"
+    },
+    {
+      "id": "B9",
+      "items": [
+        "P1.12"
+      ],
+      "mode": "recommended",
+      "note": "закрытие фазы"
+    }
+  ]
+}

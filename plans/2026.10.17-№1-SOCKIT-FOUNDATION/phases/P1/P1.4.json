@@ -1,0 +1,120 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P1.4",
+  "title": "Реестр problem codes, исключения и раннер wire-fixtures",
+  "status": "todo",
+  "summary": "SocKit\\Errors: enum ProblemCode (24 кода), ProblemSpec, ProvidesProblem, SocKitException; fixture-снимок реестра; универсальный раннер tests/Unit/Contracts/FixtureSuiteTest с обнаружением обработчиков по каталогу, чтобы следующие пункты добавляли fixtures и обработчики без правки раннера.",
+  "why": "Все VO и SPI бросают типизированные ошибки с кодом (T-10); fixtures — единственный способ зафиксировать wire-контракт для будущих SDK и Edufy-адаптера (SN-19/SN-20). Раннер с discovery нужен, чтобы последующие пункты не конфликтовали по одному файлу.",
+  "scope": {
+    "include": [
+      "packages/core/src/Errors/{Enums/ProblemCode.php, Data/ProblemSpec.php, Contracts/ProvidesProblem.php, Exceptions/SocKitException.php}",
+      "packages/core/resources/contracts/fixtures/problems/registry.json — все коды со spec",
+      "tests/Unit/Contracts/FixtureSuiteTest.php — обходит resources/contracts/fixtures/**/*.json, по полю `contract` находит класс `SocKit\\Tests\\Unit\\Contracts\\Handlers\\<Studly(contract)>Handler` (интерфейс FixtureHandler::check(array $fixture): void), отсутствие обработчика — fail",
+      "tests/Unit/Contracts/Handlers/{FixtureHandler.php, ProblemsHandler.php}",
+      "tests/Unit/Errors/ProblemCodeTest.php"
+    ],
+    "exclude": [
+      "problem+json HTTP-маппинг (трек HTTP)"
+    ]
+  },
+  "depends_on": [
+    "P1.3"
+  ],
+  "related": [],
+  "reads": [
+    {
+      "ref": "knowledge/kernel-contracts#problems",
+      "why": "Точный список кодов, HTTP, retryable, receipt",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#fixtures",
+      "why": "Формат fixture и состав областей",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#rules",
+      "why": "Общие правила контрактов",
+      "required": true
+    },
+    {
+      "ref": "knowledge/perplexity-audit#v2-29",
+      "why": "Исходный список кодов аудита",
+      "required": false
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Errors/**",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/problems/registry.json",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Contracts/**",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Errors/ProblemCodeTest.php",
+      "change": "create"
+    }
+  ],
+  "rules": [
+    "`declare(strict_types=1);` во всех PHP-файлах; DTO/VO — `final readonly`; enums string-backed.",
+    "Каждый публичный тип вне `Internal\\` помечен `#[Api(since: '1.0')]` или `#[Spi(kind: SpiKind::…, since: '1.0')]`.",
+    "Именованные аргументы в вызовах с ≥2 аргументами внутри кода пакета.",
+    "Никаких импортов Chatom/AzGuard/Edufy/CoreX в packages/core (T-06).",
+    "Тест на каждое правило VO и каждый reason/problem code; fixture-файл на каждый wire-случай из knowledge/kernel-contracts#fixtures.",
+    "Сообщение исключения — не контракт; тесты проверяют problem() и detail(), не текст.",
+    "Удаление/переименование кода ломает snapshot-тест (registry.json сравнивается с enum в обе стороны)."
+  ],
+  "guidance": "`ProblemCode::spec(): ProblemSpec` через match; `ProblemSpec(public string $code, public int $httpStatus, public bool $retryable, public bool $receiptRecorded, public string $title)`. `SocKitException` abstract: `__construct(string $message, private array $detail = [], ?\\Throwable $previous = null)`, `abstract public function problem(): ProblemCode`, `detail(): array<string, scalar|null>`. registry.json: `{\"fixture\":\"problems/registry\",\"contract\":\"problems\",\"version\":\"1.0\",\"input\":{},\"expect\":{\"codes\":[{\"code\":\"sockit.authentication_required\",\"http\":401,\"retryable\":false,\"receipt\":false}, …]}}`.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "vendor/bin/pest tests/Unit/Errors tests/Unit/Contracts",
+      "expect": "exit 0, 0 failed",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "vendor/bin/pest tests/Arch",
+      "expect": "exit 0",
+      "kind": "impact"
+    },
+    {
+      "id": "V90",
+      "cmd": "vendor/bin/phpstan analyse --no-progress",
+      "expect": "exit 0, [OK] No errors",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "vendor/bin/pint --test",
+      "expect": "exit 0",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Реестр 24 problem codes",
+    "Раннер fixtures с discovery"
+  ],
+  "route": {
+    "class": "implementation",
+    "effort": "medium"
+  },
+  "review": {
+    "mode": "none"
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": null,
+  "updated_at": "2026-10-17T17:59:42Z"
+}

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "skills": {
+    "ecosystem-mcp": {
+      "source": "local"
+    },
+    "ecosystem-setup": {
+      "source": "local"
+    }
+  },
+  "sources": {
+    "swissknifeman": {
+      "ref": "registry"
+    }
+  }
+}

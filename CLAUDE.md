@@ -1,0 +1,21 @@
+<!-- swissknifeman:hub:start -->
+<!-- swissknifeman hub: stub — skills and task-commands are connected natively; index and priority rules are not duplicated here. -->
+<!-- swissknifeman:registry sha=4a7f58cd2b84 skills=209 -->
+<!-- Full index: `skiller status` or generate-hub.sh --target <dir> --full-index. -->
+<!-- swissknifeman:hub:end -->
+
+<!-- maind:healthcheck hash=e1d110725a76 (managed by maind — do not edit manually) -->
+## mAInd — temporary project context and graph
+
+Memory defaults to this project's private scope `project:sockit`. Read `ns:*` or `global`
+only for an explicit cross-project request and when the scope is authorized.
+
+Store only short useful temporary context: 48-hour default TTL, 72-hour maximum,
+800 characters, at most 8 live entries per scope. Use one replaceable `active-handoff`
+for continuity, then forget it when work finishes. Keep plans, decisions, progress,
+commit history and durable rules in repository artifacts. Empty memory is normal.
+
+Use `maind health --cwd` for connection symptoms or setup changes; repair with
+`maind health --cwd --fix`. A memory outage does not block ordinary repository work.
+Project connections: `maind graph --project sockit`.
+<!-- /maind:healthcheck -->

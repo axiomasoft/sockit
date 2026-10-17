@@ -1,0 +1,7 @@
+[mcp_servers.maind]
+command = "maind"
+args = ["mcp", "--scope", "project:sockit"]
+
+[mcp_servers.perplexity]
+command = "<HOME>/projects/packages/perplexity-web-mcp/start.sh"
+args = ["--pool=default"]

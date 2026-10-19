@@ -1,2 +1,0 @@
-{"v":1,"ts":"2026-10-17T17:34:50Z","type":"plan_created","actor":{"provider":"claude-code","model":"claude-opus-5-5"},"summary":"plan PLAN1 created","data":{"plan_id":"2026.10.17-№1-SOCKIT-FOUNDATION"}}
-{"v":1,"ts":"2026-10-17T18:00:41Z","type":"design_done","phase":"P1","actor":{"provider":"claude-code","model":"claude-opus-5-5"},"summary":"P1 design done"}

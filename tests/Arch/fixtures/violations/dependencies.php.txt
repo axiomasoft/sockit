@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+use Chatom\Contracts\Port as Discussion;
+use AzGuard\{Verdict, Contracts\Gate as Authorization};
+use Edufy\Person, Social\Graph;
+use CoreX\Contract;
+use SocKit\{Comments\Thread, Forum\Topic, ChatomBridge\Bridge, Posts\Post, Reactions\Reaction, Groups\Group};
+use function Chatom\resolve;
+use const CoreX\VERSION;
+final class ForbiddenImports { public function direct(\Chatom\Data\Ref $ref): void {} }

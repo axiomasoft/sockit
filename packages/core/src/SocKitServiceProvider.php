@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace SocKit;
 
 use Illuminate\Support\ServiceProvider;
+use SocKit\Attributes\Api;
 
+#[Api(since: '1.0')]
 class SocKitServiceProvider extends ServiceProvider
 {
     public function register(): void

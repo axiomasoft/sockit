@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+class AnythingService {}
+class AnythingManager {}
+class AnythingHelper {}
+class AnythingUtil {}
+namespace SocKit\Support\Data;
+class MutableData {}
+final class NotReadonly {}
+readonly class NotFinal {}

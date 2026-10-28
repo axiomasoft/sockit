@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Testing\ArchFixtures;
+use SocKit\Attributes\{Api as PublicApi, Spi as Port, SpiKind};
+use Illuminate\Database\Eloquent\Model as Record;
+use Illuminate\Database\Eloquent\Builder as Query;
+use Illuminate\Http\{Request as Input, Response as Output};
+use Closure as Callback;
+#[PublicApi]
+interface BadSignature {
+    public function record(Record $record): Query;
+    public function http(?Input $input): Output;
+    public function union(string|Callback $callback): void;
+    public function intersection(Callback&\Stringable $callback): void;
+    public function dnf((Callback&\Stringable)|string $callback): void;
+    public function leak(): \SocKit\Support\Internal\Hidden;
+}
+#[Port(kind: SpiKind::Implement)]
+interface BadPort { public function handle(Callback $callback): void; }
+class HostRecord extends Record {}
+#[PublicApi]
+interface HiddenBase { public function handle(HostRecord $record): void; }
+#[PublicApi]
+trait BadTrait { public function callback(Callback $callback): void {} }

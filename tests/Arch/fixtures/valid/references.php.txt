@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support {
+    use SocKit\Support\Internal\{Codec as LocalCodec};
+    use SocKit\Attributes\{Api, function api_label, const API_VERSION};
+    // use Chatom\NotAnImport;
+    #[Api]
+    final class References {
+        use LocalTrait;
+        public function codec(LocalCodec $codec): \SocKit\Support\Internal\Codec {}
+        public function capture(): void { $work = function () use ($codec) {}; }
+    }
+}
+namespace SocKit\Panels {
+    use SocKit\Panels\Internal\Codec;
+    final class OtherReferences {}
+}

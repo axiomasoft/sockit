@@ -1,0 +1,7 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Actors;
+use SocKit\Audience\Internal\{Evaluator as PrivateEvaluator};
+final class ForeignInternal { public function direct(\SocKit\Support\Internal\Codec $codec): void {} }

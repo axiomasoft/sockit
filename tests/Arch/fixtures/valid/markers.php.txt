@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+use SocKit\Attributes\{Api as PublicApi, Spi as Port, SpiKind as Kind};
+#[PublicApi(since: '1.0')]
+final class GoodClass {}
+#[Port(kind: Kind::Implement, since: '1.0')]
+interface GoodInterface {}
+#[\SocKit\Attributes\Api]
+trait GoodTrait {}
+#[PublicApi]
+enum GoodEnum: string { case Value = 'value'; }
+namespace SocKit\Support\Internal;
+final class PrivateClass {}

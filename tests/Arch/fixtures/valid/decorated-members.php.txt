@@ -1,0 +1,12 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+use SocKit\Attributes\Api;
+#[Api]
+final class HasMembers {
+    #[Api]
+    public function member(): void {}
+}
+class MissingAfterMember {}

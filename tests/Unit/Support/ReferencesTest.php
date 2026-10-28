@@ -49,11 +49,11 @@ it('canonicalizes recursively while preserving list order', function (): void {
 });
 
 it('enforces revisions, version compatibility and safe key logging', function (): void {
-    expect((new Revision(1))->next()->isAfter(new Revision(1)))->toBeTrue()->and((new Incarnation(1))->next()->value)->toBe(2);
-    expect(fn () => (new Revision(PHP_INT_MAX))->next())->toThrow(InvalidPayloadException::class);
+    expect(new Revision(1)->next()->isAfter(new Revision(1)))->toBeTrue()->and(new Incarnation(1)->next()->value)->toBe(2);
+    expect(fn () => new Revision(PHP_INT_MAX)->next())->toThrow(InvalidPayloadException::class);
     $version = WireVersion::fromWire('1.2');
     expect($version->supports(new WireVersion(major: 1, minor: 1)))->toBeTrue()->and($version->supports(new WireVersion(major: 2, minor: 0)))->toBeFalse();
     expect(fn () => $version->requireSupported(new WireVersion(major: 1, minor: 3)))->toThrow(UnsupportedWireVersionException::class);
-    expect((new CommandKey('1234567890123456'))->hashForLog())->toBe(substr(hash('sha256', '1234567890123456'), 0, 16));
+    expect(new CommandKey('1234567890123456')->hashForLog())->toBe(substr(hash('sha256', '1234567890123456'), 0, 16));
     expect(Ids::uuid7())->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/');
 });

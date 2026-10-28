@@ -1,6 +1,6 @@
 # Трассировка требований
 
-Источник — native PLAN1: brief, requirements-trace, canon-rules и panel-design. Актуальные решения D14–D16 имеют приоритет над историческими формулировками. P1 даёт контракты/fixtures и архитектурные проверки; это не end-to-end и не доказательство готовности runtime. Все сценарии P2+ ниже pending до реального выполнения; P7/P8 условны. Связанные документы: [границы](core-boundary.md), [приватность](privacy.md), [панели](panels-and-storage.md), [внешние обсуждения](external-discussions.md).
+Источник — native PLAN1: brief, requirements-trace, canon-rules и panel-design. Актуальные решения D14–D16 имеют приоритет над историческими формулировками. P1 даёт контракты/fixtures и архитектурные проверки; это не end-to-end и не доказательство готовности runtime. Нижеследующие строки описывают полные требования; результаты P2 fixture указаны отдельно, P7/P8 условны. Связанные документы: [границы](core-boundary.md), [приватность](privacy.md), [панели](panels-and-storage.md), [внешние обсуждения](external-discussions.md).
 
 ## Brief B1–B21
 
@@ -109,3 +109,16 @@
 | PANEL-10 | Cross-installation, revoke, archive, containment и unknown deny | P1.7 контракт/fixture; P4 pending |
 | PANEL-11 | Frozen migration, no overwrite, partial failure manifest | P3/4 pending |
 | PANEL-12 | Нет comments domain/schema или mandatory Chatom; adapter не пишет чужие таблицы | P1.3 arch; P6 и conditional P7/8 pending |
+
+
+## P2 runtime evidence
+
+`tests/Feature/Consumer/StandaloneRuntimeTest.php` installs an independent Laravel consumer
+from a copied package and checks discovery, cached configuration and fresh boot without SQL.
+Its `acme.runtime` fixture uses two panels with the same host ID and exercises public surface
+lifecycle, owner mutation, duplicate replay, payload/CAS conflict, a rollback fault, revoked
+actor denial and relay to an SQL inbox on isolated PostgreSQL. Missing target resolver is
+checked in a separate process. `tests/Integration/Runtime` covers the wider P2 transaction,
+concurrency, fence, worker and outbox matrix. These observations do not establish complete
+SN/PANEL acceptance: P3 generated migrations and models, P4 social functions, P6 real host
+conformance and P9 release qualification remain pending. See `artifacts/p2.10/REPORT.md`.

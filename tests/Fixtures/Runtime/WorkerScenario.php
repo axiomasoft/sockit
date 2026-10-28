@@ -26,21 +26,21 @@ use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Testing\SocKitFake;
 use SocKit\Tests\Integration\Support\PgTarget;
 
-final class WorkerScenario
+final readonly class WorkerScenario
 {
-    public readonly EnvelopeScenario $base;
+    public EnvelopeScenario $base;
 
-    public readonly Application $a;
+    public Application $a;
 
-    public readonly Application $b;
+    public Application $b;
 
-    public readonly RuntimeDatabase $dbB;
+    public RuntimeDatabase $dbB;
 
-    public readonly WorkerActorResolver $actorA;
+    public WorkerActorResolver $actorA;
 
-    public readonly WorkerActorResolver $actorB;
+    public WorkerActorResolver $actorB;
 
-    public readonly SocKitFake $fakeB;
+    public SocKitFake $fakeB;
 
     public function __construct()
     {

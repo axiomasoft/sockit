@@ -7,10 +7,10 @@ namespace SocKit\Tests\Integration\Support;
 use PDO;
 use RuntimeException;
 
-final class PgTarget
+final readonly class PgTarget
 {
     /** @param array{run: string, container: string, host: string, port: int, owner: string, decoy: string, user: string, password: string} $manifest */
-    public function __construct(private readonly array $manifest)
+    public function __construct(private array $manifest)
     {
         $run = $manifest['run'];
         if (! preg_match('/^[a-f0-9]{16}$/D', $run) || ! preg_match('/^[a-f0-9]{64}$/D', $manifest['container']) || $manifest['host'] !== '127.0.0.1' || $manifest['port'] < 1 || $manifest['port'] > 65535 || $manifest['owner'] !== 'sockit_p2_'.$run.'_test' || $manifest['decoy'] !== 'sockit_p2_decoy_'.$run.'_test' || $manifest['user'] !== 'postgres') {

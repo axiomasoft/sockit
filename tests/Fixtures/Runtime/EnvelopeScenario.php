@@ -19,24 +19,24 @@ use SocKit\Support\Data\Revision;
 use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Tests\Integration\Support\PgTarget;
 
-final class EnvelopeScenario
+final readonly class EnvelopeScenario
 {
-    public readonly OutboxScenario $base;
+    public OutboxScenario $base;
 
-    public readonly EnvelopeTarget $target;
+    public EnvelopeTarget $target;
 
-    public readonly EnvelopeMutation $mutation;
+    public EnvelopeMutation $mutation;
 
-    public readonly EnvelopeAuthorityFence $fence;
+    public EnvelopeAuthorityFence $fence;
 
-    public readonly EnvelopeMissingReceiptPolicy $absence;
+    public EnvelopeMissingReceiptPolicy $absence;
 
-    public readonly Operations $operations;
+    public Operations $operations;
 
-    public readonly OperationHandle $handle;
+    public OperationHandle $handle;
 
     /** @var array<string, string> */
-    private readonly array $sentinels;
+    private array $sentinels;
 
     public function __construct(bool $install = true)
     {

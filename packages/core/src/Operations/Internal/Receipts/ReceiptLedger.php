@@ -168,7 +168,7 @@ final readonly class ReceiptLedger
 
             return new ReceiptSnapshot(id: $row->id, namespace: $envelope->namespace, keyHash: $envelope->key->hashForLog(), digest: $envelope->digest,
                 initiatingActor: $actor->actor ?? throw new ReceiptException(ProblemCode::AuthenticationRequired), outcome: OperationOutcome::from($row->outcome), resource: $resource, revision: $row->revision === null ? null : new Revision($row->revision), problem: $row->problem === null ? null : ProblemCode::from($row->problem));
-        } catch (\JsonException|\ValueError|InvalidPayloadException|InvalidOperationResultException $error) {
+        } catch (\JsonException|\ValueError|InvalidPayloadException|InvalidOperationResultException) {
             throw new ReceiptException(ProblemCode::ProviderUnavailable);
         }
     }

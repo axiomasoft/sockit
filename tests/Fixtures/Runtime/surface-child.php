@@ -17,6 +17,7 @@ use SocKit\Tests\Fixtures\Runtime\SurfaceScenario;
 $app = Runtime::app();
 Runtime::trust($app);
 $db = new RuntimeDatabase($app); // verifies private manifest/identity before opening owner transaction
+register_shutdown_function(static fn () => $db->close());
 $connection = $db->capsule->getConnection('owner_a');
 $row = $connection->selectOne('SELECT pg_backend_pid() AS pid');
 if (! $row instanceof stdClass || ! isset($row->pid) || ! is_int($row->pid)) {

@@ -138,7 +138,7 @@ it('rolls back claims and effects for faults non-recordable problems pending unk
                 };
             });
             Assert::fail('Unstable/non-recordable outcome committed');
-        } catch (ReceiptException|InvalidOperationResultException $error) {
+        } catch (ReceiptException|InvalidOperationResultException) {
             expect($failure)->not->toBe('fault');
         } catch (RuntimeException $error) {
             expect($error->getMessage())->toBe('injected failure');

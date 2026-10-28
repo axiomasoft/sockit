@@ -1,0 +1,113 @@
+private container=ac0e9c485cb87731544c9909e2b25812d46dfe634410c46df55055a623a74ea3 owner=sockit_p2_6e38f4209612014a_test decoy=sockit_p2_decoy_6e38f4209612014a_test port=32905
+> pest 'tests/Feature/Consumer/StandaloneRuntimeTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=102
+PG identity database=sockit_p2_decoy_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=103
+Installing dependencies from lock file
+Verifying lock file contents can be installed on current platform.
+Package operations: 75 installs, 0 updates, 0 removals
+    0 [>---------------------------]    0 [->--------------------------]
+  - Installing ramsey/collection (2.1.1): Extracting archive
+  - Installing brick/math (1.0.0): Extracting archive
+  - Installing ramsey/uuid (4.9.4): Extracting archive
+  - Installing voku/portable-ascii (2.1.1): Extracting archive
+  - Installing symfony/polyfill-php80 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-mbstring (v1.43.3): Extracting archive
+  - Installing symfony/polyfill-ctype (v1.37.0): Extracting archive
+  - Installing phpoption/phpoption (1.10.0): Extracting archive
+  - Installing graham-campbell/result-type (v1.2.0): Extracting archive
+  - Installing vlucas/phpdotenv (v5.8.0): Extracting archive
+  - Installing symfony/css-selector (v8.1.10): Extracting archive
+  - Installing tijsverkoyen/css-to-inline-styles (v2.4.0): Extracting archive
+  - Installing symfony/var-dumper (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-uuid (v1.43.0): Extracting archive
+  - Installing symfony/uid (v8.1.9): Extracting archive
+  - Installing symfony/deprecation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/routing (v8.1.10): Extracting archive
+  - Installing symfony/process (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-php86 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php85 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php84 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-normalizer (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-idn (v1.43.0): Extracting archive
+  - Installing symfony/mime (v8.1.10): Extracting archive
+  - Installing psr/container (2.0.2): Extracting archive
+  - Installing symfony/service-contracts (v3.7.3): Extracting archive
+  - Installing psr/event-dispatcher (1.0.0): Extracting archive
+  - Installing symfony/event-dispatcher-contracts (v3.7.1): Extracting archive
+  - Installing symfony/event-dispatcher (v8.1.5): Extracting archive
+  - Installing psr/log (3.0.2): Extracting archive
+  - Installing doctrine/lexer (3.0.3): Extracting archive
+  - Installing egulias/email-validator (4.0.4): Extracting archive
+  - Installing symfony/mailer (v8.1.10): Extracting archive
+  - Installing symfony/http-foundation (v8.1.10): Extracting archive
+  - Installing symfony/error-handler (v8.1.10): Extracting archive
+  - Installing symfony/http-kernel (v8.1.10): Extracting archive
+  - Installing symfony/finder (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-intl-grapheme (v1.43.3): Extracting archive
+  - Installing symfony/string (v8.1.10): Extracting archive
+  - Installing symfony/console (v8.1.10): Extracting archive
+  - Installing psr/simple-cache (3.0.0): Extracting archive
+  - Installing psr/http-message (2.0): Extracting archive
+  - Installing nunomaduro/termwind (v2.4.0): Extracting archive
+  - Installing symfony/translation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/translation (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-time (v1.42.0): Extracting archive
+  - Installing psr/clock (1.0.0): Extracting archive
+  - Installing symfony/clock (v8.1.9): Extracting archive
+  - Installing carbonphp/carbon-doctrine-types (3.2.1): Extracting archive
+  - Installing nesbot/carbon (3.15.1): Extracting archive
+  - Installing monolog/monolog (3.12.1): Extracting archive
+  - Installing psr/http-factory (1.1.0): Extracting archive
+  - Installing league/uri-interfaces (7.9.1): Extracting archive
+  - Installing league/uri (7.9.1): Extracting archive
+  - Installing league/mime-type-detection (1.17.0): Extracting archive
+  - Installing league/flysystem-local (3.35.3): Extracting archive
+  - Installing league/flysystem (3.36.0): Extracting archive
+  - Installing nette/utils (v4.1.6): Extracting archive
+  - Installing nette/schema (v1.4.0): Extracting archive
+  - Installing dflydev/dot-access-data (v3.0.3): Extracting archive
+  - Installing league/config (v1.2.0): Extracting archive
+  - Installing league/commonmark (2.10.4): Extracting archive
+  - Installing laravel/serializable-closure (v2.1.0): Extracting archive
+  - Installing laravel/prompts (v0.3.26): Extracting archive
+  - Installing guzzlehttp/uri-template (v2.0.1): Extracting archive
+  - Installing symfony/polyfill-php82 (v1.43.0): Extracting archive
+  - Installing guzzlehttp/psr7 (3.2.0): Extracting archive
+  - Installing guzzlehttp/promises (3.1.0): Extracting archive
+  - Installing psr/http-client (1.0.3): Extracting archive
+  - Installing guzzlehttp/guzzle (8.3.1): Extracting archive
+  - Installing fruitcake/php-cors (v1.4.0): Extracting archive
+  - Installing dragonmantank/cron-expression (v3.6.1): Extracting archive
+  - Installing doctrine/inflector (2.1.1): Extracting archive
+  - Installing laravel/framework (v13.39.0): Extracting archive
+  - Installing axiomasoft/sockit (0.1.x-dev): Mirroring from ../../../packages/core
+  0/74 [>---------------------------]   0%
+ 69/74 [==========================>-]  93%
+ 74/74 [============================] 100%
+Generating autoload files
+55 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+Installed package source fingerprint=def985f091930010218cb7fa758d6189a40115664c9d24bbc9c32783ce58a5fc
+PG identity database=sockit_p2_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=104
+PG identity database=sockit_p2_decoy_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=105
+PG identity database=sockit_p2_decoy_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=106
+P2.2 Laravel connection=owner_a database=sockit_p2_6e38f4209612014a_test backend_pid=107
+P2.2 Laravel connection=owner_b database=sockit_p2_6e38f4209612014a_test backend_pid=108
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_6e38f4209612014a_test backend_pid=109
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.6 consumer-owned SQL snapshots installed AFTER verified identities
+PG identity database=sockit_p2_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=110
+P2.7 all acme/schema DDL AFTER verified isolated identities
+PG identity database=sockit_p2_decoy_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=114
+PG identity database=sockit_p2_6e38f4209612014a_test server_version_num=160014 marker=sockit-p21-6e38f4209612014a backend_pid=115
+P2.6 consume owner_level=0 consumer_backend=115 mode=delivery event=01a1840b-2f96-7079-a26b-2c63dcdef6c3
+delivery results=[{"status":"confirmed","problem":null,"reason":"outbox.confirmed"},{"status":"quarantine","problem":"sockit.revision_conflict","reason":"outbox.current_boundary_rejected"}]
+revoked result={"outcome":"rejected","receipt_id":null,"resource":null,"revision":null,"problem":"sockit.authentication_required","problem_detail":[]}
+{"assertions":["create","read","create_b","mutation_b","mutation","lookup","replay","payload_conflict","cas","rollback","relay","inbox","relay_repeat","revoked_replay","archive","resume","delete"],"counts":[1,2,3,2],"deliveries":2}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Consumer\StandaloneRuntimeTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs and boots the standalone consumer with an owned Postgre[39m[90m…[39m [90m3.18s[39m  
+
+  [90mTests:[39m    [32;1m1 passed[39;22m[90m (634 assertions)[39m
+  [90mDuration:[39m [39m3.22s[39m
+

@@ -273,4 +273,9 @@ PostgreSQL acceptance uses `acme.runtime` test-only schema, real commits/rollbac
 outbox assertions. It covers same-process A→B→A, exceptions, reentrant calls on one container,
 independent concurrent Fiber transactions and stale worker metadata/permissions. This closes
 the P2 worker portion of PANEL-06; generated model relations/hydration/queue restoration remain P3,
-and consumer installation qualification remains P6. These fixtures are not social e2e.
+and real host consumer qualification remains P6. These fixtures are not social e2e.
+
+
+The standalone `tests/Fixtures/Consumer` shows host-supplied actor, installation, target,
+authority fence and policy adapters with package discovery. It supplies its own module mutation
+and inbox; these are test fixtures, not product adapters or production schema.

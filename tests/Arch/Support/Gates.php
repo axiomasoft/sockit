@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Tests\Arch\Support;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use LogicException;
 use ReflectionClass;
 use ReflectionIntersectionType;
@@ -306,7 +310,7 @@ final class Gates
 
     private static function forbiddenSignature(string $name): bool
     {
-        foreach (['Closure', 'Illuminate\\Database\\Eloquent', 'Illuminate\\Http\\Request', 'Illuminate\\Http\\Response', 'Symfony\\Component\\HttpFoundation\\Request', 'Symfony\\Component\\HttpFoundation\\Response'] as $prefix) {
+        foreach (['Closure', 'Illuminate\\Database\\Eloquent', Request::class, Response::class, \Symfony\Component\HttpFoundation\Request::class, \Symfony\Component\HttpFoundation\Response::class] as $prefix) {
             if (self::within($name, $prefix)) {
                 return true;
             }
@@ -316,7 +320,7 @@ final class Gates
         }
         // A consumer's subclass must not hide an Eloquent or HTTP base type.
         if (class_exists($name) || interface_exists($name)) {
-            foreach (['Illuminate\\Database\\Eloquent\\Model', 'Illuminate\\Database\\Eloquent\\Builder', 'Symfony\\Component\\HttpFoundation\\Request', 'Symfony\\Component\\HttpFoundation\\Response'] as $base) {
+            foreach ([Model::class, Builder::class, \Symfony\Component\HttpFoundation\Request::class, \Symfony\Component\HttpFoundation\Response::class] as $base) {
                 if (is_a($name, $base, true)) {
                     return true;
                 }

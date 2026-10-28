@@ -12,6 +12,10 @@ use SocKit\Tests\Integration\Support\PgTarget;
 
 require dirname(__DIR__, 3).'/vendor/autoload.php';
 $scenario = new OutboxScenario(install: false);
+register_shutdown_function(static function () use ($scenario): void {
+    $scenario->consumer->close();
+    $scenario->db->close();
+});
 $connection = $scenario->db->capsule->getConnection('owner_a');
 $identity = $connection->selectOne('SELECT pg_backend_pid() AS pid');
 if (! $identity instanceof stdClass || ! is_int($identity->pid)) {

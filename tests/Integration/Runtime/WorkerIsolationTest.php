@@ -103,14 +103,12 @@ it('interleaves Fibers at manual barriers with independent PDO transactions', fu
     try {
         $a = $s->job();
         $b = $s->job(b: true);
-        $make = function (bool $isB, OperationJobReference $job) use ($s): Fiber {
-            return new Fiber(fn () => new OperationJobs($isB ? $s->b : $s->a)->execute(job: $job, factory: function (OperationHandle $handle) use ($s, $isB): EnvelopeMutation {
-                Fiber::suspend([$handle->surface->panel->value, $handle->actor->actor?->id]);
-                expect($handle->actor->actor?->id)->toBe($isB ? '8' : '7');
+        $make = (fn (bool $isB, OperationJobReference $job): Fiber => new Fiber(fn () => new OperationJobs($isB ? $s->b : $s->a)->execute(job: $job, factory: function (OperationHandle $handle) use ($s, $isB): EnvelopeMutation {
+            Fiber::suspend([$handle->surface->panel->value, $handle->actor->actor?->id]);
+            expect($handle->actor->actor?->id)->toBe($isB ? '8' : '7');
 
-                return $s->mutation($isB);
-            }));
-        };
+            return $s->mutation($isB);
+        })));
         $fa = $make(isB: false, job: $a);
         $fb = $make(isB: true, job: $b);
         expect($fa->start())->toBe(['acme.a', '7'])->and($fb->start())->toBe(['acme.b', '8']);

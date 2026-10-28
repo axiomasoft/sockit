@@ -14,6 +14,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 require dirname(__DIR__, 3).'/vendor/autoload.php';
 
 $scenario = new OutboxScenario(install: false);
+register_shutdown_function(static function () use ($scenario): void {
+    $scenario->consumer->close();
+    $scenario->db->close();
+});
 if (getenv('SOCKIT_NO_IDENTITY') !== '1') {
     $scenario->app->make('config')->set('sockit.deployment_identity', 'owned-test-cluster');
 }

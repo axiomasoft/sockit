@@ -20,6 +20,10 @@ use SocKit\Tests\Fixtures\Runtime\EnvelopeAuthority;
 use SocKit\Tests\Fixtures\Runtime\EnvelopeScenario;
 
 $s = new EnvelopeScenario(install: false);
+register_shutdown_function(static function () use ($s): void {
+    $s->base->consumer->close();
+    $s->base->db->close();
+});
 $connection = $s->base->db->capsule->getConnection('owner_a');
 $connection->statement("SET statement_timeout='10s'");
 $authority = new EnvelopeAuthority($connection);

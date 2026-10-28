@@ -75,3 +75,12 @@ observable lock barriers, SQL counts and fault injection. Tests include state/re
 pre-commit failures, rolled-back winner recovery, duplicate/different digest/CAS, archive/delete races,
 current revoke, lost-response lookup and local generation fencing. Panel B and the default decoy
 are compared as complete row snapshots. These fixtures do not claim social or remote delivery e2e.
+
+
+## Standalone consumer evidence — P2.10
+
+The separate Laravel consumer in `tests/Fixtures/Consumer` exercises the public envelope and
+relay with a consumer-owned SQL inbox. Its rollback assertion compares owner state, revision,
+receipts and outbox, plus panel B and decoy snapshots. The fixture confirms one inbox effect
+for the delivered event; stale events may be quarantined. This does not establish remote
+exactly-once delivery or atomic revocation across databases.

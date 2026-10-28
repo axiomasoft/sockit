@@ -139,7 +139,7 @@ final readonly class Envelope
                         }
                         $store->append(event: new EventEnvelope(eventId: Ids::uuid7(), sourceInstallation: $handle->actor->installation, panel: $handle->surface->panel,
                             sourceGeneration: $this->app->make(SocKitConfig::class)->events->sourceGeneration, surface: $handle->surface,
-                            sourceRevision: $receipt->revision ?? throw new EnvelopeException(ProblemCode::PayloadInvalid), privacyRevision: $target === null ? $current->privacyGeneration : $target->privacyRevision,
+                            sourceRevision: $receipt->revision ?? throw new EnvelopeException(ProblemCode::PayloadInvalid), privacyRevision: $target?->privacyRevision ?: $current->privacyGeneration,
                             eventType: $proposal->type, occurredAt: new DateTimeImmutable('now', new DateTimeZone('UTC')), payload: $proposal->refs,
                             audience: $request->proposedAudience ?? $request->subject->spec, target: $request->target), consumers: $consumers);
                     }

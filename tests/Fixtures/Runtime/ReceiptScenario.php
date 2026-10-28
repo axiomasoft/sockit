@@ -22,7 +22,7 @@ use SocKit\Tests\Integration\Support\PgTarget;
 
 final class ReceiptScenario
 {
-    public const TYPE = 'acme.runtime.mutate';
+    public const string TYPE = 'acme.runtime.mutate';
 
     public static function install(RuntimeDatabase $db): void
     {

@@ -25,7 +25,7 @@ use SocKit\Surfaces\Enums\TargetLifecycle;
 /** Real acme owner state/revision SQL. No social domain is implemented by this fixture. */
 final class EnvelopeMutation implements OwnerMutation
 {
-    public const TYPE = 'acme.runtime.mutate';
+    public const string TYPE = 'acme.runtime.mutate';
 
     public string $authorizationAction = self::TYPE;
 

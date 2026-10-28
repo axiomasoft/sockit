@@ -85,7 +85,7 @@ final readonly class AudienceSpec
         if (! isset($wire['version'], $wire['scope']) || ! is_string($wire['version']) || ! is_string($wire['scope'])) {
             throw new InvalidPayloadException('Invalid audience wire');
         }
-        (new WireVersion(major: 1, minor: 0))->requireSupported(WireVersion::fromWire($wire['version']));
+        new WireVersion(major: 1, minor: 0)->requireSupported(WireVersion::fromWire($wire['version']));
         $scope = Scope::tryFrom($wire['scope']) ?? throw new InvalidPayloadException('Unknown audience scope');
         $expected = ['version', 'scope', ...match ($scope) {
             Scope::Direct => ['actors'], Scope::Group => ['group'], Scope::Contour => ['contour_level', 'contour'], default => [],

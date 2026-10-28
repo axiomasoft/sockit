@@ -35,10 +35,8 @@ it('routes public lifecycle through the same receipt CAS tombstone and outbox en
     try {
         $api = $s->base->app->make(SurfaceInstances::class);
         expect($api->get($s->handle)->revision->value)->toBe(1);
-        $command = function (string $action, int $expected) use ($s, $api): CommandEnvelope {
-            return new CommandEnvelope(key: new CommandKey('req.2026-10-28.'.$action), namespace: new CommandNamespace(installation: $s->handle->actor->installation, panel: $s->handle->surface->panel, integration: 'acme.client', commandType: 'sockit.surfaces.'.$action),
-                digest: $api->digest(handle: $s->handle, action: $action, expectedRevision: new Revision($expected)), expectedRevision: new Revision($expected));
-        };
+        $command = (fn (string $action, int $expected): CommandEnvelope => new CommandEnvelope(key: new CommandKey('req.2026-10-28.'.$action), namespace: new CommandNamespace(installation: $s->handle->actor->installation, panel: $s->handle->surface->panel, integration: 'acme.client', commandType: 'sockit.surfaces.'.$action),
+            digest: $api->digest(handle: $s->handle, action: $action, expectedRevision: new Revision($expected)), expectedRevision: new Revision($expected)));
         $archive = $api->archive(handle: $s->handle, command: $command('archive', 1));
         expect($archive->isSuccess())->toBeTrue()->and($api->get($s->handle)->lifecycle->value)->toBe('archived');
         $resume = $api->resume(handle: $s->handle, command: $command('resume', 2));

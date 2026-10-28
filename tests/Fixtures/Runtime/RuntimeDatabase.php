@@ -20,9 +20,9 @@ final class RuntimeDatabase
 {
     public readonly Capsule $capsule;
 
-    public readonly PDO $owner;
+    public PDO $owner;
 
-    public readonly PDO $decoy;
+    public PDO $decoy;
 
     /** @var list<array{connection: string|null, sql: string}> */
     public array $queries = [];
@@ -39,8 +39,12 @@ final class RuntimeDatabase
         $this->capsule = new Capsule;
         $events = new Dispatcher(new Container);
         $this->capsule->setEventDispatcher($events);
-        $events->listen(events: QueryExecuted::class, listener: function (QueryExecuted $query): void {
-            $this->queries[] = ['connection' => $query->connectionName, 'sql' => $query->sql];
+        $weak = \WeakReference::create($this);
+        $events->listen(events: QueryExecuted::class, listener: static function (QueryExecuted $query) use ($weak): void {
+            $database = $weak->get();
+            if ($database instanceof self) {
+                $database->queries[] = ['connection' => $query->connectionName, 'sql' => $query->sql];
+            }
         });
         $this->capsule->addConnection(config: [...$owner, 'prefix' => 'driver_'], name: 'owner_a');
         $this->capsule->addConnection(config: [...$owner, 'prefix' => 'other_'], name: 'owner_b');
@@ -79,8 +83,19 @@ final class RuntimeDatabase
         $this->owner->exec('DROP SCHEMA IF EXISTS panel_a CASCADE');
         $this->owner->exec('DROP SCHEMA IF EXISTS panel_b CASCADE');
         $this->decoy->exec('DROP SCHEMA IF EXISTS panel_a CASCADE');
+        $this->close();
+    }
+
+    public function close(): void
+    {
         foreach (['owner_a', 'owner_b', 'decoy'] as $name) {
             $this->capsule->getDatabaseManager()->disconnect($name);
         }
+        unset($this->owner, $this->decoy);
+    }
+
+    public function __destruct()
+    {
+        $this->close();
     }
 }

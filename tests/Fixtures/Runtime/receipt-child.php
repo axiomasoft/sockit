@@ -15,6 +15,7 @@ use SocKit\Tests\Fixtures\Runtime\RuntimeScenario as Runtime;
 $app = Runtime::app();
 $fake = Runtime::trust($app);
 $db = new RuntimeDatabase($app);
+register_shutdown_function(static fn () => $db->close());
 $connection = $db->capsule->getConnection('owner_a');
 $connection->statement("SET statement_timeout = '10s'");
 $pid = $connection->scalar('SELECT pg_backend_pid()');

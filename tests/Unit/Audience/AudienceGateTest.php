@@ -43,7 +43,7 @@ it('enforces installation and unknown boundaries before invoking a custom resolv
     $subject = Scenario::subject($wire);
     expect($gate->read(viewer: $viewer, subject: $subject)->reason)->toBe('audience.unknown')
         ->and($resolver->calls())->toBe([])
-        ->and((new AudienceGate($resolver))->read(viewer: $viewer, subject: $subject)->canRead())->toBeFalse();
+        ->and(new AudienceGate($resolver)->read(viewer: $viewer, subject: $subject)->canRead())->toBeFalse();
 });
 
 it('does not reuse admission across panel target incarnation installation or actor', function (): void {
@@ -208,7 +208,7 @@ it('keeps mixed successful and failing batch subjects equivalent to scalar', fun
     $wire['spec'] = ['version' => '1.0', 'scope' => 'public'];
     $public = Scenario::subject($wire);
     $policy = (new FakeSurfaceAudiencePolicy)->allow(viewer: $viewer, surface: $contour->surface);
-    $contours = (new FakeContourResolver($viewer->installation))->failWith(new Error('Unavailable facts'));
+    $contours = new FakeContourResolver($viewer->installation)->failWith(new Error('Unavailable facts'));
     $gate = new AudienceGate(resolver: new AudienceEvaluator(contours: $contours, groups: new FakeGroupMembershipResolver($viewer->installation)), surfacePolicy: $policy);
     $batch = $gate->readMany(viewer: $viewer, subjects: [$contour, $public]);
     expect($batch['p1'])->toEqual($gate->read(viewer: $viewer, subject: $contour))

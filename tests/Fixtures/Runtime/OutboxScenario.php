@@ -24,15 +24,15 @@ use SocKit\Support\Ids;
 use SocKit\Testing\SocKitFake;
 use SocKit\Tests\Integration\Support\PgTarget;
 
-final class OutboxScenario
+final readonly class OutboxScenario
 {
-    public readonly Application $app;
+    public Application $app;
 
-    public readonly SocKitFake $fake;
+    public SocKitFake $fake;
 
-    public readonly RuntimeDatabase $db;
+    public RuntimeDatabase $db;
 
-    public readonly SqlInboxConsumer $consumer;
+    public SqlInboxConsumer $consumer;
 
     public function __construct(string $generation = '1', bool $selected = true, bool $install = true)
     {
@@ -134,6 +134,8 @@ final class OutboxScenario
     {
         $this->db->owner->exec('DROP SCHEMA IF EXISTS acme_consumer CASCADE');
         SurfaceScenario::decoyUntouched($this->db);
+        $this->consumer->close();
         $this->db->cleanup();
+        $this->app->flush();
     }
 }

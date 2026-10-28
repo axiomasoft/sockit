@@ -1,0 +1,13 @@
+{
+  "fixture": "command/namespace",
+  "contract": "command",
+  "version": "1.0",
+  "description": "namespace",
+  "input": {
+    "kind": "namespace",
+    "value": "edufy-prod/edufy.community/edufy.social/sockit.posts.publish"
+  },
+  "expect": {
+    "valid": true
+  }
+}

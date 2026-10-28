@@ -1,0 +1,17 @@
+{
+  "fixture": "refs/resource-invalid-panel",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "resource-invalid-panel",
+  "input": {
+    "kind": "resource",
+    "value": {
+      "panel": "BAD",
+      "kind": "post",
+      "id": "1"
+    }
+  },
+  "expect": {
+    "valid": false
+  }
+}

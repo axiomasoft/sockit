@@ -1,0 +1,24 @@
+{
+  "fixture": "digest/list-order-dependent",
+  "contract": "digest",
+  "version": "1.0",
+  "description": "list-order-dependent",
+  "input": {
+    "command": "test",
+    "payload": {
+      "a": [
+        1,
+        2
+      ]
+    },
+    "compare": {
+      "a": [
+        2,
+        1
+      ]
+    }
+  },
+  "expect": {
+    "equal": false
+  }
+}

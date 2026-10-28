@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/panel",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "panel",
+  "input": {
+    "kind": "panel",
+    "value": "edufy.community"
+  },
+  "expect": {
+    "valid": true
+  }
+}

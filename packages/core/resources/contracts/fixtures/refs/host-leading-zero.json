@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/host-leading-zero",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "host-leading-zero",
+  "input": {
+    "kind": "host",
+    "value": "edufy.class: 007 "
+  },
+  "expect": {
+    "valid": true
+  }
+}

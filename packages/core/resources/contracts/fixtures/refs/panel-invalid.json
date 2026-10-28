@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/panel-invalid",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "panel-invalid",
+  "input": {
+    "kind": "panel",
+    "value": "default"
+  },
+  "expect": {
+    "valid": false
+  }
+}

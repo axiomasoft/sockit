@@ -1,0 +1,17 @@
+{
+  "fixture": "refs/surface-missing-panel",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "surface-missing-panel",
+  "input": {
+    "kind": "surface",
+    "value": {
+      "kind": "edufy.class-feed",
+      "host": "edufy.class:42",
+      "incarnation": 1
+    }
+  },
+  "expect": {
+    "valid": false
+  }
+}

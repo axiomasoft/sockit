@@ -1,0 +1,13 @@
+{
+  "fixture": "command/key-129",
+  "contract": "command",
+  "version": "1.0",
+  "description": "key-129",
+  "input": {
+    "kind": "key",
+    "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expect": {
+    "valid": false
+  }
+}

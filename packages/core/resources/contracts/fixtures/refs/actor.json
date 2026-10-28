@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/actor",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "actor",
+  "input": {
+    "kind": "actor",
+    "value": "user:007"
+  },
+  "expect": {
+    "valid": true
+  }
+}

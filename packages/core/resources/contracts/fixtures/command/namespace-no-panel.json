@@ -1,0 +1,13 @@
+{
+  "fixture": "command/namespace-no-panel",
+  "contract": "command",
+  "version": "1.0",
+  "description": "namespace-no-panel",
+  "input": {
+    "kind": "namespace",
+    "value": "edufy-prod/edufy.social/sockit.posts.publish"
+  },
+  "expect": {
+    "valid": false
+  }
+}

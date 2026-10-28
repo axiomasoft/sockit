@@ -1,0 +1,24 @@
+{
+  "fixture": "digest/publish",
+  "contract": "digest",
+  "version": "1.0",
+  "description": "publish",
+  "input": {
+    "command": "sockit.posts.publish",
+    "payload": {
+      "body": "Привет, класс!",
+      "surface": {
+        "kind": "edufy.class-feed",
+        "host": "edufy.class:42"
+      },
+      "audience": {
+        "scope": "contour",
+        "contour_level": "class"
+      }
+    }
+  },
+  "expect": {
+    "canonical": "{\"audience\":{\"contour_level\":\"class\",\"scope\":\"contour\"},\"body\":\"Привет, класс!\",\"surface\":{\"host\":\"edufy.class:42\",\"kind\":\"edufy.class-feed\"}}",
+    "digest": "sha256:ecfa83c151467271e0482508f186eb073be0732a3c5020ec1a2524dacf44cc36"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "subject": "PLAN1.P2.7",
+  "head": "03c852c9ef08bb0294a4facb17394d5453d3fabd",
+  "source_check_digest": "f9488523f6b2e58eb4b47b9d76deb37dd91d770a4c060838519633621c4a8165",
+  "schema_validated": true,
+  "logs_verified": true,
+  "checks": {
+    "V1": {
+      "evidence": "artifacts/p2.7/correction-1/V1-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    12 passed (196 assertions)"
+      ],
+      "log_sha256": "c39b97ecf93d73b8d887eb84b2a7ca80533f5f3da85d79eb594ab16786a3d3c1"
+    },
+    "V2": {
+      "evidence": "artifacts/p2.7/correction-1/V2-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    11 passed (421 assertions)"
+      ],
+      "log_sha256": "c8dbaca49aabf64e06f30ef98af7ef5a393b55c0e4a56952f8c972682b2be36d"
+    },
+    "V3": {
+      "evidence": "artifacts/p2.7/correction-1/V3-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    44 passed (755 assertions)"
+      ],
+      "log_sha256": "e7a6c3da481a9b8108ab021f62e18208f38ca9b14a5b2a8553defdbd62a49c4e"
+    },
+    "V4": {
+      "evidence": "artifacts/p2.7/correction-1/V4-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    47 passed (413 assertions)"
+      ],
+      "log_sha256": "f53c929c3ea5e5ed1f6a734e349765ff585d9fc39e76587742717518d7de1678"
+    },
+    "V5": {
+      "evidence": "artifacts/p2.7/correction-1/V5-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    29 passed (520 assertions)"
+      ],
+      "log_sha256": "c7907919ced7c1cf4c24ed95a8e9bc2852fd571d4c56c1ad6700f50484fad14c"
+    },
+    "V6": {
+      "evidence": "artifacts/p2.7/correction-1/V6-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    28 passed (339 assertions)"
+      ],
+      "log_sha256": "90842508a1060063112f5563372409d43a533e814b96ffce583cd53fbe3d5dd4"
+    },
+    "V7": {
+      "evidence": "artifacts/p2.7/correction-1/V7-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    7 passed (103 assertions)"
+      ],
+      "log_sha256": "ea75fa95ab1092c28eab22e1a9b4f370f177c70cd9118c1631386f2b0cdc13db"
+    },
+    "V8": {
+      "evidence": "artifacts/p2.7/correction-1/V8-final.json",
+      "exit": 0,
+      "summary": [
+        "Tests:    61 passed (178 assertions)"
+      ],
+      "log_sha256": "9e04e1a7d8741a6c41154ff6e0f0fe2848f39b870286d7322c013ec7fd5c302e"
+    },
+    "V90": {
+      "evidence": "artifacts/p2.7/correction-1/V90-final.json",
+      "exit": 0,
+      "summary": [
+        "[OK] No errors                                                                 "
+      ],
+      "log_sha256": "5ce85b2a36eb907a66da6cb94fbd26125424ad2015c383ba4083140cb9ed426f"
+    },
+    "V91": {
+      "evidence": "artifacts/p2.7/correction-1/V91-final.json",
+      "exit": 0,
+      "summary": [
+        "\"result\":\"passed\""
+      ],
+      "log_sha256": "0794c228cfdb036d505d058bcbf58185eea948fd1b82b24fc2f1dfa2fdfba189"
+    }
+  },
+  "V99": "round 1 RED; targeted round 2 pending; no final receipt generated",
+  "negative_bootstrap_exit": 2
+}

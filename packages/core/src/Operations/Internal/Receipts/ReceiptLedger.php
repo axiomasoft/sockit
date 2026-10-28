@@ -15,6 +15,8 @@ use SocKit\Operations\Data\ReceiptSnapshot;
 use SocKit\Operations\Enums\OperationOutcome;
 use SocKit\Operations\Exceptions\InvalidOperationResultException;
 use SocKit\Operations\Internal\Storage\OwnerConnection;
+use SocKit\Support\Data\CommandKey;
+use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\PayloadDigest;
 use SocKit\Support\Data\ResourceRef;
 use SocKit\Support\Data\Revision;
@@ -38,12 +40,13 @@ final readonly class ReceiptLedger
      *
      * @param  array<mixed>  $payload
      * @param  Closure(string): OperationResult  $write
+     * @param  (Closure(ReceiptSnapshot): void)|null  $afterRecord
      */
-    public function transaction(CommandEnvelope $envelope, string $commandType, array $payload, Closure $write): ReceiptSnapshot
+    public function transaction(CommandEnvelope $envelope, string $commandType, array $payload, Closure $write, ?string $guardContext = null, ?Closure $afterRecord = null): ReceiptSnapshot
     {
         $this->validate(envelope: $envelope, commandType: $commandType, payload: $payload);
 
-        return $this->owner->transaction(function () use ($envelope, $write): ReceiptSnapshot {
+        return $this->owner->transaction(function () use ($envelope, $write, $guardContext, $afterRecord): ReceiptSnapshot {
             $this->requireProfile();
             $table = $this->owner->table('receipts');
             $sqlTable = $table->getGrammar()->wrapTable($table->from);
@@ -52,8 +55,8 @@ final readonly class ReceiptLedger
             // A conflict waits for the other transaction. No 23505 is swallowed and the transaction
             // stays usable. Explicit conflict target does not hide unrelated uniqueness failures.
             $inserted = $table->getConnection()->select(
-                query: 'INSERT INTO '.$sqlTable.' (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id',
-                bindings: [$id, $envelope->namespace->toWire(), $envelope->key->value, $envelope->digest->value, $actor->actor?->toWire(), $actor->kind->value, $actor->onBehalfOf?->toWire()],
+                query: 'INSERT INTO '.$sqlTable.' (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of'.($guardContext === null ? '' : ', guard_context').') VALUES (?, ?, ?, ?, ?, ?, ?'.($guardContext === null ? '' : ', ?').') ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id',
+                bindings: [$id, $envelope->namespace->toWire(), $envelope->key->value, $envelope->digest->value, $actor->actor?->toWire(), $actor->kind->value, $actor->onBehalfOf?->toWire(), ...($guardContext === null ? [] : [$guardContext])],
                 useReadPdo: false,
             );
             if ($inserted !== []) {
@@ -65,12 +68,40 @@ final readonly class ReceiptLedger
                 $snapshot = new ReceiptSnapshot(id: $id, namespace: $envelope->namespace, keyHash: $envelope->key->hashForLog(), digest: $envelope->digest,
                     initiatingActor: $actor->actor ?? throw new ReceiptException(ProblemCode::AuthenticationRequired), outcome: $result->outcome, resource: $result->resource, revision: $result->revision, problem: $result->problem);
                 $table->where('id', $id)->update(['outcome' => $snapshot->outcome->value, 'resource' => $snapshot->resource === null ? null : json_encode($snapshot->resource->toWire(), JSON_THROW_ON_ERROR), 'revision' => $snapshot->revision?->value, 'problem' => $snapshot->problem?->value]);
+                if ($afterRecord !== null) {
+                    $afterRecord($snapshot);
+                }
 
                 return $snapshot;
             }
 
             // A separate READ COMMITTED statement sees the committed winner after INSERT waited.
-            return $this->read($envelope) ?? throw new ReceiptException(ProblemCode::ProviderUnavailable);
+            return $this->read(envelope: $envelope, guardContext: $guardContext) ?? throw new ReceiptException(ProblemCode::ProviderUnavailable);
+        });
+    }
+
+    /** Committed non-content guard metadata only. Caller must perform baseline guards first,
+     * then current subject guards outside tx before requesting the result. */
+    public function context(CommandNamespace $namespace, CommandKey $key): ?string
+    {
+        $row = $this->owner->table('receipts')->where('namespace', $namespace->toWire())->where('command_key', $key->value)->first();
+        if ($row === null) {
+            return null;
+        }
+        $this->identity($row);
+        if (! isset($row->guard_context) || ! is_string($row->guard_context)) {
+            throw new ReceiptException(ProblemCode::ProviderUnavailable);
+        }
+
+        return $row->guard_context;
+    }
+
+    public function result(CommandEnvelope $envelope, string $guardContext): ?ReceiptSnapshot
+    {
+        return $this->owner->transaction(function () use ($envelope, $guardContext): ?ReceiptSnapshot {
+            $this->requireProfile();
+
+            return $this->read(envelope: $envelope, guardContext: $guardContext);
         });
     }
 
@@ -111,16 +142,16 @@ final readonly class ReceiptLedger
         }
     }
 
-    private function read(CommandEnvelope $envelope): ?ReceiptSnapshot
+    private function read(CommandEnvelope $envelope, ?string $guardContext = null): ?ReceiptSnapshot
     {
         $row = $this->owner->table('receipts')->where('namespace', $envelope->namespace->toWire())->where('command_key', $envelope->key->value)->lockForUpdate()->first();
         if ($row === null) {
             return null;
         }
+        $this->identity($row);
         $actor = $this->owner->handle()->actor;
-        // Check identity before digest or result to avoid exposing another actor's outcome/conflict.
-        if ($row->actor_ref !== $actor->actor?->toWire() || $row->actor_kind !== $actor->kind->value || $row->on_behalf_of !== $actor->onBehalfOf?->toWire()) {
-            throw new ReceiptException(ProblemCode::ActorContextInvalid);
+        if ($guardContext !== null && (! isset($row->guard_context) || $row->guard_context !== $guardContext)) {
+            throw new ReceiptException(ProblemCode::IdempotencyConflict);
         }
         if ($row->digest !== $envelope->digest->value) {
             throw new ReceiptException(ProblemCode::IdempotencyConflict);
@@ -139,6 +170,14 @@ final readonly class ReceiptLedger
                 initiatingActor: $actor->actor ?? throw new ReceiptException(ProblemCode::AuthenticationRequired), outcome: OperationOutcome::from($row->outcome), resource: $resource, revision: $row->revision === null ? null : new Revision($row->revision), problem: $row->problem === null ? null : ProblemCode::from($row->problem));
         } catch (\JsonException|\ValueError|InvalidPayloadException|InvalidOperationResultException $error) {
             throw new ReceiptException(ProblemCode::ProviderUnavailable);
+        }
+    }
+
+    private function identity(\stdClass $row): void
+    {
+        $actor = $this->owner->handle()->actor;
+        if ($row->actor_ref !== $actor->actor?->toWire() || $row->actor_kind !== $actor->kind->value || $row->on_behalf_of !== $actor->onBehalfOf?->toWire()) {
+            throw new ReceiptException(ProblemCode::ActorContextInvalid);
         }
     }
 }

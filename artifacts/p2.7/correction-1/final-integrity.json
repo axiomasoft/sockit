@@ -1,0 +1,13 @@
+{
+  "subject": "PLAN1.P2.7",
+  "handoff_artifacts_verified": true,
+  "archived_sources_verified": 148,
+  "correction_paths": 14,
+  "protected_workspace_files": 535,
+  "original_foreign_files": 410,
+  "historical_review_artifacts": 104,
+  "native_status": "in_progress",
+  "native_result": "start/executor metadata only",
+  "review": "targeted round 2/2 pending; actual receipt required",
+  "V99": "not passed"
+}

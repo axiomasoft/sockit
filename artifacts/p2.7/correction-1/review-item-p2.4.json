@@ -1,0 +1,234 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P2.4",
+  "title": "Surface instance lifecycle, incarnation, CAS и tombstone storage",
+  "status": "done",
+  "summary": "Kernel repository хранит panel-qualified surface instances с revision/lifecycle и non-content tombstones. Archive/read-only, delete и новое incarnation не допускают stale resurrection.",
+  "why": "SN-05/SN-14/I-06/I-07: compiled definition не является runtime instance; stale event после удаления не создаёт живой объект.",
+  "scope": {
+    "include": [
+      "Internal surface repository и lifecycle transition primitives на owner connection",
+      "CAS expectedRevision; tombstone source generation+incarnation+revision",
+      "Test schema/fixtures и PG мешающие операции для surface lifecycle"
+    ],
+    "exclude": [
+      "Product body/moderation/retention policy, auto purge",
+      "Публичный mutation bypass конверта P2.7",
+      "Comment lifecycle/дерево"
+    ]
+  },
+  "depends_on": [
+    "P2.2",
+    "P2.3"
+  ],
+  "related": [],
+  "decisions": [
+    "D4",
+    "D6",
+    "D14",
+    "D15",
+    "D16",
+    "D17"
+  ],
+  "reads": [
+    {
+      "ref": "knowledge/execution-policy#routing",
+      "why": "Exact Codex pins и классификация риска D17",
+      "required": true
+    },
+    {
+      "ref": "knowledge/execution-policy#review",
+      "why": "Только выбранный anchor; обязательные checks у всех",
+      "required": true
+    },
+    {
+      "ref": "knowledge/execution-policy#autonomy",
+      "why": "Native API; не выдавать skipped/fake за pass",
+      "required": true
+    },
+    {
+      "ref": "knowledge/invariants#core",
+      "why": "CAS/tombstone non-resurrection",
+      "required": true
+    },
+    {
+      "ref": "knowledge/invariants#locks",
+      "why": "Lock surface before own target",
+      "required": true
+    },
+    {
+      "ref": "knowledge/panel-design#model",
+      "why": "Surface instance != panel/table",
+      "required": true
+    },
+    {
+      "ref": "knowledge/privacy-model#algorithm",
+      "why": "Archive всегда read_only; no author shortcut",
+      "required": true
+    },
+    {
+      "path": "packages/core/src/Surfaces/Data/SurfaceRef.php",
+      "why": "Действующая incarnation identity",
+      "required": true
+    },
+    {
+      "path": "docs/architecture/invariants.md",
+      "why": "Нормативный lock order",
+      "required": true
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Surfaces/Internal/Instances/**",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Data/SurfaceInstance.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Enums/SurfaceLifecycle.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Operations/Internal/Storage/**",
+      "change": "any"
+    },
+    {
+      "path": "tests/Integration/Runtime/SurfaceLifecycleTest.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Integration/Runtime/TombstoneReplayTest.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/**",
+      "change": "any"
+    },
+    {
+      "path": "artifacts/p2.4/**",
+      "change": "any",
+      "note": "Реальные check logs/evidence и handoff только при исполнении"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "p24-report",
+      "path": "artifacts/p2.4/REPORT.md",
+      "role": "output"
+    }
+  ],
+  "rules": [
+    "Работа только своего item. Production DDL/generators P3, social reactions/posts P4, comments/external adapters/UI вне P2. Test-only schema и acme.runtime fixture не социальный продукт.",
+    "Соблюдать принятую P1: strict_types, named arguments для >=2 аргументов, Api/Spi, без Internal/framework persistence типов в public domain signatures. Не ослаблять arch-гейты; runtime SQL только на connection/table map immutable панели.",
+    "Не менять global database.default, runtime config, static currentPanel; actor/installation только ActorContexts и текущая host isolation. Unknown/error/revoked deny; anonymous/system fallback запрещён.",
+    "Каждый PG check проходит общий fail-closed bootstrap P2.1: отдельный owned PostgreSQL >=16, реальные PDO backend PIDs/DB identity, *_test и run marker, без ambient dev/prod .env. Missing prerequisites/skip/timeout/failed assertion => не pass и item не done.",
+    "Сохранять actual command/cwd/exit/stdout/stderr/environment identity без секретов и проверяемые SQL assertions в artifacts своего item. Текст expect — требование, не результат. Не создавать result.checks/pass до реального запуска.",
+    "Routes — назначение будущему исполнителю, не доказательство actual model. Native start/finish только при отдельном исполнении; сейчас детализация. Не повторять принятые P1 reviews без изменённого инварианта."
+  ],
+  "guidance": "Storage identity включает trusted installation+panel+kind+lossless host key+incarnation, current instance uniqueness не по host ID в одиночку. Поля: UUIDv7 kernel ID, lifecycle Live/Archived/Deleted, revision>=1, privacy/local policy generation, timestamps; content-free tombstone хранит complete ref, max revision/source generation/deletion time без тела/actor PII. Test schema constraints/short names в fixture, production schema P3. Internal repositories не публичный обход authorizer: public lifecycle commands появятся в P2.7 и всегда идут через конверт.\nРазрешены Live→Archived, Archived→Live с current authorization и CAS, Live/Archived→Deleted с tombstone; Deleted→Live того же incarnation запрещён. Новый incarnation создаётся явно доверенной операцией после tombstone, не auto upsert/recycled host ID; предыдущий tombstone остаётся. Stale ref => surface_incarnation_mismatch; archived write=>surface_archived. CAS UPDATE WHERE revision=:expected; 0 affected => deterministic conflict/current lookup, не retry с новой revision. Same-class multirow locks сортируются по stable identity.\nPG barriers: два archive/edit с одной expected revision дают одного winner и один revision_conflict; archive-vs-write и delete-vs-replay сериализуются surface lock. Обратный порядок stale create/update после tombstone и смены source generation не resurrect; другая panel при тех же ID не затронута. Проверить оба исхода transaction rollback с tombstone/instance, без automatic purge (D11). Эти repository checks ещё не доказывают full envelope — owner P2.7.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/SurfaceLifecycleTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "CAS barrier winner=1; Live/Archived/Deleted transitions, archive read_only, owner rollback",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/TombstoneReplayTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "reordered/duplicate/old generation не resurrect; new incarnation explicit; panel B untouched",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V3",
+      "cmd": "composer test -- tests/Unit/Contracts tests/Arch --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "совместимость P1 wire/problem/API invariants",
+      "kind": "impact"
+    },
+    {
+      "id": "V90",
+      "cmd": "composer analyse -- --memory-limit=512M",
+      "expect": "exit 0, No errors; нет новых suppressions/baseline",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "composer lint",
+      "expect": "exit 0; changed PHP проходит Pint",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Surface instance repository и typed lifecycle snapshots",
+    "Non-content tombstone enforcement и real PG lifecycle races"
+  ],
+  "route": {
+    "class": "frontier",
+    "effort": "high",
+    "provider": "codex",
+    "model": "gpt-6.1-sol"
+  },
+  "review": {
+    "mode": "none",
+    "reason": "Обязательные адресные checks; независимое tx/privacy review сосредоточено в P2.7, без blanket review."
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": {
+    "started_at": "2026-10-28T14:47:18Z",
+    "finished_at": "2026-10-28T14:55:55Z",
+    "executor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    "notes": "Surface lifecycle snapshots and owner-only CAS/tombstone repository implemented. V1 real isolated PG16 11/207; V2 3/47; V3 contracts/arch 46/1639; V90/V91 exit 0. Nine actual PG lock barriers; no stale resurrection; explicit next incarnation; atomic rollback; panel/install/lossless key isolation. Identity/marker/PDO proof before fixture DDL; missing manifest rejects exit 2. Repository in permitted Operations/Internal/Storage preserves A3. 410 foreign files unchanged. No agents/review (mode none), no full envelope/social e2e claim. Evidence artifacts/p2.4/REPORT.md. Only P2.4 executed.",
+    "checks": [
+      {
+        "id": "V1",
+        "exit": 0,
+        "at": "2026-10-28T14:55:55Z",
+        "evidence": "artifacts/p2.4/V1.json"
+      },
+      {
+        "id": "V2",
+        "exit": 0,
+        "at": "2026-10-28T14:55:55Z",
+        "evidence": "artifacts/p2.4/V2.json"
+      },
+      {
+        "id": "V3",
+        "exit": 0,
+        "at": "2026-10-28T14:55:55Z",
+        "evidence": "artifacts/p2.4/V3.json"
+      },
+      {
+        "id": "V90",
+        "exit": 0,
+        "at": "2026-10-28T14:55:55Z",
+        "evidence": "artifacts/p2.4/V90.json"
+      },
+      {
+        "id": "V91",
+        "exit": 0,
+        "at": "2026-10-28T14:55:55Z",
+        "evidence": "artifacts/p2.4/V91.json"
+      }
+    ],
+    "evidence": [
+      "artifacts/p2.4/V1.json",
+      "artifacts/p2.4/V2.json",
+      "artifacts/p2.4/V3.json",
+      "artifacts/p2.4/V90.json",
+      "artifacts/p2.4/V91.json"
+    ]
+  },
+  "updated_at": "2026-10-28T14:55:55Z"
+}

@@ -1,0 +1,284 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P2.3",
+  "title": "Host target SPI и public capability registry для L0",
+  "status": "done",
+  "summary": "TargetRef/TargetResolution и TargetResolver связывают host alias+lossless key+incarnation с текущими visibility/lifecycle/privacy generation. Public capability slot позволяет P4 posts зарегистрировать target без sibling imports.",
+  "why": "L0 reactions должен работать с Article/Product без Posts, а target IDs/actor input сами не дают права. D16 требует fail-closed current boundary.",
+  "scope": {
+    "include": [
+      "TargetResolver SPI и optional local TargetWriteFence SPI с точной consistency boundary",
+      "ModuleRegistrar target capability FQCN slot, freeze/selected-on-panel resolution, конфиг targets binding",
+      "FakeTargetResolver и SocKitFake default deny; host adapter swap и contract fixtures"
+    ],
+    "exclude": [
+      "Реализация Reactions/Posts или PostTargetResolver P4",
+      "Универсальный target plugin engine, внешние ORM/body reads ядром",
+      "Сетевые callbacks под DB lock"
+    ]
+  },
+  "depends_on": [
+    "P2.2"
+  ],
+  "related": [],
+  "decisions": [
+    "D4",
+    "D6",
+    "D14",
+    "D15",
+    "D16",
+    "D17"
+  ],
+  "reads": [
+    {
+      "ref": "knowledge/execution-policy#routing",
+      "why": "Exact Codex pins и классификация риска D17",
+      "required": true
+    },
+    {
+      "ref": "knowledge/execution-policy#review",
+      "why": "Только выбранный anchor; обязательные checks у всех",
+      "required": true
+    },
+    {
+      "ref": "knowledge/execution-policy#autonomy",
+      "why": "Native API; не выдавать skipped/fake за pass",
+      "required": true
+    },
+    {
+      "ref": "knowledge/panel-design#contracts",
+      "why": "P2 замораживает target signatures с named L0/P4 consumer",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#audience",
+      "why": "Admission/containment обязательны даже custom allow",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#modules",
+      "why": "Additive registrar slot/private draft/freeze",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#testing",
+      "why": "FakeTargetResolver вводится с runtime consumer",
+      "required": true
+    },
+    {
+      "ref": "knowledge/invariants#pipeline",
+      "why": "Remote resolve outside tx, local generation/fence",
+      "required": true
+    },
+    {
+      "path": "packages/core/src/Configuration/SocKitConfig.php",
+      "why": "targets placeholder signature",
+      "required": true
+    },
+    {
+      "path": "packages/core/src/Modules/ModuleRegistrar.php",
+      "why": "Реальный declaration collection",
+      "required": true
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Surfaces/Contracts/TargetResolver.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Contracts/TargetWriteFence.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Data/TargetRef.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Data/TargetResolution.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Enums/TargetLifecycle.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Internal/TargetCapabilities.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Operations/OperationHandles.php",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/Modules/ModuleRegistrar.php",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/Modules/Internal/**",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/Configuration/SocKitConfig.php",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/Configuration/Data/ResolversConfig.php",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/SocKitServiceProvider.php",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/Testing/FakeTargetResolver.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Testing/SocKitFake.php",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/**",
+      "change": "create"
+    },
+    {
+      "path": "tests/Unit/Contracts/**",
+      "change": "any"
+    },
+    {
+      "path": "tests/Feature/Targets/**",
+      "change": "create"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/**",
+      "change": "any"
+    },
+    {
+      "path": "docs/architecture/spi.md",
+      "change": "any"
+    },
+    {
+      "path": "artifacts/p2.3/**",
+      "change": "any",
+      "note": "Реальные check logs/evidence и handoff только при исполнении"
+    },
+    {
+      "path": "packages/core/src/Modules/Modules.php",
+      "change": "any",
+      "note": "P2.3 additive target declaration shape and existing public boot coordinator wiring; no new top-level namespace."
+    },
+    {
+      "path": "packages/core/src/Surfaces/Surfaces.php",
+      "change": "any",
+      "note": "P2.3 additive target declaration shape and existing public boot coordinator wiring; no new top-level namespace."
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "p23-report",
+      "path": "artifacts/p2.3/REPORT.md",
+      "role": "output"
+    }
+  ],
+  "rules": [
+    "Работа только своего item. Production DDL/generators P3, social reactions/posts P4, comments/external adapters/UI вне P2. Test-only schema и acme.runtime fixture не социальный продукт.",
+    "Соблюдать принятую P1: strict_types, named arguments для >=2 аргументов, Api/Spi, без Internal/framework persistence типов в public domain signatures. Не ослаблять arch-гейты; runtime SQL только на connection/table map immutable панели.",
+    "Не менять global database.default, runtime config, static currentPanel; actor/installation только ActorContexts и текущая host isolation. Unknown/error/revoked deny; anonymous/system fallback запрещён.",
+    "Каждый PG check проходит общий fail-closed bootstrap P2.1: отдельный owned PostgreSQL >=16, реальные PDO backend PIDs/DB identity, *_test и run marker, без ambient dev/prod .env. Missing prerequisites/skip/timeout/failed assertion => не pass и item не done.",
+    "Сохранять actual command/cwd/exit/stdout/stderr/environment identity без секретов и проверяемые SQL assertions в artifacts своего item. Текст expect — требование, не результат. Не создавать result.checks/pass до реального запуска.",
+    "Routes — назначение будущему исполнителю, не доказательство actual model. Native start/finish только при отдельном исполнении; сейчас детализация. Не повторять принятые P1 reviews без изменённого инварианта."
+  ],
+  "guidance": "Namespace Targets НЕ добавлять в закрытый верхний список ядра: использовать SocKit\\Surfaces\\{Contracts,Data,Enums,Internal}. TargetRef содержит HostEntityRef (alias+lossless key) и Incarnation; SurfaceRef уже несёт panel. TargetResolver::resolve(ActorContext $actor, SurfaceRef $surface, TargetRef $target): TargetResolution. Результат: точные surface/target refs, read/write AudienceVerdict, lifecycle, Revision privacyRevision, непустой generation token; не content body, не ORM и не actor от payload. Resolver вызывается вне транзакции на каждом защищённом входе/replay; unknown/missing/mismatch => deny, stale deleted target не переиспользуется по key. Поля с wire shape и typed ошибки описать в docblock/fixtures, сохранить stable P1 codes.\nModuleRegistrar::target(string $alias, string $resolver): self принимает FQCN TargetResolver. Private draft компилируется с existing graph, duplicate alias в одной enabled panel => configuration_invalid; неизвестные/disabled capabilities не resolve-ятся; host config sockit.resolvers.targets даёт fallback только как явно configured adapter для host aliases, а не permissive Allow. Registry хранит immutable FQCN declarations, resolver instance вызывается scoped/явно в operation; поздняя registration rejected. Tests с acme.runtime и вторым fixture модулем доказывают slot, не импортируют реальные Posts.\nTargetWriteFence::recheck(OperationHandle $handle, TargetResolution $resolved): AuthorizationDecision — только local/no-network стадия под lock на owner connection, same-DB host adapter сам владеет своими запросами и fence. P2 write profile требует проверяемого local fence/generation; удалённый непроверяемый target не получает successful write (authorization_unknown), повторный resolve только после rollback вне tx. Для remote reads разрешён текущий sampled resolution с явно описанной границей; обещания cross-DB atomic revoke нет. Future иной consistency profile требует явного контракта, не silent widening. Swap tests проверяют configured unavailable, malicious allow при foreign panel/installation, revoked target, recycled key/new incarnation и same key двух panels; fake default deny. Fakes и contract fixtures не объявлять social e2e.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "composer test -- tests/Feature/Targets tests/Unit/Contracts --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "target registry order/freeze/disabled slot, swap/fail-closed, roundtrip lossless numeric/string/UUID refs; 0 skipped",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "composer test -- tests/Arch --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "public Api/Spi и no ORM/Internal signatures; no sibling imports; closed core module list",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V90",
+      "cmd": "composer analyse -- --memory-limit=512M",
+      "expect": "exit 0, No errors; нет новых suppressions/baseline",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "composer lint",
+      "expect": "exit 0; changed PHP проходит Pint",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "TargetResolver/TargetWriteFence public contracts + fixtures",
+    "Capability registration и scoped binding",
+    "Testing fake default deny и documented consistency boundary"
+  ],
+  "route": {
+    "class": "frontier",
+    "effort": "high",
+    "provider": "codex",
+    "model": "gpt-6.1-sol"
+  },
+  "review": {
+    "mode": "none",
+    "reason": "Обязательные адресные checks; независимое tx/privacy review сосредоточено в P2.7, без blanket review."
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": {
+    "started_at": "2026-10-28T14:25:20Z",
+    "finished_at": "2026-10-28T14:43:21Z",
+    "executor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    "notes": "TargetResolver/TargetWriteFence, lossless target wire, frozen panel-selected FQCN registry, scoped host binding and default-deny fake implemented. V1 32/1475, V2 45/250, V90/V91 exit 0. Additional real isolated PostgreSQL16 local fence V3 1/28 and affected boot/config/cache/handle V4 60/777 pass. Private target identity proven before fixture DDL; negative missing manifest exit 2. No agents/review (mode none), no social e2e claim. Foreign changes preserved. Evidence artifacts/p2.3/REPORT.md. Only P2.3 executed.",
+    "checks": [
+      {
+        "id": "V1",
+        "exit": 0,
+        "at": "2026-10-28T14:43:21Z",
+        "evidence": "artifacts/p2.3/V1.json"
+      },
+      {
+        "id": "V2",
+        "exit": 0,
+        "at": "2026-10-28T14:43:21Z",
+        "evidence": "artifacts/p2.3/V2.json"
+      },
+      {
+        "id": "V90",
+        "exit": 0,
+        "at": "2026-10-28T14:43:21Z",
+        "evidence": "artifacts/p2.3/V90.json"
+      },
+      {
+        "id": "V91",
+        "exit": 0,
+        "at": "2026-10-28T14:43:21Z",
+        "evidence": "artifacts/p2.3/V91.json"
+      }
+    ],
+    "evidence": [
+      "artifacts/p2.3/V1.json",
+      "artifacts/p2.3/V2.json",
+      "artifacts/p2.3/V90.json",
+      "artifacts/p2.3/V91.json"
+    ]
+  },
+  "updated_at": "2026-10-28T14:43:21Z"
+}

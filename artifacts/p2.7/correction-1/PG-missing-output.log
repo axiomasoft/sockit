@@ -1,0 +1,23 @@
+COMMAND env -u SOCKIT_PG_MANIFEST composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/EnvelopeAtomicityTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+CWD /home/vostrikov/projects/packages/sockit
+STDOUT
+
+  [44;1m INFO [49;22m Error in bootstrap script: RuntimeException:
+
+Missing private PostgreSQL run manifest
+#0 /home/vostrikov/projects/packages/sockit/tests/Integration/Support/bootstrap.php(11): SocKit\Tests\Integration\Support\PgTarget::fromEnvironment()
+#1 /home/vostrikov/projects/packages/sockit/vendor/phpunit/phpunit/src/TextUI/Configuration/BootstrapLoader.php(68): include_once('/home/vostrikov...')
+#2 /home/vostrikov/projects/packages/sockit/vendor/phpunit/phpunit/src/TextUI/Configuration/BootstrapLoader.php(43): PHPUnit\TextUI\Configuration\BootstrapLoader->load('/home/vostrikov...')
+#3 /home/vostrikov/projects/packages/sockit/vendor/phpunit/phpunit/src/TextUI/Application.php(173): PHPUnit\TextUI\Configuration\BootstrapLoader->handle(Object(PHPUnit\TextUI\Configuration\Configuration))
+#4 /home/vostrikov/projects/packages/sockit/vendor/pestphp/pest/src/Kernel.php(104): PHPUnit\TextUI\Application->run(Array)
+#5 /home/vostrikov/projects/packages/sockit/vendor/pestphp/pest/bin/pest(207): Pest\Kernel->handle(Array, Array)
+#6 /home/vostrikov/projects/packages/sockit/vendor/pestphp/pest/bin/pest(215): {closure:/home/vostrikov/projects/packages/sockit/vendor/pestphp/pest/bin/pest:21}()
+#7 /home/vostrikov/projects/packages/sockit/vendor/bin/pest(119): include('/home/vostrikov...')
+#8 {main}.
+
+STDERR
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Runtime/EnvelopeAtomicityTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+Script pest handling the test event returned with error code 2
+
+EXIT 2
+

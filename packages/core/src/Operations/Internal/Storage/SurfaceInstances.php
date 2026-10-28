@@ -25,6 +25,14 @@ final readonly class SurfaceInstances
 {
     public function __construct(private OwnerConnection $owner) {}
 
+    /** Sample local generations before remote guards. No lock and no authority conferred. */
+    public function current(): ?SurfaceInstance
+    {
+        $row = $this->query('surface_instances')->first();
+
+        return $row === null ? null : $this->hydrate($row);
+    }
+
     /** Explicit first creation, never an event-driven upsert. INSERT UNIQUE arbitrates absent-row races. */
     public function create(Revision $sourceGeneration, Revision $privacyGeneration): SurfaceInstance
     {
@@ -147,6 +155,12 @@ final readonly class SurfaceInstances
         if ($row === null) {
             $this->reject(ProblemCode::SurfaceNotFound);
         }
+
+        return $this->hydrate($row);
+    }
+
+    private function hydrate(\stdClass $row): SurfaceInstance
+    {
         $handle = $this->owner->handle();
         $ref = $handle->surface;
 

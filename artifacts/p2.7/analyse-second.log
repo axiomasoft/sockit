@@ -1,0 +1,78 @@
+> phpstan analyse --no-progress '--memory-limit=512M'
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ --------------------------------------------------------------------- 
+  Line   packages/core/src/Operations/Internal/Envelope/Envelope.php          
+ ------ --------------------------------------------------------------------- 
+  116    Using nullsafe property access "?->privacyRevision" on left side of  
+         ?? is unnecessary. Use -> instead.                                   
+         🪪  nullsafe.neverNull                                               
+ ------ --------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   tests/Fixtures/Runtime/EnvelopeRace.php                            
+ ------ ------------------------------------------------------------------- 
+  45     Parameter #1 $array of function array_unique expects array, mixed  
+         given.                                                             
+         🪪  argument.type                                                  
+  45     Parameter #1 $array of function array_unique expects array, mixed  
+         given.                                                             
+         🪪  argument.type                                                  
+ ------ ------------------------------------------------------------------- 
+
+ ------ ------------------------------------------- 
+  Line   tests/Fixtures/Runtime/envelope-child.php  
+ ------ ------------------------------------------- 
+  22     Cannot cast mixed to string.               
+         🪪  cast.string                            
+ ------ ------------------------------------------- 
+
+ ------ ----------------------------------------------------- 
+  Line   tests/Integration/Runtime/EnvelopeAtomicityTest.php  
+ ------ ----------------------------------------------------- 
+  31     Cannot call method listen() on                       
+         Illuminate\Contracts\Events\Dispatcher|null.         
+         🪪  method.nonObject                                 
+ ------ ----------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Integration/Runtime/EnvelopeConcurrencyTest.php                  
+ ------ ----------------------------------------------------------------------- 
+  15     Parameter #1 $w of static method                                       
+         SocKit\Operations\Data\OperationResult::fromWire() expects array<stri  
+         ng, mixed>, mixed given.                                               
+         🪪  argument.type                                                      
+  15     Parameter #1 $w of static method                                       
+         SocKit\Operations\Data\OperationResult::fromWire() expects array<stri  
+         ng, mixed>, mixed given.                                               
+         🪪  argument.type                                                      
+  28     Parameter #1 $w of static method                                       
+         SocKit\Operations\Data\OperationResult::fromWire() expects array<stri  
+         ng, mixed>, mixed given.                                               
+         🪪  argument.type                                                      
+  38     Parameter #1 $w of static method                                       
+         SocKit\Operations\Data\OperationResult::fromWire() expects array<stri  
+         ng, mixed>, mixed given.                                               
+         🪪  argument.type                                                      
+ ------ ----------------------------------------------------------------------- 
+
+ [ERROR] Found 9 errors                                                         
+
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1

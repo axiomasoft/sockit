@@ -29,7 +29,19 @@ final readonly class OwnerConnection
         $this->assertRouting();
         $this->handles->assertCurrent(handle: $this->handle, namespace: $this->namespace);
 
-        return $this->connection->transaction(fn (): mixed => $callback($this));
+        $this->connection->beginTransaction();
+        try {
+            $result = $callback($this);
+            $this->connection->commit();
+
+            return $result;
+        } catch (\Throwable $error) {
+            // Includes a fault immediately before PDO commit. Never touch a caller's outer tx.
+            if ($this->connection->transactionLevel() > 0) {
+                $this->connection->rollBack();
+            }
+            throw $error;
+        }
     }
 
     /** Known logical entities only. Policy/receipt/CAS orchestration is added by its owning P2 items. */

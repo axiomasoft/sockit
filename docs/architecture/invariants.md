@@ -36,3 +36,42 @@ Own-post reaction-vs-hide/delete serialized by post lock; external host targets 
 Анонс (P8): outbox SocKit → bridge inbox (PK consumer,event_id + digest) → текущий snapshot поста через owner API → текущая аудитория канала ⊆ аудитории поста (иначе deny/quarantine) → durable send intent со stable key → вызов Chatom **вне** транзакции SocKit → при таймауте lookup по тому же ключу → mapping+receipt → AudienceShrunk/PostDeleted → idempotent redact/delete; stale событие отбрасывается по privacy revision/tombstone.
 
 Неизвестный внешний исход: owner пишет durable intent + digest → execute(originalKey) → ответ потерян → reconciler lookupOutcome(originalKey): confirmed → receipt; absent → retry тем же key/payload; conflict/unknown → quarantine. Если у backend нет idempotency/outcome lookup — мост не объявляет exactly-once эффекта.
+
+## Runtime enforcement — P2.7
+
+The public Operations envelope implements I-02/I-03/I-04/I-05/I-06/I-07/I-08/I-11/I-12.
+It validates subject-bound canonical digest and trusted context before claiming a receipt; guards
+execute outside the owner transaction. Receipt uniqueness serializes duplicate keys using PostgreSQL
+ON CONFLICT, followed by receipt → surface → target/fence → owner CAS locks. Changed surface/local
+generations abort; remote authority is re-resolved only outside the transaction. No automatic retry
+hides a deadlock/timeout or CAS conflict. Snapshot/effect predicates and mandatory ref-only event
+proposals cannot turn Unknown or zero affected rows into Confirmed.
+
+The owner envelope requires a composite host authority fence after all owner locks and before
+persist. Its generation is captured before current guards outside tx, then locally checked and
+held through commit; a rolled-back receipt holder cannot hand a stale write grant to its waiter.
+Missing/stale/unprovable authority rejects and rolls back the claim; fresh guards resolve only
+after rollback, without an automatic persistence retry. Target-less lifecycle uses the same fence.
+
+The owner envelope rejects nested owner transactions before effect. Its transaction boundary catches
+faults including a failure immediately before PDO commit. State, revision, receipt and outbox either
+commit together or leave no new rows/revision. Delivery is outside this envelope; rollback cannot
+consume or wake a relay. Definitive rejected outcomes may be recorded in a separate minimal
+transaction after rollback, according to ProblemSpec; this is never a successful mutation claim.
+
+Both execute replay and lookup reauthorize current action, surface/audience/containment, lifecycle,
+target incarnation/privacy/generation and safety-visible owner target before output, including after
+waiting for a winner. Actor/namespace identity is checked before reading receipt results. Existing lookup authorizes the recorded action independently of commandType. Absent lookup
+and another actor's key use the same explicit host action mapping/policy after current baseline
+surface access; unknown mappings deny. Lookup hides another actor's receipt as absence only
+when that absence policy allows. Receipt context contains no body/command payload and cannot grant
+access. The original namespace/key/digest/resource remain stable after a lost response. Archive or
+read-only access can expose only currently readable metadata, and never grants another write.
+The originating authorized delete can acknowledge its own commit; deleted-resource replay remains denied.
+
+`EnvelopeAtomicityTest`, `EnvelopeConcurrencyTest`, `ReplayAuthorizationTest` and
+`GenerationFenceTest` exercise these through real isolated PostgreSQL with independent backend PIDs,
+observable lock barriers, SQL counts and fault injection. Tests include state/revision/receipt/outbox/
+pre-commit failures, rolled-back winner recovery, duplicate/different digest/CAS, archive/delete races,
+current revoke, lost-response lookup and local generation fencing. Panel B and the default decoy
+are compared as complete row snapshots. These fixtures do not claim social or remote delivery e2e.

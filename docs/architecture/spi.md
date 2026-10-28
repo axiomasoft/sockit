@@ -141,3 +141,96 @@ rebuild cannot suppress a later live effect. Projection polling uses a bounded e
 large rebuild pagination/product scheduling is outside P2.6. Test fixtures demonstrate independent SQL
 inbox/projection transactions, process crashes, fenced ACK and two-panel identity; they are not social
 or remote delivery e2e evidence.
+
+## Atomic owner mutations — P2.7
+
+`Operations::execute(OperationHandle, CommandEnvelope, OwnerMutation): OperationResult` is the fixed
+owner envelope. `lookup(handle, namespace, key): ?OperationResult` returns absent only after current
+surface/admission/audience access and explicit absence authorization. Another actor's key
+is subject to the same absence policy. Existing receipts authorize their stored action;
+commandType is an idempotency identity and is not implicitly an authorization action. Neither entry trusts an old handle,
+author or installation from command data. Construct a digest with `Operations::digest(handle,
+mutation, expectedRevision)`; it binds the complete surface/panel/incarnation, target/incarnation,
+subject and proposed audiences, action/intent, CAS revision and canonical module data. Namespace
+commandType must equal mutation commandType. Reserved identity fields must match; author/actor/
+installation payload fields are rejected. Keys/namespaces are lossless and never truncated.
+
+`OwnerMutation` is a trusted owner implementation, not arbitrary client-supplied code. Its exact
+methods are `commandType(): string`, `payload(): array`, `request(OperationHandle): MutationRequest`,
+`lock(OperationHandle): MutationSnapshot`, and `persist(OperationHandle, MutationSnapshot): MutationEffect`.
+Request/payload are side-effect-free outside transactions. Request names the action, trusted subject,
+intent (`write`, `publish`, `read`), sampled owner safety/local generation, optional proposed audience
+and target. Module mutations require a target; target-less kernel lifecycle is private to the kernel.
+`read` is metadata for guards, never permission for execute to persist. DTOs are final readonly and
+contain domain values; neither ORM, driver nor closures enter the protocol.
+
+Action authorization, admission, audience, containment for publication, owner safety and current
+target visibility are mandatory. Missing providers and Unknown deny. Surface local generations are
+sampled before remote guards and compared under the surface lock. The host target adapter must
+provide current owner lifecycle/safety/visibility for replay/lookup and a local `TargetWriteFence`
+for writes. The host also binds the mandatory scoped `MutationAuthorityFence` described below;
+target/surface generation alone does not prove current action/admission authority. A remote-only adapter cannot prove mutation and is denied. Owner lock/persist use only
+local SQL on the exact panel connection: receipt → surface → optional group → target/post → reaction,
+with deterministic order within a class. Lock returns current resource/revision/lifecycle/safety and
+local generation; CAS requires the expected revision, or both resource/revision absent and expected
+null for create. Persist reports real affectedRows=1, the same resource and old.next() (1 on create).
+Malformed effects, generation/safety mismatch, empty event proposals or substituted refs roll back.
+Trusted implementations must actually execute their SQL CAS and must not open/commit transactions,
+write another owner's connection or perform network IO. The kernel cannot sandbox arbitrary PHP.
+
+State/revision, finalized receipt and ref-only outbox append commit together. The kernel supplies
+UUIDv7 event identity, panel/source epoch, time, audience and revision fields. Extensions cannot omit
+outbox; at least one proposal is required. Consumers come from frozen selected module declarations;
+no consumer is called by execute. There is no required wakeup: durable polling is authoritative.
+Module resource events require the future domain owner's current lookup before relay dispatch;
+P2.6's surface-event relay does not claim to hydrate arbitrary module resources.
+
+Receipts store only a canonical guard descriptor (surface/installation, action/intent, audience,
+optional target generations and digest), not payload content or authority. Replay and lookup resolve
+current guards outside SQL transactions before and after reading a committed receipt. A UNIQUE wait
+never reuses pre-wait permission. Read-only/archive permits a currently authorized readable outcome
+without a new effect. Deleted/hidden/stale-incarnation resources disclose no old reference. A successful
+surface delete returns its own authorized post-commit non-content acknowledgement; later replay and
+lookup are subject to deleted visibility. Definitive safe denials are separately recorded as minimal
+Rejected receipts where ProblemSpec permits; they never replace or disclose a winner. Unknown,
+provider/payload/idempotency errors remain non-success and unrecorded.
+
+`SurfaceInstances::get/create/archive/resume/delete` delegates to the same guarded Operations service.
+Lifecycle actions are `sockit.surfaces.{get,create,archive,resume,delete}`. `digest(handle, action,
+expectedRevision)` prepares a bound lifecycle command digest. Create requires a missing instance,
+explicit first incarnation and no tombstone; archive/resume/delete require CAS. Resume is an explicit
+administrative transition, still requiring current write admission and action permission. No deleted
+instance is restored through this API. Generations and tombstones remain kernel-owned.
+
+Nested active owner transactions are rejected with `sockit.configuration_invalid` before guards or
+mutation. The caller's transaction is neither completed nor rolled back. Cross-panel atomic commit is
+not promised. There is no automatic retry, last-write-wins, authorization cache, retention or purge.
+Current reads are sampled authority; atomic revocation across remote databases is not promised.
+The `acme.runtime` PostgreSQL fixture proves real CAS/state/revision/receipt/outbox and fault/race
+behavior through the public SPI; it is not a reactions/posts product or social e2e test.
+
+
+`MutationAuthorityFence::capture(OperationHandle, MutationRequest): string` runs outside the
+owner transaction before current action/admission/audience/containment guards and returns a
+nonempty bounded host generation for the complete request identity. Its
+`recheck(OperationHandle, MutationRequest, string $generation): AuthorizationDecision` runs on
+the exact owner connection after receipt/surface/target/module locks and immediately before
+persist. It proves that all guarded authority facts still permit this operation and holds their
+local fence until commit. Host revocation writers must share that fence and compatible lock
+order. Recheck performs local SQL only, never remote authorizers/resolvers; host facts without
+such proof cannot enable writes. Bind this SPI explicitly as scoped; no permissive default or
+implicit capture at boot. Missing => provider_unavailable; revoked => authorization_denied;
+stale/unproven => authorization_unknown. A failed claim rolls back before state/revision. The
+kernel then re-resolves current guards outside tx without automatically retrying persistence;
+explicit retry uses the original key/digest. This includes a UNIQUE waiter becoming the winner
+after holder rollback, and applies equally to target-less lifecycle commands.
+
+`MissingReceiptPolicy::decide(OperationHandle, CommandNamespace): AuthorizationDecision` is
+the explicit scoped host policy for absent module outcomes. Map supported command types to
+their actual OwnerMutation authorization actions consistently with execute; unknown mappings
+fail closed. This policy is used for both absence and another actor's key, after trusted
+context/surface/admission/audience checks. Missing provider => provider_unavailable; Unknown
+never becomes null. Existing owned receipts instead reauthorize the stored action through
+replay, irrespective of commandType permission or the current absence mapping. Known kernel
+lifecycle commands have an intrinsic exact command-to-action mapping. No new grant is inferred
+from a receipt or supplied by payload.

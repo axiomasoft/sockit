@@ -48,7 +48,7 @@ final class EnvelopeMutation implements OwnerMutation
     /** @var array<string, mixed> */
     public array $extraPayload = [];
 
-    public function __construct(private readonly Connection $connection) {}
+    public function __construct(private readonly Connection $connection, private readonly string $schema = 'panel_a') {}
 
     public function commandType(): string
     {
@@ -74,7 +74,7 @@ final class EnvelopeMutation implements OwnerMutation
     public function lock(OperationHandle $handle): MutationSnapshot
     {
         $this->locks++;
-        $row = $this->connection->table('panel_a.envelope_revisions')->where('target', $this->targetKey)->lockForUpdate()->first();
+        $row = $this->connection->table($this->schema.'.envelope_revisions')->where('target', $this->targetKey)->lockForUpdate()->first();
         if ($row === null || ! is_string($row->resource) || ! is_int($row->revision)) {
             throw new \RuntimeException('Missing fixture revision');
         }
@@ -86,8 +86,8 @@ final class EnvelopeMutation implements OwnerMutation
     public function persist(OperationHandle $handle, MutationSnapshot $snapshot): MutationEffect
     {
         $this->writes++;
-        $this->connection->table('panel_a.envelope_state')->where('target', $this->targetKey)->increment('effects', $this->value);
-        $affected = $this->connection->table('panel_a.envelope_revisions')->where('target', $this->targetKey)->where('revision', $snapshot->revision?->value)->update(['revision' => $snapshot->revision?->next()->value]);
+        $this->connection->table($this->schema.'.envelope_state')->where('target', $this->targetKey)->increment('effects', $this->value);
+        $affected = $this->connection->table($this->schema.'.envelope_revisions')->where('target', $this->targetKey)->where('revision', $snapshot->revision?->value)->update(['revision' => $snapshot->revision?->next()->value]);
         $resource = $snapshot->resource ?? throw new \RuntimeException('No fixture resource');
 
         return new MutationEffect(affectedRows: $this->bad === 'rows' ? 0 : $affected, resource: $resource,

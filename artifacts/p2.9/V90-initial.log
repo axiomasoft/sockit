@@ -1,0 +1,73 @@
+command=composer analyse -- --memory-limit=512M
+cwd=/home/vostrikov/projects/packages/sockit
+> phpstan analyse --no-progress '--memory-limit=512M'
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ ---------------------------------------------------------------------- 
+  Line   packages/core/src/Operations/Data/OperationJobReference.php           
+ ------ ---------------------------------------------------------------------- 
+  73     Method SocKit\Operations\Data\OperationJobReference::object() should  
+         return array<string, mixed> but returns array<mixed, mixed>.          
+         🪪  return.type                                                       
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Operations/OperationJobs.php                         
+ ------ ----------------------------------------------------------------------- 
+  36     Instanceof between Illuminate\Database\DatabaseManager and             
+         Illuminate\Database\DatabaseManager will always evaluate to true.      
+         🪪  instanceof.alwaysTrue                                              
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+ ------ ----------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------- 
+  Line   tests/Fixtures/Runtime/WorkerScenario.php                
+ ------ --------------------------------------------------------- 
+  103    Cannot call method fetchColumn() on PDOStatement|false.  
+         🪪  method.nonObject                                     
+  104    Cannot call method fetchColumn() on PDOStatement|false.  
+         🪪  method.nonObject                                     
+  105    Cannot call method fetchColumn() on PDOStatement|false.  
+         🪪  method.nonObject                                     
+  106    Cannot call method fetchColumn() on PDOStatement|false.  
+         🪪  method.nonObject                                     
+ ------ --------------------------------------------------------- 
+
+ ------ --------------------------------------------------- 
+  Line   tests/Integration/Runtime/WorkerIsolationTest.php  
+ ------ --------------------------------------------------- 
+  106    Cannot call method isSuccess() on mixed.           
+         🪪  method.nonObject                               
+  106    Cannot call method isSuccess() on mixed.           
+         🪪  method.nonObject                               
+ ------ --------------------------------------------------- 
+
+ ------ ---------------------------------------------------------- 
+  Line   tests/Integration/Runtime/WorkerRevocationTest.php        
+ ------ ---------------------------------------------------------- 
+  24     Match expression does not handle remaining value: string  
+         🪪  match.unhandled                                       
+ ------ ---------------------------------------------------------- 
+
+ [ERROR] Found 9 errors                                                         
+
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1

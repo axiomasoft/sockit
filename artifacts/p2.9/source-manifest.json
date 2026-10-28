@@ -1,0 +1,18 @@
+{
+  "base": "af35b2fb110b916c9edf7b4e3bbbac6913184568",
+  "files": {
+    "docs/architecture/spi.md": "c201a9e7f39713ca776c3d5f166f79559e35f43e729c91e6ffdd2afa07817b36",
+    "packages/core/src/Operations/Data/OperationJobReference.php": "ffcda76c0587bca0e5646abc1d8822db39ad44328810333a6a09556b0cc800e2",
+    "packages/core/src/Operations/Internal/Envelope/WorkerActor.php": "1598cb2c8f06e6db5eca3211679feab56c50d1de55ab76132026ab0cf8e13e9b",
+    "packages/core/src/Operations/Internal/Envelope/WorkerRuntime.php": "9818eeeb53a3d3fce6e318b0d000f92838339abb75e09b88e3c3416b43da4c94",
+    "packages/core/src/Operations/OperationJobs.php": "fd0c19c7127489239a092157b72652fb2ea0a0e5e38c72f5db2869d41baaf571",
+    "tests/Fixtures/Runtime/EnvelopeAuthority.php": "f786553b8a6b985f13faf1c6ff9deb031e7236747e9558f56714035da5584072",
+    "tests/Fixtures/Runtime/EnvelopeAuthorityFence.php": "5a373f082be4873c01cfcf49725f51eb62773f7fc77b230f4c82be59e3e948fc",
+    "tests/Fixtures/Runtime/EnvelopeMutation.php": "5552e2e2e172807e43aad9cdd5f2cff3037aa06017c4aee2d25928fb3d009684",
+    "tests/Fixtures/Runtime/EnvelopeTarget.php": "21abe44d0abc749948d3d55cbbebdb1b6fdf4135c38cee4a6016d2fd0d8bb417",
+    "tests/Fixtures/Runtime/WorkerActorResolver.php": "716213ffcf166d89c9656c6897e7f4ef6b6fb2ed4ab5b797658aa86c90a09e07",
+    "tests/Fixtures/Runtime/WorkerScenario.php": "c6cb9d5f6754a6cc3ed14a6b4759358879c11dd9cce9af68718b0ffa644b9c6d",
+    "tests/Integration/Runtime/WorkerIsolationTest.php": "6d1bb287301c7157c938ac3377028c46e86ae8ed5edf4ad759ceed500a938af8",
+    "tests/Integration/Runtime/WorkerRevocationTest.php": "ef857b47c669300ea6e1f0fdd14e2c08ab2c6b82ae0b7db3918be30b8ab07f5a"
+  }
+}

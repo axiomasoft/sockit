@@ -24,7 +24,7 @@ final class EnvelopeAuthorityFence implements MutationAuthorityFence
 
     public bool $unproven = false;
 
-    public function __construct(private readonly Connection $connection) {}
+    public function __construct(private readonly Connection $connection, private readonly string $schema = 'panel_a') {}
 
     public function capture(OperationHandle $handle, MutationRequest $request): string
     {
@@ -32,7 +32,7 @@ final class EnvelopeAuthorityFence implements MutationAuthorityFence
         if ($this->connection->transactionLevel() !== 0) {
             throw new \LogicException('Authority capture under owner lock');
         }
-        $generation = $this->connection->table('panel_a.envelope_authority')->value('generation');
+        $generation = $this->connection->table($this->schema.'.envelope_authority')->value('generation');
         if (! is_int($generation)) {
             throw new \RuntimeException('Authority generation missing');
         }
@@ -46,7 +46,7 @@ final class EnvelopeAuthorityFence implements MutationAuthorityFence
         if ($this->unproven || $this->connection->transactionLevel() !== 1) {
             return AuthorizationDecision::unknown('fixture.authority_unproven');
         }
-        $row = $this->connection->table('panel_a.envelope_authority')->lockForUpdate()->first();
+        $row = $this->connection->table($this->schema.'.envelope_authority')->lockForUpdate()->first();
         if ($row === null || ! is_int($row->generation)) {
             return AuthorizationDecision::unknown('fixture.authority_missing');
         }

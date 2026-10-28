@@ -234,3 +234,43 @@ never becomes null. Existing owned receipts instead reauthorize the stored actio
 replay, irrespective of commandType permission or the current absence mapping. Known kernel
 lifecycle commands have an intrinsic exact command-to-action mapping. No new grant is inferred
 from a receipt or supplied by payload.
+
+## Worker operation rehydration — P2.9
+
+`OperationJobReference` is trusted scalar queue metadata. Wire v1.0 contains `surface`
+(with panel/host/incarnation), `target` (host/incarnation), `actor`, `source_generation`,
+original `namespace` (installation/panel/integration/operation type), `key`, `digest` and
+`expected_revision`. It contains no actor facts, permissions, ORM, registry or operation closure.
+`toWire()` / `fromWire()` preserve these values; unknown top-level fields and unsupported
+versions fail closed. Queue authentication/metadata integrity belongs to the host.
+
+The host first activates its trusted isolation and connection resolver, then calls
+`OperationJobs::execute(job: $ref, factory: fn (OperationHandle $current): OwnerMutation => ...)`.
+The local factory constructs the original owner operation from trusted application data;
+it must be side-effect-free and must not choose isolation from the job. Namespace, command type,
+explicit target and canonical digest must still match the original command. Retry retains the
+original key/digest/CAS revision. There is no automatic retry or queue/Redis dependency.
+
+Installation is compared with `TenantResolver::current()`, source epoch with frozen
+`SocKitConfig::events`. `ActorContexts::forWorker()` re-resolves current actor facts for each
+consume and each protected envelope entry. Deleted/missing/revoked principals never become
+anonymous/system. Target/admission/privacy/containment and receipt replay authorization use
+the existing P2.7 envelope, outside owner locks. A changed target incarnation cannot revive an
+old reference. A freshly sampled target generation is permitted on a new mutation if all current
+guards allow it; replay cannot disclose a receipt bound to a previous target generation.
+
+The private runtime copies container binding maps and replaces only its own actor/handle/storage/
+relay instances. It neither installs a current actor in the host container nor resets host scoped
+instances. Its immutable actor adapter re-resolves the explicit job principal, preserving caller
+context through nested success/throw and Fiber suspension. All per-call state expires with the
+call; no global cleanup or container flush runs on success/failure. Host-owned adapters remain
+responsible for explicit handle routing and their own isolation; copying container maps does not
+make a mutable adapter or one PDO safe across Fibers. Interleaved transactions require independent
+host connection managers/PDOs. Any already-open transaction in the current manager is rejected
+before actor IO/factory execution, leaving the caller transaction intact.
+
+PostgreSQL acceptance uses `acme.runtime` test-only schema, real commits/rollback, receipt and
+outbox assertions. It covers same-process A→B→A, exceptions, reentrant calls on one container,
+independent concurrent Fiber transactions and stale worker metadata/permissions. This closes
+the P2 worker portion of PANEL-06; generated model relations/hydration/queue restoration remain P3,
+and consumer installation qualification remains P6. These fixtures are not social e2e.

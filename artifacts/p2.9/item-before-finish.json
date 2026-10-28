@@ -1,0 +1,202 @@
+{
+  "ok": true,
+  "data": {
+    "ref": "P2.9",
+    "kind": "item",
+    "doc": {
+      "$schema": "urn:swissknifeman:task:plan:item:v1",
+      "id": "P2.9",
+      "title": "Worker rehydration и A→B→A isolation после exceptions",
+      "status": "in_progress",
+      "summary": "Долгоживущий worker восстанавливает scalar refs в текущем host isolation, заново разрешает actor/target/admission и не переносит scoped context между panels/jobs. Exceptions и nested handles сохраняют caller context.",
+      "why": "PANEL-06/T-34: scoped container не изолирует две панели/Fiber сам; serialized actor snapshot и deleted actor fallback опасны.",
+      "scope": {
+        "include": [
+          "Scalar job/ref codec и rehydration entry через ActorContexts::forWorker + explicit operation factory",
+          "Current source generation/panel/incarnation validation; finally cleanup только принадлежащего context",
+          "PG sequential/interleaved jobs, exception и same process fresh actor resolution"
+        ],
+        "exclude": [
+          "Обязательная queue/Redis dependency, общий singleton current actor",
+          "Generated model hydration/relations/queue restore P3",
+          "Edufy real install/изменения соседних repos P6"
+        ]
+      },
+      "depends_on": [
+        "P2.7"
+      ],
+      "related": [],
+      "decisions": [
+        "D4",
+        "D6",
+        "D14",
+        "D15",
+        "D16",
+        "D17"
+      ],
+      "reads": [
+        {
+          "ref": "knowledge/execution-policy#routing",
+          "why": "Exact Codex pins и классификация риска D17",
+          "required": true
+        },
+        {
+          "ref": "knowledge/execution-policy#review",
+          "why": "Только выбранный anchor; обязательные checks у всех",
+          "required": true
+        },
+        {
+          "ref": "knowledge/execution-policy#autonomy",
+          "why": "Native API; не выдавать skipped/fake за pass",
+          "required": true
+        },
+        {
+          "ref": "knowledge/panel-design#compile",
+          "why": "Jobs scalar refs, no runtime global config",
+          "required": true
+        },
+        {
+          "ref": "knowledge/ecosystem-practices#workers",
+          "why": "A→B→A, deleted actor deny, scoped != Fiber",
+          "required": true
+        },
+        {
+          "ref": "knowledge/kernel-contracts#actors",
+          "why": "forWorker trusted reResolve",
+          "required": true
+        },
+        {
+          "ref": "knowledge/panel-design#acceptance",
+          "why": "PANEL-06 runtime часть; P3 model portion pending",
+          "required": true
+        },
+        {
+          "path": "packages/core/src/Actors/ActorContexts.php",
+          "why": "Текущий worker API",
+          "required": true
+        },
+        {
+          "path": "packages/core/src/Testing/FakeActorContextResolver.php",
+          "why": "Fake missing actor throws, не fallback",
+          "required": true
+        }
+      ],
+      "task_files": [
+        {
+          "path": "packages/core/src/Operations/Data/OperationJobReference.php",
+          "change": "create"
+        },
+        {
+          "path": "packages/core/src/Operations/OperationJobs.php",
+          "change": "create"
+        },
+        {
+          "path": "packages/core/src/Operations/Internal/Envelope/**",
+          "change": "any"
+        },
+        {
+          "path": "tests/Integration/Runtime/WorkerIsolationTest.php",
+          "change": "create"
+        },
+        {
+          "path": "tests/Integration/Runtime/WorkerRevocationTest.php",
+          "change": "create"
+        },
+        {
+          "path": "tests/Fixtures/Runtime/**",
+          "change": "any"
+        },
+        {
+          "path": "docs/architecture/spi.md",
+          "change": "any"
+        },
+        {
+          "path": "artifacts/p2.9/**",
+          "change": "any",
+          "note": "Реальные check logs/evidence и handoff только при исполнении"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "p29-report",
+          "path": "artifacts/p2.9/REPORT.md",
+          "role": "output"
+        }
+      ],
+      "rules": [
+        "Работа только своего item. Production DDL/generators P3, social reactions/posts P4, comments/external adapters/UI вне P2. Test-only schema и acme.runtime fixture не социальный продукт.",
+        "Соблюдать принятую P1: strict_types, named arguments для >=2 аргументов, Api/Spi, без Internal/framework persistence типов в public domain signatures. Не ослаблять arch-гейты; runtime SQL только на connection/table map immutable панели.",
+        "Не менять global database.default, runtime config, static currentPanel; actor/installation только ActorContexts и текущая host isolation. Unknown/error/revoked deny; anonymous/system fallback запрещён.",
+        "Каждый PG check проходит общий fail-closed bootstrap P2.1: отдельный owned PostgreSQL >=16, реальные PDO backend PIDs/DB identity, *_test и run marker, без ambient dev/prod .env. Missing prerequisites/skip/timeout/failed assertion => не pass и item не done.",
+        "Сохранять actual command/cwd/exit/stdout/stderr/environment identity без секретов и проверяемые SQL assertions в artifacts своего item. Текст expect — требование, не результат. Не создавать result.checks/pass до реального запуска.",
+        "Routes — назначение будущему исполнителю, не доказательство actual model. Native start/finish только при реальном исполнении под actual executor session; подготовка плана не является исполнением. Не повторять принятые P1 reviews без изменённого инварианта.",
+        "При изменении принятых P2.7 tx/privacy инвариантов сохранить UNIQUE-wait/revoke rollback, action при lookup, общий host fence для revoke writers, atomic receipt/outbox и повторную авторизацию replay; повторить адресные проверки изменённого риска."
+      ],
+      "guidance": "JobReference wire содержит version, panel+surface+target refs/incarnations, actor ref, installation ref, source generation, original namespace/key/digest и operation type; не ActorContext age/permissions snapshot, registry objects, models/closures. Installation из job — ожидаемая identity, не команда переключить глобальную БД: host сначала активирует и подтверждает свой isolation, затем core сравнивает с trusted TenantResolver.current(). ActorContexts::forWorker reResolve на каждый job; missing/revoked actor deny, не anonymous/system. Resolve current target/privacy/admission/containment вне tx, source generation mismatch fail closed. Namespace пересобрать/сверить trusted installation+panel, retry original key.\nA→B→A одним process, одинаковые host IDs, разные actors и connection maps; после exception в B A снова получает собственные refs/current facts и ровно свои rows. Nested handle в B не изменяет A; nested owner transactions rejected по P2.7 без global reset чужого контекста. Если private scoped bridge необходим, finally восстанавливает previous frame при success/throw, immutable singleton остаётся stateless. Interleaved Fiber test с ручными barriers (без DB sharing одной PDO tx) показывает отсутствие global active panel; отдельные owner transactions на independent connections. Не обещать multi-Fiber safety одного mutable PDO. Revoked permission/deleted actor/changed isolation/target incarnation между serialization и consume запрещает эффект и receipt replay output. PG committed writes/rollback/outbox проверяются не только counters fake resolver. Generated Eloquent queue restoration будет доказана P3, не помечать PANEL-06 полностью закрытым.",
+      "validation": [
+        {
+          "id": "V1",
+          "cmd": "python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/WorkerIsolationTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+          "expect": "same process A→B→A и B exception/nested/interleaved handles: no actor/panel/config/connection leak, owner rows correct",
+          "kind": "acceptance"
+        },
+        {
+          "id": "V2",
+          "cmd": "python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/WorkerRevocationTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+          "expect": "serialization→revoke/delete/installation/generation/incarnation change: no effect/no stale receipt output/no system fallback",
+          "kind": "acceptance"
+        },
+        {
+          "id": "V3",
+          "cmd": "composer test -- tests/Unit/Actors tests/Feature/Configuration tests/Arch --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+          "expect": "P1 actor/config guards сохранены",
+          "kind": "impact"
+        },
+        {
+          "id": "V90",
+          "cmd": "composer analyse -- --memory-limit=512M",
+          "expect": "exit 0, No errors; нет новых suppressions/baseline",
+          "kind": "acceptance"
+        },
+        {
+          "id": "V91",
+          "cmd": "composer lint",
+          "expect": "exit 0; changed PHP проходит Pint",
+          "kind": "acceptance"
+        }
+      ],
+      "deliverables": [
+        "Scalar worker rehydration API и current guard checks",
+        "PG long-lived worker isolation/revocation evidence"
+      ],
+      "route": {
+        "class": "frontier",
+        "effort": "high",
+        "provider": "codex",
+        "model": "gpt-6.1-sol"
+      },
+      "review": {
+        "mode": "none",
+        "reason": "Обязательные адресные checks; независимое tx/privacy review сосредоточено в P2.7, без blanket review."
+      },
+      "authority": {
+        "kind": "routine"
+      },
+      "rag": {
+        "need": "none",
+        "status": "not_needed"
+      },
+      "result": {
+        "started_at": "2026-10-28T19:12:06Z",
+        "executor": {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "session": "01a183ec-e1a6-7ba1-a3a5-b485dfb55f0b"
+        }
+      },
+      "updated_at": "2026-10-28T19:12:06Z"
+    },
+    "revision": "sha256:a545b46a81c06daa2086defeb7c5018084bdcccf9e68e737262059b2a6c6c23f"
+  }
+}

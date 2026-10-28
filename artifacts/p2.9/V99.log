@@ -1,0 +1,10 @@
+command=python3 artifacts/p2.9/verify-evidence.py
+cwd=/home/vostrikov/projects/packages/sockit
+V1 native schema/exit/log/PG identity OK
+V2 native schema/exit/log/PG identity OK
+V3 native schema/exit/log/PG identity OK
+V4 native schema/exit/log/PG identity OK
+V90 native schema/exit/log/PG identity OK
+V91 native schema/exit/log/PG identity OK
+source manifest: 13 paths unchanged
+scoped commit preview and 411 outside file digests OK

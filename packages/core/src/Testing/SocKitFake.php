@@ -16,6 +16,7 @@ use SocKit\Audience\Contracts\ContourResolver;
 use SocKit\Audience\Contracts\GroupMembershipResolver;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Support\Data\InstallationRef;
+use SocKit\Surfaces\Contracts\TargetResolver;
 
 /** Explicit testing installation. No production resolver defaults are registered. */
 #[Api(since: '1.0')]
@@ -35,6 +36,8 @@ final readonly class SocKitFake
 
     public FakeSurfaceAudiencePolicy $surfaces;
 
+    public FakeTargetResolver $targets;
+
     private function __construct(InstallationRef $installation)
     {
         $this->tenants = new FakeTenantResolver($installation);
@@ -44,11 +47,13 @@ final readonly class SocKitFake
         $this->authorizer = new FakeActionAuthorizer;
         $this->audience = new FakeAudienceResolver;
         $this->surfaces = new FakeSurfaceAudiencePolicy;
+        $this->targets = new FakeTargetResolver;
     }
 
     public static function install(Application $app, ?InstallationRef $installation = null): self
     {
         $fake = new self($installation ?? new InstallationRef('test'));
+        $app->instance(abstract: TargetResolver::class, instance: $fake->targets);
         $app->instance(abstract: TenantResolver::class, instance: $fake->tenants);
         $app->instance(abstract: ActorContextResolver::class, instance: $fake->actors);
         $app->instance(abstract: ContourResolver::class, instance: $fake->contours);

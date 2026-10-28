@@ -1,0 +1,16 @@
+{
+  "fixture": "targets/numeric",
+  "contract": "targets",
+  "version": "1.0",
+  "description": "P2.3 target wire contract; test fixture, not social e2e",
+  "input": {
+    "kind": "ref",
+    "wire": {
+      "host": "article:9223372036854775808",
+      "incarnation": 1
+    }
+  },
+  "expect": {
+    "valid": true
+  }
+}

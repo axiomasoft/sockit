@@ -9,6 +9,7 @@ use Illuminate\Database\ConnectionResolverInterface;
 use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Exceptions\ActorContextMismatchException;
 use SocKit\Attributes\Api;
+use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\Internal\Storage\OwnerStorage;
@@ -18,16 +19,31 @@ use SocKit\Panels\PanelStorage;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Data\SurfaceRef;
+use SocKit\Surfaces\Data\TargetRef;
+use SocKit\Surfaces\Data\TargetResolution;
+use SocKit\Surfaces\Surfaces;
 
 #[Api(since: '1.0')]
 final readonly class OperationHandles
 {
-    public function __construct(private ActorContexts $actors, private PanelDefinitions $panels, private SurfaceDefinitions $surfaces) {}
+    public function __construct(private ActorContexts $actors, private PanelDefinitions $panels, private SurfaceDefinitions $surfaces, private Application $app) {}
 
     public static function configure(Application $app): void
     {
         $app->scoped(self::class);
         $app->scoped(abstract: OwnerStorage::class, concrete: static fn (Application $app): OwnerStorage => new OwnerStorage(connections: $app->make(ConnectionResolverInterface::class), handles: $app->make(self::class)));
+    }
+
+    /** Sample current target visibility outside transactions on every protected entry/replay. */
+    public function resolveTarget(OperationHandle $handle, TargetRef $target): TargetResolution
+    {
+        return Surfaces::resolveTarget(app: $this->app, handle: $handle, target: $target);
+    }
+
+    /** Local target fence only; full operation lock ordering and authorization belong to the envelope. */
+    public function recheckTarget(OperationHandle $handle, TargetResolution $resolved): AuthorizationDecision
+    {
+        return Surfaces::recheckTarget(app: $this->app, handle: $handle, resolved: $resolved);
     }
 
     public function forSurface(SurfaceRef $surface): OperationHandle

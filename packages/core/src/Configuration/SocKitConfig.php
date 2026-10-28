@@ -25,6 +25,7 @@ use SocKit\Configuration\Data\SurfacesConfig;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Modules\ModuleManifest;
 use SocKit\Panels\PanelProvider;
+use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Surfaces\SurfaceProvider;
 
 #[Api(since: '1.0')]
@@ -109,7 +110,7 @@ final readonly class SocKitConfig
     {
         return ['tenant' => TenantResolver::class, 'actor' => ActorContextResolver::class, 'contour' => ContourResolver::class,
             'audience' => AudienceResolver::class, 'authorizer' => ActionAuthorizer::class, 'groups' => GroupMembershipResolver::class,
-            'surface_policy' => SurfaceAudiencePolicy::class, 'targets' => 'SocKit\Surfaces\Contracts\TargetResolver'];
+            'surface_policy' => SurfaceAudiencePolicy::class, 'targets' => TargetResolver::class];
     }
 
     private static function scope(mixed $value, string $key): Scope

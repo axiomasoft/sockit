@@ -26,9 +26,6 @@ class SocKitServiceProvider extends ServiceProvider
         $this->app->make('config')->set(key: 'sockit', value: SocKitConfig::normalize($this->app->make('config')));
         $this->app->singleton(abstract: SocKitConfig::class, concrete: fn (Application $app): SocKitConfig => SocKitConfig::fromRepository($app->make('config')));
         foreach (SocKitConfig::resolverContracts() as $key => $contract) {
-            if ($key === 'targets') {
-                continue; // TargetResolver is introduced with its runtime consumer in P2.
-            }
             $this->app->scoped(abstract: $contract, concrete: static function (Application $app) use ($key, $contract): object {
                 $resolvers = $app->make(SocKitConfig::class)->resolvers;
                 $fqcn = $resolvers->for($key);

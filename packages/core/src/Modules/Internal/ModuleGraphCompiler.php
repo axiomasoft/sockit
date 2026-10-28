@@ -97,6 +97,7 @@ final class ModuleGraphCompiler
             $draft = new ModuleRegistrar($id);
             try {
                 $module->register($draft);
+                $draft->freeze();
                 $declaration = $draft->declarations();
                 foreach ($declaration['features'] as $feature) {
                     if (isset($features[$feature])) {
@@ -124,7 +125,12 @@ final class ModuleGraphCompiler
             } catch (InvalidModuleException $error) {
                 array_push($errors, ...$error->errors);
             } catch (InvalidConfigurationException $error) {
+                if (($error->detail()['rule'] ?? null) === 'MODULE_TARGET_DUPLICATE') {
+                    throw $error;
+                }
                 $errors[] = ['module' => $id, 'key' => (string) $error->detail()['key'], 'rule' => 'MODULE_SETTINGS_INVALID'];
+            } finally {
+                $draft->freeze();
             }
         }
         if ($errors !== []) {

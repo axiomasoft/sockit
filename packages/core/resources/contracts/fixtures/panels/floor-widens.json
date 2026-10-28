@@ -1,0 +1,47 @@
+{
+  "fixture": "floor-widens",
+  "contract": "panels",
+  "version": "1.0",
+  "input": {
+    "panels": [
+      {
+        "id": "host.articles",
+        "prefix": "articles_",
+        "modules": [
+          "demo.module"
+        ],
+        "settings": {
+          "demo.module": {
+            "limit": 30
+          }
+        }
+      },
+      {
+        "id": "host.products",
+        "prefix": "products_",
+        "hosts": [
+          "article",
+          "product"
+        ],
+        "modules": [
+          "other.module"
+        ],
+        "floor": {
+          "allowed_scopes": [
+            "direct",
+            "public"
+          ],
+          "default_scope": "direct",
+          "max_scope": "public",
+          "minor_default_scope": "direct",
+          "minor_max_scope": "direct",
+          "contour_levels": []
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rule": "PANEL_FLOOR_WIDENS"
+  }
+}

@@ -13,6 +13,7 @@ use SocKit\Audience\AudienceGate;
 use SocKit\Configuration\Exceptions\ProviderUnavailableException;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Modules\Modules;
+use SocKit\Panels\PanelDefinitions;
 
 #[Api(since: '1.0')]
 class SocKitServiceProvider extends ServiceProvider
@@ -43,7 +44,14 @@ class SocKitServiceProvider extends ServiceProvider
         $this->app->scoped(ActorContexts::class);
         $this->app->scoped(AudienceEvaluator::class);
         $this->app->scoped(AudienceGate::class);
+        PanelDefinitions::configure($this->app);
         Modules::configure($this->app);
+        $app = $this->app;
+        $app->booting(static function () use ($app): void {
+            $draft = Modules::compile($app);
+            PanelDefinitions::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft);
+            Modules::publish(app: $app, draft: $draft);
+        });
     }
 
     public function boot(): void

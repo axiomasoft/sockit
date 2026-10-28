@@ -22,9 +22,17 @@ final readonly class Modules
     {
         self::compiler($app);
         $app->singleton(abstract: self::class, concrete: fn (): self => new self($app->make(ModuleGraphCompiler::class)->published()));
-        $app->booting(static function () use ($app): void {
-            $app->make(ModuleGraphCompiler::class)->compile(app: $app, config: $app->make(SocKitConfig::class));
-        });
+    }
+
+    /** Compile a private candidate. Registry resolution still fails until publish. */
+    public static function compile(Application $app): self
+    {
+        return new self(self::compiler($app)->compile(app: $app, config: $app->make(SocKitConfig::class)));
+    }
+
+    public static function publish(Application $app, self $draft): void
+    {
+        self::compiler($app)->publish($draft->graph);
     }
 
     private static function compiler(Application $app): ModuleGraphCompiler

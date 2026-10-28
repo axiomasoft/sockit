@@ -1,0 +1,126 @@
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Configuration/SocKitConfig.php                       
+ ------ ----------------------------------------------------------------------- 
+  77     Parameter #1 $providers of class                                       
+         SocKit\Configuration\Data\PanelsConfig constructor expects             
+         list<class-string<SocKit\Panels\PanelProvider>>, list<class-string> g  
+         iven.                                                                  
+         🪪  argument.type                                                      
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Panels/PanelDefinition.php                           
+ ------ ----------------------------------------------------------------------- 
+  32     Call to function array_is_list() with list<string> will always evalua  
+         te to true.                                                            
+         🪪  function.alreadyNarrowedType                                       
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  38     Call to function array_is_list() with list<string> will always evalua  
+         te to true.                                                            
+         🪪  function.alreadyNarrowedType                                       
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  46     Call to function is_string() with string will always evaluate to       
+         true.                                                                  
+         🪪  function.alreadyNarrowedType                                       
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Panels/PanelStorage.php                              
+ ------ ----------------------------------------------------------------------- 
+  33     Call to function is_string() with string will always evaluate to       
+         true.                                                                  
+         🪪  function.alreadyNarrowedType                                       
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  40     Call to function is_string() with class-string will always evaluate    
+         to true.                                                               
+         🪪  function.alreadyNarrowedType                                       
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------- 
+  Line   tests/Feature/Panels/ConfigCacheTest.php         
+ ------ ------------------------------------------------- 
+  45     Cannot access offset 'demo.module' on mixed.     
+         🪪  offsetAccess.nonOffsetAccessible             
+  45     Cannot access offset 'host.articles' on mixed.   
+         🪪  offsetAccess.nonOffsetAccessible             
+  45     Cannot access offset 'limit' on mixed.           
+         🪪  offsetAccess.nonOffsetAccessible             
+  45     Cannot access offset 'moduleSettings' on mixed.  
+         🪪  offsetAccess.nonOffsetAccessible             
+  46     Cannot access offset 'host.products' on mixed.   
+         🪪  offsetAccess.nonOffsetAccessible             
+  46     Cannot access offset 'receipts' on mixed.        
+         🪪  offsetAccess.nonOffsetAccessible             
+  46     Cannot access offset 'storage' on mixed.         
+         🪪  offsetAccess.nonOffsetAccessible             
+  46     Cannot access offset 'tables' on mixed.          
+         🪪  offsetAccess.nonOffsetAccessible             
+ ------ ------------------------------------------------- 
+
+ ------ ------------------------------------------------- 
+  Line   tests/Feature/Panels/LifecycleTest.php           
+ ------ ------------------------------------------------- 
+  100    Assign to protected(set) property                
+         SocKit\Panels\PanelDefinition::$moduleSettings.  
+         🪪  assign.propertyProtectedSet                  
+  101    Assign to protected(set) property                
+         SocKit\Panels\PanelStorage::$tables.             
+         🪪  assign.propertyProtectedSet                  
+ ------ ------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   tests/Fixtures/Panels/ArticlePanel.php                                
+ ------ ---------------------------------------------------------------------- 
+  15     Parameter #1 $models of method SocKit\Panels\Panel::models() expects  
+         array<string, class-string>, array<string, string> given.             
+         🪪  argument.type                                                     
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------- 
+  Line   tests/Fixtures/Panels/ConfiguredPanel.php  
+ ------ ------------------------------------------- 
+  44     Cannot cast mixed to string.               
+         🪪  cast.string                            
+ ------ ------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Unit/Panels/PanelTest.php                                        
+ ------ ----------------------------------------------------------------------- 
+  14     Cannot access offset 'value' on array<mixed>|bool|float|int|string|nu  
+         ll.                                                                    
+         🪪  offsetAccess.nonOffsetAccessible                                   
+ ------ ----------------------------------------------------------------------- 
+
+ [ERROR] Found 19 errors                                                        
+

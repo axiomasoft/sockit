@@ -23,6 +23,8 @@ final class ModuleGraphCompiler
 
     private ?CompiledModuleGraph $graph = null;
 
+    private ?CompiledModuleGraph $draft = null;
+
     public function add(string $module): void
     {
         if (! $this->collecting) {
@@ -40,7 +42,7 @@ final class ModuleGraphCompiler
         return $this->graph;
     }
 
-    public function compile(Application $app, SocKitConfig $config): void
+    public function compile(Application $app, SocKitConfig $config): CompiledModuleGraph
     {
         if (! $this->collecting) {
             throw new InvalidModuleException([['module' => '', 'key' => 'modules', 'rule' => 'MODULE_REGISTRATION_CLOSED']]);
@@ -123,8 +125,16 @@ final class ModuleGraphCompiler
         if ($errors !== []) {
             throw new InvalidModuleException($errors);
         }
-        // P1.13/P1.10 extend this draft validation before the single publication point.
-        $this->graph = new CompiledModuleGraph(manifests: $active, declarations: $declarations, settings: $settings);
+
+        return $this->draft = new CompiledModuleGraph(manifests: $active, declarations: $declarations, settings: $settings);
+    }
+
+    public function publish(CompiledModuleGraph $draft): void
+    {
+        if ($this->collecting || $this->draft !== $draft || $this->graph !== null) {
+            throw new InvalidModuleException([['module' => '', 'key' => 'modules', 'rule' => 'MODULE_REGISTRATION_CLOSED']]);
+        }
+        $this->graph = $draft;
     }
 
     /** @return list<string> */

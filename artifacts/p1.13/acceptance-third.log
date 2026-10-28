@@ -1,0 +1,108 @@
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Panels\PanelTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit materializes a detached immutable storage snapshot and closes its builder[39m
+  [32;1m✓[39;22m[90m [39m[90mit strips nested PHP references from settings, table maps and privacy floors[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates declared identifiers at the length boundary and rejects sanitizing or truncation[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown model keys and defers class loading and model compatibility to P3[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects callback and object settings with panel/provider/key diagnostics[39m
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Feature\Panels\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.20s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.16s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Panels\LifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-01/04 compiles all 24 provider orders into identical indep[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-02 never falls back for an unknown panel[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-04 rejects an unused invalid graph without publishing modules or panels[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes retained builders and makes all nested snapshots immutable[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Contracts\FixtureSuiteTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit discovers and checks every wire fixture[39m[90m                          [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\AttributesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exposes the exact attribute contract and string backed SPI kinds[39m
+  [32;1m✓[39;22m[90m [39m[90mit makes the marker types final readonly class attributes with an API marker with dataset "API"[39m
+  [32;1m✓[39;22m[90m [39m[90mit makes the marker types final readonly class attributes with an API marker with dataset "SPI"[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\ComposerRequireTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 accepts the real core require[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 rejects each forbidden vendor[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 checks require rather than dev dependencies[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\LayeringTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A2 and A3 accept the real core tree[39m[90m                              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A2 detects every forbidden family, alias, group use and direct reference[39m
+  [32;1m✓[39;22m[90m [39m[90mit A3 rejects foreign Internal imports and fully qualified references[39m
+  [32;1m✓[39;22m[90m [39m[90mit A2 and A3 accept same module Internal, trait use and closure captures[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\ModuleListTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 accepts the real core tree[39m[90m                                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A4 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 explicitly allows Panels before runtime PanelId exists[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\NamingTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A5 accepts the real core tree[39m[90m                                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A5 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A5 rejects all forbidden suffixes and both missing Data modifiers[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\NoEditionFlagsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A10 accepts the real core tree[39m[90m                                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A10 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A10 detects string keys, methods and properties but ignores comments[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\OwnershipManifestTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 accepts real namespace ownership[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A8 rejects overlapping prefixes even without a matching source type[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 rejects an uncovered namespace[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 accepts separate non-overlapping owners[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\PublicSignatureTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 accepts the real core tree[39m[90m                                    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A9 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 reflects aliases, nullable, union, intersection, DNF, SPI, traits and hidden base types[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 accepts safe signatures, private and protected implementation details and empty input[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 rejects inherited Internal self and parent in parameters and return types[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 rejects self parent and static hiding Eloquent or HTTP base types[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 allows safe relative types traits and late binding to the public inheritor[39m
+  [32;1m✓[39;22m[90m [39m[90mit F3 defers parent on a public trait and accepts its safe consuming class[39m
+  [32;1m✓[39;22m[90m [39m[90mit F3 still rejects composed Internal parents and explicit forbidden types on the trait[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\PublicSurfaceMarkersTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 accepts the real core tree[39m[90m                                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 resolves aliases, groups and fully qualified attributes on all named type kinds[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('internal-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('double-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('foreign-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 does not carry member attributes onto the next class[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\SourceScannerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit F2 preserves namespace and imports after literal braces in interpolated strings[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\TenancyNeutralTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A6 accepts the real core tree[39m[90m                                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A6 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A6 detects keys and variables but ignores comments and prose[39m
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Panels\ConfigCacheTest[22m [90m>[39m it PANEL-03 runs real conf…   
+[39;1m  Expected: [39;22m[31m{"host.articles":{"hostTypes":["article"],"modules":["demo.module"],"moduleSettings":{"demo.module":{"limit":30}},"floor":{"allowedScopes":["direct"],"defaultScope":"direct","maxScope":"direct","minorDefaultScope":"direct","minorMaxScope":"direct","contourLevels":[]},"id":{"value":"host.articles"},"storage":{"tables":{"outbox":"articles_outbox","receipts":"articles_receipts","surface_instances":"articles_surface_instances","tombstones":"articles_tombstones"},"models":{"receipts":"SocKit\\Tests\\Fixtures\\Panels\\ReceiptModel"},"connection":"social","schema":null,"prefix":"articles_","ids":"uuid7"},"provider":"SocKit\\Tests\\Fixtures\\Panels\\ArticlePanel"},"host.products":{"hostTypes":["article","product"],"modules":["other.module"],"moduleSettings":{"other.module":[]},"floor":{"allowedScopes":["direct"],"defaultScope":"direct","maxScope":"direct","minorDefaultScope":"direct","minorMaxScope":"direct","contourLevels":[]},"id":{"value":"host.products"},"storage":{"tables":{"outbox":"products_outbox","receipts":"products_receipts","surface_instances":"products_surface_instances","tombstones":"products_tombstones"},"models":[],"connection":"social","schema":null,"prefix":"products_","ids":"uuid7"},"provider":"SocKit\\Tests\\Fixtures\\Panels\\ProductPanel"}}[39m[39;1m
+
+  To contain: [39;22m[32m"limit\":30[39m
+
+  at [32mtests/Feature/Panels/ConfigCacheTest.php[39m:[32m46[39m
+     42▕             ->and($snapshot['connections'])->toBe(0)
+     43▕             ->and($snapshot['panels'])->toHaveCount($enabled ? 2 : 0);
+     44▕         if ($enabled) {
+     45▕             $panels = \SocKit\Tests\Unit\Audience\Support\Scenario::object($snapshot['panels']);
+  ➜  46▕             expect(json_encode($panels, JSON_THROW_ON_ERROR))->toContain('"limit\":30', 'products_receipts');
+     47▕         }
+     48▕     } finally {
+     49▕         $files->deleteDirectory($root);
+     50▕     }
+
+  [33m1   [39m[39;1mtests/Feature/Panels/ConfigCacheTest.php[39;22m:[39;1m46[39;22m
+
+
+  [90mTests:[39m    [31;1m1 failed[39;22m[90m,[39m[39m [39m[32;1m54 passed[39;22m[90m (1496 assertions)[39m
+  [90mDuration:[39m [39m0.59s[39m
+

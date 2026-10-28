@@ -24,6 +24,7 @@ use SocKit\Configuration\Data\ResolversConfig;
 use SocKit\Configuration\Data\SurfacesConfig;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Modules\ModuleManifest;
+use SocKit\Panels\PanelProvider;
 
 #[Api(since: '1.0')]
 final readonly class SocKitConfig
@@ -37,7 +38,7 @@ final readonly class SocKitConfig
         $modules = self::map(value: $data['modules'], key: 'sockit.modules');
         $privacy = self::map(value: $data['privacy'], key: 'sockit.privacy');
         self::requireRule(valid: $ids['strategy'] === 'uuid7', key: 'sockit.ids.strategy', rule: 'IDS_STRATEGY');
-        $panels = self::providers(value: $data['panels'], key: 'sockit.panels', contract: 'SocKit\Panels\Contracts\PanelProvider');
+        $panels = self::providers(value: $data['panels'], key: 'sockit.panels', contract: PanelProvider::class);
         $surfaces = self::providers(value: $data['surfaces'], key: 'sockit.surfaces', contract: 'SocKit\Surfaces\Contracts\SurfaceProvider');
         $enabled = self::strings(value: $modules['enabled'], key: 'sockit.modules.enabled');
         self::requireRule(valid: count(array_unique($enabled)) === count($enabled), key: 'sockit.modules.enabled', rule: 'MODULE_IDS_UNIQUE');
@@ -123,7 +124,7 @@ final readonly class SocKitConfig
     /** @phpstan-assert-if-true class-string $value */
     public static function implementation(mixed $value, string $contract): bool
     {
-        return is_string($value) && class_exists($value) && is_subclass_of($value, $contract) && (new \ReflectionClass($value))->isInstantiable();
+        return is_string($value) && class_exists($value) && is_subclass_of($value, $contract) && new \ReflectionClass($value)->isInstantiable();
     }
 
     /** @param list<string>|null $allowed
@@ -157,7 +158,7 @@ final readonly class SocKitConfig
         $values = self::strings(value: $value, key: $key);
         $providers = [];
         foreach ($values as $provider) {
-            if (! self::implementation(value: $provider, contract: $contract)) {
+            if (! self::implementation(value: $provider, contract: $contract) || ! is_subclass_of($provider, $contract)) {
                 throw new InvalidConfigurationException(message: 'Invalid provider implementation', detail: ['key' => $key, 'rule' => 'PROVIDER_IMPLEMENTATION']);
             }
             $providers[] = $provider;

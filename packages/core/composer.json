@@ -1,0 +1,49 @@
+{
+    "name": "axiomasoft/sockit",
+    "description": "Embeddable social engine for Laravel",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "illuminate/support": "^13.0",
+        "illuminate/contracts": "^13.0",
+        "illuminate/container": "^13.0",
+        "illuminate/config": "^13.0",
+        "ramsey/uuid": "^4.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "SocKit\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SocKit\\SocKitServiceProvider"
+            ]
+        },
+        "sockit": {
+            "owners": {
+                "core": {
+                    "namespaces": [
+                        "SocKit\\"
+                    ],
+                    "paths": [
+                        "packages/core/src",
+                        "packages/core/config",
+                        "packages/core/resources"
+                    ],
+                    "tables": [],
+                    "config": [
+                        "sockit"
+                    ],
+                    "publish-tags": [
+                        "sockit-config"
+                    ],
+                    "commands": [],
+                    "module-ids": []
+                }
+            }
+        }
+    }
+}

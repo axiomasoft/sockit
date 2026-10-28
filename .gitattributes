@@ -1,0 +1,9 @@
+/tests export-ignore
+/docs export-ignore
+/plans export-ignore
+/audits export-ignore
+/phpunit.xml export-ignore
+/phpstan.neon export-ignore
+/pint.json export-ignore
+/rector.php export-ignore
+/testbench.yaml export-ignore

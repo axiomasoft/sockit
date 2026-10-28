@@ -1,0 +1,53 @@
+{
+    "name": "axiomasoft/sockit-monorepo",
+    "description": "SocKit development monorepo",
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/*",
+            "options": {
+                "symlink": true,
+                "versions": {
+                    "axiomasoft/sockit": "0.1.x-dev"
+                }
+            }
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "axiomasoft/sockit": "^0.1@dev"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^5.0",
+        "pestphp/pest-plugin-arch": "^5.0",
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.0",
+        "rector/rector": "^2.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SocKit\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "analyse": "phpstan analyse --no-progress",
+        "lint": "pint --test",
+        "refactor:check": "rector process --dry-run",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ]
+    }
+}

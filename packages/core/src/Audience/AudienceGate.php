@@ -92,10 +92,11 @@ final readonly class AudienceGate
                     $content = $batch[$subject->key] ?? null;
                     // P1 contract verification: an incoherent capability must never widen scalar access.
                     // No verdict cache or cross-panel grouping. Missing/malformed keys fail closed.
-                    if (! $content instanceof AudienceVerdict || $content != $this->resolver->decideRead(viewer: $viewer, subject: $subject)) {
+                    if (! $content instanceof AudienceVerdict) {
                         $result[$subject->key] = AudienceVerdict::deny('audience.unknown');
                     } else {
-                        $result[$subject->key] = $this->intersect(admission: $admissions[$subject->key], content: $content, subject: $subject);
+                        $scalar = $this->resolver->decideRead(viewer: $viewer, subject: $subject);
+                        $result[$subject->key] = $this->intersect(admission: $admissions[$subject->key], content: $this->reconcile(batch: $content, scalar: $scalar), subject: $subject);
                     }
                 } catch (\Throwable) {
                     $result[$subject->key] = AudienceVerdict::deny('audience.resolver_error');
@@ -161,10 +162,38 @@ final readonly class AudienceGate
         if (! $content->canRead()) {
             return $content;
         }
-        if ($subject->surfaceArchived || ! $admission->canWrite() || ! $content->canWrite()) {
-            return new AudienceVerdict(decision: VerdictDecision::AllowReadOnly, reason: ! $admission->canWrite() ? $admission->reason : $content->reason, policyVersion: $content->policyVersion, expiresAt: $content->expiresAt);
+        $readOnly = $subject->surfaceArchived || ! $admission->canWrite() || ! $content->canWrite();
+
+        return new AudienceVerdict(
+            decision: $readOnly ? VerdictDecision::AllowReadOnly : $content->decision,
+            reason: ! $admission->canWrite() ? $admission->reason : $content->reason,
+            policyVersion: $content->policyVersion,
+            expiresAt: $this->earliestExpiry(left: $admission->expiresAt, right: $content->expiresAt),
+        );
+    }
+
+    private function reconcile(AudienceVerdict $batch, AudienceVerdict $scalar): AudienceVerdict
+    {
+        if ($batch->decision !== $scalar->decision || $batch->reason !== $scalar->reason || $batch->policyVersion !== $scalar->policyVersion) {
+            return AudienceVerdict::deny('audience.unknown');
         }
 
-        return $content;
+        // TTL is metadata computed at each invocation, not part of the access decision.
+        // A missing deadline never discards the other resolver's finite deadline.
+        return new AudienceVerdict(
+            decision: $batch->decision,
+            reason: $batch->reason,
+            policyVersion: $batch->policyVersion,
+            expiresAt: $this->earliestExpiry(left: $batch->expiresAt, right: $scalar->expiresAt),
+        );
+    }
+
+    private function earliestExpiry(?\DateTimeImmutable $left, ?\DateTimeImmutable $right): ?\DateTimeImmutable
+    {
+        if ($left === null) {
+            return $right;
+        }
+
+        return $right === null || $left <= $right ? $left : $right;
     }
 }

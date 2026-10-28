@@ -1,0 +1,12 @@
+command: composer analyse -- --memory-limit=512M
+cwd: /home/vostrikov/projects/packages/sockit
+source_manifest_sha256: b44f2aa9a79882f3872ecae2d981efbad32af216fa90ec4ca4117ba5f489ddea
+exit: 0
+--- stdout ---
+
+ [OK] No errors                                                                 
+
+
+--- stderr ---
+> phpstan analyse --no-progress '--memory-limit=512M'
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.

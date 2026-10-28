@@ -1,0 +1,43 @@
+private container=3f4c2d063efa131acf8b6410065419606ca4bf6c793fbc83f00ae7adb784cdd5 owner=sockit_p2_4f1ce9667324c250_test decoy=sockit_p2_decoy_4f1ce9667324c250_test port=32932
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Schema\FrozenSnapshotTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit executes the old frozen file in fresh processes without current[39m[90m… [39m [90m0.63s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renders deterministic canonical source and rejects corrupted des[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renders deterministic canonical source and rejects corrupted des[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.17s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit allows credential rotation while preserving the frozen selector[39m[90m… [39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not adopt unmanaged tables or indexes and atomically leaves[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not adopt unmanaged tables or indexes and atomically leaves[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a middle DDL failure including earlier tables indexes[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a middle DDL failure including earlier tables indexes[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves later dependent tables and rolls back preceding revers[39m[90m…[39m [90m0.25s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\FrozenSnapshotTest[22m [90m>[39m it refuses redirect…   
+[39;1m  Exception [RuntimeException] not thrown.[39;22m
+
+  at [32mtests/Integration/Schema/FrozenSnapshotTest.php[39m:[32m98[39m
+     94▕         }
+     95▕         $problem = match ($change) {
+     96▕             'driver' => 'SNAPSHOT_DRIVER_UNSUPPORTED', 'routing' => 'SNAPSHOT_ENDPOINT_AMBIGUOUS', default => 'SNAPSHOT_CONNECTION_CHANGED',
+     97▕         };
+  ➜  98▕         expect(fn () => $fixture->migrations['a']->down())->toThrow(RuntimeException::class, $problem);
+     99▕         expect($fixture->catalog())->toBe($before);
+    100▕         $fixture->untouched();
+    101▕         fwrite(STDERR, 'P3.3 SQL assertions alias_change='.$change.' refused_before_write=true owner_and_decoy_preserved=true'.PHP_EOL);
+    102▕     } finally {
+
+  [33m1   [39m[39;1mtests/Integration/Schema/FrozenSnapshotTest.php[39;22m:[39;1m98[39;22m
+
+
+  [90mTests:[39m    [31;1m1 failed[39;22m[90m,[39m[39m [39m[32;1m18 passed[39;22m[90m (113 assertions)[39m
+  [90mDuration:[39m [39m3.91s[39m
+

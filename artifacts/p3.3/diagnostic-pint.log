@@ -1,0 +1,1 @@
+{"tool":"pint","result":"fixed","files":[{"path":"artifacts\/p3.3\/cleanup-diagnostic.php","fixers":["single_quote","binary_operator_spaces"]}]}

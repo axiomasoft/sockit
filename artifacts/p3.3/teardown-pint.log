@@ -1,0 +1,1 @@
+{"tool":"pint","result":"fixed","files":[{"path":"artifacts\/p3.3\/cleanup-count-diagnostic.php","fixers":["binary_operator_spaces"]}]}

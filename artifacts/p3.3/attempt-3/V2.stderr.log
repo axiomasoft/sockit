@@ -1,0 +1,104 @@
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/FrozenSnapshotTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=102
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=103
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=104
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=105
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=106
+fresh_snapshot_up=ok latest_helpers_unavailable=true prefix_changed=true search_path_changed=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=108
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=109
+fresh_snapshot_down=ok latest_helpers_unavailable=true prefix_changed=true search_path_changed=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=111
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=112
+P3.3 SQL assertions frozen_module_version=1 old_module_removed=true panel_config_removed=true frozen_schema=panel_a frozen_prefix=driver_a_ panel_b_host_decoy_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=114
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=115
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=116
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=117
+P3.3 SQL assertions integrity_encoding_refused_before_ddl=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=119
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=120
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=121
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=122
+P3.3 SQL assertions integrity_digest_refused_before_ddl=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=124
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=125
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=126
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=127
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=129
+P3.3 SQL assertions alias_change=database refused_before_write=true owner_and_decoy_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=130
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=131
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=132
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=133
+P3.3 SQL assertions alias_change=endpoint refused_before_write=true owner_and_decoy_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=135
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=136
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=137
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=138
+P3.3 SQL assertions alias_change=driver refused_before_write=true owner_and_decoy_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=140
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=141
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=142
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=143
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=146
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=147
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=148
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=149
+P3.3 SQL assertions alias_change=pdo refused_before_write=true owner_and_decoy_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=151
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=152
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=153
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=154
+P3.3 SQL assertions credential_rotation_accepted=true prefix_change_uses_frozen_tables=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=156
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=157
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=158
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=159
+P3.3 SQL assertions unmanaged_table_not_adopted=true partial_up_absent=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=161
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=162
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=163
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=164
+P3.3 SQL assertions unmanaged_index_not_adopted=true partial_up_absent=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=166
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=167
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=168
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=169
+P3.3 SQL assertions mid_up_failure_atomic=true outer_transaction=none owned_catalog_empty=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=171
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=172
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=173
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=174
+P3.3 SQL assertions mid_up_failure_atomic=true outer_transaction=savepoint_preserved owned_catalog_empty=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=176
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=177
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=178
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=179
+P3.3 SQL assertions rollback_change=column refused_before_drop=true all_tables_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=181
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=182
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=183
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=184
+P3.3 SQL assertions rollback_change=index refused_before_drop=true all_tables_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=186
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=187
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=188
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=189
+P3.3 SQL assertions rollback_change=receipt refused_before_drop=true all_tables_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=191
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=192
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=193
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=194
+P3.3 SQL assertions rollback_change=sequence refused_before_drop=true all_tables_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=196
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=197
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=198
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=199
+P3.3 SQL assertions rollback_change=replacement refused_before_drop=true all_tables_preserved=true
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=201
+PG identity database=sockit_p2_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=202
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=203
+PG identity database=sockit_p2_decoy_4f1ce9667324c250_test server_version_num=160014 marker=sockit-p21-4f1ce9667324c250 backend_pid=204
+P3.3 SQL assertions descendant_blocks_rollback=true reverse_failure_atomic=true later_tables_preserved=true panel_b_host_decoy_preserved=true
+Script pest handling the test event returned with error code 1

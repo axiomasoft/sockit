@@ -1,0 +1,311 @@
+private container=78a6c686ab2dcad6d9827f07660b7e3cf80eb6b167620f863d4b792d0c3746cc owner=sockit_p2_471d620bb8c1843f_test decoy=sockit_p2_decoy_471d620bb8c1843f_test port=32942
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Schema\CompilerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit compiles the complete versioned kernel descriptor without loadin[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit canonicalizes component/maps permutations and keeps ordered hist[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves valid custom maps and gives different panel/storage de[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit excludes enabled but not selected fragments and requires dependencies to be explicitly selected[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('missing', 'SCHEMA_DEPENDENCY_MISSING')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('version', 'SCHEMA_DEPENDENCY_MISSING')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('cycle', 'SCHEMA_DEPENDENCY_CYCLE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('owner', 'SCHEMA_OWNER_INVALID')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('reserved', 'SCHEMA_OWNER_DUPLICATE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('duplicate', 'SCHEMA_ENTITY_DUPLICATE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('steal', 'SCHEMA_ENTITY_DUPLICATE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown overrides at compilation even when storage shape is valid with ('tables')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown overrides at compilation even when storage shape is valid with ('models')[39m
+  [32;1m✓[39;22m[90m [39m[90mit accepts additive v2 and rejects changed, removed or regressed fr[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate steps, gaps and version regressions before publication[39m
+  [32;1m✓[39;22m[90m [39m[90mit detaches nested reference arrays and refuses mutation after freeze[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unresolved FK targets, foreign ownership and unknown index columns with ('foreign_owner')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unresolved FK targets, foreign ownership and unknown index columns with ('unknown_column')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unresolved FK targets, foreign ownership and unknown index columns with ('unknown_target')[39m
+  [32;1m✓[39;22m[90m [39m[90mit canonicalizes nested metadata maps while preserving ordered composite columns[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects a step appended to an already frozen version even if a newer version follows[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects table/model collisions and overflow after materializing component defaults[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid data-only column defaults and model key specifications[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes bounded kernel check predicates and rejects unknown check columns[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Schema\StorageIdentityTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit collapses declared same-server connection aliases before any dat[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps proven distinct servers databases and schemas independent[39m[90m  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit normalizes spelling without guessing DNS or socket equivalence[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "absent"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "list"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "multi"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "dsn"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "socket parent"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "socket abstract"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "port zero"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "port overflow"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "port injection"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "whitespace"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "empty port"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "empty label"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "unsafe"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "proxy unknown"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "socket unknown"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema unresolved"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema search path"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema quoted"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema unicode"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema overflow"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "driver"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "database missing"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "database dsn"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "read replica"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "write routing"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "dsn override"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects contradictory endpoint cluster and alias assignments[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates config-safe descriptors at normalization without connection resolution[39m
+  [32;1m✓[39;22m[90m [39m[90mit omits credentials from descriptors digests and failure diagnosti[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit redacts PDO failures and never tries a connection from the pure path[39m
+  [32;1m✓[39;22m[90m [39m[90mit detects physical collisions from different panel prefixes and cu[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit validates final driver prefix plus panel prefix suffix and table[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanit[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('ccccccccccccccccccccccccccccc…cccccc', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('Column', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('колонка', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('a-b', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit derives stable short names from full physical identity and detec[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\FrozenSnapshotTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit executes the old frozen file in fresh processes without current[39m[90m… [39m [90m0.48s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renders deterministic canonical source and rejects corrupted des[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renders deterministic canonical source and rejects corrupted des[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit allows credential rotation while preserving the frozen selector[39m[90m… [39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not adopt unmanaged tables or indexes and atomically leaves[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not adopt unmanaged tables or indexes and atomically leaves[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a middle DDL failure including earlier tables indexes[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a middle DDL failure including earlier tables indexes[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves later dependent tables and rolls back preceding revers[39m[90m…[39m [90m0.26s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\KernelSchemaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs production component tables with exact catalog keys bou[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs actual P2 surface receipt envelope and durable outbox write[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back P2 receipt state revision and outbox together after a[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit arbitrates unique receipt claims with independent processes on p[39m[90m…[39m [90m0.73s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit arbitrates unique receipt claims with independent processes on p[39m[90m…[39m [90m0.73s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit enforces DTO byte bounds UUID7 lifecycle and nullable in-flight[39m[90m… [39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit materializes the selected module version history in a new initia[39m[90m…[39m [90m0.22s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\StorageIdentityTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit discovers actual catalog identity and refuses two connection nam[39m[90m…[39m [90m0.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit freezes the resolved search_path schema and checks real final ta[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit accepts 63 byte final identifiers and rejects 64 bytes before ca[39m[90m…[39m [90m0.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed on live database endpoint and schema disagreement[39m[90m   [39m [90m0.10s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ConsoleCommandsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit runs doctor and bounded relay against isolated panel storage in[39m[90m… [39m [90m2.34s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\EnvelopeAtomicityTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit commits one state revision receipt and outbox and replays only o[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back every set on a real SQL fault at each persist boundar[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back every set on a real SQL fault at each persist boundar[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back every set on a real SQL fault at each persist boundar[39m[90m…[39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back every set on a real SQL fault at each persist boundar[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back every set on a real SQL fault at each persist boundar[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects a nested owner transaction without changing or completin[39m[90m…[39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back owner protocol violations instead of trusting a succe[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back owner protocol violations instead of trusting a succe[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back owner protocol violations instead of trusting a succe[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back owner protocol violations instead of trusting a succe[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back owner protocol violations instead of trusting a succe[39m[90m…[39m [90m0.25s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\EnvelopeConcurrencyTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit serializes duplicate digest conflict CAS and rollback claimants[39m[90m… [39m [90m0.69s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes duplicate digest conflict CAS and rollback claimants[39m[90m… [39m [90m0.66s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes duplicate digest conflict CAS and rollback claimants[39m[90m… [39m [90m0.60s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes duplicate digest conflict CAS and rollback claimants[39m[90m… [39m [90m0.64s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes archive and delete against mutation under the shared[39m[90m… [39m [90m0.62s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes archive and delete against mutation under the shared[39m[90m… [39m [90m0.60s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not disclose the committed winner after authority revokes w[39m[90m…[39m [90m0.56s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit recovers a lost response by original key in a fresh process with[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a newly won claim before any effect when authority re[39m[90m…[39m [90m0.67s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a newly won claim before any effect when authority re[39m[90m…[39m [90m0.60s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back an unprovable authority generation then permits only[39m[90m… [39m [90m0.59s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\GenerationFenceTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires provable local fences and rolls back when sampled autho[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires provable local fences and rolls back when sampled autho[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires provable local fences and rolls back when sampled autho[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit routes public lifecycle through the same receipt CAS tombstone a[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit creates only a missing surface with explicit incarnation and can[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed before mutation without a provable local composite[39m[90m… [39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed before mutation without a provable local composite[39m[90m… [39m [90m0.30s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\InboxIdentityTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit deduplicates complete event identity in a real consumer SQL tran[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps equal event IDs independent by panel, installation, source[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit consumer inbox and effect roll back together and commit-before-A[39m[90m…[39m [90m1.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit consumer inbox and effect roll back together and commit-before-A[39m[90m…[39m [90m1.35s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes a consumer UNIQUE conflict against an uncommitted inb[39m[90m…[39m [90m0.45s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes a consumer UNIQUE conflict against an uncommitted inb[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects stored digest conflicts in both projection and delivery[39m[90m… [39m [90m0.22s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\Infrastructure\ConnectionCleanupTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit releases PostgreSQL sessions across repeated complete scenario t[39m[90m…[39m [90m8.19s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\Infrastructure\HarnessIsolationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unsafe targets before connecting[39m
+  [32;1m✓[39;22m[90m [39m[90mit isolates schemas and decoy and rolls back after a fault[39m[90m          [39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit observes two child backends blocked on a row lock[39m[90m                [39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects a missing database marker before writes[39m[90m                  [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cleans up its test schema after an exception escapes the fixture[39m[90m [39m [90m0.05s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\OutboxRelayTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit polls only committed outbox events after a missed wakeup and rol[39m[90m…[39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit two real relay processes use SKIP LOCKED and one durable lease b[39m[90m…[39m [90m0.57s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fences an expired worker ACK and preserves the newer token and p[39m[90m…[39m [90m1.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit recovers an abruptly terminated process with the same identity a[39m[90m…[39m [90m1.53s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit recovers an abruptly terminated process with the same identity a[39m[90m…[39m [90m1.55s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit recovers an abruptly terminated process with the same identity a[39m[90m…[39m [90m1.56s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit unknown and retry remain undelivered and the relay alone retries[39m[90m…[39m [90m3.68s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit quarantines disabled or missing consumers durably without resolv[39m[90m…[39m [90m0.54s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rebuilds projections without delivery effects or suppressing a l[39m[90m…[39m [90m0.47s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.43s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.30s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects current access, deleted state and stale/corrupt immutabl[39m[90m…[39m [90m0.42s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit checks source generation from frozen server config and quarantin[39m[90m…[39m [90m0.73s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit isolates per-consumer ACKs and supports a concrete consumer swap[39m[90m…[39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rehydrates target visibility and privacy on the public target po[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rehydrates target visibility and privacy on the public target po[39m[90m…[39m [90m0.52s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rehydrates target visibility and privacy on the public target po[39m[90m…[39m [90m0.32s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rehydrates target visibility and privacy on the public target po[39m[90m…[39m [90m0.34s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rehydrates target visibility and privacy on the public target po[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit quarantines a reference to another resource instead of dispatchi[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not resurrect a previous incarnation when its event is repl[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit quarantines repeatedly expired crash leases at the attempt budge[39m[90m…[39m [90m3.55s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\PanelStorageTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit routes all four logical repositories to explicit owner tables an[39m[90m…[39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps simultaneous and nested A B A handles independent and reje[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forged bindings namespaces and stale trusted contexts be[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing maps unknown connections and invalid final prefi[39m[90m…[39m [90m0.08s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ReceiptClaimsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.55s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.52s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.63s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.55s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit isolates installation panel integration command type and exact c[39m[90m…[39m [90m0.24s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ReceiptConflictRecoveryTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit recovers a committed outcome by original key after closing the c[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects caller digest type namespace and anonymous identity befo[39m[90m…[39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies another actor before exposing digest conflict or stored r[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit persists only a minimal stable rejection and keeps the original[39m[90m… [39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit propagates unrelated unique failures and rejects nested or non R[39m[90m…[39m [90m0.20s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ReplayAuthorizationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reauthorizes execute replay and lookup after current revoke remo[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit allows a currently readable read-only replay without giving anot[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit allows a currently readable read-only replay without giving anot[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit allows a currently readable read-only replay without giving anot[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit protects absent lookup and does not reveal another actor namespa[39m[90m…[39m [90m0.36s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds same-panel keys to the full target incarnation surface and[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds same-panel keys to the full target incarnation surface and[39m[90m…[39m [90m0.32s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds same-panel keys to the full target incarnation surface and[39m[90m…[39m [90m0.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit records only definitive safe rejections and never unknown decisi[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit records only definitive safe rejections and never unknown decisi[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit records only definitive safe rejections and never unknown decisi[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit records only definitive safe rejections and never unknown decisi[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not let a custom allow resolver bypass admission or current[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not let a custom allow resolver bypass admission or current[39m[90m…[39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not let a custom allow resolver bypass admission or current[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not let a custom allow resolver bypass admission or current[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit publishes an explicitly contained direct audience through the re[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects command type and supplied author or cross-panel authorit[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects command type and supplied author or cross-panel authorit[39m[90m…[39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects command type and supplied author or cross-panel authorit[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit looks up an existing outcome using its declared action even when[39m[90m…[39m [90m0.30s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit authorizes absent outcomes only through an explicit action mappi[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires an absence policy only for missing module receipts and[39m[90m… [39m [90m0.29s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\SurfaceLifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps typed owner snapshots CAS and Live Archived Deleted transi[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit arbitrates concurrent explicit creation by UNIQUE without an abs[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.41s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.42s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.48s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.46s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.45s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deletes an archived instance and rejects missing and regressing[39m[90m… [39m [90m0.20s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\TombstoneReplayTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects reordered duplicate old generation events and explicitly[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back instance and tombstone together if the tombstone writ[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not resurrect a tombstoned ref even if the current row is m[39m[90m…[39m [90m0.18s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\WorkerIsolationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit runs scalar jobs A B A in one process with fresh actors and sepa[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps caller context after factory exceptions and real B write r[39m[90m…[39m [90m0.41s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit supports nested B handle during A factory without replacing eith[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit interleaves Fibers at manual barriers with independent PDO trans[39m[90m…[39m [90m0.41s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects nested owner transaction and preserves the callers uncom[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit isolates reentrant calls on the same worker container after nest[39m[90m…[39m [90m0.41s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\WorkerRevocationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.42s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.42s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.42s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.41s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.41s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies changed current facts before effect and before stale rece[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds factory command type target namespace and digest to origin[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds factory command type target namespace and digest to origin[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds factory command type target namespace and digest to origin[39m[90m…[39m [90m0.36s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds factory command type target namespace and digest to origin[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed scalar codec and unsupported versions without[39m[90m… [39m [90m0.38s[39m  
+
+  [90mTests:[39m    [32;1m264 passed[39;22m[90m (3859 assertions)[39m
+  [90mDuration:[39m [39m86.24s[39m
+

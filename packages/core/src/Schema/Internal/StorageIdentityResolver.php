@@ -27,6 +27,7 @@ final class StorageIdentityResolver
      * No DDL, search_path changes, runtime default connection or config mutation. */
     public function discover(Connection $connection, StorageDeployment $deployment, ?string $schema): StorageLocation
     {
+        SchemaValues::require(valid: $connection->getRawReadPdo() === null, key: 'connection', rule: 'STORAGE_ENDPOINT_AMBIGUOUS');
         $config = SchemaValues::map($connection->getConfig());
         $this->assertConnection(connection: $config, deployment: $deployment);
         SchemaValues::require(valid: $schema === null || SchemaValues::identifier($schema), key: 'schema', rule: 'STORAGE_IDENTIFIER_INVALID');

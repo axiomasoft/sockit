@@ -1,0 +1,97 @@
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/KernelSchemaTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=102
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=103
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=104
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=105
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=106
+P3.3 SQL assertions catalog_exact=true kernel_bounds=true composite_tombstone=true no_host_fk=true module_crud=true module_dependency_fk=true relay_index=true reverse_drop=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=108
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=109
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=110
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=111
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=114
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=115
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=116
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=117
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=118
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=119
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=120
+P3.3 SQL assertions public_envelope_confirmed=true replay_one_write=true guard_context_persisted=true outbox_claim_ack=true surface_recreate=true tombstone_retained=true panel_b_untouched=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=121
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=122
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=123
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=124
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=126
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=127
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=128
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=129
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=130
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=131
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=132
+P3.3 SQL assertions receipt_surface_outbox_atomic_rollback=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=133
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=134
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=135
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=136
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=139
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=140
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=141
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=142
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=143
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=144
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=145
+P2.7 barrier duplicate holder=149 waiter=156 blocked_by_holder=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=146
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=147
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=148
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=149
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=150
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=151
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=152
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=153
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=154
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=155
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=156
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=157
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=158
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=159
+P2.7 race outcomes [{"outcome":"confirmed","receiptId":"01a184b6-1692-7274-98ec-f4d0f2b2a4c7","resource":{"panel":{"value":"acme.a"},"kind":"surface_instance","id":"01a184b6-15ce-73f3-b9fa-d6bfb278ca5d"},"revision":{"value":2},"problem":null,"problemDetail":[]},{"outcome":"confirmed","receiptId":"01a184b6-1692-7274-98ec-f4d0f2b2a4c7","resource":{"panel":{"value":"acme.a"},"kind":"surface_instance","id":"01a184b6-15ce-73f3-b9fa-d6bfb278ca5d"},"revision":{"value":2},"problem":null,"problemDetail":[]}]
+P3.3 SQL assertions production_unique_claim=duplicate one_receipt=true one_effect=true one_outbox=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=160
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=161
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=162
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=163
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=166
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=167
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=168
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=169
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=170
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=171
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=172
+P2.7 barrier rollback holder=176 waiter=183 blocked_by_holder=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=173
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=174
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=175
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=176
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=177
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=178
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=179
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=180
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=181
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=182
+P2.2 Laravel connection=owner_a database=sockit_p2_9e45988d5035edc6_test backend_pid=183
+P2.2 Laravel connection=owner_b database=sockit_p2_9e45988d5035edc6_test backend_pid=184
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e45988d5035edc6_test backend_pid=185
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=186
+P2.7 race outcomes [{"outcome":"rejected","receiptId":null,"resource":null,"revision":null,"problem":"sockit.provider_unavailable","problemDetail":[]},{"outcome":"confirmed","receiptId":"01a184b6-1a30-7094-ab65-34b467a649a2","resource":{"panel":{"value":"acme.a"},"kind":"surface_instance","id":"01a184b6-18e7-733c-8868-658b04a7307d"},"revision":{"value":2},"problem":null,"problemDetail":[]}]
+P3.3 SQL assertions production_unique_claim=rollback one_receipt=true one_effect=true one_outbox=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=187
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=188
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=189
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=190
+P3.3 SQL assertions host_key_512_bytes_lossless=true host_key_513_bytes_denied=true namespace_384_key_128=true uuid7_lifecycle_checks=true in_flight_null_allowed=true invalid_stable_outcomes_denied=true outbox_json_object_and_byte_bounds=true
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=192
+PG identity database=sockit_p2_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=193
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=194
+PG identity database=sockit_p2_decoy_9e45988d5035edc6_test server_version_num=160014 marker=sockit-p21-9e45988d5035edc6 backend_pid=195
+P3.3 SQL assertions selected_module_v2_initial_up_down=true

@@ -19,6 +19,7 @@ use SocKit\Operations\OperationHandles;
 use SocKit\Operations\Operations;
 use SocKit\Operations\OutboxRelay;
 use SocKit\Panels\PanelDefinitions;
+use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\Surfaces\SurfaceInstances;
 use SocKit\Surfaces\Surfaces;
 
@@ -58,6 +59,7 @@ class SocKitServiceProvider extends ServiceProvider
         $app = $this->app;
         $app->booting(static function () use ($app): void {
             $draft = Modules::compile($app);
+            new PanelSchemaCompiler()->validateComponents($draft->schemaComponents());
             $panels = PanelDefinitions::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft);
             Surfaces::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft, panels: $panels);
             Modules::publish(app: $app, draft: $draft);

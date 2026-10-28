@@ -13,6 +13,8 @@ use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Modules\Exceptions\InvalidModuleException;
 use SocKit\Modules\ModuleManifest;
 use SocKit\Modules\ModuleRegistrar;
+use SocKit\Schema\Contracts\SchemaContribution;
+use SocKit\Schema\Exceptions\InvalidSchemaException;
 
 final class ModuleGraphCompiler
 {
@@ -89,7 +91,7 @@ final class ModuleGraphCompiler
             throw new InvalidModuleException($errors);
         }
         ksort($modules);
-        $active = $declarations = $settings = $features = $consumers = [];
+        $active = $declarations = $settings = $features = $consumers = $schemaComponents = [];
         foreach ($modules as $id => $module) {
             if (! in_array($id, $config->modules->enabled, true)) {
                 continue;
@@ -110,6 +112,17 @@ final class ModuleGraphCompiler
                         $errors[] = ['module' => $id, 'key' => 'consumers.'.$consumerId, 'rule' => 'MODULE_CONSUMER_DUPLICATE'];
                     }
                     $consumers[$consumerId] = $consumer;
+                }
+                if ($declaration['schema'] !== null) {
+                    $contribution = $app->make($declaration['schema']);
+                    if (! $contribution instanceof SchemaContribution) {
+                        throw new InvalidSchemaException(message: 'Invalid schema contribution binding', detail: ['key' => $id, 'rule' => 'SCHEMA_IMPLEMENTATION_INVALID']);
+                    }
+                    $component = $contribution->component();
+                    if ($component->id !== $id || $id === 'sockit.kernel') {
+                        throw new InvalidSchemaException(message: 'Invalid schema owner', detail: ['key' => $id, 'rule' => 'SCHEMA_OWNER_INVALID']);
+                    }
+                    $schemaComponents[$id] = $component;
                 }
                 $schema = $declaration['settings'] !== null ? $app->make($declaration['settings']) : null;
                 if ($schema !== null && ! $schema instanceof ModuleSettingsSchema) {
@@ -143,7 +156,7 @@ final class ModuleGraphCompiler
             throw new InvalidModuleException($errors);
         }
 
-        return $this->draft = new CompiledModuleGraph(manifests: $active, declarations: $declarations, settings: $settings);
+        return $this->draft = new CompiledModuleGraph(manifests: $active, declarations: $declarations, settings: $settings, schemaComponents: $schemaComponents);
     }
 
     public function publish(CompiledModuleGraph $draft): void

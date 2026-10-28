@@ -15,6 +15,7 @@ use SocKit\Panels\Exceptions\InvalidPanelException;
 use SocKit\Panels\Panel;
 use SocKit\Panels\PanelDefinition;
 use SocKit\Panels\PanelProvider;
+use SocKit\Schema\PanelSchemaCompiler;
 
 final class PanelGraphCompiler
 {
@@ -63,7 +64,9 @@ final class PanelGraphCompiler
                 $this->fail(panel: '', provider: $provider, key: 'panels', rule: 'PANEL_PROVIDER_INVALID');
             }
             try {
-                $panel = $instance->panel(new Panel(floor: $config->privacy->floor, provider: $provider))->materialize();
+                $builder = $instance->panel(new Panel(floor: $config->privacy->floor, provider: $provider));
+                $selected = new PanelSchemaCompiler()->entities(selected: $builder->selectedModules(), components: $modules->schemaComponents());
+                $panel = $builder->materialize(entities: $selected);
             } catch (InvalidPanelException $error) {
                 throw new InvalidPanelException(message: $error->getMessage(), detail: array_replace($error->detail(), ['provider' => $provider]), previous: $error);
             }
@@ -102,7 +105,8 @@ final class PanelGraphCompiler
                     $this->fail(panel: $id, provider: $provider, key: 'moduleSettings.'.$module, rule: 'PANEL_SETTING_INVALID', previous: $error);
                 }
             }
-            foreach ($panel->storage->tables as $key => $table) {
+            $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $modules->schemaComponents());
+            foreach ($schema->storage->tables as $key => $table) {
                 // Declared identities only. Connection aliases and driver prefixes require P3.
                 $identity = json_encode([$panel->storage->connection, $panel->storage->schema, $table], JSON_THROW_ON_ERROR);
                 if (isset($storage[$identity])) {
@@ -110,7 +114,7 @@ final class PanelGraphCompiler
                 }
                 $storage[$identity] = true;
             }
-            $definitions[$id] = new PanelDefinition(id: $panel->id, hostTypes: $panel->hostTypes, storage: $panel->storage, modules: $panel->modules, moduleSettings: $settings, floor: $panel->floor, provider: $provider);
+            $definitions[$id] = new PanelDefinition(id: $panel->id, hostTypes: $panel->hostTypes, storage: $schema->storage, modules: $panel->modules, moduleSettings: $settings, floor: $panel->floor, provider: $provider);
             $instances[] = $instance;
         }
         ksort($definitions);

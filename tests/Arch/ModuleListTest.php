@@ -22,3 +22,10 @@ it('A4 rejects its negative control', function (): void {
 it('A4 explicitly allows Panels before runtime PanelId exists', function (): void {
     expect(Gates::modules(SourceScanner::fixture('valid/panels.php.txt')))->toBe([]);
 });
+
+it('A4 explicitly admits the schema compiler namespace while retaining the unknown namespace control', function (): void {
+    $files = SourceScanner::php('packages/core/src/Schema');
+    expect($files)->not->toBe([]);
+    expect(Gates::modules($files))->toBe([])
+        ->and(Gates::modules(SourceScanner::fixture('violations/unknown-module.php.txt')))->not->toBe([]);
+});

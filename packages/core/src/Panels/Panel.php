@@ -123,6 +123,12 @@ final class Panel
         return $this;
     }
 
+    /** @return list<string> */
+    public function selectedModules(): array
+    {
+        return $this->selectedModules;
+    }
+
     public function floor(PrivacyFloor $floor): self
     {
         $this->mutable();
@@ -131,7 +137,8 @@ final class Panel
         return $this;
     }
 
-    public function materialize(): PanelDefinition
+    /** @param list<string> $entities Schema-owned keys; direct builders retain the kernel baseline. */
+    public function materialize(array $entities = PanelStorage::KERNEL_ENTITIES): PanelDefinition
     {
         $this->mutable();
         $this->frozen = true;
@@ -142,10 +149,11 @@ final class Panel
         }
         try {
             $tables = [];
-            foreach (PanelStorage::KERNEL_ENTITIES as $key) {
+            foreach ($entities as $key) {
                 $tables[$key] = $this->tablePrefix.($this->tableMap[$key] ?? $key);
             }
-            PanelValues::require(valid: array_diff(array_keys($this->tableMap), PanelStorage::KERNEL_ENTITIES) === [], key: 'tables', rule: 'PANEL_TABLE_INVALID');
+            PanelValues::require(valid: array_diff(array_keys($this->tableMap), $entities) === [], key: 'tables', rule: 'PANEL_TABLE_INVALID');
+            PanelValues::require(valid: array_diff(array_keys($this->modelMap), $entities) === [], key: 'models', rule: 'PANEL_MODEL_INVALID');
 
             return new PanelDefinition(id: $id, hostTypes: $this->hosts,
                 storage: new PanelStorage(connection: $this->connectionName, schema: $this->schemaName, prefix: $this->tablePrefix, tables: $tables, models: $this->modelMap),

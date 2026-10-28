@@ -27,7 +27,7 @@ use Throwable;
 final class Gates
 {
     private const array MODULES = [
-        'Attributes', 'Support', 'Actors', 'Audience', 'Panels', 'Surfaces',
+        'Attributes', 'Support', 'Schema', 'Actors', 'Audience', 'Panels', 'Surfaces',
         'Operations', 'Errors', 'Modules', 'Configuration', 'Testing', 'Internal', 'Facades',
     ];
 

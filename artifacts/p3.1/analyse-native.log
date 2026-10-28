@@ -1,0 +1,62 @@
+> phpstan analyse --no-progress '--memory-limit=512M'
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+ ------ ------------------------------------------------------------------- 
+  Line   tests/Feature/Schema/CompilationTest.php                           
+ ------ ------------------------------------------------------------------- 
+  10     Syntax error, unexpected T_NAME_FULLY_QUALIFIED, expecting '{' on  
+         line 10                                                            
+         🪪  phpstan.parse (non-ignorable)                                  
+  55     Syntax error, unexpected T_STRING, expecting ')' on line 55        
+         🪪  phpstan.parse (non-ignorable)                                  
+  58     Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 58     
+         🪪  phpstan.parse (non-ignorable)                                  
+  65     Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 65     
+         🪪  phpstan.parse (non-ignorable)                                  
+  74     Syntax error, unexpected T_STRING on line 74                       
+         🪪  phpstan.parse (non-ignorable)                                  
+  80     Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 80     
+         🪪  phpstan.parse (non-ignorable)                                  
+  90     Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 90     
+         🪪  phpstan.parse (non-ignorable)                                  
+  93     Syntax error, unexpected T_STRING on line 93                       
+         🪪  phpstan.parse (non-ignorable)                                  
+  105    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 105    
+         🪪  phpstan.parse (non-ignorable)                                  
+  108    Syntax error, unexpected T_STRING on line 108                      
+         🪪  phpstan.parse (non-ignorable)                                  
+  117    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 117    
+         🪪  phpstan.parse (non-ignorable)                                  
+  122    Syntax error, unexpected T_STRING on line 122                      
+         🪪  phpstan.parse (non-ignorable)                                  
+  123    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 123    
+         🪪  phpstan.parse (non-ignorable)                                  
+  128    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 128    
+         🪪  phpstan.parse (non-ignorable)                                  
+  134    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 134    
+         🪪  phpstan.parse (non-ignorable)                                  
+  134    Syntax error, unexpected T_STRING on line 134                      
+         🪪  phpstan.parse (non-ignorable)                                  
+  137    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 137    
+         🪪  phpstan.parse (non-ignorable)                                  
+  142    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 142    
+         🪪  phpstan.parse (non-ignorable)                                  
+  144    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 144    
+         🪪  phpstan.parse (non-ignorable)                                  
+  152    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 152    
+         🪪  phpstan.parse (non-ignorable)                                  
+  153    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 153    
+         🪪  phpstan.parse (non-ignorable)                                  
+  159    Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING on line 159    
+         🪪  phpstan.parse (non-ignorable)                                  
+  159    Syntax error, unexpected T_ENCAPSED_AND_WHITESPACE on line 159     
+         🪪  phpstan.parse (non-ignorable)                                  
+ ------ ------------------------------------------------------------------- 
+
+
+ [ERROR] Found 23 errors                                                        
+
+⚠️  Result is incomplete because of severe errors. ⚠️
+   Fix these errors first and then re-run PHPStan
+   to get all reported errors.
+
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1

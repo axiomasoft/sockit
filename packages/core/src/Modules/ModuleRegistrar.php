@@ -10,6 +10,7 @@ use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Modules\Exceptions\InvalidModuleException;
 use SocKit\Operations\Contracts\OutboxConsumer;
+use SocKit\Schema\Contracts\SchemaContribution;
 use SocKit\Surfaces\Contracts\TargetResolver;
 
 #[Spi(kind: SpiKind::Call, since: '1.0')]
@@ -40,6 +41,23 @@ final class ModuleRegistrar
             $this->fail(key: 'consumers.'.$id, rule: 'MODULE_CONSUMER_DUPLICATE');
         }
         $this->consumers[$id] = $consumer;
+
+        return $this;
+    }
+
+    /** @var class-string<SchemaContribution>|null */
+    private ?string $schemaContribution = null;
+
+    public function schema(string $contribution): self
+    {
+        $this->mutable();
+        if ($this->schemaContribution !== null) {
+            $this->fail(key: 'schema', rule: 'MODULE_SCHEMA_DUPLICATE');
+        }
+        if (! is_subclass_of($contribution, SchemaContribution::class) || ! new \ReflectionClass($contribution)->isInstantiable()) {
+            $this->fail(key: 'schema', rule: 'MODULE_SCHEMA_INVALID');
+        }
+        $this->schemaContribution = $contribution;
 
         return $this;
     }
@@ -105,10 +123,10 @@ final class ModuleRegistrar
         return $this;
     }
 
-    /** @return array{surfaces:list<string>, features:list<string>, settings:class-string<ModuleSettingsSchema>|null, targets:array<string, class-string<TargetResolver>>, consumers:array<string, class-string<OutboxConsumer>>} */
+    /** @return array{surfaces:list<string>, features:list<string>, settings:class-string<ModuleSettingsSchema>|null, schema:class-string<SchemaContribution>|null, targets:array<string, class-string<TargetResolver>>, consumers:array<string, class-string<OutboxConsumer>>} */
     public function declarations(): array
     {
-        return ['surfaces' => $this->surfaces, 'features' => $this->features, 'settings' => $this->schema, 'targets' => $this->targets, 'consumers' => $this->consumers];
+        return ['surfaces' => $this->surfaces, 'features' => $this->features, 'settings' => $this->schema, 'schema' => $this->schemaContribution, 'targets' => $this->targets, 'consumers' => $this->consumers];
     }
 
     private function fail(string $key, string $rule): never

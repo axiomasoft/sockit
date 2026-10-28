@@ -12,7 +12,7 @@ foreach (array_slice($argv, 1) as $arg) {
     }
 }
 $errors = [];
-$names = ['theses', 'philosophy', 'core-boundary', 'layering-rules', 'structure', 'ownership', 'extension-axes', 'invariants', 'privacy', 'spi', 'glossary', 'ecosystem-practices', 'panels-and-storage', 'external-discussions', 'neighbor-work'];
+$names = ['theses', 'philosophy', 'core-boundary', 'layering-rules', 'structure', 'ownership', 'extension-axes', 'invariants', 'privacy', 'spi', 'glossary', 'ecosystem-practices', 'panels-and-storage', 'external-discussions', 'neighbor-work', 'traceability'];
 $files = [];
 foreach ($names as $name) {
     $files[] = "$root/docs/architecture/$name.md";
@@ -74,6 +74,17 @@ if ($theses !== false) {
         $id = sprintf('T-%02d', $i);
         if (! preg_match('/^\|\s*'.preg_quote($id, '/').'\s*\|.+\|.+\|\s*$/mu', $theses)) {
             $errors[] = "Missing thesis or check: $id";
+        }
+    }
+}
+$trace = @file_get_contents("$root/docs/architecture/traceability.md");
+if ($trace !== false) {
+    foreach (['S' => 10, 'SN' => 22] as $prefix => $count) {
+        for ($i = 1; $i <= $count; $i++) {
+            $id = sprintf('%s-%02d', $prefix, $i);
+            if (! preg_match('/(?<![A-Za-z0-9-])'.preg_quote($id, '/').'(?![A-Za-z0-9-])/', $trace)) {
+                $errors[] = "Missing traceability requirement: $id";
+            }
         }
     }
 }

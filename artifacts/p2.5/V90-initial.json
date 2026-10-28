@@ -1,0 +1,33 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p25-V90-initial",
+  "check_id": "V90-initial",
+  "subject": "PLAN1.P2.5",
+  "procedure": {
+    "cmd": "composer analyse -- --memory-limit=512M",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "candidate": {
+    "head": "d8f4042982374526cced7d5a34ecdd63f9bf1bb5",
+    "dirty_digest": "e6f54485d3c17525a4bccd7544343e0e6d74267d4ecf7874de3a4cfe757ffdf1"
+  },
+  "exit": 1,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "env_digest": "1dc49a97e792b7a70b85ef225672ed895d6729f12e49624b3b14916a8b87ea37"
+  },
+  "log": {
+    "path": "artifacts/p2.5/V90-initial.log",
+    "sha256": "726c655163c1a2928a2c75980c28fa36f5c341f4d8e64366f8e0c526cb6fe2a7"
+  },
+  "started_at": "2026-10-28T15:49:41.806831+00:00",
+  "finished_at": "2026-10-28T15:49:43.805338+00:00",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "items": [
+    "P2.5"
+  ],
+  "phase": "P2",
+  "batch": "B5",
+  "route": "ok",
+  "resumed": [],
+  "packs": [
+    "/home/vostrikov/.local/share/swissknifeman/workspaces/axioma/projects/sockit/plans/2026.10.17-№1-SOCKIT-FOUNDATION/context/P2.5.json"
+  ],
+  "scouts": [],
+  "warnings": []
+}

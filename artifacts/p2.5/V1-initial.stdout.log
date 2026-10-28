@@ -1,0 +1,12 @@
+private container=88875ce1270b6736220950e296a823cc38849f08531ad41bbc17086aeabf62b2 owner=sockit_p2_c98fe7ac2dbd4d62_test decoy=sockit_p2_decoy_c98fe7ac2dbd4d62_test port=32814
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ReceiptClaimsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.68s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.67s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.77s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.80s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit isolates installation panel integration command type and exact c[39m[90m…[39m [90m0.19s[39m  
+
+  [90mTests:[39m    [32;1m5 passed[39;22m[90m (138 assertions)[39m
+  [90mDuration:[39m [39m3.20s[39m
+

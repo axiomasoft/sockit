@@ -1,0 +1,33 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p25-PG-missing",
+  "check_id": "PG-missing",
+  "subject": "PLAN1.P2.5",
+  "procedure": {
+    "cmd": "env -u SOCKIT_PG_MANIFEST composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/ReceiptClaimsTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "candidate": {
+    "head": "d8f4042982374526cced7d5a34ecdd63f9bf1bb5",
+    "dirty_digest": "23618d2d3c7732fdc9a2b751ff65bbc1710ff90f462e7e7a6e09dad57eb1b99d"
+  },
+  "exit": 2,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "env_digest": "1dc49a97e792b7a70b85ef225672ed895d6729f12e49624b3b14916a8b87ea37"
+  },
+  "log": {
+    "path": "artifacts/p2.5/PG-missing.log",
+    "sha256": "09794ad042234075f4cbe92a06027bb1c93961fa107f3936097bfe09523f1054"
+  },
+  "started_at": "2026-10-28T15:52:37.509395+00:00",
+  "finished_at": "2026-10-28T15:52:37.837356+00:00",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  }
+}

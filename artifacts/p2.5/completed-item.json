@@ -1,0 +1,61 @@
+{
+  "ok": true,
+  "data": {
+    "ref": "P2.5",
+    "kind": "item",
+    "doc": {
+      "id": "P2.5",
+      "status": "done",
+      "result": {
+        "started_at": "2026-10-28T15:45:52Z",
+        "finished_at": "2026-10-28T15:55:25Z",
+        "executor": {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        "notes": "Internal owner receipt ledger and minimal stable snapshots implemented. V1 isolated PG16 5/143; V2 10/123; V3 9/1415; PHPStan max and Pint exit 0; Arch 45/250. Four real holder/waiter PG barriers prove same-digest replay, digest conflict, rollback winner recovery and actor denial; SQL remains usable inside the same tx. Lost-response original-key lookup, exact namespaces/keys, non-recordable/unstable outcome rollback and unrelated 23505 propagation proved. Private owned test identity/marker/PDO proof before fixture DDL; missing manifest exit 2. All 410 foreign files unchanged. No agents/review (mode none), no guarded public replay/social e2e/full outbox claim. Evidence artifacts/p2.5/REPORT.md. Only P2.5 executed.",
+        "checks": [
+          {
+            "id": "V1",
+            "exit": 0,
+            "at": "2026-10-28T15:55:25Z",
+            "evidence": "artifacts/p2.5/V1.json"
+          },
+          {
+            "id": "V2",
+            "exit": 0,
+            "at": "2026-10-28T15:55:25Z",
+            "evidence": "artifacts/p2.5/V2-final.json"
+          },
+          {
+            "id": "V3",
+            "exit": 0,
+            "at": "2026-10-28T15:55:25Z",
+            "evidence": "artifacts/p2.5/V3.json"
+          },
+          {
+            "id": "V90",
+            "exit": 0,
+            "at": "2026-10-28T15:55:25Z",
+            "evidence": "artifacts/p2.5/V90.json"
+          },
+          {
+            "id": "V91",
+            "exit": 0,
+            "at": "2026-10-28T15:55:25Z",
+            "evidence": "artifacts/p2.5/V91-final.json"
+          }
+        ],
+        "evidence": [
+          "artifacts/p2.5/V1.json",
+          "artifacts/p2.5/V2-final.json",
+          "artifacts/p2.5/V3.json",
+          "artifacts/p2.5/V90.json",
+          "artifacts/p2.5/V91-final.json"
+        ]
+      }
+    },
+    "revision": "sha256:1eae98062b6a49b770a4c08d3674e703459d63277847124d5fe6bd7302ef454f"
+  }
+}

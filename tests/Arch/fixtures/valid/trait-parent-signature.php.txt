@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+
+use SocKit\Attributes\Api;
+
+#[Api]
+trait PublicParentSignature
+{
+    public function base(): parent { return $this; }
+    public function parentValue(parent $value): parent { return $value; }
+    public function unionParent(parent|string $value): parent|string { return $value; }
+}
+
+#[Api]
+class PublicTraitBase {}
+
+#[Api]
+class PublicTraitChild extends PublicTraitBase
+{
+    use PublicParentSignature;
+}

@@ -62,3 +62,29 @@ it('F1 rejects self parent and static hiding Eloquent or HTTP base types', funct
 it('F1 allows safe relative types traits and late binding to the public inheritor', function (): void {
     expect(Gates::signatures(SourceScanner::fixture('valid/relative-signature.php.txt')))->toBe([]);
 });
+
+it('F3 defers parent on a public trait and accepts its safe consuming class', function (): void {
+    $files = SourceScanner::fixture('valid/trait-parent-signature.php.txt');
+    expect(Gates::markers($files))->toBe([])
+        ->and(Gates::signatures($files))->toBe([]);
+});
+
+it('F3 still rejects composed Internal parents and explicit forbidden types on the trait', function (): void {
+    $files = SourceScanner::fixture('violations/trait-parent-signature.php.txt');
+    expect(Gates::markers($files))->toBe([]);
+    $violations = Gates::signatures($files);
+    expect($violations)->toHaveCount(6);
+    $messages = implode("\n", array_column($violations, 'message'));
+    expect($messages)->toContain(
+        'PublicHiddenTraitChild::base exposes SocKit\\Support\\Internal\\TraitHiddenBase',
+        'PublicHiddenTraitChild::parentArgument exposes SocKit\\Support\\Internal\\TraitHiddenBase',
+        'ExplicitForbiddenParentSignature::callback exposes Closure',
+        'ExplicitForbiddenParentSignature::request exposes Illuminate\\Http\\Request',
+        'ExplicitForbiddenParentSignature::record exposes Illuminate\\Database\\Eloquent\\Model',
+        'ExplicitForbiddenParentSignature::internal exposes SocKit\\Support\\Internal\\TraitHiddenBase',
+    );
+    expect(str_contains($messages, 'Cannot reflect'))->toBeFalse();
+    foreach ($violations as $violation) {
+        expect($violation['gate'])->toBe('A9');
+    }
+});

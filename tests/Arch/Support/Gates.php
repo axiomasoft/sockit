@@ -247,6 +247,12 @@ final class Gates
                         }
                         foreach ($types as $signature) {
                             foreach (self::typeNames($signature) as $typeName) {
+                                // A trait has no parent until composed into a class. Only
+                                // defer that relative type; check all other types here.
+                                // Composed methods are checked in their declaring class.
+                                if ($reflection->isTrait() && strtolower($typeName) === 'parent') {
+                                    continue;
+                                }
                                 $typeName = self::resolveSignatureType($typeName, $method, $reflection->getName());
                                 if (self::forbiddenSignature($typeName)) {
                                     $violations[] = self::violation('A9', $file, $method->getStartLine() ?: $type['line'], $type['name'].'::'.$method->getName().' exposes '.$typeName);

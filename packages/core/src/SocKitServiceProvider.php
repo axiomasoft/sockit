@@ -13,6 +13,7 @@ use SocKit\Audience\AudienceGate;
 use SocKit\Configuration\Exceptions\ProviderUnavailableException;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Modules\Modules;
+use SocKit\Operations\OperationHandles;
 use SocKit\Panels\PanelDefinitions;
 use SocKit\Surfaces\Surfaces;
 
@@ -43,6 +44,7 @@ class SocKitServiceProvider extends ServiceProvider
             });
         }
         $this->app->scoped(ActorContexts::class);
+        OperationHandles::configure($this->app);
         $this->app->scoped(AudienceEvaluator::class);
         $this->app->scoped(AudienceGate::class);
         Surfaces::configure($this->app);

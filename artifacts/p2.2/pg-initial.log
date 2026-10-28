@@ -1,0 +1,22 @@
+private container=2d69805f87573c78481d1cf608df04e49bd3f87690447966014927f15244ad65 owner=sockit_p2_706dd1f9d17ad616_test decoy=sockit_p2_decoy_706dd1f9d17ad616_test port=32792
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Runtime/PanelStorageTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_706dd1f9d17ad616_test server_version_num=160014 marker=sockit-p21-706dd1f9d17ad616 backend_pid=102
+
+  [41;1m ParseError [49;22m
+
+[39;1m  Unclosed '{' on line 109 does not match ')'[39;22m
+
+  at [32mtests/Integration/Runtime/PanelStorageTest.php[39m:[32m118[39m
+    114▕         $b = $handles->forSurface(Runtime::surface('acme.b'));
+    115▕         $forged = new OperationHandle(surface: $a->surface, actor: $a->actor, panel: $b->panel, definition: $a->definition);
+    116▕         expect(fn () => $storage->forHandle($forged))->toThrow(StorageBindingException::class)
+    117▕             ->and(fn () => $storage->forHandle(handle: $a, namespace: new CommandNamespace(installation: $a->actor->installation, panel: $b->surface->panel, integration: 'acme.runtime', commandType: 'acme.write')))->toThrow(StorageBindingException::class)
+  ➜ 118▕             ->and(fn () => $storage->forHandle($a)->table('arbitrary_table')))->toThrow(InvalidConfigurationException::class);
+    119▕         $owner = $storage->forHandle($a);
+    120▕         $fake->actors->actingAs(Runtime::actor('99'));
+    121▕         expect(fn () => $owner->transaction(static fn (OwnerConnection $connection): bool => $connection->table('receipts')->insert(['id' => 'forged', 'payload' => 'bad'])))->toThrow(ActorContextMismatchException::class);
+    122▕         expect($db->queries)->toBe([]);
+
+
+
+Script pest handling the test event returned with error code 1

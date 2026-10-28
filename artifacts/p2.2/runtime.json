@@ -1,0 +1,11 @@
+{
+  "session": "01a182d8-41bf-7ab3-a620-bdd0476c60b5",
+  "observed_turn_context": [
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "cwd": "/home/vostrikov/projects/packages/sockit"
+    }
+  ],
+  "base": "50469600b6ffde7b863cdf5db41cbc1939961796"
+}

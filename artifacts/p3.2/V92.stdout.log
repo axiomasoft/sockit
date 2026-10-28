@@ -1,0 +1,8 @@
+private container=9cadb4c27b29396a73ae6957bced3c68109ec8f357dd554226b50d9fda9ac9ff owner=sockit_p2_b09f6c18d3eacf28_test decoy=sockit_p2_decoy_b09f6c18d3eacf28_test port=32921
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ConsoleCommandsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit runs doctor and bounded relay against isolated panel storage in[39m[90m… [39m [90m2.57s[39m  
+
+  [90mTests:[39m    [32;1m1 passed[39;22m[90m (20 assertions)[39m
+  [90mDuration:[39m [39m2.63s[39m
+

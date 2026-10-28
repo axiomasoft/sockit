@@ -21,6 +21,19 @@ final class SchemaValues
         return strlen($value) <= 63 && preg_match('/^[a-z_][a-z0-9_]*$/D', $value) === 1;
     }
 
+    /** @return array<string, mixed> */
+    public static function map(mixed $value): array
+    {
+        self::require(valid: is_array($value) && ($value === [] || ! array_is_list($value)), key: 'snapshot', rule: 'STORAGE_MAP_INCOMPLETE');
+        $result = [];
+        foreach ($value as $key => $item) {
+            self::require(valid: is_string($key), key: 'snapshot', rule: 'STORAGE_MAP_INCOMPLETE');
+            $result[$key] = $item;
+        }
+
+        return $result;
+    }
+
     /** Strip references recursively and sort maps; ordered lists retain their order. */
     public static function canonical(mixed $value): mixed
     {

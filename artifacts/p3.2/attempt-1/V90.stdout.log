@@ -1,0 +1,14 @@
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Internal/Console/DoctorCommand.php                   
+ ------ ----------------------------------------------------------------------- 
+  56     Instanceof between Illuminate\Database\Connection and                  
+         Illuminate\Database\Connection will always evaluate to true.           
+         🪪  instanceof.alwaysTrue                                              
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+ ------ ----------------------------------------------------------------------- 
+
+
+ [ERROR] Found 1 error                                                          
+

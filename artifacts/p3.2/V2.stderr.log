@@ -1,0 +1,22 @@
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/StorageIdentityTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=102
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=103
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=104
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=105
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=106
+SQL assertions: aliases=first,alias distinct_pdo_backends=true same_physical_key=true collision_before_ddl=true transaction_read_only=on catalog_unchanged=true
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=107
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=108
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=109
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=110
+SQL assertions: frozen_schema=p32_owned search_path_changed=true exact_relations=["drv_articles_demo_links","drv_articles_demo_targets","sk_idx_99c9b15b17c5809b1356cfe3dd378714","sk_pk_496683207a6fca33508a5d29d7663914","sk_pk_9d86c3daba8d61269d0f7b4c16e226d2"] exact_fk=sk_fk_efa9e2be3be95845e7f982ce51bc3b4a existing_relation_rejected=true neighbor=untouched decoy=untouched
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=111
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=112
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=113
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=114
+SQL assertions: schema_bytes=63 table_bytes=63 column_bytes=63 table_and_pk_exact=true overflow_64_rejected_before_ddl=true
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=115
+PG identity database=sockit_p2_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=116
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=117
+PG identity database=sockit_p2_decoy_6ccecd9e7a86c852_test server_version_num=160014 marker=sockit-p21-6ccecd9e7a86c852 backend_pid=118
+SQL assertions: database_mismatch=denied endpoint_mismatch=denied missing_schema=denied unresolved_search_path=denied

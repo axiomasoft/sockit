@@ -1,0 +1,11 @@
+private container=87539850e4c39a6669427113aed3bf7accfcafc675888d6f4d975caf99f26377 owner=sockit_p2_6ccecd9e7a86c852_test decoy=sockit_p2_decoy_6ccecd9e7a86c852_test port=32920
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\StorageIdentityTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit discovers actual catalog identity and refuses two connection nam[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit freezes the resolved search_path schema and checks real final ta[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit accepts 63 byte final identifiers and rejects 64 bytes before ca[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed on live database endpoint and schema disagreement[39m[90m   [39m [90m0.13s[39m  
+
+  [90mTests:[39m    [32;1m4 passed[39;22m[90m (27 assertions)[39m
+  [90mDuration:[39m [39m0.84s[39m
+

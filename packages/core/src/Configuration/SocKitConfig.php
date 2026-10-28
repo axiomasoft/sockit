@@ -26,6 +26,8 @@ use SocKit\Configuration\Data\SurfacesConfig;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Modules\ModuleManifest;
 use SocKit\Panels\PanelProvider;
+use SocKit\Schema\Exceptions\InvalidSchemaException;
+use SocKit\Schema\StoragePreflight;
 use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Surfaces\SurfaceProvider;
 
@@ -95,10 +97,10 @@ final readonly class SocKitConfig
     {
         $raw = $repository->get('sockit', []);
         ModulesConfig::assertSerializable(value: $raw, key: 'sockit');
-        $raw = self::map(value: $raw, key: 'sockit', allowed: ['ids', 'panels', 'surfaces', 'modules', 'resolvers', 'privacy', 'events']);
+        $raw = self::map(value: $raw, key: 'sockit', allowed: ['ids', 'panels', 'surfaces', 'modules', 'resolvers', 'privacy', 'events', 'storage']);
         $defaults = self::map(value: require __DIR__.'/../../config/sockit.php', key: 'sockit');
         $data = array_replace($defaults, $raw);
-        foreach (['ids', 'modules', 'resolvers', 'privacy', 'events'] as $section) {
+        foreach (['ids', 'modules', 'resolvers', 'privacy', 'events', 'storage'] as $section) {
             $base = self::map(value: $defaults[$section], key: 'sockit.'.$section);
             $values = self::map(value: array_key_exists($section, $raw) ? $raw[$section] : [], key: 'sockit.'.$section, allowed: array_keys($base));
             $data[$section] = array_replace($base, $values);
@@ -108,6 +110,12 @@ final readonly class SocKitConfig
         $privacy = self::map(value: $data['privacy'], key: 'sockit.privacy');
         $floor = self::map(value: $privacy['floor'], key: 'sockit.privacy.floor', allowed: array_keys($baseFloor));
         $data['privacy'] = ['floor' => array_replace($baseFloor, $floor)];
+        $storage = self::map(value: $data['storage'], key: 'sockit.storage');
+        try {
+            StoragePreflight::validateDeployments($storage['deployments']);
+        } catch (InvalidSchemaException $error) {
+            throw new InvalidConfigurationException(message: 'Invalid storage deployment configuration', detail: $error->detail());
+        }
 
         return $data;
     }

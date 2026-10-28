@@ -10,6 +10,8 @@ use SocKit\Configuration\SocKitConfig;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\PanelDefinitions;
 use SocKit\Panels\PanelStorage;
+use SocKit\Schema\Exceptions\InvalidSchemaException;
+use SocKit\Schema\StoragePreflight;
 
 final class DoctorCommand extends Command
 {
@@ -48,26 +50,18 @@ final class DoctorCommand extends Command
         }
         try {
             $connection = $this->laravel->make(ConnectionResolverInterface::class)->connection($storage->connection);
-            if ($connection->getDriverName() !== 'pgsql') {
-                throw new \RuntimeException;
-            }
-            // A host-provided stable deployment identity is required; aliases alone prove nothing.
-            $identity = $this->laravel->make('config')->get('sockit.deployment_identity');
-            if (! is_string($identity) || $identity === '') {
-                $errors[] = 'connection.identity_unproven';
-            }
-            $server = $connection->selectOne('SELECT current_database() AS db, inet_server_addr()::text AS address, inet_server_port() AS port');
-            if (! $server instanceof \stdClass || ! is_string($server->db) || ! is_string($server->address) || $server->port === null) {
-                $errors[] = 'connection.identity_unproven';
-            }
+            $deployments = $this->laravel->make('config')->get('sockit.storage.deployments', []);
+            StoragePreflight::validateDeployments($deployments);
+            assert(is_array($deployments));
+            $identity = StoragePreflight::inspect(storage: $storage, connection: $connection, deployment: $deployments[$storage->connection] ?? null);
             foreach ($storage->tables as $entity => $table) {
-                $name = ($storage->schema === null ? '' : $storage->schema.'.').$table;
+                $name = $identity['schema'].'.'.$table;
                 if (! $connection->getSchemaBuilder()->hasTable($name)) {
                     $errors[] = 'schema.missing.'.$entity;
                 }
             }
             if (isset($storage->tables['outbox']) && ! in_array('schema.missing.outbox', $errors, true)) {
-                $name = ($storage->schema === null ? '' : $storage->schema.'.').$storage->tables['outbox'];
+                $name = $identity['schema'].'.'.$storage->tables['outbox'];
                 $rows = $connection->table($name)->where('panel', $panel)->pluck('deliveries');
                 foreach ($rows as $row) {
                     if (! is_string($row)) {
@@ -85,6 +79,9 @@ final class DoctorCommand extends Command
                     }
                 }
             }
+        } catch (InvalidSchemaException $error) {
+            $errors[] = 'connection.identity_unproven';
+            $errors[] = $error->detail()['rule'];
         } catch (\Throwable) {
             $errors[] = 'connection_or_schema.unavailable';
         }

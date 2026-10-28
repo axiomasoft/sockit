@@ -1,0 +1,8 @@
+command: composer lint
+cwd: /home/vostrikov/projects/packages/sockit
+source_manifest_sha256: d765cc7fd3235881d74ceba8cd3701bcd8545ff5025e57798d3f6dac43eaa278
+exit: 0
+--- stdout ---
+{"tool":"pint","result":"passed"}
+--- stderr ---
+> pint --test

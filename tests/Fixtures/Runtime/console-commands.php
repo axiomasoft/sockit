@@ -19,7 +19,14 @@ register_shutdown_function(static function () use ($scenario): void {
     $scenario->db->close();
 });
 if (getenv('SOCKIT_NO_IDENTITY') !== '1') {
-    $scenario->app->make('config')->set('sockit.deployment_identity', 'owned-test-cluster');
+    $connection = $scenario->db->capsule->getConnection('owner_a');
+    $endpoint = $connection->getConfig();
+    if (! is_array($endpoint)) {
+        throw new RuntimeException('Invalid owned connection');
+    }
+    $observed = PgTarget::query($scenario->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(PDO::FETCH_ASSOC);
+    $descriptor = ['cluster' => 'owned-test-cluster', 'endpoint' => ['host' => $endpoint['host'], 'port' => $endpoint['port']], 'aliases' => [$observed]];
+    $scenario->app->make('config')->set('sockit.storage.deployments', ['owner_a' => $descriptor, 'owner_b' => $descriptor]);
 }
 $scenario->consumer->fault = getenv('SOCKIT_CONSOLE_FAULT') ?: '';
 if (getenv('SOCKIT_NO_HANDLES') !== '1') {

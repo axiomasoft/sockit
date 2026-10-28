@@ -89,7 +89,7 @@ final class ModuleGraphCompiler
             throw new InvalidModuleException($errors);
         }
         ksort($modules);
-        $active = $declarations = $settings = $features = [];
+        $active = $declarations = $settings = $features = $consumers = [];
         foreach ($modules as $id => $module) {
             if (! in_array($id, $config->modules->enabled, true)) {
                 continue;
@@ -104,6 +104,12 @@ final class ModuleGraphCompiler
                         $errors[] = ['module' => $id, 'key' => 'features.'.$feature, 'rule' => 'MODULE_FEATURE_DUPLICATE'];
                     }
                     $features[$feature] = $id;
+                }
+                foreach ($declaration['consumers'] as $consumerId => $consumer) {
+                    if (isset($consumers[$consumerId])) {
+                        $errors[] = ['module' => $id, 'key' => 'consumers.'.$consumerId, 'rule' => 'MODULE_CONSUMER_DUPLICATE'];
+                    }
+                    $consumers[$consumerId] = $consumer;
                 }
                 $schema = $declaration['settings'] !== null ? $app->make($declaration['settings']) : null;
                 if ($schema !== null && ! $schema instanceof ModuleSettingsSchema) {

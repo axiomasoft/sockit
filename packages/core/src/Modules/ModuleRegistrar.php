@@ -9,6 +9,7 @@ use SocKit\Attributes\SpiKind;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Modules\Exceptions\InvalidModuleException;
+use SocKit\Operations\Contracts\OutboxConsumer;
 use SocKit\Surfaces\Contracts\TargetResolver;
 
 #[Spi(kind: SpiKind::Call, since: '1.0')]
@@ -25,6 +26,23 @@ final class ModuleRegistrar
 
     /** @var array<string, class-string<TargetResolver>> */
     private array $targets = [];
+
+    /** @var array<string, class-string<OutboxConsumer>> */
+    private array $consumers = [];
+
+    public function outboxConsumer(string $id, string $consumer): self
+    {
+        $this->mutable();
+        if (preg_match('/^[a-z][a-z0-9_.-]{0,95}$/D', $id) !== 1 || ! is_subclass_of($consumer, OutboxConsumer::class) || ! new \ReflectionClass($consumer)->isInstantiable()) {
+            $this->fail(key: 'consumers.'.$id, rule: 'MODULE_CONSUMER_INVALID');
+        }
+        if (isset($this->consumers[$id])) {
+            $this->fail(key: 'consumers.'.$id, rule: 'MODULE_CONSUMER_DUPLICATE');
+        }
+        $this->consumers[$id] = $consumer;
+
+        return $this;
+    }
 
     private bool $frozen = false;
 
@@ -87,10 +105,10 @@ final class ModuleRegistrar
         return $this;
     }
 
-    /** @return array{surfaces:list<string>, features:list<string>, settings:class-string<ModuleSettingsSchema>|null, targets:array<string, class-string<TargetResolver>>} */
+    /** @return array{surfaces:list<string>, features:list<string>, settings:class-string<ModuleSettingsSchema>|null, targets:array<string, class-string<TargetResolver>>, consumers:array<string, class-string<OutboxConsumer>>} */
     public function declarations(): array
     {
-        return ['surfaces' => $this->surfaces, 'features' => $this->features, 'settings' => $this->schema, 'targets' => $this->targets];
+        return ['surfaces' => $this->surfaces, 'features' => $this->features, 'settings' => $this->schema, 'targets' => $this->targets, 'consumers' => $this->consumers];
     }
 
     private function fail(string $key, string $rule): never

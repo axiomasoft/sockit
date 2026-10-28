@@ -77,3 +77,67 @@ installation/live/write snapshot. Нет optional fence/проверяемой l
 `failWith(...)`; всё ненастроенное deny. Ключ включает весь actor context, installation, panel/surface,
 target и incarnation. Fake не реализует local fence. Swap/registry fixtures `acme.runtime` и `acme.other`
 и локальный PostgreSQL host adapter проверяют seams, **не являются social e2e**.
+
+## Durable events and consumers — P2.6
+
+`ModuleRegistrar::outboxConsumer(id: 'acme.inbox', consumer: MyConsumer::class)` declares a
+concrete `OutboxConsumer` FQCN. IDs are globally unique across enabled modules; declarations freeze
+with the graph. Effective consumers are restricted to modules selected on the explicit panel.
+Boot and config caching collect class names without constructing consumers or touching SQL.
+Consumer instances are resolved per attempt and must not retain actor/installation in a singleton.
+
+`EventEnvelope` wire v1.0 contains UUIDv7 `event_id`, `source_installation`, `panel`,
+`source_generation`, complete `surface` including incarnation, `source_revision`, `privacy_revision`,
+`event_type`, UTC `occurred_at`, `audience`, optional `target`, `payload` and `digest`.
+Payload is a map of typed `ResourceRef` values serialized to scalar reference fields; arbitrary body,
+actor facts and unknown fields are rejected. Digest covers all immutable envelope fields except itself.
+Unknown wire version and conflicting digest fail closed with existing problem codes.
+`sockit.events.source_generation` is a nonempty server-owned string of at most 64 bytes (development
+default `'1'`), frozen in `SocKitConfig::events`. Actor generation and payload never select that epoch.
+Rotation invalidates old source events for dispatch; clone/restore qualification belongs to P9.
+
+The internal `OutboxStore::append()` joins an existing owner transaction and uses the panel's immutable
+logical `outbox` mapping. The caller obtains server-compiled consumer IDs from
+`OutboxRelay::consumers($handle)` **before** entering the transaction. Append identity is
+`(installation,panel,source_generation,event_id)`; identical replay preserves delivery state;
+a conflicting immutable envelope raises `sockit.event_identity_conflict` and rolls back the caller's
+transaction. It does not rewrite the accepted event. An event without consumers remains durably
+quarantined. The owner envelope integrating state/revision/receipt/append is P2.7; production DDL is P3.
+P2 uses PostgreSQL test-only snapshots, with one kernel logical outbox and no kernel inbox table.
+
+`OutboxRelay::poll(handle: $handle, mode: ReplayMode::Delivery, limit: 100)` is scoped to the
+explicit handle's installation/panel/surface incarnation. The host restores trusted isolation and
+supplies the current principal; the relay re-resolves that actor with `ActorContexts::forWorker`,
+checks current action `sockit.events.deliver`, admission/content audience, owner lifecycle/revisions,
+and optional public target visibility/privacy before each consume. Surface lookup is performed by
+the public relay through its owner repository; consumers do not read kernel tables. P2 surface-event
+payload refs must match the current surface resource. Other resource refs fail closed until their
+domain owner supplies a public current lookup; no generic foreign table access is inferred.
+No body is dispatched. Access facts are sampled immediately before dispatch; atomic revocation across
+separate authority/delivery databases is not promised. Network/resolvers/consumer never run under owner locks.
+
+Claims use a short `FOR UPDATE SKIP LOCKED` transaction, PostgreSQL time, a random lease token,
+expiry and durable attempt count per consumer, followed by commit. `lease_seconds` (1–3600),
+`retry_seconds` (1–86400) and `max_attempts` (1–1000) are typed server scalars. ACK/retry/quarantine
+requires the same full source/event/consumer identity, current token and unexpired lease under lock.
+An old worker cannot overwrite a reclaimed lease. `DeliveryResult` distinguishes `confirmed`, `retry`,
+`unknown` and `quarantine`; only confirmed becomes delivered. Unknown outcomes and exceptions retain
+stable identity for retry. The relay is the sole retry owner with bounded backoff and attempt quarantine.
+Repeated crashes also stop at the attempt budget. Missing/disabled consumers quarantine with a reason;
+disable never deletes or silently acknowledges pending data. Recovery/redrive from quarantine is explicit
+and is not an automatic policy in P2. Wakeups are optional hints; durable polling survives their loss.
+
+`OutboxConsumer::consume(EventEnvelope $event, ReplayMode $mode): DeliveryResult` runs outside the
+owner transaction and may be called repeatedly after crashes/timeouts. Implementations set bounded
+IO timeouts, fail closed, own their SQL inbox and commit inbox identity/digest plus local effect in one
+consumer transaction. UNIQUE must include `(consumer,installation,panel,source_generation,event_id)`;
+same identity/digest is a no-op, another digest is quarantine. A queue ACK is not proof of a remote effect.
+No batch or authorization cache is provided; stable SPI additions require separate capabilities.
+
+`ReplayMode::ProjectionOnly` calls the same current guards and consumer port for idempotent local
+projection only. It does not claim/ACK or advance live delivery state. Consumers must perform zero
+network/notification/delivery effects and keep projection dedup separate from the live inbox, so a
+rebuild cannot suppress a later live effect. Projection polling uses a bounded explicit surface batch;
+large rebuild pagination/product scheduling is outside P2.6. Test fixtures demonstrate independent SQL
+inbox/projection transactions, process crashes, fenced ACK and two-panel identity; they are not social
+or remote delivery e2e evidence.

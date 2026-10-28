@@ -11,6 +11,7 @@ use SocKit\Configuration\SocKitConfig;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Modules\Internal\CompiledModuleGraph;
 use SocKit\Modules\Internal\ModuleGraphCompiler;
+use SocKit\Operations\Contracts\OutboxConsumer;
 use SocKit\Surfaces\Contracts\TargetResolver;
 
 #[Spi(kind: SpiKind::Call, since: '1.0')]
@@ -72,7 +73,7 @@ final readonly class Modules
         return $this->graph->manifests;
     }
 
-    /** @return array<string, array{surfaces:list<string>, features:list<string>, settings:class-string<ModuleSettingsSchema>|null, targets:array<string, class-string<TargetResolver>>}> */
+    /** @return array<string, array{surfaces:list<string>, features:list<string>, settings:class-string<ModuleSettingsSchema>|null, targets:array<string, class-string<TargetResolver>>, consumers:array<string, class-string<OutboxConsumer>>}> */
     public function declarations(): array
     {
         return $this->graph->declarations;

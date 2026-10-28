@@ -16,6 +16,7 @@ use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Exceptions\InvalidPrivacyFloorException;
+use SocKit\Configuration\Data\EventsConfig;
 use SocKit\Configuration\Data\IdsConfig;
 use SocKit\Configuration\Data\ModulesConfig;
 use SocKit\Configuration\Data\PanelsConfig;
@@ -31,11 +32,17 @@ use SocKit\Surfaces\SurfaceProvider;
 #[Api(since: '1.0')]
 final readonly class SocKitConfig
 {
-    public function __construct(public IdsConfig $ids, public PanelsConfig $panels, public SurfacesConfig $surfaces, public ModulesConfig $modules, public ResolversConfig $resolvers, public PrivacyConfig $privacy) {}
+    public function __construct(public IdsConfig $ids, public PanelsConfig $panels, public SurfacesConfig $surfaces, public ModulesConfig $modules, public ResolversConfig $resolvers, public PrivacyConfig $privacy, public EventsConfig $events = new EventsConfig) {}
 
     public static function fromRepository(Repository $repository): self
     {
         $data = self::normalize($repository);
+        $events = self::map(value: $data['events'], key: 'sockit.events');
+        self::requireRule(valid: is_string($events['source_generation']), key: 'sockit.events.source_generation', rule: 'CONFIG_STRING');
+        foreach (['lease_seconds', 'retry_seconds', 'max_attempts'] as $key) {
+            self::requireRule(valid: is_int($events[$key]), key: 'sockit.events.'.$key, rule: 'CONFIG_INT');
+        }
+        $eventConfig = new EventsConfig(sourceGeneration: $events['source_generation'], leaseSeconds: $events['lease_seconds'], retrySeconds: $events['retry_seconds'], maxAttempts: $events['max_attempts']);
         $ids = self::map(value: $data['ids'], key: 'sockit.ids');
         $modules = self::map(value: $data['modules'], key: 'sockit.modules');
         $privacy = self::map(value: $data['privacy'], key: 'sockit.privacy');
@@ -77,7 +84,7 @@ final readonly class SocKitConfig
         }
 
         return new self(ids: new IdsConfig($ids['strategy']), panels: new PanelsConfig($panels), surfaces: new SurfacesConfig($surfaces), modules: new ModulesConfig(enabled: $enabled, settings: $moduleSettings),
-            resolvers: new ResolversConfig(tenant: $classes['tenant'], actor: $classes['actor'], contour: $classes['contour'], audience: $classes['audience'], authorizer: $classes['authorizer'], groups: $classes['groups'], surfacePolicy: $classes['surface_policy'], targets: $classes['targets']), privacy: new PrivacyConfig($privacyFloor));
+            resolvers: new ResolversConfig(tenant: $classes['tenant'], actor: $classes['actor'], contour: $classes['contour'], audience: $classes['audience'], authorizer: $classes['authorizer'], groups: $classes['groups'], surfacePolicy: $classes['surface_policy'], targets: $classes['targets']), privacy: new PrivacyConfig($privacyFloor), events: $eventConfig);
     }
 
     /** Normalize known configuration maps, preserving defaults for empty map overrides.
@@ -88,10 +95,10 @@ final readonly class SocKitConfig
     {
         $raw = $repository->get('sockit', []);
         ModulesConfig::assertSerializable(value: $raw, key: 'sockit');
-        $raw = self::map(value: $raw, key: 'sockit', allowed: ['ids', 'panels', 'surfaces', 'modules', 'resolvers', 'privacy']);
+        $raw = self::map(value: $raw, key: 'sockit', allowed: ['ids', 'panels', 'surfaces', 'modules', 'resolvers', 'privacy', 'events']);
         $defaults = self::map(value: require __DIR__.'/../../config/sockit.php', key: 'sockit');
         $data = array_replace($defaults, $raw);
-        foreach (['ids', 'modules', 'resolvers', 'privacy'] as $section) {
+        foreach (['ids', 'modules', 'resolvers', 'privacy', 'events'] as $section) {
             $base = self::map(value: $defaults[$section], key: 'sockit.'.$section);
             $values = self::map(value: array_key_exists($section, $raw) ? $raw[$section] : [], key: 'sockit.'.$section, allowed: array_keys($base));
             $data[$section] = array_replace($base, $values);

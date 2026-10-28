@@ -1,0 +1,16 @@
+{
+  "fixture": "pending",
+  "contract": "outcome",
+  "version": 1,
+  "input": {
+    "outcome": "pending",
+    "receipt_id": "r1",
+    "resource": null,
+    "revision": null,
+    "problem": null,
+    "problem_detail": {}
+  },
+  "expect": {
+    "valid": true
+  }
+}

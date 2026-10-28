@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support\Internal;
+
+class RelativeBase
+{
+    public function selfReturn(): self { return $this; }
+    public function selfArgument(self $value): void {}
+    public function nullableSelf(?self $value): ?self { return $value; }
+    public function unionSelf(self|string $value): self|string { return $value; }
+    public function safeStatic(): static { return $this; }
+}
+
+class RelativeChild extends RelativeBase
+{
+    public function parentReturn(): parent { return $this; }
+    public function parentArgument(parent $value): void {}
+}
+
+namespace SocKit\Support;
+
+#[\SocKit\Attributes\Api]
+class RelativeFacade extends Internal\RelativeChild {}

@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support\Internal;
+
+trait RelativeFluent
+{
+    public function fluent(): self { return $this; }
+    public function fluentParent(): parent { return $this; }
+}
+
+class RelativeFactory
+{
+    public function create(): static { return $this; }
+}
+
+namespace SocKit\Support;
+
+use SocKit\Attributes\Api;
+
+#[Api]
+class SafeRelativeBase {}
+
+#[Api]
+class SafeRelativeChild extends SafeRelativeBase
+{
+    use Internal\RelativeFluent;
+    public function value(self $value): self { return $value; }
+    public function parentValue(parent $value): parent { return $value; }
+    public function lateBound(): static { return $this; }
+}
+
+#[Api]
+class SafeRelativeFactory extends Internal\RelativeFactory {}

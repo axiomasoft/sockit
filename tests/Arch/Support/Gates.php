@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Tests\Arch\Support;
 
+use LogicException;
 use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionMethod;
@@ -246,6 +247,7 @@ final class Gates
                         }
                         foreach ($types as $signature) {
                             foreach (self::typeNames($signature) as $typeName) {
+                                $typeName = self::resolveSignatureType($typeName, $method, $reflection->getName());
                                 if (self::forbiddenSignature($typeName)) {
                                     $violations[] = self::violation('A9', $file, $method->getStartLine() ?: $type['line'], $type['name'].'::'.$method->getName().' exposes '.$typeName);
                                 }
@@ -281,6 +283,19 @@ final class Gates
         }
 
         return $names;
+    }
+
+    private static function resolveSignatureType(string $name, ReflectionMethod $method, string $publicClass): string
+    {
+        // self/parent use the lexical declaring class, including inherited methods.
+        // static uses late binding to the public type currently being inspected.
+        return match (strtolower($name)) {
+            'self' => $method->getDeclaringClass()->getName(),
+            'parent' => ($method->getDeclaringClass()->getParentClass()
+                ?: throw new LogicException('Cannot resolve parent of '.$method->getDeclaringClass()->getName()))->getName(),
+            'static' => $publicClass,
+            default => $name,
+        };
     }
 
     private static function forbiddenSignature(string $name): bool

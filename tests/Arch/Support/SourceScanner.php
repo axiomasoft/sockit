@@ -159,9 +159,9 @@ final class SourceScanner
             $attributes = [];
             $modifiers = [];
 
-            if ($text === '{' || in_array($id, [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true)) {
+            if (($id === 0 && $text === '{') || in_array($id, [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true)) {
                 $depth++;
-            } elseif ($text === '}') {
+            } elseif ($id === 0 && $text === '}') {
                 $depth--;
                 if ($depth < $namespaceDepth) {
                     $namespace = '';

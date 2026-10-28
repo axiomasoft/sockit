@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Testing\ArchFixtures\Relative;
+
+use SocKit\Attributes\Api;
+
+#[Api]
+class RelativeRecord extends \Illuminate\Database\Eloquent\Model
+{
+    public function relativeSelf(): self { return $this; }
+    public function relativeParent(): parent { return $this; }
+    public function relativeStatic(): static { return $this; }
+}
+
+#[Api]
+class RelativeRequest extends \Illuminate\Http\Request
+{
+    public function relativeSelf(): self { return $this; }
+    public function relativeParent(): parent { return $this; }
+    public function relativeStatic(): static { return $this; }
+}
+
+#[Api]
+class RelativeResponse extends \Illuminate\Http\Response
+{
+    public function relativeSelf(): self { return $this; }
+    public function relativeParent(): parent { return $this; }
+    public function relativeStatic(): static { return $this; }
+}

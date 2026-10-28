@@ -7,7 +7,7 @@ it('reports all documentation violations and accepts the actual documentation', 
     $fixture = escapeshellarg(dirname(__DIR__, 3).'/tests/Fixtures/docs-violations');
     exec(PHP_BINARY." $script --root=$fixture 2>&1", $output, $exit);
     expect($exit)->toBe(1)
-        ->and(implode("\n", $output))->toContain('ADR section Альтернативы', 'Forbidden filesystem reference', 'T-31');
+        ->and(implode("\n", $output))->toContain('ADR section Альтернативы', 'Forbidden filesystem reference', 'T-31', 'Матрица решений', 'Генерация и upgrade', 'Условные адаптеры', 'Предложение канону');
 
     exec(PHP_BINARY." $script 2>&1", $actual, $actualExit);
     expect($actualExit)->toBe(0)->and(implode("\n", $actual))->toBe('OK');

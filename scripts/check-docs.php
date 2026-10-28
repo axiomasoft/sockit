@@ -12,7 +12,7 @@ foreach (array_slice($argv, 1) as $arg) {
     }
 }
 $errors = [];
-$names = ['theses', 'philosophy', 'core-boundary', 'layering-rules', 'structure', 'ownership', 'extension-axes', 'invariants', 'privacy', 'spi', 'glossary'];
+$names = ['theses', 'philosophy', 'core-boundary', 'layering-rules', 'structure', 'ownership', 'extension-axes', 'invariants', 'privacy', 'spi', 'glossary', 'ecosystem-practices', 'panels-and-storage', 'external-discussions', 'neighbor-work'];
 $files = [];
 foreach ($names as $name) {
     $files[] = "$root/docs/architecture/$name.md";
@@ -48,6 +48,24 @@ foreach ($files as $file) {
         }
     } elseif (! preg_match('/^#\s+\S/mu', $content)) {
         $errors[] = "Missing heading: $file";
+    }
+}
+$requiredSections = [
+    'ecosystem-practices' => ['Матрица решений'],
+    'panels-and-storage' => ['Модель и компиляция', 'Schema и имена', 'Генерация и upgrade', 'Приёмка'],
+    'external-discussions' => ['Владение и доступность', 'Условные адаптеры'],
+    'neighbor-work' => ['Открытые действия', 'Предложение канону'],
+];
+foreach ($requiredSections as $name => $sections) {
+    $path = "$root/docs/architecture/$name.md";
+    $content = @file_get_contents($path);
+    if ($content === false) {
+        continue;
+    }
+    foreach ($sections as $section) {
+        if (! preg_match('/^## '.preg_quote($section, '/').'\s*\R+(?!\s*#)\s*\S/mu', $content)) {
+            $errors[] = "Missing or empty section $section: $path";
+        }
     }
 }
 $theses = @file_get_contents("$root/docs/architecture/theses.md");

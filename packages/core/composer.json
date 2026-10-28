@@ -47,7 +47,10 @@
                     "publish-tags": [
                         "sockit-config"
                     ],
-                    "commands": [],
+                    "commands": [
+                        "sockit:doctor",
+                        "sockit:relay"
+                    ],
                     "module-ids": []
                 }
             }

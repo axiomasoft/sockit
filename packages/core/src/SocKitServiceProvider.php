@@ -12,6 +12,8 @@ use SocKit\Audience\AudienceEvaluator;
 use SocKit\Audience\AudienceGate;
 use SocKit\Configuration\Exceptions\ProviderUnavailableException;
 use SocKit\Configuration\SocKitConfig;
+use SocKit\Internal\Console\DoctorCommand;
+use SocKit\Internal\Console\RelayCommand;
 use SocKit\Modules\Modules;
 use SocKit\Operations\OperationHandles;
 use SocKit\Operations\Operations;
@@ -67,6 +69,7 @@ class SocKitServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
+            $this->commands([DoctorCommand::class, RelayCommand::class]);
             $this->publishes(paths: [__DIR__.'/../config/sockit.php' => config_path('sockit.php')], groups: 'sockit-config');
         }
     }

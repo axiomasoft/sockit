@@ -39,7 +39,7 @@ final class SnapshotFixture
 
     private mixed $previousDb;
 
-    public function __construct(bool $explicitSchema = true, int $version = 1)
+    public function __construct(bool $explicitSchema = true, int $version = 1, bool $modelRelations = false)
     {
         $this->pg = new StoragePgFixture;
         $this->capsule = new Manager;
@@ -48,7 +48,7 @@ final class SnapshotFixture
             $this->pg->owner->exec('CREATE SCHEMA panel_'.$id);
             $connection = $this->pg->connection(name: 'owner_'.$id, prefix: $id === 'a' ? 'driver_' : 'other_');
             $this->capsule->addConnection(config: [...SchemaValues::map($connection->getConfig()), 'prefix' => $connection->getTablePrefix()], name: 'owner_'.$id);
-            $schema = $this->compile(id: $id, version: $version, explicitSchema: $explicitSchema);
+            $schema = $this->compile(id: $id, version: $version, explicitSchema: $explicitSchema, modelRelations: $modelRelations);
             if (! $explicitSchema) {
                 $connection->getPdo()->exec('SET search_path TO panel_'.$id.', public');
             }
@@ -92,7 +92,7 @@ final class SnapshotFixture
         return $runtime;
     }
 
-    public function compile(string $id = 'a', int $version = 1, bool $selected = true, bool $explicitSchema = true): PanelSchema
+    public function compile(string $id = 'a', int $version = 1, bool $selected = true, bool $explicitSchema = true, bool $modelRelations = false): PanelSchema
     {
         $panel = (new Panel)->id('acme.'.$id)->hostTypes('article')->connection('owner_'.$id)->prefix($id.'_')->modules(...($selected ? ['acme.demo-targets', 'acme.demo-links'] : []));
         if ($explicitSchema) {
@@ -100,7 +100,7 @@ final class SnapshotFixture
         }
 
         return new PanelSchemaCompiler()->compile(panel: $panel->materialize(), components: $selected ? [
-            'acme.demo-targets' => ($version === 1 ? new DemoTargetsV1 : new DemoTargetsV2)->component(),
+            'acme.demo-targets' => ($modelRelations ? new DemoModelContribution : ($version === 1 ? new DemoTargetsV1 : new DemoTargetsV2))->component(),
             'acme.demo-links' => new DependentContribution()->component(),
         ] : []);
     }

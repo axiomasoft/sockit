@@ -1,0 +1,29 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "PLAN1.P3.4.sixth-V90",
+  "check_id": "V90",
+  "subject": "PLAN1.P3.4",
+  "procedure": {
+    "cmd": "composer analyse -- --memory-limit=512M",
+    "cwd": "."
+  },
+  "candidate": {
+    "head": "7a46820e2c6e49e1b8d16ff2f1288503f9b3dc9b",
+    "dirty_digest": "7efd91387011cb41210aa5b216c9b2b6a9558a767b6721538424ddf278fb1178"
+  },
+  "exit": 1,
+  "log": {
+    "path": "artifacts/p3.4/sixth-V90.log",
+    "sha256": "9cb959470fd077e567f70d927030544c2ade210ed982546cd96014f86b44af14"
+  },
+  "started_at": "2026-10-28T23:23:43.652525Z",
+  "finished_at": "2026-10-28T23:23:45.305813Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  }
+}

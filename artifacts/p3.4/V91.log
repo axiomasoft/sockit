@@ -1,0 +1,5 @@
+COMMAND composer lint
+STDOUT
+{"tool":"pint","result":"passed"}
+STDERR
+> pint --test

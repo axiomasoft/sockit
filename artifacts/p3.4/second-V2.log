@@ -1,0 +1,89 @@
+COMMAND python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Schema/ModelQueueRestoreTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+STDOUT
+private container=9478d6a0da60f4c7979dc73b4cfb8e9d1fba47726a62c1da8400f0d1dd593d89 owner=sockit_p2_1742c91e0fcabcb5_test decoy=sockit_p2_decoy_1742c91e0fcabcb5_test port=32960
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Schema\ModelQueueRestoreTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit restores real Illuminate identifiers in fresh consumer processes[39m[90m…[39m [90m1.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rechecks current actor and authorization after model restoration[39m[90m…[39m [90m0.57s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rechecks current actor and authorization after model restoration[39m[90m…[39m [90m0.39s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\ModelQueueRestoreTest[22m [90m>[39m it rechecks curr…   
+[39;1m  Failed asserting that 1 is identical to 0.[39;22m
+
+  at [32mtests/Integration/Schema/ModelQueueRestoreTest.php[39m:[32m122[39m
+    118▕ 
+    119▕             return $s->mutation();
+    120▕         });
+    121▕         expect($result->isSuccess())->toBeFalse()->and($result->resource)->toBeNull()->and($s->counts()['effects'])->toBe(0)
+  ➜ 122▕             ->and($s->counts()['outbox'])->toBe(0)->and($s->counts()['receipts'])->toBe(0);
+    123▕         if ($seen !== null) {
+    124▕             expect($seen->actor?->id)->toBe('7');
+    125▕         }
+    126▕         fwrite(STDERR, 'P3.4 SQL assertions model_restored=true revoked_'.$revocation.'_denied=true no_fallback_or_effects=true'.PHP_EOL);
+
+  [33m1   [39m[39;1mtests/Integration/Schema/ModelQueueRestoreTest.php[39;22m:[39;1m122[39;22m
+
+
+  [90mTests:[39m    [31;1m1 failed[39;22m[90m,[39m[39m [39m[32;1m2 passed[39;22m[90m (143 assertions)[39m
+  [90mDuration:[39m [39m2.15s[39m
+
+
+STDERR
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/ModelQueueRestoreTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=103
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=104
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=105
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=106
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=107
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=108
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel367264dffe723162\\DemoTarget","id":"01a184d1-26f6-73be-b047-db0a1186a7d7","panel":"acme.a","table":"panel_a.a_demo_targets","connection":"owner_a","relations":{"demoLinksTarget":1},"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel367264dffe723162\\DemoLink","id":"01a184d1-26f9-72e4-875e-f2e1b150bd72","panel":"acme.a","table":"panel_a.a_demo_links","connection":"owner_a","relations":{"target":"owner_a"},"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel367264dffe723162\\SurfaceInstance","id":"01a184d1-26fc-72b9-819e-3ee858fab3af","panel":"acme.a","table":"panel_a.a_surface_instances","connection":"owner_a","relations":[],"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel367264dffe723162\\Receipt","id":"01a184d1-2707-733c-b585-072324bfa13b","panel":"acme.a","table":"panel_a.a_receipts","connection":"owner_a","relations":[],"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel367264dffe723162\\OutboxEvent","id":"01a184d1-2708-7179-9c65-2d7743817f97","panel":"acme.a","table":"panel_a.a_outbox","connection":"owner_a","relations":[],"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel9fe15b9aa17aaee0\\DemoTarget","id":"01a184d1-28ce-73b2-a640-144331602d90","panel":"acme.b","table":"panel_b.b_demo_targets","connection":"owner_b","relations":{"demoLinksTarget":1},"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel9fe15b9aa17aaee0\\DemoLink","id":"01a184d1-28cf-706b-8b7e-4eea7c43ece0","panel":"acme.b","table":"panel_b.b_demo_links","connection":"owner_b","relations":{"target":"owner_b"},"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel9fe15b9aa17aaee0\\SurfaceInstance","id":"01a184d1-28d1-70d2-b9f3-2b3ea6d1be4a","panel":"acme.b","table":"panel_b.b_surface_instances","connection":"owner_b","relations":[],"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel9fe15b9aa17aaee0\\Receipt","id":"01a184d1-28d2-7396-a8db-3ebc06c14e0f","panel":"acme.b","table":"panel_b.b_receipts","connection":"owner_b","relations":[],"default":"decoy"}
+P3.4 fresh restore {"class":"App\\SocKit\\Generated\\Panel9fe15b9aa17aaee0\\OutboxEvent","id":"01a184d1-28d4-70b2-bdc3-0af990b03ace","panel":"acme.b","table":"panel_b.b_outbox","connection":"owner_b","relations":[],"default":"decoy"}
+P3.4 SQL assertions fresh_bootstrap_all_single_key_entities=true A_B_A_nested_relations=true B_exception_rollback=true identifier_connection_tamper_denied=true decoy_untouched=true
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=141
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=142
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=143
+P2.2 Laravel connection=owner_a database=sockit_p2_1742c91e0fcabcb5_test backend_pid=144
+P2.2 Laravel connection=owner_b database=sockit_p2_1742c91e0fcabcb5_test backend_pid=145
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_1742c91e0fcabcb5_test backend_pid=146
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.6 consumer-owned SQL snapshots installed AFTER verified identities
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=147
+P2.7 all acme/schema DDL AFTER verified isolated identities
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=148
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=149
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=150
+P2.2 Laravel connection=owner_a database=sockit_p2_1742c91e0fcabcb5_test backend_pid=151
+P2.2 Laravel connection=owner_b database=sockit_p2_1742c91e0fcabcb5_test backend_pid=152
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_1742c91e0fcabcb5_test backend_pid=153
+P2.9 SQL A {"effects":0,"revision":1,"receipts":0,"outbox":0}
+P2.9 SQL A {"effects":0,"revision":1,"receipts":0,"outbox":0}
+P2.9 SQL A {"effects":0,"revision":1,"receipts":0,"outbox":0}
+P3.4 SQL assertions model_restored=true revoked_actor_denied=true no_fallback_or_effects=true
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=154
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=155
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=156
+P2.2 Laravel connection=owner_a database=sockit_p2_1742c91e0fcabcb5_test backend_pid=157
+P2.2 Laravel connection=owner_b database=sockit_p2_1742c91e0fcabcb5_test backend_pid=158
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_1742c91e0fcabcb5_test backend_pid=159
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.6 consumer-owned SQL snapshots installed AFTER verified identities
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=160
+P2.7 all acme/schema DDL AFTER verified isolated identities
+PG identity database=sockit_p2_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=161
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=162
+PG identity database=sockit_p2_decoy_1742c91e0fcabcb5_test server_version_num=160014 marker=sockit-p21-1742c91e0fcabcb5 backend_pid=163
+P2.2 Laravel connection=owner_a database=sockit_p2_1742c91e0fcabcb5_test backend_pid=164
+P2.2 Laravel connection=owner_b database=sockit_p2_1742c91e0fcabcb5_test backend_pid=165
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_1742c91e0fcabcb5_test backend_pid=166
+P2.9 SQL A {"effects":0,"revision":1,"receipts":1,"outbox":0}
+P2.9 SQL A {"effects":0,"revision":1,"receipts":1,"outbox":0}
+P2.9 SQL A {"effects":0,"revision":1,"receipts":1,"outbox":0}
+Script pest handling the test event returned with error code 1

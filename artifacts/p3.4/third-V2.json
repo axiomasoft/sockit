@@ -1,0 +1,29 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "PLAN1.P3.4.third-V2",
+  "check_id": "V2",
+  "subject": "PLAN1.P3.4",
+  "procedure": {
+    "cmd": "python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Schema/ModelQueueRestoreTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+    "cwd": "."
+  },
+  "candidate": {
+    "head": "7a46820e2c6e49e1b8d16ff2f1288503f9b3dc9b",
+    "dirty_digest": "52ca2e5903653e9c6b2e8f26aa1c41d7a5e5677373283afe7527c8c3d7b2d69e"
+  },
+  "exit": 0,
+  "log": {
+    "path": "artifacts/p3.4/third-V2.log",
+    "sha256": "6c895884eecb129e3a81705cee17854bfa5b6eb9415b17d1288bcbd1ff0e4cec"
+  },
+  "started_at": "2026-10-28T23:21:44.774793Z",
+  "finished_at": "2026-10-28T23:21:49.197768Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  }
+}

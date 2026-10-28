@@ -1,0 +1,104 @@
+ ------ -------------------------------------- 
+  Line   tests/Fixtures/Modules/console.php    
+ ------ -------------------------------------- 
+  12     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+  15     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+ ------ -------------------------------------- 
+
+ ------ -------------------------------------- 
+  Line   tests/Fixtures/Panels/console.php     
+ ------ -------------------------------------- 
+  12     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+  15     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+ ------ -------------------------------------- 
+
+ ------ ------------------------------------------- 
+  Line   tests/Fixtures/Runtime/envelope-child.php  
+ ------ ------------------------------------------- 
+  37     Variable $argv might not be defined.       
+         🪪  variable.undefined                     
+  38     Variable $argv might not be defined.       
+         🪪  variable.undefined                     
+ ------ ------------------------------------------- 
+
+ ------ ----------------------------------------- 
+  Line   tests/Fixtures/Runtime/outbox-child.php  
+ ------ ----------------------------------------- 
+  26     Variable $argv might not be defined.     
+         🪪  variable.undefined                   
+ ------ ----------------------------------------- 
+
+ ------ ------------------------------------------- 
+  Line   tests/Fixtures/Runtime/outbox-console.php  
+ ------ ------------------------------------------- 
+  12     Variable $argv might not be defined.       
+         🪪  variable.undefined                     
+  17     Variable $argv might not be defined.       
+         🪪  variable.undefined                     
+ ------ ------------------------------------------- 
+
+ ------ ------------------------------------------ 
+  Line   tests/Fixtures/Runtime/receipt-child.php  
+ ------ ------------------------------------------ 
+  28     Variable $argv might not be defined.      
+         🪪  variable.undefined                    
+  29     Variable $argv might not be defined.      
+         🪪  variable.undefined                    
+ ------ ------------------------------------------ 
+
+ ------ ------------------------------------------ 
+  Line   tests/Fixtures/Runtime/surface-child.php  
+ ------ ------------------------------------------ 
+  29     Variable $argv might not be defined.      
+         🪪  variable.undefined                    
+ ------ ------------------------------------------ 
+
+ ------ ------------------------------------------- 
+  Line   tests/Fixtures/Runtime/target-console.php  
+ ------ ------------------------------------------- 
+  13     Variable $argv might not be defined.       
+         🪪  variable.undefined                     
+  18     Variable $argv might not be defined.       
+         🪪  variable.undefined                     
+ ------ ------------------------------------------- 
+
+ ------ -------------------------------------- 
+  Line   tests/Fixtures/Schema/console.php     
+ ------ -------------------------------------- 
+  15     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+  22     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+ ------ -------------------------------------- 
+
+ ------ --------------------------------------------- 
+  Line   tests/Fixtures/Schema/model-queue-child.php  
+ ------ --------------------------------------------- 
+  15     Variable $argv might not be defined.         
+         🪪  variable.undefined                       
+ ------ --------------------------------------------- 
+
+ ------ ------------------------------------------ 
+  Line   tests/Fixtures/Schema/snapshot-child.php  
+ ------ ------------------------------------------ 
+  26     Variable $argv might not be defined.      
+         🪪  variable.undefined                    
+  27     Variable $argv might not be defined.      
+         🪪  variable.undefined                    
+ ------ ------------------------------------------ 
+
+ ------ -------------------------------------- 
+  Line   tests/Fixtures/Surfaces/console.php   
+ ------ -------------------------------------- 
+  13     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+  16     Variable $argv might not be defined.  
+         🪪  variable.undefined                
+ ------ -------------------------------------- 
+
+ [ERROR] Found 21 errors                                                        
+

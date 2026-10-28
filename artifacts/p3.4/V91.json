@@ -1,0 +1,29 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "PLAN1.P3.4.V91",
+  "check_id": "V91",
+  "subject": "PLAN1.P3.4",
+  "procedure": {
+    "cmd": "composer lint",
+    "cwd": "."
+  },
+  "candidate": {
+    "head": "7a46820e2c6e49e1b8d16ff2f1288503f9b3dc9b",
+    "dirty_digest": "25e3607ef462735b007fb4005911b464d447caacd6a330bed844dcfdf05f571b"
+  },
+  "exit": 0,
+  "log": {
+    "path": "artifacts/p3.4/V91.log",
+    "sha256": "04275f849689e77318162c0832c17fc2e6dba5a2fc76fd91b0d7d4300dd6dc7a"
+  },
+  "started_at": "2026-10-28T23:25:17.910754Z",
+  "finished_at": "2026-10-28T23:25:19.658105Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  }
+}

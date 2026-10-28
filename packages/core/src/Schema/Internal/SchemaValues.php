@@ -21,6 +21,13 @@ final class SchemaValues
         return strlen($value) <= 63 && preg_match('/^[a-z_][a-z0-9_]*$/D', $value) === 1;
     }
 
+    public static function text(mixed $value): string
+    {
+        self::require(valid: is_string($value), key: 'binding', rule: 'MODEL_BINDING_INVALID');
+
+        return $value;
+    }
+
     /** @return array<string, mixed> */
     public static function map(mixed $value): array
     {

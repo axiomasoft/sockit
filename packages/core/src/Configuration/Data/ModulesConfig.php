@@ -40,10 +40,23 @@ final readonly class ModulesConfig
             if (! is_string($name) || (! is_scalar($item) && ! is_array($item) && $item !== null)) {
                 throw new InvalidConfigurationException(message: 'Settings must be a serializable map', detail: ['key' => $key, 'rule' => 'CONFIG_MAP']);
             }
-            $settings[$name] = $item;
+            $settings[$name] = is_array($item) ? self::copy($item) : $item;
         }
 
         return $settings;
+    }
+
+    /** Copy validated values recursively so no nested PHP reference survives normalization.
+     * @param array<array-key, mixed> $values
+     * @return array<array-key, mixed> */
+    private static function copy(array $values): array
+    {
+        $copy = [];
+        foreach ($values as $key => $value) {
+            $copy[$key] = is_array($value) ? self::copy($value) : $value;
+        }
+
+        return $copy;
     }
 
     public static function assertSerializable(mixed $value, string $key): void

@@ -80,6 +80,11 @@ final class ModuleGraphCompiler
                 $errors[] = ['module' => $id, 'key' => 'modules.enabled', 'rule' => 'MODULE_LISTED_NOT_OFFERED'];
             }
         }
+        foreach (array_keys($config->modules->settings) as $id) {
+            if (! isset($modules[$id])) {
+                $errors[] = ['module' => $id, 'key' => 'sockit.modules.settings.'.$id, 'rule' => 'MODULE_SETTINGS_NOT_OFFERED'];
+            }
+        }
         if ($errors !== []) {
             throw new InvalidModuleException($errors);
         }

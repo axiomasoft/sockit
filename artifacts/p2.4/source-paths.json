@@ -1,0 +1,11 @@
+[
+  "packages/core/src/Operations/Internal/Storage/OwnerConnection.php",
+  "packages/core/src/Operations/Internal/Storage/SurfaceInstances.php",
+  "packages/core/src/Operations/Internal/Storage/SurfaceStateException.php",
+  "packages/core/src/Surfaces/Data/SurfaceInstance.php",
+  "packages/core/src/Surfaces/Enums/SurfaceLifecycle.php",
+  "tests/Fixtures/Runtime/SurfaceScenario.php",
+  "tests/Fixtures/Runtime/surface-child.php",
+  "tests/Integration/Runtime/SurfaceLifecycleTest.php",
+  "tests/Integration/Runtime/TombstoneReplayTest.php"
+]

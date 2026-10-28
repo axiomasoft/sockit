@@ -1,0 +1,18 @@
+private container=2065eba863e0ee597b7278c87126d178bd5d6338a40ade0f120635b935ec24e1 owner=sockit_p2_b00853b834e7c192_test decoy=sockit_p2_decoy_b00853b834e7c192_test port=32803
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\SurfaceLifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps typed owner snapshots CAS and Live Archived Deleted transi[39m[90m…[39m [90m0.34s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit arbitrates concurrent explicit creation by UNIQUE without an abs[39m[90m…[39m [90m0.59s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.86s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.77s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.78s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.66s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.65s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.80s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.42s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deletes an archived instance and rejects missing and regressing[39m[90m… [39m [90m0.16s[39m  
+
+  [90mTests:[39m    [32;1m11 passed[39;22m[90m (207 assertions)[39m
+  [90mDuration:[39m [39m6.50s[39m
+

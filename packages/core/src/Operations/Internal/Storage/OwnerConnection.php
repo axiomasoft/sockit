@@ -61,4 +61,19 @@ final readonly class OwnerConnection
         }
         $this->connection->afterCommit($callback);
     }
+
+    /** Internal repositories share this exact handle; they cannot supply a second panel/actor identity. */
+    public function handle(): OperationHandle
+    {
+        return $this->handle;
+    }
+
+    /** Local guard only: trusted context was checked before BEGIN, no host callbacks under locks. */
+    public function requireTransaction(): void
+    {
+        $this->assertRouting();
+        if ($this->connection->transactionLevel() !== 1) {
+            throw new InvalidConfigurationException(message: 'Surface storage requires its own active owner transaction', detail: ['key' => 'transaction']);
+        }
+    }
 }

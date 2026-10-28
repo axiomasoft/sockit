@@ -1,0 +1,20 @@
+{
+  "fixture": "groups-disabled",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "features": [
+          "groups"
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FEATURE_DISABLED"
+    ]
+  }
+}

@@ -33,9 +33,14 @@ final readonly class PanelDefinitions
     }
 
     /** Called with a private module view by the booting coordinator. */
-    public static function compile(Application $app, SocKitConfig $config, Modules $modules): void
+    public static function compile(Application $app, SocKitConfig $config, Modules $modules): self
     {
-        self::compiler($app)->compile(app: $app, config: $config, modules: $modules);
+        return new self(self::compiler($app)->compile(app: $app, config: $config, modules: $modules));
+    }
+
+    public static function publish(Application $app, self $draft): void
+    {
+        self::compiler($app)->publish($draft->definitions);
     }
 
     private static function compiler(Application $app): PanelGraphCompiler

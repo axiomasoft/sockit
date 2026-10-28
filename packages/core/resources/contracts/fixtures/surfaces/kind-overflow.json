@@ -1,0 +1,18 @@
+{
+  "fixture": "kind-overflow",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "kind": "a.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_KIND_INVALID"
+    ]
+  }
+}

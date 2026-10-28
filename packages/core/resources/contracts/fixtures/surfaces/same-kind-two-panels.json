@@ -1,0 +1,59 @@
+{
+  "fixture": "same-kind-two-panels",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "settings": {
+          "display_limit": 10
+        }
+      },
+      {
+        "panel": "crm.team",
+        "settings": {
+          "display_limit": 20
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": true,
+    "surfaces": {
+      "crm.public/crm.article": {
+        "panel": "crm.public",
+        "kind": "crm.article",
+        "host": "article",
+        "features": [
+          "reactions"
+        ],
+        "settings": {
+          "display_limit": 10
+        },
+        "contour": null,
+        "contour_levels": [
+          "class",
+          "school"
+        ],
+        "archive_readers": false
+      },
+      "crm.team/crm.article": {
+        "panel": "crm.team",
+        "kind": "crm.article",
+        "host": "article",
+        "features": [
+          "reactions"
+        ],
+        "settings": {
+          "display_limit": 20
+        },
+        "contour": null,
+        "contour_levels": [
+          "class",
+          "school"
+        ],
+        "archive_readers": false
+      }
+    }
+  }
+}

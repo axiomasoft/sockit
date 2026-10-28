@@ -25,6 +25,7 @@ use SocKit\Configuration\Data\SurfacesConfig;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Modules\ModuleManifest;
 use SocKit\Panels\PanelProvider;
+use SocKit\Surfaces\SurfaceProvider;
 
 #[Api(since: '1.0')]
 final readonly class SocKitConfig
@@ -39,7 +40,7 @@ final readonly class SocKitConfig
         $privacy = self::map(value: $data['privacy'], key: 'sockit.privacy');
         self::requireRule(valid: $ids['strategy'] === 'uuid7', key: 'sockit.ids.strategy', rule: 'IDS_STRATEGY');
         $panels = self::providers(value: $data['panels'], key: 'sockit.panels', contract: PanelProvider::class);
-        $surfaces = self::providers(value: $data['surfaces'], key: 'sockit.surfaces', contract: 'SocKit\Surfaces\Contracts\SurfaceProvider');
+        $surfaces = self::providers(value: $data['surfaces'], key: 'sockit.surfaces', contract: SurfaceProvider::class);
         $enabled = self::strings(value: $modules['enabled'], key: 'sockit.modules.enabled');
         self::requireRule(valid: count(array_unique($enabled)) === count($enabled), key: 'sockit.modules.enabled', rule: 'MODULE_IDS_UNIQUE');
         foreach ($enabled as $id) {

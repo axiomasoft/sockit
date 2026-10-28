@@ -1,0 +1,18 @@
+{
+  "fixture": "kind-newline",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "kind": "crm.article\n"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_KIND_INVALID"
+    ]
+  }
+}

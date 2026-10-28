@@ -1,0 +1,18 @@
+{
+  "fixture": "host-invalid",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "host": "Host\\Article"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_HOST_INVALID"
+    ]
+  }
+}

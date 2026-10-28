@@ -1,0 +1,20 @@
+{
+  "fixture": "comments-excluded",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "features": [
+          "comments"
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FEATURE_DISABLED"
+    ]
+  }
+}

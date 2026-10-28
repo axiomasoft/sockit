@@ -1,0 +1,18 @@
+{
+  "fixture": "provider-validation",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "reject_graph": true
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_POLICY_INVALID"
+    ]
+  }
+}

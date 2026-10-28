@@ -26,6 +26,9 @@ final class PanelGraphCompiler
     /** @var array<string, PanelDefinition>|null */
     private ?array $definitions = null;
 
+    /** @var array<string, PanelDefinition>|null */
+    private ?array $draft = null;
+
     public function add(string $provider): void
     {
         $this->phase();
@@ -42,7 +45,8 @@ final class PanelGraphCompiler
         return $this->definitions;
     }
 
-    public function compile(Application $app, SocKitConfig $config, Modules $modules): void
+    /** @return array<string, PanelDefinition> */
+    public function compile(Application $app, SocKitConfig $config, Modules $modules): array
     {
         $this->phase();
         $this->collecting = false;
@@ -113,7 +117,17 @@ final class PanelGraphCompiler
         foreach ($instances as $instance) {
             $instance->validate($definitions);
         }
-        $this->definitions = $definitions;
+
+        return $this->draft = $definitions;
+    }
+
+    /** @param array<string, PanelDefinition> $draft */
+    public function publish(array $draft): void
+    {
+        if ($this->collecting || $this->draft !== $draft || $this->definitions !== null) {
+            $this->fail(panel: '', provider: '', key: 'panels', rule: 'PANEL_REGISTRY_PHASE');
+        }
+        $this->definitions = $draft;
     }
 
     private function phase(): void

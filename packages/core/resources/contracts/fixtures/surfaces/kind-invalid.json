@@ -1,0 +1,18 @@
+{
+  "fixture": "kind-invalid",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "kind": "single"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_KIND_INVALID"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "fixture": "setting-unknown",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "settings": {
+          "unknown": 1
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_SETTING_INVALID"
+    ]
+  }
+}

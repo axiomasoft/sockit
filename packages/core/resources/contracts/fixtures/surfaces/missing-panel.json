@@ -1,0 +1,18 @@
+{
+  "fixture": "missing-panel",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "missing_panel": true
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_PANEL_UNKNOWN"
+    ]
+  }
+}

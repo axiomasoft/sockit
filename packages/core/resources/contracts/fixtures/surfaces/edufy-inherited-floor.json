@@ -1,0 +1,39 @@
+{
+  "fixture": "edufy-inherited-floor",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "panel": "edufy.community",
+        "kind": "edufy.class-feed",
+        "host": "edufy.class",
+        "features": [
+          "reactions",
+          "posts"
+        ],
+        "contour": "class"
+      }
+    ]
+  },
+  "expect": {
+    "valid": true,
+    "surfaces": {
+      "edufy.community/edufy.class-feed": {
+        "panel": "edufy.community",
+        "kind": "edufy.class-feed",
+        "host": "edufy.class",
+        "features": [
+          "posts",
+          "reactions"
+        ],
+        "settings": {},
+        "contour": "class",
+        "contour_levels": [
+          "class"
+        ],
+        "archive_readers": false
+      }
+    }
+  }
+}

@@ -1,0 +1,681 @@
+> phpstan analyse --no-progress '--memory-limit=512M'
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Internal/Console/MakePanelCommand.php                
+ ------ ----------------------------------------------------------------------- 
+  31     Call to function is_string() with string will always evaluate to       
+         true.                                                                  
+         🪪  function.alreadyNarrowedType                                       
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  31     Call to static method                                                  
+         SocKit\Internal\Generation\GenerationFailure::require() with true and  
+         'GENERATION_NAME…' will always evaluate to true.                       
+         🪪  staticMethod.alreadyNarrowedType                                   
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  35     Strict comparison using === between null and null will always          
+         evaluate to true.                                                      
+         🪪  identical.alwaysTrue                                               
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------- 
+  Line   packages/core/src/Internal/Generation/GenerationPaths.php  
+ ------ ----------------------------------------------------------- 
+  44     Cannot access offset 'psr-4' on mixed.                     
+         🪪  offsetAccess.nonOffsetAccessible                       
+ ------ ----------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   packages/core/src/Internal/Generation/PanelGenerator.php              
+ ------ ---------------------------------------------------------------------- 
+  43     Parameter #1 $models of method SocKit\Panels\Panel::models() expects  
+         array<string, class-string>, array<string, string> given.             
+         🪪  argument.type                                                     
+  60     Parameter $connections of static method                               
+         SocKit\Schema\StoragePreflight::generation() expects array<string,    
+         array<string, mixed>>, array<string, array<mixed, mixed>> given.      
+         🪪  argument.type                                                     
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Feature/Consumer/PanelGeneratorInstallTest.php                   
+ ------ ----------------------------------------------------------------------- 
+  57     Cannot access offset 'status' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  59     Cannot access offset 'files' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  59     Cannot access offset 'status' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  60     Cannot access offset 'registration' on mixed.                          
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  62     Argument of an invalid type mixed supplied for foreach, only           
+         iterables are supported.                                               
+         🪪  foreach.nonIterable                                                
+  62     Cannot access offset 'files' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  63     Binary operation "." between non-falsy-string and mixed results in an  
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  63     Possibly invalid array key type mixed.                                 
+         🪪  offsetAccess.invalidOffset                                         
+  75     Cannot access offset 'bindings' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  75     Cannot access offset 'panels' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  76     Cannot access offset 'bindings' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  76     Cannot access offset 'demo_targets' on mixed.                          
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  77     Cannot access offset 'connections' on mixed.                           
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  77     Cannot access offset 'default' on mixed.                               
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  77     Cannot access offset 'queries' on mixed.                               
+         🪪  offsetAccess.nonOffsetAccessible                                   
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Feature/Generation/MakePanelTest.php                             
+ ------ ----------------------------------------------------------------------- 
+  9      Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  13     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  13     Cannot call method cleanup() on mixed.                                 
+         🪪  method.nonObject                                                   
+  17     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  17     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  18     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  18     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  19     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  20     Cannot access offset 'output' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  20     Parameter #1 $json of function json_decode expects string, mixed       
+         given.                                                                 
+         🪪  argument.type                                                      
+  21     Cannot access offset 'panel' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  21     Cannot access offset 'status' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  22     Cannot access offset 'provider' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  23     Cannot access offset 'files' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  23     Cannot access offset 'models' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  24     Cannot access offset 'demo_targets' on mixed.                          
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  24     Cannot access offset 'tables' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  25     Cannot access offset 'components' on mixed.                            
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  25     Parameter #1 $array of function array_keys expects array, mixed        
+         given.                                                                 
+         🪪  argument.type                                                      
+  26     Cannot access offset 'registration' on mixed.                          
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  27     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  27     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  31     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  31     Cannot call method plan() on mixed.                                    
+         🪪  method.nonObject                                                   
+  32     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  32     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  33     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  34     Argument of an invalid type mixed supplied for foreach, only           
+         iterables are supported.                                               
+         🪪  foreach.nonIterable                                                
+  34     Cannot access property $sources on mixed.                              
+         🪪  property.nonObject                                                 
+  35     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  35     Binary operation "." between non-falsy-string and mixed results in an  
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  35     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  37     Binary operation "." between mixed and '/app/Models/SocKit…' results   
+         in an error.                                                           
+         🪪  binaryOp.invalid                                                   
+  37     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  38     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  38     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  39     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  39     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  39     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  39     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  39     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  40     Binary operation "." between mixed and '/.sockit-stage-*' results in   
+         an error.                                                              
+         🪪  binaryOp.invalid                                                   
+  40     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  44     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  44     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  45     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  45     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  45     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  45     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  45     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  60     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  60     Binary operation "." between mixed and '/composer.json' results in an  
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  60     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  61     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  61     Cannot call method plan() on mixed.                                    
+         🪪  method.nonObject                                                   
+  62     Cannot access offset 'provider' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  62     Cannot access property $manifest on mixed.                             
+         🪪  property.nonObject                                                 
+  62     Cannot access property $sources on mixed.                              
+         🪪  property.nonObject                                                 
+  62     Parameter #1 $array of function array_key_first expects array, mixed   
+         given.                                                                 
+         🪪  argument.type                                                      
+  63     Parameter #1 $plan of method                                           
+         SocKit\Internal\Generation\ExclusiveWriter::install() expects          
+         SocKit\Internal\Generation\GenerationPlan, mixed given.                
+         🪪  argument.type                                                      
+  64     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  64     Binary operation "." between mixed and '/composer.json' results in an  
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  64     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  65     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  65     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  66     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  66     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  66     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  66     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  66     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  70     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  70     Cannot access property $app on mixed.                                  
+         🪪  property.nonObject                                                 
+  70     Cannot call method make() on mixed.                                    
+         🪪  method.nonObject                                                   
+  71     Cannot call method get() on mixed.                                     
+         🪪  method.nonObject                                                   
+  71     Cannot call method set() on mixed.                                     
+         🪪  method.nonObject                                                   
+  72     Cannot call method get() on mixed.                                     
+         🪪  method.nonObject                                                   
+  72     Cannot call method set() on mixed.                                     
+         🪪  method.nonObject                                                   
+  84     Cannot call method set() on mixed.                                     
+         🪪  method.nonObject                                                   
+  89     Parameter #3 $config of class                                          
+         SocKit\Internal\Generation\PanelGenerator constructor expects          
+         Illuminate\Contracts\Config\Repository, mixed given.                   
+         🪪  argument.type                                                      
+  90     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  90     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  90     Parameter $root of method                                              
+         SocKit\Internal\Generation\PanelGenerator::plan() expects string,      
+         mixed given.                                                           
+         🪪  argument.type                                                      
+  92     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  92     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  92     Parameter $root of method                                              
+         SocKit\Internal\Generation\PanelGenerator::plan() expects string,      
+         mixed given.                                                           
+         🪪  argument.type                                                      
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Feature/Generation/WriteSafetyTest.php                           
+ ------ ----------------------------------------------------------------------- 
+  11     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  15     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  15     Cannot call method cleanup() on mixed.                                 
+         🪪  method.nonObject                                                   
+  19     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  19     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  20     Binary operation "." between mixed and '/app/Models/SocKit…' results   
+         in an error.                                                           
+         🪪  binaryOp.invalid                                                   
+  21     Binary operation "." between mixed and '/app/Models/SocKit…' results   
+         in an error.                                                           
+         🪪  binaryOp.invalid                                                   
+  22     Match expression does not handle remaining value: string               
+         🪪  match.unhandled                                                    
+  25     Binary operation "." between mixed and '/missing' results in an        
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  28     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  28     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  29     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  29     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  29     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  29     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  29     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  30     Binary operation "." between mixed and '/app/Panels' results in an     
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  37     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  37     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  37     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  41     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  41     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  41     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  42     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  42     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  43     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  43     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  43     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  43     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  43     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  45     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  45     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  45     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  51     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  51     Binary operation "." between mixed and '/app' results in an error.     
+         🪪  binaryOp.invalid                                                   
+  51     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  52     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  52     Binary operation "." between mixed and '/app/custom.php' results in    
+         an error.                                                              
+         🪪  binaryOp.invalid                                                   
+  52     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  53     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  53     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  54     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  54     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  55     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  55     Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  55     Cannot access offset 'output' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  55     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  59     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  59     Cannot call method plan() on mixed.                                    
+         🪪  method.nonObject                                                   
+  60     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  60     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  68     Parameter #1 $plan of method                                           
+         SocKit\Internal\Generation\ExclusiveWriter::install() expects          
+         SocKit\Internal\Generation\GenerationPlan, mixed given.                
+         🪪  argument.type                                                      
+  69     Call to an undefined method                                            
+         Pest\PendingCalls\TestCall|Pest\Support\HigherOrderTapProxy::fail().   
+         🪪  method.notFound                                                    
+  73     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  73     Cannot call method tree() on mixed.                                    
+         🪪  method.nonObject                                                   
+  77     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  77     Cannot call method plan() on mixed.                                    
+         🪪  method.nonObject                                                   
+  78     Cannot access property $sources on mixed.                              
+         🪪  property.nonObject                                                 
+  78     Parameter #1 $array of function array_key_first expects array, mixed   
+         given.                                                                 
+         🪪  argument.type                                                      
+  81     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  81     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  84     Parameter #1 $plan of method                                           
+         SocKit\Internal\Generation\ExclusiveWriter::install() expects          
+         SocKit\Internal\Generation\GenerationPlan, mixed given.                
+         🪪  argument.type                                                      
+  85     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  85     Binary operation "." between non-falsy-string and mixed results in an  
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  85     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  86     Binary operation "." between mixed and '/.sockit-stage-*' results in   
+         an error.                                                              
+         🪪  binaryOp.invalid                                                   
+  86     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  90     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  90     Cannot call method plan() on mixed.                                    
+         🪪  method.nonObject                                                   
+  91     Cannot access property $sources on mixed.                              
+         🪪  property.nonObject                                                 
+  91     Parameter #1 $array of function array_key_first expects array, mixed   
+         given.                                                                 
+         🪪  argument.type                                                      
+  95     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  95     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  96     Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  96     Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  100    Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  100    Cannot access property $app on mixed.                                  
+         🪪  property.nonObject                                                 
+  100    Cannot call method instance() on mixed.                                
+         🪪  method.nonObject                                                   
+  101    Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  101    Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  102    Cannot access offset 'exit' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  103    Cannot access offset 'output' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  103    Parameter #1 $json of function json_decode expects string, mixed       
+         given.                                                                 
+         🪪  argument.type                                                      
+  104    Cannot access offset 'manifest' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  104    Cannot access offset 'panel' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  104    Cannot access offset 'recovery' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                   
+  105    Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  105    Binary operation "." between non-falsy-string and mixed results in an  
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  105    Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  106    Binary operation "." between mixed and '/.sockit-stage-*' results in   
+         an error.                                                              
+         🪪  binaryOp.invalid                                                   
+  106    Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  110    Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$generation.                               
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  110    Cannot call method plan() on mixed.                                    
+         🪪  method.nonObject                                                   
+  111    Binary operation "." between mixed and '/invocation.json' results in   
+         an error.                                                              
+         🪪  binaryOp.invalid                                                   
+  111    Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  112    Cannot access property $manifest on mixed.                             
+         🪪  property.nonObject                                                 
+  112    Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  112    Cannot access property $sources on mixed.                              
+         🪪  property.nonObject                                                 
+  132    Argument of an invalid type mixed supplied for foreach, only           
+         iterables are supported.                                               
+         🪪  foreach.nonIterable                                                
+  132    Cannot access property $sources on mixed.                              
+         🪪  property.nonObject                                                 
+  133    Binary operation "." between mixed and '/' results in an error.        
+         🪪  binaryOp.invalid                                                   
+  133    Binary operation "." between non-falsy-string and mixed results in an  
+         error.                                                                 
+         🪪  binaryOp.invalid                                                   
+  133    Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+  135    Binary operation "." between mixed and '/.sockit-stage-*' results in   
+         an error.                                                              
+         🪪  binaryOp.invalid                                                   
+  135    Cannot access property $root on mixed.                                 
+         🪪  property.nonObject                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   tests/Fixtures/PanelConsumer/GenerationFixture.php                 
+ ------ ------------------------------------------------------------------- 
+  50     Parameter #1 $root of method                                       
+         SocKit\Internal\Generation\PanelGenerator::plan() expects string,  
+         list<string>|string given.                                         
+         🪪  argument.type                                                  
+ ------ ------------------------------------------------------------------- 
+
+ [ERROR] Found 212 errors                                                       
+
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1

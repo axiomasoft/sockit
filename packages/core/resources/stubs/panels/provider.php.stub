@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{NAMESPACE}};
+
+use SocKit\Panels\Panel;
+use SocKit\Panels\PanelProvider;
+
+/** Consumer-owned panel. Register this class in config/sockit.php, panels. */
+final class {{CLASS}} extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel->id({{ID}})->hostTypes({{HOST}})
+            ->connection({{CONNECTION}})->schema({{SCHEMA}})->prefix({{PREFIX}})
+            ->modules({{MODULES}})
+            ->models({{MODELS}});
+    }
+}

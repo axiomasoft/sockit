@@ -49,6 +49,7 @@
                     ],
                     "commands": [
                         "sockit:doctor",
+                        "sockit:make-panel",
                         "sockit:relay"
                     ],
                     "module-ids": []

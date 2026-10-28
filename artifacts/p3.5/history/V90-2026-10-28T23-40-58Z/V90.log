@@ -1,0 +1,19 @@
+command=composer analyse -- --memory-limit=512M
+cwd=/home/vostrikov/projects/packages/sockit
+started_at=2026-10-28T23:40:58Z
+finished_at=2026-10-28T23:40:59Z
+exit=0
+php=PHP 8.4.27 (cli) (built: Oct 21 2026 14:35:21) (NTS)
+Copyright (c) The PHP Group
+Built by Ubuntu
+Zend Engine v4.4.27, Copyright (c) Zend Technologies
+    with Zend OPcache v8.4.27, Copyright (c), by Zend Technologies
+    with Xdebug v3.5.3, Copyright (c) 2002-2026, by Derick Rethans
+source_digest=ac5b921d7e4ef20b6329281a99c3b63e40718e362ab11e9b0ddc859d4f3b0414
+--- stdout ---
+
+ [OK] No errors                                                                 
+
+
+--- stderr ---
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.

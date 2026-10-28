@@ -1,0 +1,8 @@
+private container=ce1c390d3a8b0392f8569a866e263461064dd49d8f5d1f89be1a135d0dc9946a owner=sockit_p2_c5cc046d864aeed3_test decoy=sockit_p2_decoy_c5cc046d864aeed3_test port=32977
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Consumer\PanelGeneratorInstallTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit composer-installs the CLI and loads only generated provider/mode[39m[90m…[39m [90m2.19s[39m  
+
+  [90mTests:[39m    [32;1m1 passed[39;22m[90m (373 assertions)[39m
+  [90mDuration:[39m [39m2.25s[39m
+

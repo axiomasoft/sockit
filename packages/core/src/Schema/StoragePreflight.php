@@ -17,6 +17,33 @@ use SocKit\Schema\Internal\StoragePreflight as PhysicalPreflight;
 #[Spi(kind: SpiKind::Call, since: '1.0')]
 final class StoragePreflight
 {
+    /** Pure generation preflight: trusted deployments and explicit schemas, never PDO.
+     * @param list<PanelSchema> $schemas
+     * @param array<string, array<string, mixed>> $connections
+     * @return array<string, array<string, string>> Panel ID => final physical tables */
+    public static function generation(array $schemas, array $connections, mixed $deployments): array
+    {
+        self::validateDeployments($deployments);
+        assert(is_array($deployments));
+        $preflight = new PhysicalPreflight;
+        $physical = $tables = [];
+        foreach ($schemas as $schema) {
+            $name = $schema->storage->connection;
+            $config = $connections[$name] ?? [];
+            $prefix = $config['prefix'] ?? '';
+            if (! is_string($prefix)) {
+                throw new Exceptions\InvalidSchemaException(message: 'Invalid driver prefix', detail: ['key' => 'prefix', 'rule' => 'STORAGE_IDENTIFIER_INVALID']);
+            }
+            $location = new StorageIdentityResolver()->declared(connection: $config, deployment: StorageDeployment::fromArray($deployments[$name] ?? null), schema: $schema->storage->schema);
+            $resolved = $preflight->compile(schema: $schema, location: $location, driverPrefix: $prefix);
+            $physical[] = $resolved;
+            $tables[$schema->panel] = $preflight->tables(storage: $schema->storage, location: $location, driverPrefix: $prefix);
+        }
+        $preflight->assertDisjoint($physical);
+
+        return $tables;
+    }
+
     public static function validateDeployments(mixed $deployments): void
     {
         StorageDeployment::validateRegistry($deployments);

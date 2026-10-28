@@ -12,12 +12,14 @@
             "dist": {
                 "type": "path",
                 "url": "packages/core",
-                "reference": "d4d775f3678f6bbfb1064d29052ed973bd1a5dee"
+                "reference": "bef4a8f4a22851ede12889b715b4e7863be4bc58"
             },
             "require": {
                 "illuminate/config": "^13.0",
+                "illuminate/console": "^13.0",
                 "illuminate/container": "^13.0",
                 "illuminate/contracts": "^13.0",
+                "illuminate/database": "^13.0",
                 "illuminate/support": "^13.0",
                 "php": "^8.4",
                 "ramsey/uuid": "^4.9"
@@ -40,7 +42,12 @@
                                 "packages/core/config",
                                 "packages/core/resources"
                             ],
-                            "tables": [],
+                            "tables": [
+                                "surface_instances",
+                                "receipts",
+                                "outbox",
+                                "tombstones"
+                            ],
                             "config": [
                                 "sockit"
                             ],
@@ -8273,16 +8280,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "2.3.9",
+            "version": "2.3.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "2c122d2f890ae4b9e6ede898a9ac36b2c07e2a17"
+                "reference": "c9fb3e1560c6a33eca59c9a2fcb4d9925445a0a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/2c122d2f890ae4b9e6ede898a9ac36b2c07e2a17",
-                "reference": "2c122d2f890ae4b9e6ede898a9ac36b2c07e2a17",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/c9fb3e1560c6a33eca59c9a2fcb4d9925445a0a4",
+                "reference": "c9fb3e1560c6a33eca59c9a2fcb4d9925445a0a4",
                 "shasum": ""
             },
             "require": {
@@ -8314,9 +8321,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.9"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.11"
             },
-            "time": "2026-10-27T22:32:31+00:00"
+            "time": "2026-10-28T10:46:50+00:00"
         },
         {
             "name": "phpstan/phpstan",

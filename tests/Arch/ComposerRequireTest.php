@@ -17,3 +17,9 @@ it('A7 rejects each forbidden vendor', function (): void {
 it('A7 checks require rather than dev dependencies', function (): void {
     expect(Gates::composerRequire(SourceScanner::fixture('valid/composer.php.txt')))->toBe([]);
 });
+
+it('declares the runtime database and console components explicitly', function (): void {
+    $manifest = json_decode((string) file_get_contents('packages/core/composer.json'), true, flags: JSON_THROW_ON_ERROR);
+    expect(data_get($manifest, 'require.illuminate/database'))->toBe('^13.0')
+        ->and(data_get($manifest, 'require.illuminate/console'))->toBe('^13.0');
+});

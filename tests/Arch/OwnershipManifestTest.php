@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use SocKit\Panels\PanelStorage;
 use SocKit\Tests\Arch\Support\Gates;
 use SocKit\Tests\Arch\Support\SourceScanner;
 
@@ -23,4 +24,9 @@ it('A8 rejects an uncovered namespace', function (): void {
 
 it('A8 accepts separate non-overlapping owners', function (): void {
     expect(Gates::ownership(SourceScanner::fixture('valid/panels.php.txt'), SourceScanner::fixture('valid/composer.php.txt')[0]))->toBe([]);
+});
+
+it('declares the four kernel logical tables as core owned', function (): void {
+    $manifest = json_decode((string) file_get_contents('packages/core/composer.json'), true, flags: JSON_THROW_ON_ERROR);
+    expect(data_get($manifest, 'extra.sockit.owners.core.tables'))->toBe(PanelStorage::KERNEL_ENTITIES);
 });

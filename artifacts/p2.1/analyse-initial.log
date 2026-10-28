@@ -1,0 +1,106 @@
+> phpstan analyse --no-progress '--memory-limit=512M'
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Integration/Runtime/Infrastructure/HarnessIsolationTest.php      
+ ------ ----------------------------------------------------------------------- 
+  32     Cannot call method fetchColumn() on PDOStatement|false.                
+         🪪  method.nonObject                                                   
+  33     Cannot call method fetchColumn() on PDOStatement|false.                
+         🪪  method.nonObject                                                   
+  34     Cannot call method fetchColumn() on PDOStatement|false.                
+         🪪  method.nonObject                                                   
+  35     Cannot call method fetchColumn() on PDOStatement|false.                
+         🪪  method.nonObject                                                   
+  41     Cannot call method fetchColumn() on PDOStatement|false.                
+         🪪  method.nonObject                                                   
+  58     Access to an undefined property Pest\Mixins\Expectation<int|null>::$n  
+         ot.                                                                    
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  58     Cannot call method fetchColumn() on PDOStatement|false.                
+         🪪  method.nonObject                                                   
+  58     Cannot call method toBe() on mixed.                                    
+         🪪  method.nonObject                                                   
+  64     Strict comparison using === between int|string|false|null and true     
+         will always evaluate to false.                                         
+         🪪  identical.alwaysFalse                                              
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  65     Negated boolean expression is always true.                             
+         🪪  booleanNot.alwaysTrue                                              
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  68     Negated boolean expression is always true.                             
+         🪪  booleanNot.alwaysTrue                                              
+  78     Cannot call method fetchColumn() on PDOStatement|false.                
+         🪪  method.nonObject                                                   
+ ------ ----------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------- 
+  Line   tests/Integration/Support/PgTarget.php             
+ ------ --------------------------------------------------- 
+  50     Cannot access offset '5432/tcp' on mixed.          
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset '5432/tcp' on mixed.          
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'Config' on mixed.            
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'HostIp' on mixed.            
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'HostPort' on mixed.          
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'Labels' on mixed.            
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'NetworkSettings' on mixed.   
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'NetworkSettings' on mixed.   
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'Ports' on mixed.             
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'Ports' on mixed.             
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 'sockit.test.run' on mixed.   
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 0 on mixed.                   
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot access offset 0 on mixed.                   
+         🪪  offsetAccess.nonOffsetAccessible               
+  50     Cannot cast mixed to int.                          
+         🪪  cast.int                                       
+  55     Cannot call method fetch() on PDOStatement|false.  
+         🪪  method.nonObject                               
+  56     Cannot cast mixed to int.                          
+         🪪  cast.int                                       
+ ------ --------------------------------------------------- 
+
+ ------ --------------------------------------------------------- 
+  Line   tests/Integration/Support/lock-child.php                 
+ ------ --------------------------------------------------------- 
+  9      Cannot call method fetchColumn() on PDOStatement|false.  
+         🪪  method.nonObject                                     
+ ------ --------------------------------------------------------- 
+
+ [ERROR] Found 29 errors                                                        
+
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1

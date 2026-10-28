@@ -1,0 +1,17 @@
+Loading composer repositories with package information
+Updating dependencies
+Lock file operations: 0 installs, 2 updates, 0 removals
+  - Upgrading axiomasoft/sockit (0.1.x-dev d4d775f => 0.1.x-dev 96c7656)
+  - Upgrading phpstan/phpdoc-parser (2.3.9 => 2.3.11)
+Writing lock file
+Installing dependencies from lock file (including require-dev)
+Package operations: 0 installs, 2 updates, 0 removals
+    0 [>---------------------------]    0 [->--------------------------]
+  - Upgrading axiomasoft/sockit (0.1.x-dev d4d775f => 0.1.x-dev 96c7656): Source already present
+  - Upgrading phpstan/phpdoc-parser (2.3.9 => 2.3.11): Extracting archive
+ 0/1 [>---------------------------]   0%
+ 1/1 [============================] 100%
+Generating autoload files
+94 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+No security vulnerability advisories found.

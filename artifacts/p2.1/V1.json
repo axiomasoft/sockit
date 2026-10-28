@@ -1,0 +1,32 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p21-V1",
+  "check_id": "V1",
+  "subject": "PLAN1.P2.1",
+  "procedure": {
+    "cmd": "composer validate --strict",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "candidate": {
+    "head": "4cadb3476c716b7da215fd7aad77a7aa8d3f43e0",
+    "dirty_digest": "b5f8f8045a565118cb4fc8837bd97bb65233708c4cf9ca8de92ddbe78b0cd128"
+  },
+  "exit": 0,
+  "environment": {
+    "platform": "Linux; PHP 8.4.1; PostgreSQL 16 private Docker container for V3"
+  },
+  "log": {
+    "path": "artifacts/p2.1/V1.log",
+    "sha256": "43add299dc97ecbd90ec2dc456ef5a0bd824bb9abdae2a3d7cdb520e21f8e86d"
+  },
+  "started_at": "2026-10-28T14:07:49.464026+00:00",
+  "finished_at": "2026-10-28T14:07:49.603051+00:00",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-terra",
+      "effort": "high"
+    }
+  }
+}

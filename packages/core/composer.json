@@ -9,7 +9,9 @@
         "illuminate/contracts": "^13.0",
         "illuminate/container": "^13.0",
         "illuminate/config": "^13.0",
-        "ramsey/uuid": "^4.9"
+        "ramsey/uuid": "^4.9",
+        "illuminate/database": "^13.0",
+        "illuminate/console": "^13.0"
     },
     "autoload": {
         "psr-4": {
@@ -33,7 +35,12 @@
                         "packages/core/config",
                         "packages/core/resources"
                     ],
-                    "tables": [],
+                    "tables": [
+                        "surface_instances",
+                        "receipts",
+                        "outbox",
+                        "tombstones"
+                    ],
                     "config": [
                         "sockit"
                     ],

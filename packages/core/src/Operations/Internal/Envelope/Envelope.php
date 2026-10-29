@@ -42,9 +42,12 @@ use SocKit\Operations\OutboxRelay;
 use SocKit\Support\CanonicalJson;
 use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\CommandNamespace;
+use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\PayloadDigest;
 use SocKit\Support\Data\Revision;
+use SocKit\Support\Enums\ResourceKind;
 use SocKit\Support\Ids;
+use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\SurfaceInstance;
 use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
@@ -145,10 +148,15 @@ final readonly class Envelope
                     }
                 });
             // A unique-conflict wait may have outlived authority. Re-resolve only AFTER our tx ends.
-            if ($effect->value !== null && $mutation instanceof SurfaceMutation && $mutation->action === 'delete') {
-                // The command's own committed, non-content deletion acknowledgement. Later replay
-                // remains subject to deleted visibility and cannot reveal the old resource again.
-                $this->guards(handle: $handle, request: $request, current: $surfaces->current(), write: false, target: null);
+            if ($effect->value !== null) {
+                // Acknowledge this command's committed owner effect, including quarantine states.
+                // This is a storage acknowledgement, never a grant to read its content. Later
+                // replay/lookup must additionally resolve the resource's current owner visibility.
+                if ($mutation instanceof SurfaceMutation && $mutation->action === 'delete') {
+                    $this->guards(handle: $handle, request: $request, current: $surfaces->current(), write: false, target: null);
+                } else {
+                    $this->replayGuards(handle: $handle, request: $request, owner: $owner, wire: $this->decode($context));
+                }
 
                 return new OperationResult(outcome: $snapshot->outcome, receiptId: $snapshot->id, resource: $snapshot->resource, revision: $snapshot->revision, problem: $snapshot->problem);
             }
@@ -430,6 +438,14 @@ final readonly class Envelope
         }
         // Guards run again after waiting on a receipt lock. Never call host providers inside that tx.
         $this->replayGuards(handle: $handle, request: $request, owner: $owner, wire: $wire);
+        // Content resource identities are independently guarded by their existing module-owned
+        // target capability. A historical request's host visibility/audience cannot authorize
+        // disclosing a resource hidden or narrowed by a later owner revision.
+        if ($receipt->resource !== null && in_array($receipt->resource->kind, [ResourceKind::Post, ResourceKind::Group], true)) {
+            $resolved = $this->handles()->resolveTarget(handle: $handle, target: new TargetRef(
+                host: new HostEntityRef(type: $receipt->resource->kind->value, value: $receipt->resource->id), incarnation: new Incarnation(1)));
+            $this->verdict(verdict: $resolved->read, write: false);
+        }
 
         return new OperationResult(outcome: $receipt->outcome, receiptId: $receipt->id, resource: $receipt->resource, revision: $receipt->revision, problem: $receipt->problem);
     }

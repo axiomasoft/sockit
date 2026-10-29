@@ -9,6 +9,7 @@ use SocKit\Modules\Modules;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\Exceptions\InvalidPanelException;
 use SocKit\Panels\PanelDefinitions;
+use SocKit\Posts\Internal\PostTarget;
 use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\Surfaces\Exceptions\InvalidSurfaceDefinitionException;
 use SocKit\Tests\Fixtures\Social\Selection;
@@ -34,7 +35,7 @@ it('selects only explicitly enabled and panel selected modules without boot SQL 
         $features = [];
         foreach ($selected as $id) {
             $features = [...$features, ...$modules->declarations()[$id]['features']];
-            expect($modules->declarations()[$id]['targets'])->toBe([]);
+            expect($modules->declarations()[$id]['targets'])->toBe($id === 'sockit.posts' ? ['post' => PostTarget::class] : []);
         }
         expect(in_array('posts', $features, true))->toBe(in_array('sockit.posts', $selected, true));
     }

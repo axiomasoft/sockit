@@ -24,6 +24,7 @@ use SocKit\Tests\Fixtures\Runtime\EnvelopeMutation;
 use SocKit\Tests\Fixtures\Runtime\EnvelopeScenario;
 use SocKit\Tests\Fixtures\Runtime\RuntimeScenario;
 use SocKit\Tests\Fixtures\Runtime\UnavailableActor;
+use SocKit\Tests\Fixtures\Social\PostScenario;
 
 it('reauthorizes execute replay and lookup after current revoke removal visibility generation or lifecycle change', function (string $case): void {
     $s = new EnvelopeScenario;
@@ -279,6 +280,20 @@ it('requires an absence policy only for missing module receipts and still reads 
         expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->problem)->toBe(ProblemCode::ProviderUnavailable);
         $result = $s->execute($command);
         expect($result->isSuccess())->toBeTrue()->and($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->toWire())->toBe($result->toWire());
+    } finally {
+        $s->cleanup();
+    }
+});
+
+it('protects a committed resource reference in generic lookup after a current owner hold', function (): void {
+    $s = new PostScenario;
+    try {
+        $command = $s->command();
+        $result = $s->posts->create(handle: $s->handle, post: $s->post(), command: $command);
+        expect($result->isPublished())->toBeTrue(json_encode($result, JSON_THROW_ON_ERROR));
+        $s->connection()->table('panel_a.a_posts')->update(['publication_state' => 'held']);
+        $lookup = $s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key);
+        expect($lookup?->resource)->toBeNull()->and($lookup?->revision)->toBeNull()->and($lookup?->isSuccess())->toBeFalse();
     } finally {
         $s->cleanup();
     }

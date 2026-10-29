@@ -1,0 +1,11 @@
+{
+  "session": "01a18611-bab0-7fb3-93fc-2d5e19c54d73",
+  "provider": "codex",
+  "backend": "openai",
+  "originator": "codex_exec",
+  "cli_version": "0.165.0",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "sandbox": "danger-full-access",
+  "approval_policy": "never"
+}

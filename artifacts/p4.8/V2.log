@@ -1,0 +1,391 @@
+STDOUT
+private volume=c2ce1d7f8347031b50b0a75d6a100b57d1c6a8fea08d3c69cab61cba47580bc4
+private container=2ec7bb8adfff66cc3fd890354e2f0b30fb363012b70deaaadd7d423e520e8e2f owner=sockit_p2_049fdc953b1932d9_test decoy=sockit_p2_decoy_049fdc953b1932d9_test port=33216
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Social\ReactionsConsumerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit isolates public reactions on generated Article and Product panel[39m[90m…[39m [90m4.48s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit isolates public reactions on generated Article and Product panel[39m[90m…[39m [90m4.72s[39m  
+
+  [90mTests:[39m    [32;1m2 passed[39;22m[90m (961 assertions)[39m
+  [90mDuration:[39m [39m9.28s[39m
+
+
+STDERR
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Social/ReactionsConsumerTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_049fdc953b1932d9_test server_version_num=160014 marker=sockit-p21-049fdc953b1932d9 backend_pid=102
+PG identity database=sockit_p2_049fdc953b1932d9_test server_version_num=160014 marker=sockit-p21-049fdc953b1932d9 backend_pid=103
+PG identity database=sockit_p2_decoy_049fdc953b1932d9_test server_version_num=160014 marker=sockit-p21-049fdc953b1932d9 backend_pid=104
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["composer","install","--no-dev","--no-interaction","--no-scripts"] exit=0
+Installing dependencies from lock file
+Verifying lock file contents can be installed on current platform.
+Package operations: 75 installs, 0 updates, 0 removals
+    0 [>---------------------------]    0 [->--------------------------]
+  - Installing ramsey/collection (2.1.1): Extracting archive
+  - Installing brick/math (1.0.0): Extracting archive
+  - Installing ramsey/uuid (4.9.4): Extracting archive
+  - Installing voku/portable-ascii (2.1.1): Extracting archive
+  - Installing symfony/polyfill-php80 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-mbstring (v1.43.3): Extracting archive
+  - Installing symfony/polyfill-ctype (v1.37.0): Extracting archive
+  - Installing phpoption/phpoption (1.10.0): Extracting archive
+  - Installing graham-campbell/result-type (v1.2.0): Extracting archive
+  - Installing vlucas/phpdotenv (v5.8.0): Extracting archive
+  - Installing symfony/css-selector (v8.1.10): Extracting archive
+  - Installing tijsverkoyen/css-to-inline-styles (v2.4.0): Extracting archive
+  - Installing symfony/var-dumper (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-uuid (v1.43.0): Extracting archive
+  - Installing symfony/uid (v8.1.9): Extracting archive
+  - Installing symfony/deprecation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/routing (v8.1.10): Extracting archive
+  - Installing symfony/process (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-php86 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php85 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php84 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-normalizer (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-idn (v1.43.0): Extracting archive
+  - Installing symfony/mime (v8.1.10): Extracting archive
+  - Installing psr/container (2.0.2): Extracting archive
+  - Installing symfony/service-contracts (v3.7.3): Extracting archive
+  - Installing psr/event-dispatcher (1.0.0): Extracting archive
+  - Installing symfony/event-dispatcher-contracts (v3.7.1): Extracting archive
+  - Installing symfony/event-dispatcher (v8.1.5): Extracting archive
+  - Installing psr/log (3.0.2): Extracting archive
+  - Installing doctrine/lexer (3.0.3): Extracting archive
+  - Installing egulias/email-validator (4.0.4): Extracting archive
+  - Installing symfony/mailer (v8.1.10): Extracting archive
+  - Installing symfony/http-foundation (v8.1.10): Extracting archive
+  - Installing symfony/error-handler (v8.1.10): Extracting archive
+  - Installing symfony/http-kernel (v8.1.10): Extracting archive
+  - Installing symfony/finder (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-intl-grapheme (v1.43.3): Extracting archive
+  - Installing symfony/string (v8.1.10): Extracting archive
+  - Installing symfony/console (v8.1.10): Extracting archive
+  - Installing psr/simple-cache (3.0.0): Extracting archive
+  - Installing psr/http-message (2.0): Extracting archive
+  - Installing nunomaduro/termwind (v2.4.0): Extracting archive
+  - Installing symfony/translation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/translation (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-time (v1.42.0): Extracting archive
+  - Installing psr/clock (1.0.0): Extracting archive
+  - Installing symfony/clock (v8.1.9): Extracting archive
+  - Installing carbonphp/carbon-doctrine-types (3.2.1): Extracting archive
+  - Installing nesbot/carbon (3.15.1): Extracting archive
+  - Installing monolog/monolog (3.12.1): Extracting archive
+  - Installing psr/http-factory (1.1.0): Extracting archive
+  - Installing league/uri-interfaces (7.9.1): Extracting archive
+  - Installing league/uri (7.9.1): Extracting archive
+  - Installing league/mime-type-detection (1.17.0): Extracting archive
+  - Installing league/flysystem-local (3.35.3): Extracting archive
+  - Installing league/flysystem (3.36.0): Extracting archive
+  - Installing nette/utils (v4.1.6): Extracting archive
+  - Installing nette/schema (v1.4.0): Extracting archive
+  - Installing dflydev/dot-access-data (v3.0.3): Extracting archive
+  - Installing league/config (v1.2.0): Extracting archive
+  - Installing league/commonmark (2.10.4): Extracting archive
+  - Installing laravel/serializable-closure (v2.1.0): Extracting archive
+  - Installing laravel/prompts (v0.3.26): Extracting archive
+  - Installing guzzlehttp/uri-template (v2.0.1): Extracting archive
+  - Installing symfony/polyfill-php82 (v1.43.0): Extracting archive
+  - Installing guzzlehttp/psr7 (3.2.0): Extracting archive
+  - Installing guzzlehttp/promises (3.1.0): Extracting archive
+  - Installing psr/http-client (1.0.3): Extracting archive
+  - Installing guzzlehttp/guzzle (8.3.1): Extracting archive
+  - Installing fruitcake/php-cors (v1.4.0): Extracting archive
+  - Installing dragonmantank/cron-expression (v3.6.1): Extracting archive
+  - Installing doctrine/inflector (2.1.1): Extracting archive
+  - Installing laravel/framework (v13.39.0): Extracting archive
+  - Installing axiomasoft/sockit (0.1.x-dev): Mirroring from ../../../packages/core
+  0/74 [>---------------------------]   0%
+ 64/74 [========================>---]  86%
+ 74/74 [============================] 100%
+Generating autoload files
+55 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+
+P4.8 installed packages=["axiomasoft\/sockit","brick\/math","carbonphp\/carbon-doctrine-types","dflydev\/dot-access-data","doctrine\/inflector","doctrine\/lexer","dragonmantank\/cron-expression","egulias\/email-validator","fruitcake\/php-cors","graham-campbell\/result-type","guzzlehttp\/guzzle","guzzlehttp\/promises","guzzlehttp\/psr7","guzzlehttp\/uri-template","laravel\/framework","laravel\/prompts","laravel\/serializable-closure","league\/commonmark","league\/config","league\/flysystem","league\/flysystem-local","league\/mime-type-detection","league\/uri","league\/uri-interfaces","monolog\/monolog","nesbot\/carbon","nette\/schema","nette\/utils","nunomaduro\/termwind","phpoption\/phpoption","psr\/clock","psr\/container","psr\/event-dispatcher","psr\/http-client","psr\/http-factory","psr\/http-message","psr\/log","psr\/simple-cache","ramsey\/collection","ramsey\/uuid","symfony\/clock","symfony\/console","symfony\/css-selector","symfony\/deprecation-contracts","symfony\/error-handler","symfony\/event-dispatcher","symfony\/event-dispatcher-contracts","symfony\/finder","symfony\/http-foundation","symfony\/http-kernel","symfony\/mailer","symfony\/mime","symfony\/polyfill-ctype","symfony\/polyfill-intl-grapheme","symfony\/polyfill-intl-idn","symfony\/polyfill-intl-normalizer","symfony\/polyfill-mbstring","symfony\/polyfill-php80","symfony\/polyfill-php82","symfony\/polyfill-php84","symfony\/polyfill-php85","symfony\/polyfill-php86","symfony\/polyfill-time","symfony\/polyfill-uuid","symfony\/process","symfony\/routing","symfony\/service-contracts","symfony\/string","symfony\/translation","symfony\/translation-contracts","symfony\/uid","symfony\/var-dumper","tijsverkoyen\/css-to-inline-styles","vlucas\/phpdotenv","voku\/portable-ascii"]
+P4.8 installed source fingerprint=dfd61743967d726d968f3a9537fe2332d08efadf503b1f2c335560fcf2c14aa2 separate_databases=0
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","package:discover"] exit=0
+
+   INFO  Discovering packages.  
+
+  axiomasoft/sockit ..................................................... DONE
+  nesbot/carbon ......................................................... DONE
+  nunomaduro/termwind ................................................... DONE
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Article","--id=acme.article","--host=article","--modules=sockit.reactions","--prefix=article_","--connection=owner_a","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.article","provider":"Acme\\Panels\\ArticlePanelProvider","files":{"app\/Panels\/ArticlePanelProvider.php":"Acme\\Panels\\ArticlePanelProvider","app\/Models\/SocKit\/Article\/OutboxEvent.php":"Acme\\Models\\SocKit\\Article\\OutboxEvent","app\/Models\/SocKit\/Article\/ReactionCount.php":"Acme\\Models\\SocKit\\Article\\ReactionCount","app\/Models\/SocKit\/Article\/Reaction.php":"Acme\\Models\\SocKit\\Article\\Reaction","app\/Models\/SocKit\/Article\/Receipt.php":"Acme\\Models\\SocKit\\Article\\Receipt","app\/Models\/SocKit\/Article\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","app\/Models\/SocKit\/Article\/Tombstone.php":"Acme\\Models\\SocKit\\Article\\Tombstone"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\Reaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"connection":"owner_a","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ArticlePanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ArticlePanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=13827a3169424b8b67696c9630a5e56aab9cbd952ce75e41e9e19a9f8b0dcc46
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Article","--id=acme.article","--host=article","--modules=sockit.reactions","--prefix=article_","--connection=owner_a"] exit=0
+{"status":"installed","panel":"acme.article","provider":"Acme\\Panels\\ArticlePanelProvider","files":{"app\/Panels\/ArticlePanelProvider.php":"Acme\\Panels\\ArticlePanelProvider","app\/Models\/SocKit\/Article\/OutboxEvent.php":"Acme\\Models\\SocKit\\Article\\OutboxEvent","app\/Models\/SocKit\/Article\/ReactionCount.php":"Acme\\Models\\SocKit\\Article\\ReactionCount","app\/Models\/SocKit\/Article\/Reaction.php":"Acme\\Models\\SocKit\\Article\\Reaction","app\/Models\/SocKit\/Article\/Receipt.php":"Acme\\Models\\SocKit\\Article\\Receipt","app\/Models\/SocKit\/Article\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","app\/Models\/SocKit\/Article\/Tombstone.php":"Acme\\Models\\SocKit\\Article\\Tombstone"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\Reaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"connection":"owner_a","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ArticlePanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ArticlePanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=dab376b1a65b7c11662efc6c644aa17c12657f80ffb4c7a8b395e0c5824f6890
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Article","--id=acme.article","--host=article","--modules=sockit.reactions","--prefix=article_","--connection=owner_a"] exit=1
+{"status":"failed","problem":"GENERATION_FILE_EXISTS","manifest":null,"recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Product","--id=acme.product","--host=product","--modules=sockit.reactions","--prefix=product_","--connection=owner_b","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.product","provider":"Acme\\Panels\\ProductPanelProvider","files":{"app\/Panels\/ProductPanelProvider.php":"Acme\\Panels\\ProductPanelProvider","app\/Models\/SocKit\/Product\/OutboxEvent.php":"Acme\\Models\\SocKit\\Product\\OutboxEvent","app\/Models\/SocKit\/Product\/ReactionCount.php":"Acme\\Models\\SocKit\\Product\\ReactionCount","app\/Models\/SocKit\/Product\/Reaction.php":"Acme\\Models\\SocKit\\Product\\Reaction","app\/Models\/SocKit\/Product\/Receipt.php":"Acme\\Models\\SocKit\\Product\\Receipt","app\/Models\/SocKit\/Product\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","app\/Models\/SocKit\/Product\/Tombstone.php":"Acme\\Models\\SocKit\\Product\\Tombstone"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"connection":"owner_b","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ProductPanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ProductPanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=876734cc9a8a7da9b04199aadfcbe29ccbb107b06c6f495b02d9cf7ed9973a5e
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Product","--id=acme.product","--host=product","--modules=sockit.reactions","--prefix=product_","--connection=owner_b"] exit=0
+{"status":"installed","panel":"acme.product","provider":"Acme\\Panels\\ProductPanelProvider","files":{"app\/Panels\/ProductPanelProvider.php":"Acme\\Panels\\ProductPanelProvider","app\/Models\/SocKit\/Product\/OutboxEvent.php":"Acme\\Models\\SocKit\\Product\\OutboxEvent","app\/Models\/SocKit\/Product\/ReactionCount.php":"Acme\\Models\\SocKit\\Product\\ReactionCount","app\/Models\/SocKit\/Product\/Reaction.php":"Acme\\Models\\SocKit\\Product\\Reaction","app\/Models\/SocKit\/Product\/Receipt.php":"Acme\\Models\\SocKit\\Product\\Receipt","app\/Models\/SocKit\/Product\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","app\/Models\/SocKit\/Product\/Tombstone.php":"Acme\\Models\\SocKit\\Product\\Tombstone"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"connection":"owner_b","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ProductPanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ProductPanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=250a8b634b80e68d905900905bba9c30d6b2ad9eee393cde59ddaa90746fc24e
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Product","--id=acme.product","--host=product","--modules=sockit.reactions","--prefix=product_","--connection=owner_b"] exit=1
+{"status":"failed","problem":"GENERATION_FILE_EXISTS","manifest":null,"recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Invalid","--id=acme.invalid","--host=article","--modules=reactions","--prefix=invalid_","--connection=owner_a"] exit=1
+{"status":"failed","problem":"GENERATION_MODULE_NOT_ENABLED: install, offer and enable the selected module first","manifest":null,"recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","boot"] exit=0
+{"panels":["acme.article","acme.product"],"queries":0,"connections":0}
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","config:cache"] exit=0
+
+   INFO  Configuration cached successfully.  
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","boot"] exit=0
+{"panels":["acme.article","acme.product"],"queries":0,"connections":0}
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.article","files":["database\/migrations\/2026_10_29_075451_000001_sockit_deb76148b67581c0.php","database\/sockit\/acme.article\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075451_000001_sockit_deb76148b67581c0.php":"b83d77e3f9fbdafbeb4d948d5fdd4f4d0ffa9bd9867456d29c22efea37d42543","database\/sockit\/acme.article\/000001.json":"367fa0f1f11fb7b0a62406e04c545f62e6194f6d24b43d93f33cc082ac57eb7a"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\CustomReaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075451_000001_sockit_deb76148b67581c0.php","ancestry":"database\/sockit\/acme.article\/000001.json","digest":"a6ad6a162fae91bb56cfeb9c21ea3a10cc2921d10aad80b5d1b5c497b3d3355c","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_a after reviewing these consumer-owned files."} stdout_sha256=5e54e39e186ffd26a3c509b1e2a1354f0f4d341504156dafc4e6da5481897d9f
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article"] exit=0
+{"status":"generated","panel":"acme.article","files":["database\/migrations\/2026_10_29_075452_000001_sockit_deb76148b67581c0.php","database\/sockit\/acme.article\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075452_000001_sockit_deb76148b67581c0.php":"b83d77e3f9fbdafbeb4d948d5fdd4f4d0ffa9bd9867456d29c22efea37d42543","database\/sockit\/acme.article\/000001.json":"88fce4b783e18273bb7015f7bdb545d529b6ee296e007f249e9dc1142db71278"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\CustomReaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075452_000001_sockit_deb76148b67581c0.php","ancestry":"database\/sockit\/acme.article\/000001.json","digest":"b9ca0e790f033831ea468e1bb4798f0fa58a687e1d86991b3b5da4925ba2c711","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_a after reviewing these consumer-owned files."} stdout_sha256=42767ad3b2bd2aac29320de2ee87e3b301847d8abec0e24bf303509833ef0fc5
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article"] exit=1
+{"status":"failed","problem":"MIGRATION_HISTORY_EXISTS: use --upgrade","recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article","--upgrade"] exit=0
+{"status":"no_op","panel":"acme.article","files":[],"applied":0,"generated":1,"model_changes":[],"models_compatible":true}
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.product","files":["database\/migrations\/2026_10_29_075452_000001_sockit_0eee607dde298733.php","database\/sockit\/acme.product\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075452_000001_sockit_0eee607dde298733.php":"02795ff12e54a3ed6ffbb8317710955c969de5d187490dfdb316452ab95593f7","database\/sockit\/acme.product\/000001.json":"ad43311e913653a759df001ef17d5fc9f878a33940922512f8383704ed97b8b8"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075452_000001_sockit_0eee607dde298733.php","ancestry":"database\/sockit\/acme.product\/000001.json","digest":"df80d5adee4b85d690ea0118db5a72e7087ec1d09a1966e34ace8a4d29e9daeb","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_b after reviewing these consumer-owned files."} stdout_sha256=934b76181e779cc8a9308c7769332b811b50373c082e4d865709b3fd5fca7851
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product"] exit=0
+{"status":"generated","panel":"acme.product","files":["database\/migrations\/2026_10_29_075452_000001_sockit_0eee607dde298733.php","database\/sockit\/acme.product\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075452_000001_sockit_0eee607dde298733.php":"02795ff12e54a3ed6ffbb8317710955c969de5d187490dfdb316452ab95593f7","database\/sockit\/acme.product\/000001.json":"ad43311e913653a759df001ef17d5fc9f878a33940922512f8383704ed97b8b8"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075452_000001_sockit_0eee607dde298733.php","ancestry":"database\/sockit\/acme.product\/000001.json","digest":"df80d5adee4b85d690ea0118db5a72e7087ec1d09a1966e34ace8a4d29e9daeb","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_b after reviewing these consumer-owned files."} stdout_sha256=dd345eb8f724a6eedadb6ea1c2d47018f77fa7cbe71b58989b554448689fc71a
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product"] exit=1
+{"status":"failed","problem":"MIGRATION_HISTORY_EXISTS: use --upgrade","recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product","--upgrade"] exit=0
+{"status":"no_op","panel":"acme.product","files":[],"applied":0,"generated":1,"model_changes":[],"models_compatible":true}
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","migrate","--database=owner_a","--path=database\/migrations\/2026_10_29_075452_000001_sockit_deb76148b67581c0.php","--force"] exit=0
+
+   INFO  Preparing database.  
+
+  Creating migration table ...................................... 16.12ms DONE
+
+   INFO  Running migrations.  
+
+  2026_10_29_075452_000001_sockit_deb76148b67581c0 .............. 58.41ms DONE
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","migrate","--database=owner_b","--path=database\/migrations\/2026_10_29_075452_000001_sockit_0eee607dde298733.php","--force"] exit=0
+
+   INFO  Running migrations.  
+
+  2026_10_29_075452_000001_sockit_0eee607dde298733 .............. 45.78ms DONE
+
+
+P4.8 SQL catalog: production reactions/kernel tables present; posts tables absent; default/foreign storage untouched
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","smoke"] exit=0
+{"assertions":["public_surfaces","add_replay","panel_isolation","alias_incarnation_isolation","remove_cas","current_guards","atomic_rollback","models_queue"],"queue":"TzoxNToiQWNtZVxTb2NpYWxcSm9iIjoxOntzOjU6Im1vZGVsIjtPOjQ1OiJJbGx1bWluYXRlXENvbnRyYWN0c1xEYXRhYmFzZVxNb2RlbElkZW50aWZpZXIiOjU6e3M6NToiY2xhc3MiO3M6NDE6IkFjbWVcTW9kZWxzXFNvY0tpdFxBcnRpY2xlXEN1c3RvbVJlYWN0aW9uIjtzOjI6ImlkIjtzOjM2OiIwMWExODZhNy05OWE5LTcwMjktODYyMi0zZjY1ZjIzZWM2MGQiO3M6OToicmVsYXRpb25zIjthOjA6e31zOjEwOiJjb25uZWN0aW9uIjtzOjc6Im93bmVyX2EiO3M6MTU6ImNvbGxlY3Rpb25DbGFzcyI7Tjt9fQ=="}
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","restore","TzoxNToiQWNtZVxTb2NpYWxcSm9iIjoxOntzOjU6Im1vZGVsIjtPOjQ1OiJJbGx1bWluYXRlXENvbnRyYWN0c1xEYXRhYmFzZVxNb2RlbElkZW50aWZpZXIiOjU6e3M6NToiY2xhc3MiO3M6NDE6IkFjbWVcTW9kZWxzXFNvY0tpdFxBcnRpY2xlXEN1c3RvbVJlYWN0aW9uIjtzOjI6ImlkIjtzOjM2OiIwMWExODZhNy05OWE5LTcwMjktODYyMi0zZjY1ZjIzZWM2MGQiO3M6OToicmVsYXRpb25zIjthOjA6e31zOjEwOiJjb25uZWN0aW9uIjtzOjc6Im93bmVyX2EiO3M6MTU6ImNvbGxlY3Rpb25DbGFzcyI7Tjt9fQ=="] exit=0
+{"panel":"acme.article","connection":"owner_a","custom":true}
+P4.8 SQL state product {"surface_instances":"10b53b9990c48a1034d25f198ef5cd643308a8acf64e2f081a6c8a4da72dbdf6","receipts":"2d7b61c8598c76ea2d7584f5ff1bd4f3f6e8aa68ccad53e4a6f157d1ab38ec82","outbox":"867f2cd36bc135bb3e1a3ea09a3d69e866f02b65b5aa0baa8fb9cf6a6947d4f8","tombstones":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","reactions":"3a60fa42a594e70bb23a4842a35f1f4c95557dd4d2599757b3e607da36d300dd","reaction_counts":"73e8d2ba0f6691018ac22fc29ad029afbf2e4cabb0373d43c2b7908668cfc8b3"}
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","config:clear"] exit=0
+
+   INFO  Configuration cache cleared successfully.  
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","migrate:rollback","--database=owner_a","--path=database\/migrations\/2026_10_29_075452_000001_sockit_deb76148b67581c0.php","--batch=1","--force"] exit=0
+
+   INFO  Rolling back migrations.  
+
+  2026_10_29_075452_000001_sockit_deb76148b67581c0 .............. 22.90ms DONE
+
+
+P4.8 SQL state product {"surface_instances":"10b53b9990c48a1034d25f198ef5cd643308a8acf64e2f081a6c8a4da72dbdf6","receipts":"2d7b61c8598c76ea2d7584f5ff1bd4f3f6e8aa68ccad53e4a6f157d1ab38ec82","outbox":"867f2cd36bc135bb3e1a3ea09a3d69e866f02b65b5aa0baa8fb9cf6a6947d4f8","tombstones":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","reactions":"3a60fa42a594e70bb23a4842a35f1f4c95557dd4d2599757b3e607da36d300dd","reaction_counts":"73e8d2ba0f6691018ac22fc29ad029afbf2e4cabb0373d43c2b7908668cfc8b3"}
+P4.8 consumer cwd=/tmp/sockit-p48-10c90c3845b5d1ac7e0d0a469d3457b1/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","product-after"] exit=0
+{"like":1,"revision":3}
+P4.8 frozen Article rollback: Product tables/data/receipts/outbox and host sentinels preserved; Product public writes still work
+PG identity database=sockit_p2_049fdc953b1932d9_test server_version_num=160014 marker=sockit-p21-049fdc953b1932d9 backend_pid=121
+PG identity database=sockit_p2_decoy_049fdc953b1932d9_test server_version_num=160014 marker=sockit-p21-049fdc953b1932d9 backend_pid=122
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["composer","install","--no-dev","--no-interaction","--no-scripts"] exit=0
+Installing dependencies from lock file
+Verifying lock file contents can be installed on current platform.
+Package operations: 75 installs, 0 updates, 0 removals
+    0 [>---------------------------]    0 [->--------------------------]
+  - Installing ramsey/collection (2.1.1): Extracting archive
+  - Installing brick/math (1.0.0): Extracting archive
+  - Installing ramsey/uuid (4.9.4): Extracting archive
+  - Installing voku/portable-ascii (2.1.1): Extracting archive
+  - Installing symfony/polyfill-php80 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-mbstring (v1.43.3): Extracting archive
+  - Installing symfony/polyfill-ctype (v1.37.0): Extracting archive
+  - Installing phpoption/phpoption (1.10.0): Extracting archive
+  - Installing graham-campbell/result-type (v1.2.0): Extracting archive
+  - Installing vlucas/phpdotenv (v5.8.0): Extracting archive
+  - Installing symfony/css-selector (v8.1.10): Extracting archive
+  - Installing tijsverkoyen/css-to-inline-styles (v2.4.0): Extracting archive
+  - Installing symfony/var-dumper (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-uuid (v1.43.0): Extracting archive
+  - Installing symfony/uid (v8.1.9): Extracting archive
+  - Installing symfony/deprecation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/routing (v8.1.10): Extracting archive
+  - Installing symfony/process (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-php86 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php85 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php84 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-normalizer (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-idn (v1.43.0): Extracting archive
+  - Installing symfony/mime (v8.1.10): Extracting archive
+  - Installing psr/container (2.0.2): Extracting archive
+  - Installing symfony/service-contracts (v3.7.3): Extracting archive
+  - Installing psr/event-dispatcher (1.0.0): Extracting archive
+  - Installing symfony/event-dispatcher-contracts (v3.7.1): Extracting archive
+  - Installing symfony/event-dispatcher (v8.1.5): Extracting archive
+  - Installing psr/log (3.0.2): Extracting archive
+  - Installing doctrine/lexer (3.0.3): Extracting archive
+  - Installing egulias/email-validator (4.0.4): Extracting archive
+  - Installing symfony/mailer (v8.1.10): Extracting archive
+  - Installing symfony/http-foundation (v8.1.10): Extracting archive
+  - Installing symfony/error-handler (v8.1.10): Extracting archive
+  - Installing symfony/http-kernel (v8.1.10): Extracting archive
+  - Installing symfony/finder (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-intl-grapheme (v1.43.3): Extracting archive
+  - Installing symfony/string (v8.1.10): Extracting archive
+  - Installing symfony/console (v8.1.10): Extracting archive
+  - Installing psr/simple-cache (3.0.0): Extracting archive
+  - Installing psr/http-message (2.0): Extracting archive
+  - Installing nunomaduro/termwind (v2.4.0): Extracting archive
+  - Installing symfony/translation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/translation (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-time (v1.42.0): Extracting archive
+  - Installing psr/clock (1.0.0): Extracting archive
+  - Installing symfony/clock (v8.1.9): Extracting archive
+  - Installing carbonphp/carbon-doctrine-types (3.2.1): Extracting archive
+  - Installing nesbot/carbon (3.15.1): Extracting archive
+  - Installing monolog/monolog (3.12.1): Extracting archive
+  - Installing psr/http-factory (1.1.0): Extracting archive
+  - Installing league/uri-interfaces (7.9.1): Extracting archive
+  - Installing league/uri (7.9.1): Extracting archive
+  - Installing league/mime-type-detection (1.17.0): Extracting archive
+  - Installing league/flysystem-local (3.35.3): Extracting archive
+  - Installing league/flysystem (3.36.0): Extracting archive
+  - Installing nette/utils (v4.1.6): Extracting archive
+  - Installing nette/schema (v1.4.0): Extracting archive
+  - Installing dflydev/dot-access-data (v3.0.3): Extracting archive
+  - Installing league/config (v1.2.0): Extracting archive
+  - Installing league/commonmark (2.10.4): Extracting archive
+  - Installing laravel/serializable-closure (v2.1.0): Extracting archive
+  - Installing laravel/prompts (v0.3.26): Extracting archive
+  - Installing guzzlehttp/uri-template (v2.0.1): Extracting archive
+  - Installing symfony/polyfill-php82 (v1.43.0): Extracting archive
+  - Installing guzzlehttp/psr7 (3.2.0): Extracting archive
+  - Installing guzzlehttp/promises (3.1.0): Extracting archive
+  - Installing psr/http-client (1.0.3): Extracting archive
+  - Installing guzzlehttp/guzzle (8.3.1): Extracting archive
+  - Installing fruitcake/php-cors (v1.4.0): Extracting archive
+  - Installing dragonmantank/cron-expression (v3.6.1): Extracting archive
+  - Installing doctrine/inflector (2.1.1): Extracting archive
+  - Installing laravel/framework (v13.39.0): Extracting archive
+  - Installing axiomasoft/sockit (0.1.x-dev): Mirroring from ../../../packages/core
+  0/74 [>---------------------------]   0%
+ 64/74 [========================>---]  86%
+ 74/74 [============================] 100%
+Generating autoload files
+55 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+
+P4.8 installed packages=["axiomasoft\/sockit","brick\/math","carbonphp\/carbon-doctrine-types","dflydev\/dot-access-data","doctrine\/inflector","doctrine\/lexer","dragonmantank\/cron-expression","egulias\/email-validator","fruitcake\/php-cors","graham-campbell\/result-type","guzzlehttp\/guzzle","guzzlehttp\/promises","guzzlehttp\/psr7","guzzlehttp\/uri-template","laravel\/framework","laravel\/prompts","laravel\/serializable-closure","league\/commonmark","league\/config","league\/flysystem","league\/flysystem-local","league\/mime-type-detection","league\/uri","league\/uri-interfaces","monolog\/monolog","nesbot\/carbon","nette\/schema","nette\/utils","nunomaduro\/termwind","phpoption\/phpoption","psr\/clock","psr\/container","psr\/event-dispatcher","psr\/http-client","psr\/http-factory","psr\/http-message","psr\/log","psr\/simple-cache","ramsey\/collection","ramsey\/uuid","symfony\/clock","symfony\/console","symfony\/css-selector","symfony\/deprecation-contracts","symfony\/error-handler","symfony\/event-dispatcher","symfony\/event-dispatcher-contracts","symfony\/finder","symfony\/http-foundation","symfony\/http-kernel","symfony\/mailer","symfony\/mime","symfony\/polyfill-ctype","symfony\/polyfill-intl-grapheme","symfony\/polyfill-intl-idn","symfony\/polyfill-intl-normalizer","symfony\/polyfill-mbstring","symfony\/polyfill-php80","symfony\/polyfill-php82","symfony\/polyfill-php84","symfony\/polyfill-php85","symfony\/polyfill-php86","symfony\/polyfill-time","symfony\/polyfill-uuid","symfony\/process","symfony\/routing","symfony\/service-contracts","symfony\/string","symfony\/translation","symfony\/translation-contracts","symfony\/uid","symfony\/var-dumper","tijsverkoyen\/css-to-inline-styles","vlucas\/phpdotenv","voku\/portable-ascii"]
+P4.8 installed source fingerprint=dfd61743967d726d968f3a9537fe2332d08efadf503b1f2c335560fcf2c14aa2 separate_databases=1
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","package:discover"] exit=0
+
+   INFO  Discovering packages.  
+
+  axiomasoft/sockit ..................................................... DONE
+  nesbot/carbon ......................................................... DONE
+  nunomaduro/termwind ................................................... DONE
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Article","--id=acme.article","--host=article","--modules=sockit.reactions","--prefix=article_","--connection=owner_a","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.article","provider":"Acme\\Panels\\ArticlePanelProvider","files":{"app\/Panels\/ArticlePanelProvider.php":"Acme\\Panels\\ArticlePanelProvider","app\/Models\/SocKit\/Article\/OutboxEvent.php":"Acme\\Models\\SocKit\\Article\\OutboxEvent","app\/Models\/SocKit\/Article\/ReactionCount.php":"Acme\\Models\\SocKit\\Article\\ReactionCount","app\/Models\/SocKit\/Article\/Reaction.php":"Acme\\Models\\SocKit\\Article\\Reaction","app\/Models\/SocKit\/Article\/Receipt.php":"Acme\\Models\\SocKit\\Article\\Receipt","app\/Models\/SocKit\/Article\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","app\/Models\/SocKit\/Article\/Tombstone.php":"Acme\\Models\\SocKit\\Article\\Tombstone"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\Reaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"connection":"owner_a","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ArticlePanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ArticlePanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=13827a3169424b8b67696c9630a5e56aab9cbd952ce75e41e9e19a9f8b0dcc46
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Article","--id=acme.article","--host=article","--modules=sockit.reactions","--prefix=article_","--connection=owner_a"] exit=0
+{"status":"installed","panel":"acme.article","provider":"Acme\\Panels\\ArticlePanelProvider","files":{"app\/Panels\/ArticlePanelProvider.php":"Acme\\Panels\\ArticlePanelProvider","app\/Models\/SocKit\/Article\/OutboxEvent.php":"Acme\\Models\\SocKit\\Article\\OutboxEvent","app\/Models\/SocKit\/Article\/ReactionCount.php":"Acme\\Models\\SocKit\\Article\\ReactionCount","app\/Models\/SocKit\/Article\/Reaction.php":"Acme\\Models\\SocKit\\Article\\Reaction","app\/Models\/SocKit\/Article\/Receipt.php":"Acme\\Models\\SocKit\\Article\\Receipt","app\/Models\/SocKit\/Article\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","app\/Models\/SocKit\/Article\/Tombstone.php":"Acme\\Models\\SocKit\\Article\\Tombstone"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\Reaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"connection":"owner_a","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ArticlePanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ArticlePanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=dab376b1a65b7c11662efc6c644aa17c12657f80ffb4c7a8b395e0c5824f6890
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Article","--id=acme.article","--host=article","--modules=sockit.reactions","--prefix=article_","--connection=owner_a"] exit=1
+{"status":"failed","problem":"GENERATION_FILE_EXISTS","manifest":null,"recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Product","--id=acme.product","--host=product","--modules=sockit.reactions","--prefix=product_","--connection=owner_b","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.product","provider":"Acme\\Panels\\ProductPanelProvider","files":{"app\/Panels\/ProductPanelProvider.php":"Acme\\Panels\\ProductPanelProvider","app\/Models\/SocKit\/Product\/OutboxEvent.php":"Acme\\Models\\SocKit\\Product\\OutboxEvent","app\/Models\/SocKit\/Product\/ReactionCount.php":"Acme\\Models\\SocKit\\Product\\ReactionCount","app\/Models\/SocKit\/Product\/Reaction.php":"Acme\\Models\\SocKit\\Product\\Reaction","app\/Models\/SocKit\/Product\/Receipt.php":"Acme\\Models\\SocKit\\Product\\Receipt","app\/Models\/SocKit\/Product\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","app\/Models\/SocKit\/Product\/Tombstone.php":"Acme\\Models\\SocKit\\Product\\Tombstone"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"connection":"owner_b","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ProductPanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ProductPanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=876734cc9a8a7da9b04199aadfcbe29ccbb107b06c6f495b02d9cf7ed9973a5e
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Product","--id=acme.product","--host=product","--modules=sockit.reactions","--prefix=product_","--connection=owner_b"] exit=0
+{"status":"installed","panel":"acme.product","provider":"Acme\\Panels\\ProductPanelProvider","files":{"app\/Panels\/ProductPanelProvider.php":"Acme\\Panels\\ProductPanelProvider","app\/Models\/SocKit\/Product\/OutboxEvent.php":"Acme\\Models\\SocKit\\Product\\OutboxEvent","app\/Models\/SocKit\/Product\/ReactionCount.php":"Acme\\Models\\SocKit\\Product\\ReactionCount","app\/Models\/SocKit\/Product\/Reaction.php":"Acme\\Models\\SocKit\\Product\\Reaction","app\/Models\/SocKit\/Product\/Receipt.php":"Acme\\Models\\SocKit\\Product\\Receipt","app\/Models\/SocKit\/Product\/SurfaceInstance.php":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","app\/Models\/SocKit\/Product\/Tombstone.php":"Acme\\Models\\SocKit\\Product\\Tombstone"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"connection":"owner_b","schema":"public","registration":"In config\/sockit.php append \\Acme\\Panels\\ProductPanelProvider::class to the 'panels' array. Keep the selected modules installed, offered and enabled.\nExample: 'panels' => [\\Acme\\Panels\\ProductPanelProvider::class],\nNo migration was created. Run the explicit panel migration generator separately when available."} stdout_sha256=250a8b634b80e68d905900905bba9c30d6b2ad9eee393cde59ddaa90746fc24e
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Product","--id=acme.product","--host=product","--modules=sockit.reactions","--prefix=product_","--connection=owner_b"] exit=1
+{"status":"failed","problem":"GENERATION_FILE_EXISTS","manifest":null,"recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:make-panel","Invalid","--id=acme.invalid","--host=article","--modules=reactions","--prefix=invalid_","--connection=owner_a"] exit=1
+{"status":"failed","problem":"GENERATION_MODULE_NOT_ENABLED: install, offer and enable the selected module first","manifest":null,"recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","boot"] exit=0
+{"panels":["acme.article","acme.product"],"queries":0,"connections":0}
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","config:cache"] exit=0
+
+   INFO  Configuration cached successfully.  
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","boot"] exit=0
+{"panels":["acme.article","acme.product"],"queries":0,"connections":0}
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.article","files":["database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php","database\/sockit\/acme.article\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php":"b83d77e3f9fbdafbeb4d948d5fdd4f4d0ffa9bd9867456d29c22efea37d42543","database\/sockit\/acme.article\/000001.json":"06c32e5ea0346f992f319151851eaaeb70770ea4ec43cd9342837e48799a8ca9"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\CustomReaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php","ancestry":"database\/sockit\/acme.article\/000001.json","digest":"80400ea8e3b46635469e995a1483f92e72db8f2fcd9aa623e4c923fa231df3a9","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_a after reviewing these consumer-owned files."} stdout_sha256=6010a6c96a868cd70d382b2c2c99247e193f58769f20c0a5ef13f32ecae7ce87
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article"] exit=0
+{"status":"generated","panel":"acme.article","files":["database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php","database\/sockit\/acme.article\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php":"b83d77e3f9fbdafbeb4d948d5fdd4f4d0ffa9bd9867456d29c22efea37d42543","database\/sockit\/acme.article\/000001.json":"06c32e5ea0346f992f319151851eaaeb70770ea4ec43cd9342837e48799a8ca9"},"tables":{"outbox":"driver_article_outbox","reaction_counts":"driver_article_reaction_counts","reactions":"driver_article_reactions","receipts":"driver_article_receipts","surface_instances":"driver_article_surface_instances","tombstones":"driver_article_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Article\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Article\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Article\\CustomReaction","receipts":"Acme\\Models\\SocKit\\Article\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Article\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Article\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php","ancestry":"database\/sockit\/acme.article\/000001.json","digest":"80400ea8e3b46635469e995a1483f92e72db8f2fcd9aa623e4c923fa231df3a9","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_a after reviewing these consumer-owned files."} stdout_sha256=05c2953694ad399ae10de56d31b9055d215be4fd23dfe0c56be1776b93239487
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article"] exit=1
+{"status":"failed","problem":"MIGRATION_HISTORY_EXISTS: use --upgrade","recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.article","--upgrade"] exit=0
+{"status":"no_op","panel":"acme.article","files":[],"applied":0,"generated":1,"model_changes":[],"models_compatible":true}
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product","--dry-run"] exit=0
+{"status":"dry_run","panel":"acme.product","files":["database\/migrations\/2026_10_29_075456_000001_sockit_0eee607dde298733.php","database\/sockit\/acme.product\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075456_000001_sockit_0eee607dde298733.php":"8888ce0c4b76df2ddd54fc45bdb031fc7cdd630f4d3fefead17f8791a38b11da","database\/sockit\/acme.product\/000001.json":"f3d8ca42555e04185868c8e9848612c6e417352a00784dc304c9f97f088b2e02"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075456_000001_sockit_0eee607dde298733.php","ancestry":"database\/sockit\/acme.product\/000001.json","digest":"180895b4448cb3596ad108f98fa5c303feb139d88b43e698aedb28dff0b52da0","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_b after reviewing these consumer-owned files."} stdout_sha256=8703b8e6f9bea8fa9ec821bb347bb2289b98d836a82d5c115bab139f12dbd8d7
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product"] exit=0
+{"status":"generated","panel":"acme.product","files":["database\/migrations\/2026_10_29_075456_000001_sockit_0eee607dde298733.php","database\/sockit\/acme.product\/000001.json"],"model_changes":[],"models_compatible":true,"outputs":{"database\/migrations\/2026_10_29_075456_000001_sockit_0eee607dde298733.php":"8888ce0c4b76df2ddd54fc45bdb031fc7cdd630f4d3fefead17f8791a38b11da","database\/sockit\/acme.product\/000001.json":"f3d8ca42555e04185868c8e9848612c6e417352a00784dc304c9f97f088b2e02"},"tables":{"outbox":"driver_product_outbox","reaction_counts":"driver_product_reaction_counts","reactions":"driver_product_reactions","receipts":"driver_product_receipts","surface_instances":"driver_product_surface_instances","tombstones":"driver_product_tombstones"},"models":{"outbox":"Acme\\Models\\SocKit\\Product\\OutboxEvent","reaction_counts":"Acme\\Models\\SocKit\\Product\\ReactionCount","reactions":"Acme\\Models\\SocKit\\Product\\Reaction","receipts":"Acme\\Models\\SocKit\\Product\\Receipt","surface_instances":"Acme\\Models\\SocKit\\Product\\SurfaceInstance","tombstones":"Acme\\Models\\SocKit\\Product\\Tombstone"},"migration":"database\/migrations\/2026_10_29_075456_000001_sockit_0eee607dde298733.php","ancestry":"database\/sockit\/acme.product\/000001.json","digest":"180895b4448cb3596ad108f98fa5c303feb139d88b43e698aedb28dff0b52da0","applied":0,"generated":0,"instruction":"Run php artisan migrate --database=owner_b after reviewing these consumer-owned files."} stdout_sha256=b49199293839d9a1516b0e76f686db12b5aefb89cd7d7e84da2275e2e67249ab
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product"] exit=1
+{"status":"failed","problem":"MIGRATION_HISTORY_EXISTS: use --upgrade","recovery":[]}
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","sockit:panel:migrations","acme.product","--upgrade"] exit=0
+{"status":"no_op","panel":"acme.product","files":[],"applied":0,"generated":1,"model_changes":[],"models_compatible":true}
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","migrate","--database=owner_a","--path=database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php","--force"] exit=0
+
+   INFO  Preparing database.  
+
+  Creating migration table ....................................... 4.90ms DONE
+
+   INFO  Running migrations.  
+
+  2026_10_29_075456_000001_sockit_deb76148b67581c0 .............. 49.16ms DONE
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","migrate","--database=owner_b","--path=database\/migrations\/2026_10_29_075456_000001_sockit_0eee607dde298733.php","--force"] exit=0
+
+   INFO  Preparing database.  
+
+  Creating migration table ....................................... 4.51ms DONE
+
+   INFO  Running migrations.  
+
+  2026_10_29_075456_000001_sockit_0eee607dde298733 .............. 50.21ms DONE
+
+
+P4.8 SQL catalog: production reactions/kernel tables present; posts tables absent; default/foreign storage untouched
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","smoke"] exit=0
+{"assertions":["public_surfaces","add_replay","panel_isolation","alias_incarnation_isolation","remove_cas","current_guards","atomic_rollback","models_queue"],"queue":"TzoxNToiQWNtZVxTb2NpYWxcSm9iIjoxOntzOjU6Im1vZGVsIjtPOjQ1OiJJbGx1bWluYXRlXENvbnRyYWN0c1xEYXRhYmFzZVxNb2RlbElkZW50aWZpZXIiOjU6e3M6NToiY2xhc3MiO3M6NDE6IkFjbWVcTW9kZWxzXFNvY0tpdFxBcnRpY2xlXEN1c3RvbVJlYWN0aW9uIjtzOjI6ImlkIjtzOjM2OiIwMWExODZhNy1hYjBmLTcxNmEtYTM4NS0xMzJiOTQzYzA3ODQiO3M6OToicmVsYXRpb25zIjthOjA6e31zOjEwOiJjb25uZWN0aW9uIjtzOjc6Im93bmVyX2EiO3M6MTU6ImNvbGxlY3Rpb25DbGFzcyI7Tjt9fQ=="}
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","restore","TzoxNToiQWNtZVxTb2NpYWxcSm9iIjoxOntzOjU6Im1vZGVsIjtPOjQ1OiJJbGx1bWluYXRlXENvbnRyYWN0c1xEYXRhYmFzZVxNb2RlbElkZW50aWZpZXIiOjU6e3M6NToiY2xhc3MiO3M6NDE6IkFjbWVcTW9kZWxzXFNvY0tpdFxBcnRpY2xlXEN1c3RvbVJlYWN0aW9uIjtzOjI6ImlkIjtzOjM2OiIwMWExODZhNy1hYjBmLTcxNmEtYTM4NS0xMzJiOTQzYzA3ODQiO3M6OToicmVsYXRpb25zIjthOjA6e31zOjEwOiJjb25uZWN0aW9uIjtzOjc6Im93bmVyX2EiO3M6MTU6ImNvbGxlY3Rpb25DbGFzcyI7Tjt9fQ=="] exit=0
+{"panel":"acme.article","connection":"owner_a","custom":true}
+P4.8 SQL state product {"surface_instances":"73ab8f431e83aa71e9daf21486da94b3a5b3cfb21fb45dcb2358c4cadf0b865f","receipts":"bbd87359c5506f1e911a0091e59cdffd21b9b68e6becf5b7ee883e8ddcfe66ae","outbox":"bccfc4ee3ce893549521ebe4c3d922018d6e707c93140a8ff9a07131a479963f","tombstones":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","reactions":"b1026a2916b38fb5f2b45bbc61bc32ae89836a797fc872e4c2586bf8b8dfb74d","reaction_counts":"db8e6ee6a0be4b804ee200ab04eedee21e3c091bc4f837c750cc5ebc6df8a282"}
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","config:clear"] exit=0
+
+   INFO  Configuration cache cleared successfully.  
+
+
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","artisan","migrate:rollback","--database=owner_a","--path=database\/migrations\/2026_10_29_075456_000001_sockit_deb76148b67581c0.php","--batch=1","--force"] exit=0
+
+   INFO  Rolling back migrations.  
+
+  2026_10_29_075456_000001_sockit_deb76148b67581c0 .............. 27.45ms DONE
+
+
+P4.8 SQL state product {"surface_instances":"73ab8f431e83aa71e9daf21486da94b3a5b3cfb21fb45dcb2358c4cadf0b865f","receipts":"bbd87359c5506f1e911a0091e59cdffd21b9b68e6becf5b7ee883e8ddcfe66ae","outbox":"bccfc4ee3ce893549521ebe4c3d922018d6e707c93140a8ff9a07131a479963f","tombstones":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","reactions":"b1026a2916b38fb5f2b45bbc61bc32ae89836a797fc872e4c2586bf8b8dfb74d","reaction_counts":"db8e6ee6a0be4b804ee200ab04eedee21e3c091bc4f837c750cc5ebc6df8a282"}
+P4.8 consumer cwd=/tmp/sockit-p48-f72ba24c1502e027cded0b142250d157/tests/Fixtures/PanelConsumer command=["\/home\/vostrikov\/.config\/herd-lite\/bin\/php","social.php","product-after"] exit=0
+{"like":1,"revision":3}
+P4.8 frozen Article rollback: Product tables/data/receipts/outbox and host sentinels preserved; Product public writes still work

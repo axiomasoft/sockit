@@ -1,0 +1,71 @@
+{
+  "note": "Iteration logs archived outside commit to avoid large dry-run output. Final V*.json/log are authoritative current-source checks.",
+  "attempts": [
+    {
+      "attempt": "V1-initial",
+      "exit": 1,
+      "reason": "Stale consumer lock lacked production module PSR-4 autoload; refreshed with real Composer solver.",
+      "log_sha256": "3cd15d362ff857d8075546b02ee83d1da1972b4a9a607ded0ebf78458873620e"
+    },
+    {
+      "attempt": "V1-second",
+      "exit": 0,
+      "reason": "Generation passed after lock refresh.",
+      "log_sha256": "b21f5617600cc30b38eb39762aced694a49230164ce16b254829fcbe47c20eed"
+    },
+    {
+      "attempt": "V2-initial",
+      "exit": 0,
+      "reason": "Both real storage topologies passed.",
+      "log_sha256": "7024f00e365b6790aa681a8b5f33a7e87eb57d60c5dd85b1c057fcc6f4799bf9"
+    },
+    {
+      "attempt": "V3-initial",
+      "exit": 1,
+      "reason": "Deployment fixture booted changed providers through stale config cache; remove owned cache before fresh boot.",
+      "log_sha256": "9e0b4076efebd8056daf8a11e8e316a50499545da3aeec495e061869ee8c8ff8"
+    },
+    {
+      "attempt": "V3-second",
+      "exit": 2,
+      "reason": "Consumer surface had not enabled posts feature; fixed coherent provider/surface selection.",
+      "log_sha256": "ba5f405149d1d8b1b0d77c0488a56e9900508bda644d02f7416d6eb098a7b654"
+    },
+    {
+      "attempt": "V3-third",
+      "exit": 2,
+      "reason": "Missing post correctly denies ContentHidden; capability probe now distinguishes that denial from unavailable capability.",
+      "log_sha256": "44a580f52baa48c6456eb13d01ec8f213998b3801d049aa5be627f167153f55e"
+    },
+    {
+      "attempt": "V3-fourth",
+      "exit": 0,
+      "reason": "Full additive/disable/re-enable scenario passed with real pending draft and delivery.",
+      "log_sha256": "4a33ce48255649f1dec74a3fe59ecc3c805570fb56b0a85871b53432dc02117b"
+    },
+    {
+      "attempt": "V3-fifth",
+      "exit": 0,
+      "reason": "Added version/config drift and frozen rollback; passed.",
+      "log_sha256": "d8c2fb85c96b04c35dd930de2110cbd6a7718bc375777966ebb74c6caa34930b"
+    },
+    {
+      "attempt": "V90-initial",
+      "exit": 1,
+      "reason": "Six fixture typing errors; replaced assertion-only narrowing with actual type checks.",
+      "log_sha256": "44e3b5d5ba8afbb7f307bd11810d557f850a5e6f263f5f7e3d852915baf1c12d"
+    },
+    {
+      "attempt": "V90-second",
+      "exit": 1,
+      "reason": "Four redundant type checks removed after proper narrowing.",
+      "log_sha256": "d30e675fc00636391bba0cd7ee3529813470381ead8d95b6acc2d2df15f173ba"
+    },
+    {
+      "attempt": "V90-third",
+      "exit": 0,
+      "reason": "No errors; optional PHPStan turbo startup warning remains from environment.",
+      "log_sha256": "55d1dddcd937da66dc092e1641aa1664baa464c03488b0ffeaa9ad76d3fd9673"
+    }
+  ]
+}

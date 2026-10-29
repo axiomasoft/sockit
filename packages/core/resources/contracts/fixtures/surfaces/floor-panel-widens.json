@@ -1,0 +1,30 @@
+{
+  "fixture": "floor-panel-widens",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "panel": "edufy.community",
+        "host": "edufy.class",
+        "floor": {
+          "allowed_scopes": [
+            "direct",
+            "public"
+          ],
+          "default_scope": "direct",
+          "max_scope": "public",
+          "minor_default_scope": "direct",
+          "minor_max_scope": "direct",
+          "contour_levels": []
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FLOOR_WIDENS"
+    ]
+  }
+}

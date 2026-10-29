@@ -1,0 +1,8 @@
+{
+  "provider": "codex",
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "session": "01a18356-1ebf-7ef1-877f-01d40534fd40",
+  "cwd": "/home/vostrikov/projects/packages/sockit",
+  "source": "actual runtime turn_context"
+}

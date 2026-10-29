@@ -1,0 +1,13 @@
+{
+  "fixture": "command/key-15",
+  "contract": "command",
+  "version": "1.0",
+  "description": "key-15",
+  "input": {
+    "kind": "key",
+    "value": "aaaaaaaaaaaaaaa"
+  },
+  "expect": {
+    "valid": false
+  }
+}

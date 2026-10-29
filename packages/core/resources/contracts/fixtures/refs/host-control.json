@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/host-control",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "host-control",
+  "input": {
+    "kind": "host",
+    "value": "x:a\u0000"
+  },
+  "expect": {
+    "valid": false
+  }
+}

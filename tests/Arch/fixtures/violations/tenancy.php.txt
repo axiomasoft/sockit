@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support\Data;
+final readonly class TenantFields {
+    public const string KEY = 'tenant_id';
+    public function __construct(public string $tenantId) {}
+}

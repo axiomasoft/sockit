@@ -1,0 +1,41 @@
+{
+  "fixture": "targets/resolution",
+  "contract": "targets",
+  "version": "1.0",
+  "description": "P2.3 target wire contract; test fixture, not social e2e",
+  "input": {
+    "kind": "resolution",
+    "wire": {
+      "version": "1.0",
+      "surface": {
+        "panel": "acme.a",
+        "kind": "acme.runtime",
+        "host": "article:42",
+        "incarnation": 1
+      },
+      "target": {
+        "host": "article:00042",
+        "incarnation": 1
+      },
+      "installation": "runtime-test",
+      "read": {
+        "decision": "allow",
+        "reason": "audience.allowed.platform",
+        "policy_version": "1",
+        "expires_at": null
+      },
+      "write": {
+        "decision": "allow",
+        "reason": "audience.allowed.platform",
+        "policy_version": "1",
+        "expires_at": null
+      },
+      "lifecycle": "live",
+      "privacy_revision": 1,
+      "generation": "local-1"
+    }
+  },
+  "expect": {
+    "valid": true
+  }
+}

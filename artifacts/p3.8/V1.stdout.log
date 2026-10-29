@@ -1,0 +1,9 @@
+private volume=795af61dee26cb4d67640fa371e3f25339de3b3f1120f9fc14f2177aab747e06
+private container=a100351e2286a830a2885ccad414e61adeefc1d474882fe54408ce025343369c owner=sockit_p2_4c9dd0d6b018685b_test decoy=sockit_p2_decoy_4c9dd0d6b018685b_test port=33092
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Consumer\GeneratedPanelsInstallTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs generated panels in a fresh consumer with isolated prod[39m[90m…[39m [90m4.36s[39m  
+
+  [90mTests:[39m    [32;1m1 passed[39;22m[90m (440 assertions)[39m
+  [90mDuration:[39m [39m4.43s[39m
+

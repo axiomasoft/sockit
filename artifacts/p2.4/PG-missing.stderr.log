@@ -1,0 +1,2 @@
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Runtime/TombstoneReplayTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+Script pest handling the test event returned with error code 2

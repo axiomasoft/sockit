@@ -1,0 +1,12 @@
+{
+  "session": "01a1869b-5e00-7330-b9d5-9286df8d609f",
+  "originator": "codex_exec",
+  "model_provider": "openai",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "sandbox_policy": {
+    "type": "danger-full-access"
+  },
+  "approval_policy": "never",
+  "runtime_source": "/home/vostrikov/.codex/sessions/2026/10/29/rollout-2026-10-29T10-41-33-01a1869b-5e00-7330-b9d5-9286df8d609f.jsonl"
+}

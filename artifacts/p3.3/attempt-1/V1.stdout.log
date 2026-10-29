@@ -1,0 +1,30 @@
+private container=cec5b0461bc91a33a1d84670e778db41d1a95fdec4cd99052edc5555f5647bd1 owner=sockit_p2_32664e34ed08d382_test decoy=sockit_p2_decoy_32664e34ed08d382_test port=32928
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Schema\KernelSchemaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs production component tables with exact catalog keys bou[39m[90m…[39m [90m0.24s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit runs actual P2 surface receipt envelope and durable outbox write[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back P2 receipt state revision and outbox together after a[39m[90m…[39m [90m0.40s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\KernelSchemaTest[22m [90m>[39m it runs… [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "panel_a.driver_a_outbox" does not exist
+LINE 1: SELECT row_to_json(t)::text FROM panel_a.driver_a_outbox t
+                                         ^[39;22m
+
+  at [32mtests/Integration/Support/PgTarget.php[39m:[32m78[39m
+     74▕     }
+     75▕ 
+     76▕     public static function query(PDO $pdo, string $sql): \PDOStatement
+     77▕     {
+  ➜  78▕         $statement = $pdo->query($sql);
+     79▕         if ($statement === false) {
+     80▕             throw new RuntimeException('PostgreSQL query failed');
+     81▕         }
+     82▕
+
+  [33m1   [39m[39;1mtests/Integration/Support/PgTarget.php[39;22m:[39;1m78[39;22m
+  [33m2   [39m[39;1mtests/Fixtures/Runtime/EnvelopeScenario.php[39;22m:[39;1m89[39;22m
+
+
+  [90mTests:[39m    [31;1m1 failed[39;22m[90m,[39m[39m [39m[32;1m2 passed[39;22m[90m (82 assertions)[39m
+  [90mDuration:[39m [39m1.09s[39m
+

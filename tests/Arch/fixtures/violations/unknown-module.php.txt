@@ -1,0 +1,8 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\NewMechanism\Data;
+final readonly class UnknownModule {}
+namespace SocKit;
+final class SurpriseRoot {}

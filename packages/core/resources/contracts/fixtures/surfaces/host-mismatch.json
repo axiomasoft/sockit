@@ -1,0 +1,18 @@
+{
+  "fixture": "host-mismatch",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "host": "edufy.class"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_HOST_MISMATCH"
+    ]
+  }
+}

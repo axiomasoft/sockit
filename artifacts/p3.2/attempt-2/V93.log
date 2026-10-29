@@ -1,0 +1,677 @@
+command: python3 scripts/testing/pg-run.py composer test -- --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+cwd: /home/vostrikov/projects/packages/sockit
+source_manifest_sha256: d765cc7fd3235881d74ceba8cd3701bcd8545ff5025e57798d3f6dac43eaa278
+exit: 1
+--- stdout ---
+private container=ecbeadb89c8711b6a3cc5a9ebf072e6ce729b9b27965cda88f1c4f22b8c778b8 owner=sockit_p2_4fb397491a9c6184_test decoy=sockit_p2_decoy_4fb397491a9c6184_test port=32919
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\AttributesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exposes the exact attribute contract and string backed SPI kinds[39m
+  [32;1m✓[39;22m[90m [39m[90mit makes the marker types final readonly class attributes with an API marker with dataset "API"[39m
+  [32;1m✓[39;22m[90m [39m[90mit makes the marker types final readonly class attributes with an API marker with dataset "SPI"[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\ComposerRequireTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 accepts the real core require[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 rejects each forbidden vendor[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 checks require rather than dev dependencies[39m
+  [32;1m✓[39;22m[90m [39m[90mit declares the runtime database and console components explicitly[39m
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Arch\LayeringTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit A2 and A3 accept the real core tree[39m[90m                              [39m [90m0.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A2 detects every forbidden family, alias, group use and direct reference[39m
+  [32;1m✓[39;22m[90m [39m[90mit A3 rejects foreign Internal imports and fully qualified references[39m
+  [32;1m✓[39;22m[90m [39m[90mit A2 and A3 accept same module Internal, trait use and closure captures[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\ModuleListTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 accepts the real core tree[39m[90m                                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A4 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 explicitly allows Panels before runtime PanelId exists[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 explicitly admits the schema compiler namespace while retaini[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\NamingTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A5 accepts the real core tree[39m[90m                                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A5 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A5 rejects all forbidden suffixes and both missing Data modifiers[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\NoEditionFlagsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A10 accepts the real core tree[39m[90m                                   [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A10 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A10 detects string keys, methods and properties but ignores comments[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\OwnershipManifestTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 accepts real namespace ownership[39m[90m                              [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A8 rejects overlapping prefixes even without a matching source type[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 rejects an uncovered namespace[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 accepts separate non-overlapping owners[39m
+  [32;1m✓[39;22m[90m [39m[90mit declares the four kernel logical tables as core owned[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\PublicSignatureTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 accepts the real core tree[39m[90m                                    [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A9 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 reflects aliases, nullable, union, intersection, DNF, SPI, traits and hidden base types[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 accepts safe signatures, private and protected implementation details and empty input[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 rejects inherited Internal self and parent in parameters and return types[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 rejects self parent and static hiding Eloquent or HTTP base types[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 allows safe relative types traits and late binding to the public inheritor[39m
+  [32;1m✓[39;22m[90m [39m[90mit F3 defers parent on a public trait and accepts its safe consuming class[39m
+  [32;1m✓[39;22m[90m [39m[90mit F3 still rejects composed Internal parents and explicit forbidden types on the trait[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\PublicSurfaceMarkersTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 accepts the real core tree[39m[90m                                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 resolves aliases, groups and fully qualified attributes on all named type kinds[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('internal-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('double-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('foreign-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 does not carry member attributes onto the next class[39m
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Arch\RuntimeEntryPointsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps owner mutation entry typed and never accepts payload author or installation as command authority[39m
+  [31;1m⨯[39;22m[90m [39m[90mit keeps public lifecycle and operation facades free of persistence[39m[90m…[39m [90m0.10s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\SourceScannerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit F2 preserves namespace and imports after literal braces in interpolated strings[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\TenancyNeutralTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A6 accepts the real core tree[39m[90m                                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A6 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A6 detects keys and variables but ignores comments and prose[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Actors\ActorContextTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit creates an explicit anonymous context without an actor[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "anonymous with actor"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "person without actor"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "service without actor"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "system without actor"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "anonymous adult"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "anonymous minor"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "person delegation"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "system delegation"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "anonymous delegation"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "empty generation"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid actor contexts with a stable problem code with dataset "oversized generation"[39m
+  [32;1m✓[39;22m[90m [39m[90mit treats unknown age as minor for policy with (SocKit\Actors\Enums\AgeBand Enum (Adult, 'adult'), false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit treats unknown age as minor for policy with (SocKit\Actors\Enums\AgeBand Enum (Minor, 'minor'), true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit treats unknown age as minor for policy with (SocKit\Actors\Enums\AgeBand Enum (Unknown, 'unknown'), true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit supports service delegation and system principals[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Actors\ActorContextsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit resolves current trusted context on every operation without caching[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails closed when no principal or worker registration exists with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails closed when no principal or worker registration exists with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects a different installation for current and worker resolution with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects a different installation for current and worker resolution with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves current worker facts with worker provenance independently of the request actor[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects worker resolver results for another principal or provenance with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects worker resolver results for another principal or provenance with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit provides default installation only through the explicit standalone resolver[39m
+  [32;1m✓[39;22m[90m [39m[90mit does not register an anonymous context for worker resolution[39m
+  [32;1m✓[39;22m[90m [39m[90mit does not substitute the current principal for an unregistered worker actor[39m
+  [32;1m✓[39;22m[90m [39m[90mit also rejects an anonymous context from another installation[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Audience\AudienceBatchTtlTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps dynamically computed TTL from changing batch access decisions[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses the earliest finite TTL across batch scalar and surface admission with ('2030-01-01T00:00:00.000001Z', '2030-01-01T00:00:00.000002Z', null, …)[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses the earliest finite TTL across batch scalar and surface admission with ('2030-01-01T00:00:00.000002Z', '2030-01-01T00:00:00.000001Z', null, …)[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses the earliest finite TTL across batch scalar and surface admission with (null, '2030-01-01T00:00:00Z', null, …)[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses the earliest finite TTL across batch scalar and surface admission with ('2030-01-01T00:00:00Z', null, null, …)[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses the earliest finite TTL across batch scalar and surface admission with (null, null, null, …)[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses the earliest finite TTL across batch scalar and surface admission with ('2030-01-02T00:00:00Z', '2030-01-03T00:00:00Z', '2030-01-01T00:00:00Z', …)[39m
+  [32;1m✓[39;22m[90m [39m[90mit still fails closed on a semantic batch mismatch even when its TTL matches with ('decision')[39m
+  [32;1m✓[39;22m[90m [39m[90mit still fails closed on a semantic batch mismatch even when its TTL matches with ('reason')[39m
+  [32;1m✓[39;22m[90m [39m[90mit still fails closed on a semantic batch mismatch even when its TTL matches with ('policyVersion')[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Audience\AudienceGateTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit enforces installation and unknown boundaries before invoking a custom resolver[39m
+  [32;1m✓[39;22m[90m [39m[90mit does not reuse admission across panel target incarnation installation or actor[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('direct') / (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('direct') / (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('group') / (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('group') / (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('contour') / (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('contour') / (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('platform') / (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('platform') / (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('public') / (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit intersects admission content and archive for every audience scope with ('public') / (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit preserves content read-only verdicts and metadata through the gate[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps mandatory floor and containment checks even for an allowing custom resolver[39m
+  [32;1m✓[39;22m[90m [39m[90mit maps Throwable from content admission and containment to resolver_error with ('content')[39m
+  [32;1m✓[39;22m[90m [39m[90mit maps Throwable from content admission and containment to resolver_error with ('admission')[39m
+  [32;1m✓[39;22m[90m [39m[90mit maps Throwable from content admission and containment to resolver_error with ('containment')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or divergent batch output instead of widening scalar access with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or divergent batch output instead of widening scalar access with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates duplicate batch keys before any host calls[39m
+  [32;1m✓[39;22m[90m [39m[90mit supports scalar-only resolvers with identical batch outcomes[39m
+  [32;1m✓[39;22m[90m [39m[90mit rechecks membership and admission after revoke without caching[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps mixed successful and failing batch subjects equivalent to scalar[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Audience\AudienceTypesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit round trips every audience form with exactly one shape[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with ([])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'allOf'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'public', ['user:1']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'direct', []])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'direct', ['user:1', 'user:1']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'direct', [42]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'direct', ['user:1']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'group', ''])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'group', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaa…aaaaaa'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'contour', 'Class', …])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'contour', 'class'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous malformed empty and duplicate audience wires with (['1.0', 'contour', 'class', …])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unsupported audience versions with ('2.0')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unsupported audience versions with ('1.1')[39m
+  [32;1m✓[39;22m[90m [39m[90mit bounds direct audiences at 500 unique actors[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses minor defaults and ceilings for both minor and unknown age with (SocKit\Actors\Enums\AgeBand Enum (Adult, 'adult'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses minor defaults and ceilings for both minor and unknown age with (SocKit\Actors\Enums\AgeBand Enum (Minor, 'minor'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses minor defaults and ceilings for both minor and unknown age with (SocKit\Actors\Enums\AgeBand Enum (Unknown, 'unknown'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks every narrowing parameter rather than just max scope with (['contour'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks every narrowing parameter rather than just max scope with (['group'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks every narrowing parameter rather than just max scope with (['platform'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks every narrowing parameter rather than just max scope with ([['class', 'school', 'region']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks every narrowing parameter rather than just max scope with ([['school', 'class']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects descriptor data outside the adopted wire contract with (['region'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects descriptor data outside the adopted wire contract with (['club'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects descriptor data outside the adopted wire contract with ([null])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects descriptor data outside the adopted wire contract with (['ignored'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects descriptor data outside the adopted wire contract with (['unknown'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects descriptor data outside the adopted wire contract with ([['direct', 1]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit restricts audience reasons to the native contract dictionary[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Audience\AuthorizationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires an explicit allow for action authorization[39m
+  [32;1m✓[39;22m[90m [39m[90mit offers an opt-in authorizer only for person and service principals with (SocKit\Actors\Enums\ActorKind Enum (Person, 'person'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit offers an opt-in authorizer only for person and service principals with (SocKit\Actors\Enums\ActorKind Enum (Service, 'service'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit offers an opt-in authorizer only for person and service principals with (SocKit\Actors\Enums\ActorKind Enum (System, 'system'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit offers an opt-in authorizer only for person and service principals with (SocKit\Actors\Enums\ActorKind Enum (Anonymous, 'anonymous'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed actions and cross-panel resource references[39m
+  [32;1m✓[39;22m[90m [39m[90mit defaults fake authorization to deny and permits explicit deny unknown and allow[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs all available fakes explicitly and keeps unknown surface access closed[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Audience\MembershipTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses current group membership independently of author identity and group rank[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps fake contour and group facts within their configured installation[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Audience\ReviewCandidateFingerprintTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit captures complete recursive covers and rejects stale source in a[39m[90m…[39m [90m0.54s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Configuration\ConfigurationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit normalizes nested defaults without widening the default floor[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([true])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([null]) #1[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[null]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([null]) #2[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[[1, 2]]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['uuid4']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([stdClass Object ()])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['demo.module']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[[]]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[[Closure Object ()]]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['stdClass']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['MissingProvider']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[['public']]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[['unknown']]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit retains defaults for explicit empty configuration sections[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Contracts\FixtureSuiteTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit discovers and checks every wire fixture[39m[90m                          [39m [90m0.12s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Docs\CheckDocsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit reports all documentation violations and accepts the actual docu[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires complete S and SN identifiers[39m[90m                           [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Errors\ProblemCodeTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exposes immutable problem specifications and exception detail[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Modules\ModulesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects early resolution without freezing collection and closes registration at boot[39m
+  [32;1m✓[39;22m[90m [39m[90mit offers distribution modules and leaves disabled declarations inactive[39m
+  [32;1m✓[39;22m[90m [39m[90mit produces identical graphs for provider registration order permutations[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails listed-not-offered and never publishes a partial graph[39m
+  [32;1m✓[39;22m[90m [39m[90mit collects manifest errors before running any draft registration[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate module identity[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps duplicate feature drafts private[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown and invalid module settings without disclosing values with (['secret-value']) #1[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown and invalid module settings without disclosing values with (['secret-value']) #2[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown and invalid module settings without disclosing values with ([0])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects supplied settings without schema and invalid schema slots[39m
+  [32;1m✓[39;22m[90m [39m[90mit merges maps and replaces lists including an explicit empty list[39m
+  [32;1m✓[39;22m[90m [39m[90mit never calls registration on a disabled module[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid module classes and unknown schema interfaces[39m
+  [32;1m✓[39;22m[90m [39m[90mit publishes value snapshots that retained draft registrars cannot mutate[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Operations\OperationHandleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit captures trusted context and immutable panel-qualified refs with[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed for absent trusted resolvers[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown panel kind and host before storage[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires all used kernel table mappings without inventing defaults[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects forged actor storage and foreign namespace snapshots[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Operations\OperationResultTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit distinguishes confirmed from other outcomes[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects pending without a receipt[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed wire[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Panels\PanelTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit materializes a detached immutable storage snapshot and closes its builder[39m
+  [32;1m✓[39;22m[90m [39m[90mit strips nested PHP references from settings, table maps and privacy floors[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates declared identifiers at the length boundary and rejects sanitizing or truncation[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown model keys and defers class loading and model compatibility to P3[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects callback and object settings with panel/provider/key diagnostics[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Schema\CompilerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit compiles the complete versioned kernel descriptor without loading future models[39m
+  [32;1m✓[39;22m[90m [39m[90mit canonicalizes component/maps permutations and keeps ordered histories and resolved specifications[39m
+  [32;1m✓[39;22m[90m [39m[90mit preserves valid custom maps and gives different panel/storage declarations different digests[39m
+  [32;1m✓[39;22m[90m [39m[90mit excludes enabled but not selected fragments and requires dependencies to be explicitly selected[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('missing', 'SCHEMA_DEPENDENCY_MISSING')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('version', 'SCHEMA_DEPENDENCY_MISSING')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('cycle', 'SCHEMA_DEPENDENCY_CYCLE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('owner', 'SCHEMA_OWNER_INVALID')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('reserved', 'SCHEMA_OWNER_DUPLICATE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('duplicate', 'SCHEMA_ENTITY_DUPLICATE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing versions, cycles, wrong owners and duplicate entities with problem rules with ('steal', 'SCHEMA_ENTITY_DUPLICATE')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown overrides at compilation even when storage shape is valid with ('tables')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown overrides at compilation even when storage shape is valid with ('models')[39m
+  [32;1m✓[39;22m[90m [39m[90mit accepts additive v2 and rejects changed, removed or regressed fr[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate steps, gaps and version regressions before publication[39m
+  [32;1m✓[39;22m[90m [39m[90mit detaches nested reference arrays and refuses mutation after freeze[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unresolved FK targets, foreign ownership and unknown index columns with ('foreign_owner')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unresolved FK targets, foreign ownership and unknown index columns with ('unknown_column')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unresolved FK targets, foreign ownership and unknown index columns with ('unknown_target')[39m
+  [32;1m✓[39;22m[90m [39m[90mit canonicalizes nested metadata maps while preserving ordered composite columns[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects a step appended to an already frozen version even if a newer version follows[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects table/model collisions and overflow after materializing component defaults[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid data-only column defaults and model key specifications[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes bounded kernel check predicates and rejects unknown check columns[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Schema\StorageIdentityTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit collapses declared same-server connection aliases before any dat[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps proven distinct servers databases and schemas independent[39m[90m  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit normalizes spelling without guessing DNS or socket equivalence[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "absent"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "list"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "multi"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "dsn"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "socket parent"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "socket abstract"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "port zero"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "port overflow"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "port injection"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "whitespace"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "empty port"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "empty label"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects ambiguous unsafe or incomplete endpoints with dataset "unsafe"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "proxy unknown"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "socket unknown"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema unresolved"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema search path"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema quoted"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema unicode"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "schema overflow"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "driver"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "database missing"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "database dsn"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "read replica"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "write routing"[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires a descriptor match and a resolved schema without attempting discovery with dataset "dsn override"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects contradictory endpoint cluster and alias assignments[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates config-safe descriptors at normalization without connection resolution[39m
+  [32;1m✓[39;22m[90m [39m[90mit omits credentials from descriptors digests and failure diagnostics[39m
+  [32;1m✓[39;22m[90m [39m[90mit redacts PDO failures and never tries a connection from the pure path[39m
+  [32;1m✓[39;22m[90m [39m[90mit detects physical collisions from different panel prefixes and cu[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit validates final driver prefix plus panel prefix suffix and table overrides[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('ccccccccccccccccccccccccccccc…cccccc', true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('ccccccccccccccccccccccccccccc…cccccc', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('Column', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('колонка', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates physical column boundaries without truncating or sanitizing with ('a-b', false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit derives stable short names from full physical identity and detec[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Support\ReferencesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit preserves host and actor values and splits at the first colon[39m[90m    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit distinguishes panel-qualified identities[39m
+  [32;1m✓[39;22m[90m [39m[90mit canonicalizes recursively while preserving list order[39m
+  [32;1m✓[39;22m[90m [39m[90mit enforces revisions, version compatibility and safe key logging[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\BootTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit boots the provider[39m[90m                                               [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit boots declared panels with a fail-on-connect spy and never resol[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Configuration\BindingsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit boots defaults without SQL and fails missing resolvers explicitly at resolution[39m
+  [32;1m✓[39;22m[90m [39m[90mit uses scoped host resolvers and immutable singleton config without capturing the preceding job[39m
+  [32;1m✓[39;22m[90m [39m[90mit requires explicit single-installation opt in[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs all existing fakes over the provider bindings[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Configuration\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit runs real Artisan config cache then fresh bootstrap with the sam[39m[90m…[39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real Artisan config cache then fresh bootstrap with the sam[39m[90m…[39m [90m0.18s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Configuration\EventsConfigTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit normalizes server event generation with scalar-only bounded relay config[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('source_generation', '')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('source_generation', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx…xxxxxx')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('source_generation', 'xy')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('source_generation', 1)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('source_generation', null)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('source_generation', ['untrusted'])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('lease_seconds', 0)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('lease_seconds', '30')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('lease_seconds', 3601)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('retry_seconds', 0)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('max_attempts', 0)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed event settings at boot with ('unknown', 1)[39m
+  [32;1m✓[39;22m[90m [39m[90mit caches actual Artisan config with consumer FQCNs and event gener[39m[90m…[39m [90m0.17s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Console\RuntimeCommandsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit registers the commands and lists and displays help without SQL[39m[90m   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing and unknown panels and invalid relay options[39m[90m     [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Consumer\StandaloneRuntimeTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs and boots the standalone consumer with an owned Postgre[39m[90m…[39m [90m3.21s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Modules\LifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit collects every module provider before compiling regardless of co[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Modules\OutboxConsumerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes additive consumer declarations without instantiating con[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid, duplicate and non-concrete consumer declarations with ('acme.inbox', 'SocKit\Tests\Fixtures\Runtime…nsumer')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid, duplicate and non-concrete consumer declarations with ('', 'SocKit\Tests\Fixtures\Runtime…nsumer')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid, duplicate and non-concrete consumer declarations with ('bad/id', 'SocKit\Tests\Fixtures\Runtime…nsumer')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid, duplicate and non-concrete consumer declarations with ('acme.other', 'stdClass')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid, duplicate and non-concrete consumer declarations with ('acme.other', 'SocKit\Operations\Contracts\O…nsumer')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate consumer IDs across modules before graph publication[39m
+  [32;1m✓[39;22m[90m [39m[90mit globally disabled offered consumers have no published declaratio[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Panels\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.18s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Panels\LifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-01/04 compiles all 24 provider orders into identical indep[39m[90m…[39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-02 never falls back for an unknown panel[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-04 rejects an unused invalid graph without publishing modu[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit freezes retained builders and makes all nested snapshots immutable[39m
+  [32;1m✓[39;22m[90m [39m[90mit merges nested defaults/global/panel maps, replaces lists and enforces the schema ceiling with (30)[39m
+  [32;1m✓[39;22m[90m [39m[90mit merges nested defaults/global/panel maps, replaces lists and enforces the schema ceiling with (101)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate configured providers and invalid FQCNs[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Schema\CompilationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit publishes identical immutable schema-aware maps in either provid[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retains builder freeze and rejects schema registration after freeze[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps enabled but unselected schema fragments out of panel maps[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails before any registry publication for an unused invalid component or missing selected dependency with dataset "unused duplicate kernel entity"[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails before any registry publication for an unused invalid component or missing selected dependency with dataset "dependency enabled but not selected"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown or unselected logical table overrides with ([['foreign']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown or unselected logical table overrides with ([[],[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not execute disabled offered schema registration[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps schema contributions separate from settings and rejects duplicate or invalid FQCN slots[39m
+  [32;1m✓[39;22m[90m [39m[90mit rebuilds identical schema snapshots in a fresh process after rea[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects schema container bindings with the wrong implementation or owner before publication with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects schema container bindings with the wrong implementation[39m[90m… [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Surfaces\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for empty and[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for empty and[39m[90m…[39m [90m0.21s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Surfaces\LifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit compiles identical snapshots in all 24 module panel surface core[39m[90m…[39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires panel identity for lookup and never falls back[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aggregates unused provider errors and leaves every registry unav[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit hides all private drafts even during provider validation[39m[90m         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit collects surfaces from globally enabled module declarations only[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit collects surfaces from globally enabled module declarations only[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid registered surface FQCNs as surface configuratio[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit freezes every setter and materialize after a successful snapshot[39m[90m [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deep copies referenced arrays in the immutable definition including the floor[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes retained invalid builders and redacts arbitrary provider[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed when a configured provider binding has the wrong ru[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit checks configured provider FQCN contracts and detects config mod[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Surfaces\ModuleSettingsRegressionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 detaches nested default and global references before merge an[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit F1 detaches nested default and global references before merge an[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit F1 detaches aliases throughout normalized nested maps and lists in both directions[39m
+  [32;1m✓[39;22m[90m [39m[90mit F2 rejects every unknown settings module ID with its full path before any registry publication[39m
+  [32;1m✓[39;22m[90m [39m[90mit F2 retains settings for an offered disabled module without invok[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Targets\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps FQCN target declarations and scoped host binding through a[39m[90m…[39m [90m0.18s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Targets\RegistryTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit compiles the public target slot independent of offer order and f[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('bad:alias', 'SocKit\Tests\Fixtures\Runtime…dapter')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('', 'SocKit\Tests\Fixtures\Runtime…dapter')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('article', 'stdClass')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('article', 'SocKit\Surfaces\Contracts\Tar…solver')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('article', 'MissingTargetAdapter')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate aliases in a registrar or selected panel before publishing any registry[39m
+  [32;1m✓[39;22m[90m [39m[90mit resolves only the module selected on the panel and leaves unsele[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit never resolves disabled or unselected capabilities through a permissive host fallback with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit never resolves disabled or unselected capabilities through a permissive host fallback with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects early registry access without accidentally freezing the graph[39m
+  [32;1m✓[39;22m[90m [39m[90mit allows the same capability alias on disjoint selected panels and[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reports duplicate aliases inside an enabled module as configuration_invalid without publishing the graph[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Targets\ResolutionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit swaps an explicitly configured host adapter lazily and keeps una[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps SocKitFake default deny across actors panels installations[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('panel')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('installation')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('target')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('incarnation')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('surface')[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks current admission before calling a malicious host allow and observes revocation on replay[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('unknown', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('deleted', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('hidden', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('read_only', true, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('live', true, true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('expired', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit does not let a remote target or read-only admission authorize a local write[39m
+  [32;1m✓[39;22m[90m [39m[90mit maps resolver exceptions and invalid runtime bindings to fail-closed stable problems[39m
+  [32;1m✓[39;22m[90m [39m[90mit preserves finite admission expiry and read-only intersection in returned target visibility[39m
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Arch\LayeringTest[22m [90m>[39m it A2 and A3 accept the real core tree     
+[39;1m  Failed asserting that two arrays are identical.
+  [39;22m[31m-Array &0 [][39m[39;1m
+  [39;22m[32m+Array &0 [[39m[39;1m
+  [39;22m[32m+    0 => Array &1 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Configuration/SocKitConfig.php',[39m[39;1m
+  [39;22m[32m+        'line' => 30,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StorageDeployment',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    1 => Array &2 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Internal/Console/DoctorCommand.php',[39m[39;1m
+  [39;22m[32m+        'line' => 14,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StorageDeployment',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    2 => Array &3 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Internal/Console/DoctorCommand.php',[39m[39;1m
+  [39;22m[32m+        'line' => 15,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StorageIdentityResolver',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    3 => Array &4 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Internal/Console/DoctorCommand.php',[39m[39;1m
+  [39;22m[32m+        'line' => 16,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StoragePreflight',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+][39m[39;1m
+  [39;22m
+
+  at [32mtests/Arch/LayeringTest.php[39m:[32m11[39m
+      7▕ 
+      8▕ it('A2 and A3 accept the real core tree', function (): void {
+      9▕     $files = SourceScanner::php('packages/core/src');
+     10▕     expect(Gates::dependencies($files))->toBe([])
+  ➜  11▕         ->and(Gates::internals($files))->toBe([]);
+     12▕ });
+     13▕ 
+     14▕ it('A2 detects every forbidden family, alias, group use and direct reference', function (): void {
+     15▕     $violations = Gates::dependencies(SourceScanner::fixture('violations/dependencies.php.txt'));
+
+  [33m1   [39m[39;1mtests/Arch/LayeringTest.php[39;22m:[39;1m11[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Arch\RuntimeEntryPointsTest[22m [90m>[39m it keeps public lifecycle and…   
+[39;1m  Failed asserting that two arrays are identical.
+  [39;22m[31m-Array &0 [][39m[39;1m
+  [39;22m[32m+Array &0 [[39m[39;1m
+  [39;22m[32m+    0 => Array &1 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Configuration/SocKitConfig.php',[39m[39;1m
+  [39;22m[32m+        'line' => 30,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StorageDeployment',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    1 => Array &2 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Internal/Console/DoctorCommand.php',[39m[39;1m
+  [39;22m[32m+        'line' => 14,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StorageDeployment',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    2 => Array &3 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Internal/Console/DoctorCommand.php',[39m[39;1m
+  [39;22m[32m+        'line' => 15,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StorageIdentityResolver',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    3 => Array &4 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A3',[39m[39;1m
+  [39;22m[32m+        'file' => 'packages/core/src/Internal/Console/DoctorCommand.php',[39m[39;1m
+  [39;22m[32m+        'line' => 16,[39m[39;1m
+  [39;22m[32m+        'message' => 'A3 Foreign Internal dependency SocKit\Schema\Internal\StoragePreflight',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+][39m[39;1m
+  [39;22m
+
+  at [32mtests/Arch/RuntimeEntryPointsTest.php[39m:[32m38[39m
+     34▕         $source = file_get_contents($path);
+     35▕         expect($source)->not->toContain('->table(', '->commit(', '->beginTransaction(', '->setDefaultConnection(', 'config(', 'static $');
+     36▕     }
+     37▕     $files = SourceScanner::php('packages/core/src');
+  ➜  38▕     expect(Gates::signatures($files))->toBe([])->and(Gates::internals($files))->toBe([]);
+     39▕     // A module owner cannot be invoked from another public shortcut around the fixed kernel protocol.
+     40▕     foreach ($files as $file) {
+     41▕         if (str_contains($file, '/Internal/Envelope/')) {
+     42▕             continue;
+
+  [33m1   [39m[39;1mtests/Arch/RuntimeEntryPointsTest.php[39;22m:[39;1m38[39;22m
+
+
+  [90mTests:[39m    [31;1m2 failed[39;22m[90m,[39m[39m [39m[32;1m371 passed[39;22m[90m (3865 assertions)[39m
+  [90mDuration:[39m [39m7.04s[39m
+
+
+--- stderr ---
+> pest '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=103
+PG identity database=sockit_p2_decoy_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=104
+Installing dependencies from lock file
+Verifying lock file contents can be installed on current platform.
+Package operations: 75 installs, 0 updates, 0 removals
+    0 [>---------------------------]    0 [->--------------------------]
+  - Installing ramsey/collection (2.1.1): Extracting archive
+  - Installing brick/math (1.0.0): Extracting archive
+  - Installing ramsey/uuid (4.9.4): Extracting archive
+  - Installing voku/portable-ascii (2.1.1): Extracting archive
+  - Installing symfony/polyfill-php80 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-mbstring (v1.43.3): Extracting archive
+  - Installing symfony/polyfill-ctype (v1.37.0): Extracting archive
+  - Installing phpoption/phpoption (1.10.0): Extracting archive
+  - Installing graham-campbell/result-type (v1.2.0): Extracting archive
+  - Installing vlucas/phpdotenv (v5.8.0): Extracting archive
+  - Installing symfony/css-selector (v8.1.10): Extracting archive
+  - Installing tijsverkoyen/css-to-inline-styles (v2.4.0): Extracting archive
+  - Installing symfony/var-dumper (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-uuid (v1.43.0): Extracting archive
+  - Installing symfony/uid (v8.1.9): Extracting archive
+  - Installing symfony/deprecation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/routing (v8.1.10): Extracting archive
+  - Installing symfony/process (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-php86 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php85 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-php84 (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-normalizer (v1.43.0): Extracting archive
+  - Installing symfony/polyfill-intl-idn (v1.43.0): Extracting archive
+  - Installing symfony/mime (v8.1.10): Extracting archive
+  - Installing psr/container (2.0.2): Extracting archive
+  - Installing symfony/service-contracts (v3.7.3): Extracting archive
+  - Installing psr/event-dispatcher (1.0.0): Extracting archive
+  - Installing symfony/event-dispatcher-contracts (v3.7.1): Extracting archive
+  - Installing symfony/event-dispatcher (v8.1.5): Extracting archive
+  - Installing psr/log (3.0.2): Extracting archive
+  - Installing doctrine/lexer (3.0.3): Extracting archive
+  - Installing egulias/email-validator (4.0.4): Extracting archive
+  - Installing symfony/mailer (v8.1.10): Extracting archive
+  - Installing symfony/http-foundation (v8.1.10): Extracting archive
+  - Installing symfony/error-handler (v8.1.10): Extracting archive
+  - Installing symfony/http-kernel (v8.1.10): Extracting archive
+  - Installing symfony/finder (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-intl-grapheme (v1.43.3): Extracting archive
+  - Installing symfony/string (v8.1.10): Extracting archive
+  - Installing symfony/console (v8.1.10): Extracting archive
+  - Installing psr/simple-cache (3.0.0): Extracting archive
+  - Installing psr/http-message (2.0): Extracting archive
+  - Installing nunomaduro/termwind (v2.4.0): Extracting archive
+  - Installing symfony/translation-contracts (v3.7.1): Extracting archive
+  - Installing symfony/translation (v8.1.10): Extracting archive
+  - Installing symfony/polyfill-time (v1.42.0): Extracting archive
+  - Installing psr/clock (1.0.0): Extracting archive
+  - Installing symfony/clock (v8.1.9): Extracting archive
+  - Installing carbonphp/carbon-doctrine-types (3.2.1): Extracting archive
+  - Installing nesbot/carbon (3.15.1): Extracting archive
+  - Installing monolog/monolog (3.12.1): Extracting archive
+  - Installing psr/http-factory (1.1.0): Extracting archive
+  - Installing league/uri-interfaces (7.9.1): Extracting archive
+  - Installing league/uri (7.9.1): Extracting archive
+  - Installing league/mime-type-detection (1.17.0): Extracting archive
+  - Installing league/flysystem-local (3.35.3): Extracting archive
+  - Installing league/flysystem (3.36.0): Extracting archive
+  - Installing nette/utils (v4.1.6): Extracting archive
+  - Installing nette/schema (v1.4.0): Extracting archive
+  - Installing dflydev/dot-access-data (v3.0.3): Extracting archive
+  - Installing league/config (v1.2.0): Extracting archive
+  - Installing league/commonmark (2.10.4): Extracting archive
+  - Installing laravel/serializable-closure (v2.1.0): Extracting archive
+  - Installing laravel/prompts (v0.3.26): Extracting archive
+  - Installing guzzlehttp/uri-template (v2.0.1): Extracting archive
+  - Installing symfony/polyfill-php82 (v1.43.0): Extracting archive
+  - Installing guzzlehttp/psr7 (3.2.0): Extracting archive
+  - Installing guzzlehttp/promises (3.1.0): Extracting archive
+  - Installing psr/http-client (1.0.3): Extracting archive
+  - Installing guzzlehttp/guzzle (8.3.1): Extracting archive
+  - Installing fruitcake/php-cors (v1.4.0): Extracting archive
+  - Installing dragonmantank/cron-expression (v3.6.1): Extracting archive
+  - Installing doctrine/inflector (2.1.1): Extracting archive
+  - Installing laravel/framework (v13.39.0): Extracting archive
+  - Installing axiomasoft/sockit (0.1.x-dev): Mirroring from ../../../packages/core
+  0/74 [>---------------------------]   0%
+ 58/74 [=====================>------]  78%
+ 74/74 [============================] 100%
+Generating autoload files
+55 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+Installed package source fingerprint=bda078038b0855e6a9d9865fe55285aff788aa7acc398ad38401a90737469088
+PG identity database=sockit_p2_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=105
+PG identity database=sockit_p2_decoy_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=106
+PG identity database=sockit_p2_decoy_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=107
+P2.2 Laravel connection=owner_a database=sockit_p2_4fb397491a9c6184_test backend_pid=108
+P2.2 Laravel connection=owner_b database=sockit_p2_4fb397491a9c6184_test backend_pid=109
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_4fb397491a9c6184_test backend_pid=110
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.6 consumer-owned SQL snapshots installed AFTER verified identities
+PG identity database=sockit_p2_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=111
+P2.7 all acme/schema DDL AFTER verified isolated identities
+PG identity database=sockit_p2_decoy_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=115
+PG identity database=sockit_p2_4fb397491a9c6184_test server_version_num=160014 marker=sockit-p21-4fb397491a9c6184 backend_pid=116
+P2.6 consume owner_level=0 consumer_backend=116 mode=delivery event=01a1849f-c2ce-73d6-83cf-6ba52f95deb8
+delivery results=[{"status":"confirmed","problem":null,"reason":"outbox.confirmed"},{"status":"quarantine","problem":"sockit.revision_conflict","reason":"outbox.current_boundary_rejected"}]
+revoked result={"outcome":"rejected","receipt_id":null,"resource":null,"revision":null,"problem":"sockit.authentication_required","problem_detail":[]}
+{"assertions":["create","read","create_b","mutation_b","mutation","lookup","replay","payload_conflict","cas","rollback","relay","inbox","relay_repeat","revoked_replay","archive","resume","delete"],"counts":[1,2,3,2],"deliveries":2}
+Script pest handling the test event returned with error code 1

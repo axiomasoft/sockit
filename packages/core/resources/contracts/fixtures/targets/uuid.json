@@ -1,0 +1,16 @@
+{
+  "fixture": "targets/uuid",
+  "contract": "targets",
+  "version": "1.0",
+  "description": "P2.3 target wire contract; test fixture, not social e2e",
+  "input": {
+    "kind": "ref",
+    "wire": {
+      "host": "article:0192f142-f391-7dcb-87ad-e02835a91997",
+      "incarnation": 1
+    }
+  },
+  "expect": {
+    "valid": true
+  }
+}

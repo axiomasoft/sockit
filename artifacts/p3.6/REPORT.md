@@ -1,0 +1,25 @@
+# PLAN1 P3.6 — исправление RED F1–F3
+
+Owning session `01a184ec-56dc-7703-bade-7925b7958439`, `codex/gpt-6.1-sol/xhigh`, `danger-full-access`. Correction base: `ae333b3c59f72967a9d2a72cb76e706cefac3653`. Исправляются три Major из RED reviewer session `01a184fd-6e15-7fb2-891b-c6dd458c4f9c`. Повторный start, reviewer/subagents, Claude и finish в correction не запускались. Независимое ревью исправленного кандидата ещё не выполнено.
+
+F1: обе ветви existing model теперь проходят общий `ModelBindings::changes()`: точный BINDING/casts/key policy и наличие публичных методов relations без обязательных аргументов с правильным типом результата. Методы consumer не вызываются при preflight. Несовместимость возвращает exit 1, `status=manual_changes_required`, `problem=MODEL_BINDING_UPDATE_REQUIRED` и `model_changes`: preserved path/FQCN, полный required_binding/required_casts, PHP-код недостающих/несовместимых relation methods и инструкцию повторить команду в fresh Artisan process. CLI tests выполняют каждый вызов в свежем PHP-процессе, чтобы проверять исправленный файл вместо уже загруженного класса. До ручного обновления не пишутся даже новые model/migration/manifest files. No-op тоже не скрывает несовместимость. Consumer files никогда не переписываются генератором.
+
+V2 подтверждает отказ без filesystem mutations при добавлении JSON metadata и FK, повторный отказ после исправления только casts, затем ручное добавление обеих relations с сохранением custom sentinel. После fresh retry ModelBindings::validate проходит, реальный Eloquent сохраняет и читает вложенный JSON-массив через PostgreSQL и создаёт BelongsTo/HasMany; неправильная return signature вновь даёт явный отказ. Старые upgrade tests теперь явно выполняют требуемый consumer repair перед генерацией.
+
+F2: make-panel template сохраняет entity→module ownership рядом с model map и исключает из runtime map только entries известных inactive owners. Исходные bindings остаются в provider; неизвестные entries продолжают проверяться materialize. V3 использует настоящий make-panel provider, удаляет модуль только из modules(), оставляет его запись models(), глобально отключает модуль, делает fresh boot/upgrade и re-enable: данные, table OID, ancestry и custom models сохранены. Provider старого шаблона уже принадлежит consumer: его не заменяем; при ручном отключении в таком файле необходимо убрать inactive entries из runtime model map либо перенести owner filtering из нового шаблона.
+
+F3: PanelGraphCompiler передаёт namespace, разрешённый Laravel Application из consumer Composer mapping, в data-only PanelSchemaCompiler. Новые default FQCN совпадают у runtime registry и генератора; явные model maps не меняются. V2 создаёт настоящий kernel-only make-panel consumer с `Acme\\ => app/` и `Acme\\ => src/`, затем включает модуль и добавляет новую entity: missing models генерируются под Acme, загружаются и проходят ModelBindings; provider не переписывается, следующий upgrade — no_op. Frozen manifests/migration history не перебиндиваются.
+
+| Check | Exit | Результат |
+|---|---:|---|
+| V1 | 0 | Буквальная команда; owned PG child: 15 tests / 120 assertions; прежние dry-run/tamper/no-op/write-safety checks и explicit preserved-model refusal |
+| V2 | 0 | Буквальная PG wrapper команда: 13 tests / 250 assertions; прежние additive/rollback/data/ledger checks + F1 JSON/relations и F3 Acme make-panel lifecycle |
+| V3 | 0 | Буквальная PG wrapper команда: 3 tests / 37 assertions; прежние disable/outbox quarantine checks + F2 actual generated provider |
+| V90 | 0 | Буквальная `composer analyse -- --memory-limit=512M`: No errors, без suppressions/baseline changes |
+| V91 | 0 | Буквальная `composer lint`: passed, правила сохранены |
+
+Все финальные receipts имеют source fingerprint `a92a07676442939bc8c7150f4e6b9c24a3b678a48a726662fe6e8e9df16b95d2`, включая изменённые provider stub, PanelGraphCompiler и новый fresh-process fixture. `V*.json` — native check-evidence schema; actual command/cwd/exit/stdout/stderr/time, source/log SHA-256 сохранены. `validate-evidence.py` проверил schema, log hashes и неизменность каждого исходника: exit 0. Ранние red-run logs сохранены вне commit в `/tmp/sockit-p36-history-01a184ec-56dc-7703-bade-7925b7958439/`.
+
+Адресные регрессии: architecture/compiler/P3.5 generation — 150 tests / 888 assertions, exit 0 (`correction-regression.log`); generated models/queue restore — 6 tests / 301 assertions, exit 0 (`correction-model-regression.log`). PostgreSQL запускался только через `scripts/testing/pg-run.py`; PgTarget доказал owned container/loopback endpoint/run marker/exact *_test names до мутаций, wrapper удалил контейнеры. Toolchain — существующие PHP 8.4.27/Composer с Xdebug off; validation flags не изменялись.
+
+Через planner API расширены только task_files P3.6 для трёх необходимых F2/F3 paths; routes не менялись. Чужие dirty/untracked не редактировались. Dry-run остаётся вне commit; commit выполняется только предписанной planner-командой после реальных проверок. Finish не вызывается: требуется новый review исправленного кандидата.

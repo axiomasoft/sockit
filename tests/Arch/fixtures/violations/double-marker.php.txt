@@ -1,0 +1,8 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+use SocKit\Attributes\{Api as PublicApi, Spi as Port, SpiKind};
+#[PublicApi, Port(kind: SpiKind::Call)]
+final class DoubleMarker {}

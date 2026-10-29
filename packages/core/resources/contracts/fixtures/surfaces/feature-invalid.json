@@ -1,0 +1,20 @@
+{
+  "fixture": "feature-invalid",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "features": [
+          "REACTIONS"
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FEATURE_INVALID"
+    ]
+  }
+}

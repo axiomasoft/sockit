@@ -1,0 +1,193 @@
+{
+  "base": "307ffcd42351abd3b98a3c52c3981bc8cec105f5",
+  "files": [
+    {
+      "path": "docs/architecture/spi.md",
+      "sha256": "85aa3d5e48d1979e7cfc276f829ecc9322ddc4fc82fdf0e45e850808f85fe7dc"
+    },
+    {
+      "path": "packages/core/src/Configuration/SocKitConfig.php",
+      "sha256": "ae6577b9206625f0d0a1102bc1fd65a0cdf73c130104a7f3b470802dd55335f0"
+    },
+    {
+      "path": "packages/core/src/Modules/Internal/CompiledModuleGraph.php",
+      "sha256": "613565fa47a646544db1c60a6aaa6aaf423434b8da484ec25dfe15fc6fe20e67"
+    },
+    {
+      "path": "packages/core/src/Modules/Internal/ModuleGraphCompiler.php",
+      "sha256": "6248d91b584e9995444e54110e99e0de09e9ec31a70659fb4c7d37a6dbd23e4a"
+    },
+    {
+      "path": "packages/core/src/Modules/ModuleRegistrar.php",
+      "sha256": "cf9e8a557badcbc8a23d4ad6ced1fb72bbdef73ded16f9f9f69e6c74c76f81c4"
+    },
+    {
+      "path": "packages/core/src/Modules/Modules.php",
+      "sha256": "a586084d3dd5315c0e5bae6909511fd36ec2be1e0a116759b87f1d8f6759ad88"
+    },
+    {
+      "path": "packages/core/src/Operations/OperationHandles.php",
+      "sha256": "b25eb0ac9a457687c759f92aabc2df8bd8a2eb72fc5c8f93b25e7c035903f243"
+    },
+    {
+      "path": "packages/core/src/SocKitServiceProvider.php",
+      "sha256": "a96507d7272d6f0b198a3f1f2d9307ff755b9bec325b4bf65f146aa31287a3c9"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Surfaces.php",
+      "sha256": "389e68266ec1fff3019a669888868a1d848dd47ce65e2a298b30e55905f19b98"
+    },
+    {
+      "path": "packages/core/src/Testing/SocKitFake.php",
+      "sha256": "3a86e7b0594c5b460a1d30681636178f9edfa6b37e20b2a156ad7b45c9d7edb9"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/bad-alias.json",
+      "sha256": "b35e987923aee4301b8a918f16b836ea2da4cd89737dd547c08030648e722330"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/colon.json",
+      "sha256": "dd59f9427af496fe6dbd5f58a0cf92e319da0aea8df8629844f0246b253434ab"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/finite-expiry.json",
+      "sha256": "00ec0bb16d14bfff1d89bff63a964c4fa9c9a8596ed80eefbc0b1f6d1a45c93f"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/generation-empty.json",
+      "sha256": "fd22da5001031aafda4eb67c0f8298a26ab0d4bdfc34f5d721bf4edd16c3574f"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/invalid-expiry.json",
+      "sha256": "daa0948cfc3a835fd361df780cfd2e6a7385fe521041f7df8951155d854fdc8f"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/lifecycle-invalid.json",
+      "sha256": "600fbf2048a7b91f0c98e939499a8174b7d86fe7b94a2837004787d9965e441a"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/missing.json",
+      "sha256": "419ef5cc81cdf73f45c1c6e27261b175dbbf05a1adb4b2725f4079ee7a5f5dda"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/numeric-coercion.json",
+      "sha256": "1d32e7f0e980cfd012a3544197bea42e5deaa5fe793a3fa2ce42af4b1068551b"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/numeric.json",
+      "sha256": "cc896f9afaeb6c0f10958a9292beb344d980b5da3d97a7479f7d94b4f8cb296c"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/resolution.json",
+      "sha256": "5874b35938a99a7dcf0f6fac104e8ca37bc0dc52649d38083a558a079e1fd474"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/revision-zero.json",
+      "sha256": "02c5537452cebc7aa75217fb813d62c2b88c3b02acf0ef39910b179132e69834"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/uuid.json",
+      "sha256": "0eeb00a993f08004239af8ecdeaa583c014fc964824d04aab8ca485a4b33d53a"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/version-unsupported.json",
+      "sha256": "73fd42bd718d383778162e359e3f865ab3cdb906bf84ddf786003bafe094926d"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/zero-incarnation.json",
+      "sha256": "8a7dde26a117f79ed696111ea12e3657cccc4e7a191357aff7632a36ceeefef0"
+    },
+    {
+      "path": "packages/core/resources/contracts/fixtures/targets/zero.json",
+      "sha256": "f8f89edd4f7b0fb29a6856d99d7335e9fa8d2883a61f6dc59b914fa2c304139a"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Contracts/TargetResolver.php",
+      "sha256": "dd35f1b2787fe9a808a654f29e6c2436837d2f572f693f5eeaea506bdef4c9af"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Contracts/TargetWriteFence.php",
+      "sha256": "1a1299d461af2dbdb73c5cc6a35d81f22a214779dba157fd172a6cd54e2d002c"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Data/TargetRef.php",
+      "sha256": "e4ddce8ef42d2577da915a41cfaf57fa943b143c91353a4ec92f29c59958f445"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Data/TargetResolution.php",
+      "sha256": "8416608ba540787508d82a393bc53857e39f1266ff5730b1bc0d2af991680c45"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Enums/TargetLifecycle.php",
+      "sha256": "4c2039a530848690eb809802548b7375abe347970167222c0a290c3b8e55342a"
+    },
+    {
+      "path": "packages/core/src/Surfaces/Internal/TargetCapabilities.php",
+      "sha256": "5257cc178ef1bd76439c0073b5ddb5d1701c8f00e9a40629d2dc4d35f5e3de50"
+    },
+    {
+      "path": "packages/core/src/Testing/FakeTargetResolver.php",
+      "sha256": "780c48bb2bba7c780d46cb6c39a9a4e55e02a728bd43d21fd6fb0e0c51e0babe"
+    },
+    {
+      "path": "tests/Feature/Targets/ConfigCacheTest.php",
+      "sha256": "77359b2a2053266e062e3ab6fa1084d87d6bbbb65ec39e5e4bbc0e6ce85e402e"
+    },
+    {
+      "path": "tests/Feature/Targets/RegistryTest.php",
+      "sha256": "400777e1fb00114e58954c8622c471de3f7772b323ee6449867048ea66e3fb4a"
+    },
+    {
+      "path": "tests/Feature/Targets/ResolutionTest.php",
+      "sha256": "4d316910a451123750645f0efae4e0a2b2cb1ed6db47da0e24cd7566a1604d31"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/LocalTargetAdapter.php",
+      "sha256": "65cf6d704f0ebd4e13266ad0576b9ad072504dd9a764408d48f79037ebae9922"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/OtherTargetAdapter.php",
+      "sha256": "86235b3781176af73f096c4ba20d027bf17a22b89abb565fe44196d548df51e0"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/OtherTargetModule.php",
+      "sha256": "a910736c32de4ae2126410434c2750337380ae9fd844200d9db37d5110ebab26"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/TargetAdapter.php",
+      "sha256": "f2d3952c2b5bb941e1d5a6b56dd03a4e2b5300565d75bba61a1e26f7a2a376c9"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/TargetFencePgTest.php",
+      "sha256": "e5eb4d027cee9b516a6ef11bcd28786cc3e6f6e7af263f4edfa95d9737a41955"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/TargetModule.php",
+      "sha256": "afa85dee080a997211c741d8217cda435031a800e20eff365ec078979e2e2657"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/TargetOtherPanel.php",
+      "sha256": "bc8f8660ee267cc9ba16c769eb917c97cbc82c0502e1f28dedfd5a223551a6b2"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/TargetPanel.php",
+      "sha256": "6022adac280148093a7677a9b26e94bd762530d1c5790a1203c3edbea434bf33"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/TargetProvider.php",
+      "sha256": "9f7fe38598e4a4eedc7421419f69a2b102e015d13d0d875934c64cd3bcb4cc6b"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/TargetScenario.php",
+      "sha256": "99a0a8e65976c8fe82fe0c9bd6ad289871e37301050e85ad7861f0d8d752ca13"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/target-console.php",
+      "sha256": "37b386ad31a3339e38f2b39ea3b28733d5f73e0658ab3be278c3d070c232f576"
+    },
+    {
+      "path": "tests/Unit/Contracts/Handlers/TargetsHandler.php",
+      "sha256": "7705b4a6a7be576f35785c8b639739ad8eec89525e5eb10030cedc833f1ad9f2"
+    }
+  ]
+}

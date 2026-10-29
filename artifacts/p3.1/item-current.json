@@ -1,0 +1,219 @@
+{
+  "ok": true,
+  "data": {
+    "ref": "P3.1",
+    "kind": "item",
+    "doc": {
+      "$schema": "urn:swissknifeman:task:plan:item:v1",
+      "id": "P3.1",
+      "title": "Module-owned schema contributions и immutable PanelSchema compiler",
+      "status": "in_progress",
+      "summary": "Kernel и выбранные module fragments компилируются в versioned PanelSchema с полными table/model specifications, dependency order и deterministic digest без SQL.",
+      "why": "P1 PanelStorage принимает только kernel keys; P2 runtime не имеет production schema compiler. Нужна schema-aware композиция без жёстко прописанных social module IDs в kernel.",
+      "scope": {
+        "include": [
+          "Schema contribution SPI и регистрация через ModuleRegistrar, отдельная от ModuleSettingsSchema",
+          "Append-only component versions/steps; panel-selected dependency graph; unknown/duplicate entity rejection",
+          "Immutable serializable PanelSchema descriptor и draft generation mode до существования generated model classes",
+          "Fixture acme.demo-targets v1/v2 и dependent fixture fragment, не production module"
+        ],
+        "exclude": [
+          "Comments/tree/replies и production social modules P4",
+          "Изменение глобальной execution-policy и принятых routes P1/P2",
+          "Автоматическое destructive uninstall/drop по текущему config"
+        ]
+      },
+      "depends_on": [
+        "P2.9"
+      ],
+      "decisions": [
+        "D14",
+        "D15",
+        "D16",
+        "D17",
+        "D18"
+      ],
+      "reads": [
+        {
+          "ref": "D18",
+          "why": "Owner decision 2026-10-29: local P3 pins override historical SONNET/gpt-6.1-terra; global policy/P1/P2 unchanged",
+          "required": true
+        },
+        {
+          "ref": "knowledge/panel-design#schema",
+          "why": "Module ownership, frozen snapshots, physical identity, additive-only upgrades",
+          "required": true
+        },
+        {
+          "ref": "knowledge/panel-design#generation",
+          "why": "Consumer-owned providers/models/migrations, preflight and real smoke",
+          "required": true
+        },
+        {
+          "ref": "knowledge/execution-policy#preflight",
+          "why": "PG wrapper, fail-closed evidence and actual runtime; selectors overridden only by D18",
+          "required": true
+        },
+        {
+          "path": "packages/core/src/Modules/ModuleRegistrar.php",
+          "why": "Не смешивать schema contributions с settings schema",
+          "required": true
+        },
+        {
+          "path": "packages/core/src/Modules/Internal/ModuleGraphCompiler.php",
+          "why": "Offered/enabled и атомарный publish",
+          "required": true
+        },
+        {
+          "path": "packages/core/src/Panels/PanelStorage.php",
+          "why": "Kernel-only map limitation",
+          "required": true
+        },
+        {
+          "path": "packages/core/src/Panels/Internal/PanelGraphCompiler.php",
+          "why": "Встроить schema-aware validation до publish",
+          "required": true
+        },
+        {
+          "path": "packages/core/src/SocKitServiceProvider.php",
+          "why": "Booting порядок без SQL",
+          "required": true
+        }
+      ],
+      "task_files": [
+        {
+          "path": "packages/core/src/Schema/**",
+          "change": "create"
+        },
+        {
+          "path": "packages/core/src/Modules/ModuleRegistrar.php",
+          "change": "modify"
+        },
+        {
+          "path": "packages/core/src/Modules/Internal/CompiledModuleGraph.php",
+          "change": "modify"
+        },
+        {
+          "path": "packages/core/src/Modules/Internal/ModuleGraphCompiler.php",
+          "change": "modify"
+        },
+        {
+          "path": "packages/core/src/Modules/Modules.php",
+          "change": "modify"
+        },
+        {
+          "path": "packages/core/src/Panels/PanelStorage.php",
+          "change": "modify"
+        },
+        {
+          "path": "packages/core/src/Panels/Internal/PanelGraphCompiler.php",
+          "change": "modify"
+        },
+        {
+          "path": "packages/core/src/SocKitServiceProvider.php",
+          "change": "modify"
+        },
+        {
+          "path": "tests/Fixtures/Schema/**",
+          "change": "create"
+        },
+        {
+          "path": "tests/Unit/Schema/CompilerTest.php",
+          "change": "create"
+        },
+        {
+          "path": "tests/Feature/Schema/CompilationTest.php",
+          "change": "create"
+        },
+        {
+          "path": "artifacts/p3.1/**",
+          "change": "any",
+          "note": "Создавать evidence только при будущем исполнении"
+        },
+        {
+          "path": "packages/core/src/Panels/Panel.php",
+          "change": "modify",
+          "note": "Schema-aware materialization retains direct builder kernel-only default"
+        },
+        {
+          "path": "tests/Arch/Support/Gates.php",
+          "change": "modify",
+          "note": "Explicit Schema namespace allowlist addition only; gates retained"
+        },
+        {
+          "path": "tests/Arch/ModuleNamespaceTest.php",
+          "change": "modify",
+          "note": "Positive Schema namespace coverage without weakening negative control"
+        }
+      ],
+      "rules": [
+        "D18 выше исторических pins D17/execution-policy для новых P3 routes. Future exact route не подтверждает actual model/session: перед исполнением проверить runtime; недоступность pin не обходить другой моделью.",
+        "Только свой item; comments/tree/replies, social reactions/posts implementation P4, external adapters и изменения соседних репозиториев вне scope. acme.demo-targets — явно test-only schema module.",
+        "Public domain API остаётся без ORM/Internal; concrete Eloquent models — persistence extension. Соблюдать Api/Spi, strict_types и adopted named arguments; не ослаблять arch checks.",
+        "Generated provider/models/migrations принадлежат consumer. No overwrite, no DDL at boot/request, no mutable currentPanel/global database.default; frozen physical maps и panel identity обязательны.",
+        "Все PG checks только через python3 scripts/testing/pg-run.py; PgTarget подтверждает owned container/endpoint/run marker/*_test до SQL. Не использовать ambient dev/prod DB. Missing consumer/PG/toolchain, skipped/incomplete/risky/warning/timeout — не pass.",
+        "Validation ниже — будущие требования. При исполнении создать указанные tests, выполнить команды и сохранить actual command/cwd/exit/stdout/stderr, source fingerprint и SQL assertions без секретов в artifacts/p3.N. Не создавать pass/result.checks по плану или mock.",
+        "Не трогать чужие .gitignore, .serena/project.yml, CLAUDE.md и outside dirty/untracked. Не переписывать P1/P2 routes. Повторять принятые checks только адресно для затронутых invariants."
+      ],
+      "guidance": "Ввести schema SPI с FQCN registration и data-only ordered steps: component ID/version, owned entity, columns/keys/indexes/FKs/model metadata и dependency refs. Core schema baseline не знает acme/demo/reactions/posts. Каждая selected component обязана иметь selected dependencies: не активировать их молча. Schema-aware registry проверяет logical keys с учётом declarations, а PanelStorage проверяет форму; неизвестные keys по-прежнему rejected до publish. Не требовать будущий generated FQCN в draft-generation mode; concrete binding/install validation P3.4 выполняется отдельно и не замалчивает ошибку. Existing P1/P2 runtime с declared kernel maps сохраняется. Missing required maps materialize из prefix и component metadata; custom overrides имеют приоритет только после проверки ownership. Immutable descriptor: format version, panel ID, fixed component versions и step IDs/digests, connection/schema, resolved logical maps, key policies, dependency order, model specifications, canonical digest (без credentials, timestamp randomness и instances). Schema history append-only: repeated step ID с другим содержимым invalid. Тестировать permutations, enabled-but-not-selected, dependency missing/cycle, duplicate owner/entity, invalid unused graph, mutation after freeze и zero SQL boot/config cache.",
+      "validation": [
+        {
+          "id": "V1",
+          "cmd": "composer test -- tests/Unit/Schema/CompilerTest.php tests/Feature/Schema/CompilationTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+          "expect": "exit 0; asserted canonical digest/order, full maps, graph failures and zero-SQL boot",
+          "kind": "acceptance"
+        },
+        {
+          "id": "V2",
+          "cmd": "composer test -- tests/Unit/Panels tests/Unit/Modules tests/Feature/Panels tests/Feature/Modules tests/Arch --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+          "expect": "exit 0; P1 configuration/ownership/public boundary regressions retained",
+          "kind": "impact"
+        },
+        {
+          "id": "V90",
+          "cmd": "composer analyse -- --memory-limit=512M",
+          "expect": "exit 0; No errors, no new suppressions/baseline",
+          "kind": "acceptance"
+        },
+        {
+          "id": "V91",
+          "cmd": "composer lint",
+          "expect": "exit 0; Pint проходит без ослабления правил",
+          "kind": "acceptance"
+        }
+      ],
+      "deliverables": [
+        "Schema contribution SPI + deterministic immutable compiler",
+        "Versioned acme.demo-targets fixture and failure matrix"
+      ],
+      "route": {
+        "class": "frontier",
+        "effort": "high",
+        "provider": "codex",
+        "model": "gpt-6.1-sol"
+      },
+      "review": {
+        "mode": "none",
+        "reason": "Заданная локальная реализация и обязательные адресные checks; независимые schema/generator anchors P3.3/P3.6 без blanket review."
+      },
+      "authority": {
+        "kind": "routine"
+      },
+      "rag": {
+        "need": "none",
+        "status": "not_needed"
+      },
+      "result": {
+        "started_at": "2026-10-28T22:01:09Z",
+        "executor": {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "session": "01a18487-dce7-7d00-b66e-d6f4ba280d2d"
+        }
+      },
+      "updated_at": "2026-10-28T22:02:56Z"
+    },
+    "revision": "sha256:524c52a8250aa3ef8937f3c17f5e3afb4ccc392860d23f45fd01b28f0e5f5736"
+  }
+}

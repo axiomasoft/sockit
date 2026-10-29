@@ -1,0 +1,35 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p24-V3-initial",
+  "check_id": "V3-initial",
+  "subject": "PLAN1.P2.4",
+  "procedure": {
+    "cmd": "composer test -- tests/Unit/Contracts tests/Arch --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "candidate": {
+    "head": "99bbd81dc6e94fb6855595b904bf642329911a31",
+    "dirty_digest": "e3891cb6102419240592dc085a711fd2b4073fc2dcbf88e5bb5835595f7f55eb"
+  },
+  "exit": 1,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "php": "8.4.1",
+    "database": "No database mutations; no ambient .env targets",
+    "session": "01a182f8-ea14-73d1-b32e-5bb6d4f39f54"
+  },
+  "log": {
+    "path": "artifacts/p2.4/V3-initial.log",
+    "sha256": "e849fabef206d971e244081c284dcd875b94f9d2bde77817a2467721cb282f53"
+  },
+  "started_at": "2026-10-28T14:51:21.252280+00:00",
+  "finished_at": "2026-10-28T14:51:21.835570+00:00",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  }
+}

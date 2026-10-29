@@ -1,0 +1,25 @@
+{
+    "require": {
+        "php": "^8.4",
+        "illuminate/support": "^13.0"
+    },
+    "require-dev": {
+        "axiomasoft/testkit": "*"
+    },
+    "extra": {
+        "sockit": {
+            "owners": {
+                "support": {
+                    "namespaces": [
+                        "SocKit\\Support\\"
+                    ]
+                },
+                "panels": {
+                    "namespaces": [
+                        "SocKit\\Panels\\"
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,8 @@
+COMMAND: python3 scripts/testing/pg-run.py php -r 'require "vendor/autoload.php"; $t = SocKit\Tests\Integration\Support\PgTarget::fromEnvironment(); $t->connect(); $t->connect(decoy: true);'
+CWD: /home/vostrikov/projects/packages/sockit
+STDOUT:
+private container=cb054842e9a3602583460ba2a685792951b7b704cd6d383b43a2a1b432fd73c4 owner=sockit_p2_14b795623684bc60_test decoy=sockit_p2_decoy_14b795623684bc60_test port=32813
+
+STDERR:
+PG identity database=sockit_p2_14b795623684bc60_test server_version_num=160014 marker=sockit-p21-14b795623684bc60 backend_pid=102
+PG identity database=sockit_p2_decoy_14b795623684bc60_test server_version_num=160014 marker=sockit-p21-14b795623684bc60 backend_pid=103

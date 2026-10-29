@@ -1,0 +1,18 @@
+{
+  "fixture": "refs/surface",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "surface",
+  "input": {
+    "kind": "surface",
+    "value": {
+      "panel": "edufy.community",
+      "kind": "edufy.class-feed",
+      "host": "edufy.class:42",
+      "incarnation": 1
+    }
+  },
+  "expect": {
+    "valid": true
+  }
+}

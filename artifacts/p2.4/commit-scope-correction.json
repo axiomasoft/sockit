@@ -1,0 +1,9 @@
+{
+  "original_native_commit": "0f49b12c0925a071560eee462d68fe7aeb721514",
+  "reason": "Native --paths-only directory argument did not expand artifact files; include exact artifact paths in the same unpublished owning commit.",
+  "procedure": [
+    "git add -- <exact artifacts/p2.4 files>",
+    "git commit --amend --no-edit --only -- <exact artifacts/p2.4 files>"
+  ],
+  "registration": "Native finish already accepted done and refuses repeat (ITEM_OWNED/NOT_STARTED); no lifecycle reopen. Final amended SHA is linked by existing Plan trailers, native commits query and a native item note. Checks/source content unchanged."
+}

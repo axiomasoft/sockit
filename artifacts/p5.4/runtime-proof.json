@@ -1,0 +1,17 @@
+{
+  "session": "01a1871a-9dc1-7690-a6f3-224ee4814e7b",
+  "provider": "codex",
+  "transport_provider": "openai",
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "sandbox": {
+    "type": "danger-full-access"
+  },
+  "approval_policy": "never",
+  "session_log": "/home/vostrikov/.codex/sessions/2026/10/29/rollout-2026-10-29T13-00-34-01a1871a-9dc1-7690-a6f3-224ee4814e7b.jsonl",
+  "originator": "codex_exec",
+  "cli_version": "0.165.0",
+  "cwd": "/home/vostrikov/projects/packages/sockit",
+  "base_head": "0a9e10ca0ee547eacbec33706be30057c6a75f90",
+  "review": "requested; no reviewer or subagent launched"
+}

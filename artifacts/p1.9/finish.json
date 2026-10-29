@@ -1,0 +1,29 @@
+{
+  "item": "P1.9",
+  "status": "done",
+  "phase_closed": null,
+  "plan_done": false,
+  "next": {
+    "kind": "run-items",
+    "exact": "run-items: planner:plan-run 2026.10.17-№1-SOCKIT-FOUNDATION P1.13",
+    "phase": "P1",
+    "batch": "B10",
+    "items": [
+      "P1.13"
+    ],
+    "route": {
+      "class": "frontier",
+      "effort": "high",
+      "provider": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    "launch": {
+      "claude": "/planner:plan-run 2026.10.17-№1-SOCKIT-FOUNDATION P1.13",
+      "codex": "$ planner:plan-run 2026.10.17-№1-SOCKIT-FOUNDATION P1.13"
+    },
+    "command": "planner:plan-run 2026.10.17-№1-SOCKIT-FOUNDATION P1.13",
+    "reason": "",
+    "mode": "recommended",
+    "batch_line": "batch B10 (recommended: run together, a split needs log --type deviation) -> planner:plan-run 2026.10.17-№1-SOCKIT-FOUNDATION P1.13"
+  }
+}

@@ -1,0 +1,1 @@
+REVIEW_RECEIPT_MISSING: P4.7 requests a review (review.mode requested) and plan settings.review_receipt is required; finish with --review-receipt PATH

@@ -1,0 +1,18 @@
+{
+  "fixture": "unknown-panel",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "panel": "unknown.panel"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_PANEL_UNKNOWN"
+    ]
+  }
+}

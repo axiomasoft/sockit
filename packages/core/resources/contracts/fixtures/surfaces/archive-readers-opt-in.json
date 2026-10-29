@@ -1,0 +1,32 @@
+{
+  "fixture": "archive-readers-opt-in",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "archive_readers": true
+      }
+    ]
+  },
+  "expect": {
+    "valid": true,
+    "surfaces": {
+      "crm.public/crm.article": {
+        "panel": "crm.public",
+        "kind": "crm.article",
+        "host": "article",
+        "features": [
+          "reactions"
+        ],
+        "settings": {},
+        "contour": null,
+        "contour_levels": [
+          "class",
+          "school"
+        ],
+        "archive_readers": true
+      }
+    }
+  }
+}

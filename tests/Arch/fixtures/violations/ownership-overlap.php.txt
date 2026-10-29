@@ -1,0 +1,18 @@
+{
+    "extra": {
+        "sockit": {
+            "owners": {
+                "core": {
+                    "namespaces": [
+                        "SocKit\\"
+                    ]
+                },
+                "support": {
+                    "namespaces": [
+                        "SocKit\\Support\\"
+                    ]
+                }
+            }
+        }
+    }
+}

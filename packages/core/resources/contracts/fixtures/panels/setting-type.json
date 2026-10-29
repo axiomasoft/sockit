@@ -1,0 +1,41 @@
+{
+  "fixture": "setting-type",
+  "contract": "panels",
+  "version": "1.0",
+  "input": {
+    "panels": [
+      {
+        "id": "host.articles",
+        "prefix": "articles_",
+        "modules": [
+          "demo.module"
+        ],
+        "settings": {
+          "demo.module": {
+            "limit": 30
+          }
+        }
+      },
+      {
+        "id": "host.products",
+        "prefix": "products_",
+        "hosts": [
+          "article",
+          "product"
+        ],
+        "modules": [
+          "demo.module"
+        ],
+        "settings": {
+          "demo.module": {
+            "limit": "30"
+          }
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rule": "PANEL_SETTING_INVALID"
+  }
+}

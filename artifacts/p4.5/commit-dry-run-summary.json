@@ -1,0 +1,6 @@
+{
+  "command": "python3 -I .swissknifeman/launcher.py planner commit PLAN1 P4.5 --role executor --leave-outside --actor codex/gpt-6.1-sol/xhigh --dry-run",
+  "cwd": "/home/vostrikov/projects/packages/sockit",
+  "exit": 0,
+  "stdout": "dry-run P4.5 executor (51 paths)\n"
+}

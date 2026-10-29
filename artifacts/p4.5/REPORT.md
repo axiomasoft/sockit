@@ -1,0 +1,13 @@
+# PLAN1 P4.5
+
+Session `01a18633-6de6-7b81-b6e8-25a367637df0`; actual runtime `codex/gpt-6.1-sol/xhigh`, `danger-full-access` подтверждён session metadata (`runtime.json`). Base HEAD: `d1ce3e8323c7a41da5a25661a092d9b9155767ab`.
+
+Добавлены явные CAS-переходы publish/hold/reject/hide/restore/delete/audience. Hidden сохраняет точный prior publication state; restore Pending/Held/Rejected не публикует. Restore Published заново проверяет текущие admission/consent/action/containment/safety/media. Каждый переход сохраняет trusted actor/reason, immutable revision и refs-only versioned event в одной owner transaction. Privacy revision консервативно растёт с каждой ревизией; published_at остаётся временем первой публикации. Узкая внутренняя правка Envelope связывает privacy version content event с committed owner revision; прежние host target/privacy/generation replay fences сохранены, публичные kernel signatures не менялись.
+
+PG-сценарии проверяют полную матрицу (56 комбинаций), duplicate promotion/digest/CAS, текущий consent revoke при неудавшемся hide и original-key retry, host generation change после owner lock, same-scope direct removal/class replacement, read_only/archive и запрет body/revision/generic receipt доступа при отзыве. Deleted/Erased terminal; delete оставляет content-free terminal revision и сохраняет требуемую историю. Erased fixture представляет состояние будущего purge owner; полная erasure/retention workflow P9 не заявляется. Live snapshot lifecycle означает retained mutable owner record; hidden visibility отдельно проверяется владельцем по матрице и не даёт read grant. PostgreSQL запускался только через pg-run.py; container label/loopback endpoint/run marker/exact *_test доказываются до DDL, panel B/decoy сверяются.
+
+Литеральные проверки: V88=0 (69 tests), V1=0 (68), V2=0 (10), V89=0 (52), V90=0 (PHPStan), V91=0 (Pint). Skipped/incomplete/warning/risky запрещены flags. V90 содержит существующий PHP startup advisory об optional turbo extension; новых suppressions/baseline/config изменений нет. Первоначальные red/fault-injection ошибки сохранены отдельно и не засчитываются как pass.
+
+Все шесть evidence проверены по check-evidence schema, literal command/cwd, log SHA-256 и окончательному source fingerprint `sha256:fa86c24c156597755181b1a6b3a8151b8079a6342328df8473076a1cb3fab2b0` (`evidence-validation.log`). Review mode none; отдельный reviewer не запускался.
+
+Дополнительно: V92=0 — 140 принятых social regression tests P4.1–P4.4; V93=0 — полный package suite через pg-run.py (452 tests). Прямой первоначальный V93=2 остановил три consumer-теста на missing private manifest до SQL; его отдельный initial log не считается pass. Supplemental evidence также проверены по schema/source/log.

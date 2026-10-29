@@ -1,0 +1,20 @@
+{
+  "fixture": "setting-key-invalid",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "settings": {
+          "BAD": 1
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_SETTING_INVALID"
+    ]
+  }
+}

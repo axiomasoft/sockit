@@ -1,0 +1,6 @@
+{
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+  "php": "8.4.1",
+  "database": "No database mutations; no ambient .env targets",
+  "session": "01a1832f-7b78-7db0-a966-18eee2934db4"
+}

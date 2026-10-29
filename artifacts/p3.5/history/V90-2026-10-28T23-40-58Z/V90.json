@@ -1,0 +1,35 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p3.5-V90-2026-10-28T23:40:58Z",
+  "check_id": "V90",
+  "subject": "PLAN1.P3.5",
+  "procedure": {
+    "cmd": "composer analyse -- --memory-limit=512M",
+    "cwd": "."
+  },
+  "candidate": {
+    "head": "7969813f5879fd3d20903ce7c573a5568301768f",
+    "dirty_digest": "ac5b921d7e4ef20b6329281a99c3b63e40718e362ab11e9b0ddc859d4f3b0414"
+  },
+  "exit": 0,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "env_digest": "b96b25768b6867783d4ff2043fe1c302b473de945d87df0d187b0858fdbcb6d6"
+  },
+  "log": {
+    "path": "artifacts/p3.5/history/V90-2026-10-28T23-40-58Z/V90.log",
+    "sha256": "847f0801d17a5546df0013e0490ffd2c2dfc3ed2a6ab2a99bb81fcd23417cc77"
+  },
+  "started_at": "2026-10-28T23:40:58Z",
+  "finished_at": "2026-10-28T23:40:59Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "session": "01a184d9-22bf-7eb2-8509-18ad592e8cc7"
+    }
+  }
+}

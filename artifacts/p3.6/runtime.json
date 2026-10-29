@@ -1,0 +1,14 @@
+{
+  "session": "01a184ec-56dc-7703-bade-7925b7958439",
+  "source": "actual session turn_context",
+  "context": {
+    "model": "gpt-6.1-sol",
+    "effort": "xhigh",
+    "sandbox_policy": {
+      "type": "danger-full-access"
+    },
+    "approval_policy": "never",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "recorded_at": "2026-10-29T00:04:09.219813+00:00"
+}

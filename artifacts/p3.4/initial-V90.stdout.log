@@ -1,0 +1,166 @@
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Schema/ModelBindings.php                             
+ ------ ----------------------------------------------------------------------- 
+  52     Call to function assert() with true will always evaluate to true.      
+         🪪  function.alreadyNarrowedType                                       
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+  52     Instanceof between SocKit\Schema\PanelModel and                        
+         SocKit\Schema\PanelModel will always evaluate to true.                 
+         🪪  instanceof.alwaysTrue                                              
+         💡  Because the type is coming from a PHPDoc, you can turn off this    
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Schema/PanelModel.php                                
+ ------ ----------------------------------------------------------------------- 
+  130    Method SocKit\Schema\PanelModel::newModelQuery() should return         
+         Illuminate\Database\Eloquent\Builder<static(SocKit\Schema\PanelModel)  
+         > but returns Illuminate\Database\Eloquent\Builder<Illuminate\Databas  
+         e\Eloquent\Model>.                                                     
+         🪪  return.type                                                        
+  150    Parameter #1 $array of function array_diff expects an array of values  
+         castable to string, array<mixed, mixed> given.                         
+         🪪  argument.type                                                      
+  154    Method SocKit\Schema\PanelModel::readIdentity() should return array<s  
+         tring, mixed>|null but returns array<mixed>|null.                      
+         🪪  return.type                                                        
+ ------ ----------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------- 
+  Line   tests/Fixtures/Schema/GeneratedModelFixture.php                      
+ ------ --------------------------------------------------------------------- 
+  56     Parameter #1 $resolver of static method                              
+         Illuminate\Database\Eloquent\Model::setConnectionResolver() expects  
+         Illuminate\Database\ConnectionResolverInterface, mixed given.        
+         🪪  argument.type                                                    
+ ------ --------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   tests/Fixtures/Schema/model-queue-child.php                           
+ ------ ---------------------------------------------------------------------- 
+  43     Parameter #1 $value of function count expects array|Countable, mixed  
+         given.                                                                
+         🪪  argument.type                                                     
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Integration/Schema/GeneratedModelsTest.php                       
+ ------ ----------------------------------------------------------------------- 
+  23     Cannot call method save() on mixed.                                    
+         🪪  method.nonObject                                                   
+  25     Call to an undefined method Illuminate\Database\Eloquent\Collection<i  
+         nt, SocKit\Schema\PanelModel>|SocKit\Schema\PanelModel::getAttribute(  
+         ).                                                                     
+         🪪  method.notFound                                                    
+  25     Call to an undefined method Illuminate\Database\Eloquent\Collection<i  
+         nt, SocKit\Schema\PanelModel>|SocKit\Schema\PanelModel::getAttribute(  
+         ).                                                                     
+         🪪  method.notFound                                                    
+  26     Call to an undefined method Illuminate\Database\Eloquent\Collection<i  
+         nt, SocKit\Schema\PanelModel>|SocKit\Schema\PanelModel::getConnection  
+         Name().                                                                
+         🪪  method.notFound                                                    
+  26     Call to an undefined method Illuminate\Database\Eloquent\Collection<i  
+         nt, SocKit\Schema\PanelModel>|SocKit\Schema\PanelModel::getTable().    
+         🪪  method.notFound                                                    
+  28     Cannot call method getKey() on mixed.                                  
+         🪪  method.nonObject                                                   
+  29     Call to an undefined method Illuminate\Database\Eloquent\Collection<i  
+         nt, SocKit\Schema\PanelModel>|SocKit\Schema\PanelModel::getRelationVa  
+         lue().                                                                 
+         🪪  method.notFound                                                    
+  29     Cannot call method getKey() on mixed.                                  
+         🪪  method.nonObject                                                   
+  29     Cannot call method last() on mixed.                                    
+         🪪  method.nonObject                                                   
+  30     Call to an undefined method Illuminate\Database\Eloquent\Collection<i  
+         nt, SocKit\Schema\PanelModel>|SocKit\Schema\PanelModel::replicate().   
+         🪪  method.notFound                                                    
+  31     Cannot call method save() on mixed.                                    
+         🪪  method.nonObject                                                   
+  32     Call to an undefined method Illuminate\Database\Eloquent\Collection<i  
+         nt, SocKit\Schema\PanelModel>|SocKit\Schema\PanelModel::getKey().      
+         🪪  method.notFound                                                    
+  39     Cannot call method getAttribute() on SocKit\Schema\PanelModel|null.    
+         🪪  method.nonObject                                                   
+  41     Cannot call method save() on mixed.                                    
+         🪪  method.nonObject                                                   
+  41     Cannot call method setAttribute() on mixed.                            
+         🪪  method.nonObject                                                   
+  41     Cannot call method setAttribute() on mixed.                            
+         🪪  method.nonObject                                                   
+  42     Cannot call method getAttribute() on SocKit\Schema\PanelModel|null.    
+         🪪  method.nonObject                                                   
+  45     Cannot call method getAttribute() on SocKit\Schema\PanelModel|null.    
+         🪪  method.nonObject                                                   
+  77     Parameter $entities of class SocKit\Schema\PanelSchema constructor     
+         expects array<string, mixed>, mixed given.                             
+         🪪  argument.type                                                      
+  80     Call to an undefined method object::getTable().                        
+         🪪  method.notFound                                                    
+  80     Unable to resolve the template type TValue in call to function expect  
+         🪪  argument.templateType                                              
+         💡  See:                                                               
+         https://phpstan.org/blog/solving-phpstan-error-unable-to-resolve-temp  
+         late-type                                                              
+  101    Offset 'host_key' might not exist on array<string, mixed>|null.        
+         🪪  offsetAccess.notFound                                              
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Integration/Schema/ModelQueueRestoreTest.php                     
+ ------ ----------------------------------------------------------------------- 
+  56     Parameter #1 $model of class                                           
+         SocKit\Tests\Fixtures\Schema\ModelQueueJob constructor expects         
+         Illuminate\Database\Eloquent\Model,                                    
+         Illuminate\Database\Eloquent\Collection<int, SocKit\Schema\PanelModel  
+         >|SocKit\Schema\PanelModel given.                                      
+         🪪  argument.type                                                      
+  59     Cannot access property $model on mixed.                                
+         🪪  property.nonObject                                                 
+  60     Cannot call method getAttribute() on mixed.                            
+         🪪  method.nonObject                                                   
+  60     Cannot call method getConnectionName() on mixed.                       
+         🪪  method.nonObject                                                   
+  61     Cannot call method first() on mixed.                                   
+         🪪  method.nonObject                                                   
+  61     Cannot call method getRelationValue() on mixed.                        
+         🪪  method.nonObject                                                   
+  61     Cannot call method getRelationValue() on mixed.                        
+         🪪  method.nonObject                                                   
+  62     Cannot call method getConnectionName() on mixed.                       
+         🪪  method.nonObject                                                   
+  62     Cannot call method getKey() on mixed.                                  
+         🪪  method.nonObject                                                   
+  65     Cannot call method getConnection() on mixed.                           
+         🪪  method.nonObject                                                   
+  65     Cannot call method transaction() on mixed.                             
+         🪪  method.nonObject                                                   
+  66     Cannot call method save() on mixed.                                    
+         🪪  method.nonObject                                                   
+  66     Cannot call method setAttribute() on mixed.                            
+         🪪  method.nonObject                                                   
+  73     Cannot call method save() on mixed.                                    
+         🪪  method.nonObject                                                   
+  73     Cannot call method setAttribute() on mixed.                            
+         🪪  method.nonObject                                                   
+  105    Cannot call method create() on mixed.                                  
+         🪪  method.nonObject                                                   
+  106    Parameter #1 $model of class                                           
+         SocKit\Tests\Fixtures\Schema\ModelQueueJob constructor expects         
+         Illuminate\Database\Eloquent\Model, mixed given.                       
+         🪪  argument.type                                                      
+  114    Cannot access property $model on mixed.                                
+         🪪  property.nonObject                                                 
+  114    Cannot call method getAttribute() on mixed.                            
+         🪪  method.nonObject                                                   
+ ------ ----------------------------------------------------------------------- 
+
+ [ERROR] Found 48 errors                                                        
+

@@ -1,0 +1,198 @@
+> phpstan analyse --no-progress '--memory-limit=512M'
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ --------------------------------------------------------------- 
+  Line   packages/core/src/Operations/Internal/Envelope/Envelope.php    
+ ------ --------------------------------------------------------------- 
+  106    Anonymous function has an unused use $consumers.               
+         🪪  closure.unusedUse                                          
+  106    Anonymous function has an unused use $handle.                  
+         🪪  closure.unusedUse                                          
+  106    Anonymous function has an unused use $owner.                   
+         🪪  closure.unusedUse                                          
+  106    Anonymous function has an unused use $request.                 
+         🪪  closure.unusedUse                                          
+  106    Anonymous function has an unused use $surfaces.                
+         🪪  closure.unusedUse                                          
+  106    Anonymous function has an unused use $target.                  
+         🪪  closure.unusedUse                                          
+  107    Strict comparison using === between null and null will always  
+         evaluate to true.                                              
+         🪪  identical.alwaysTrue                                       
+  108    Unreachable statement - code above always terminates.          
+         🪪  deadCode.unreachable                                       
+ ------ --------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Integration/Runtime/EnvelopeAtomicityTest.php                    
+ ------ ----------------------------------------------------------------------- 
+  10     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$scenario.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  11     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$scenario.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  11     Cannot call method cleanup() on mixed.                                 
+         🪪  method.nonObject                                                   
+  14     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$scenario.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  15     Cannot call method execute() on mixed.                                 
+         🪪  method.nonObject                                                   
+  16     Cannot call method isSuccess() on mixed.                               
+         🪪  method.nonObject                                                   
+  17     Cannot call method execute() on mixed.                                 
+         🪪  method.nonObject                                                   
+  18     Cannot access property $handle on mixed.                               
+         🪪  property.nonObject                                                 
+  18     Cannot access property $key on mixed.                                  
+         🪪  property.nonObject                                                 
+  18     Cannot access property $namespace on mixed.                            
+         🪪  property.nonObject                                                 
+  18     Cannot access property $operations on mixed.                           
+         🪪  property.nonObject                                                 
+  18     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  18     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  18     Cannot call method lookup() on mixed.                                  
+         🪪  method.nonObject                                                   
+  19     Cannot call method toWire() on mixed.                                  
+         🪪  method.nonObject                                                   
+  19     Cannot call method toWire() on mixed.                                  
+         🪪  method.nonObject                                                   
+  19     Cannot call method toWire() on mixed.                                  
+         🪪  method.nonObject                                                   
+  19     Cannot call method toWire() on mixed.                                  
+         🪪  method.nonObject                                                   
+  20     Cannot access property $mutation on mixed.                             
+         🪪  property.nonObject                                                 
+  20     Cannot access property $writes on mixed.                               
+         🪪  property.nonObject                                                 
+  20     Cannot call method counts() on mixed.                                  
+         🪪  method.nonObject                                                   
+  21     Cannot access property $base on mixed.                                 
+         🪪  property.nonObject                                                 
+  21     Cannot access property $calls on mixed.                                
+         🪪  property.nonObject                                                 
+  21     Cannot access property $consumer on mixed.                             
+         🪪  property.nonObject                                                 
+  25     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$scenario.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  26     Cannot access property $base on mixed.                                 
+         🪪  property.nonObject                                                 
+  26     Cannot access property $capsule on mixed.                              
+         🪪  property.nonObject                                                 
+  26     Cannot access property $db on mixed.                                   
+         🪪  property.nonObject                                                 
+  26     Cannot call method getConnection() on mixed.                           
+         🪪  method.nonObject                                                   
+  30     Cannot call method getEventDispatcher() on mixed.                      
+         🪪  method.nonObject                                                   
+  30     Cannot call method listen() on mixed.                                  
+         🪪  method.nonObject                                                   
+  32     Cannot call method listen() on mixed.                                  
+         🪪  method.nonObject                                                   
+  40     Cannot call method execute() on mixed.                                 
+         🪪  method.nonObject                                                   
+  41     Cannot call method counts() on mixed.                                  
+         🪪  method.nonObject                                                   
+  41     Cannot call method isSuccess() on mixed.                               
+         🪪  method.nonObject                                                   
+  42     Cannot access property $base on mixed.                                 
+         🪪  property.nonObject                                                 
+  42     Cannot access property $calls on mixed.                                
+         🪪  property.nonObject                                                 
+  42     Cannot access property $consumer on mixed.                             
+         🪪  property.nonObject                                                 
+  42     Cannot call method getPdo() on mixed.                                  
+         🪪  method.nonObject                                                   
+  42     Cannot call method inTransaction() on mixed.                           
+         🪪  method.nonObject                                                   
+  42     Cannot call method transactionLevel() on mixed.                        
+         🪪  method.nonObject                                                   
+  46     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$scenario.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  47     Cannot call method command() on mixed.                                 
+         🪪  method.nonObject                                                   
+  48     Cannot access property $base on mixed.                                 
+         🪪  property.nonObject                                                 
+  48     Cannot access property $capsule on mixed.                              
+         🪪  property.nonObject                                                 
+  48     Cannot access property $db on mixed.                                   
+         🪪  property.nonObject                                                 
+  48     Cannot call method getConnection() on mixed.                           
+         🪪  method.nonObject                                                   
+  49     Cannot call method beginTransaction() on mixed.                        
+         🪪  method.nonObject                                                   
+  51     Cannot access property $levels on mixed.                               
+         🪪  property.nonObject                                                 
+  51     Cannot access property $locks on mixed.                                
+         🪪  property.nonObject                                                 
+  51     Cannot access property $mutation on mixed.                             
+         🪪  property.nonObject                                                 
+  51     Cannot access property $problem on mixed.                              
+         🪪  property.nonObject                                                 
+  51     Cannot access property $target on mixed.                               
+         🪪  property.nonObject                                                 
+  51     Cannot call method execute() on mixed.                                 
+         🪪  method.nonObject                                                   
+  52     Cannot call method getPdo() on mixed.                                  
+         🪪  method.nonObject                                                   
+  52     Cannot call method inTransaction() on mixed.                           
+         🪪  method.nonObject                                                   
+  52     Cannot call method transactionLevel() on mixed.                        
+         🪪  method.nonObject                                                   
+  53     Cannot call method rollBack() on mixed.                                
+         🪪  method.nonObject                                                   
+  54     Cannot call method counts() on mixed.                                  
+         🪪  method.nonObject                                                   
+  58     Access to an undefined property                                        
+         Pest\PendingCalls\TestCall::$scenario.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  59     Cannot access property $bad on mixed.                                  
+         🪪  property.nonObject                                                 
+  59     Cannot access property $mutation on mixed.                             
+         🪪  property.nonObject                                                 
+  60     Cannot call method counts() on mixed.                                  
+         🪪  method.nonObject                                                   
+  60     Cannot call method execute() on mixed.                                 
+         🪪  method.nonObject                                                   
+  60     Cannot call method isSuccess() on mixed.                               
+         🪪  method.nonObject                                                   
+ ------ ----------------------------------------------------------------------- 
+
+ [ERROR] Found 73 errors                                                        
+
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1

@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Configuration;
+final class FeatureFlags {
+    public const string KEY = 'premium_edition';
+    public function proEnabled(): bool { return true; }
+    public bool $enterprise_enabled = true;
+}

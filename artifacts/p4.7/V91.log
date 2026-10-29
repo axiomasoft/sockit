@@ -1,0 +1,4 @@
+STDOUT
+{"tool":"pint","result":"passed"}
+STDERR
+> pint --test

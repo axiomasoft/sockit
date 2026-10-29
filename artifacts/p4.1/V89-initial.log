@@ -1,0 +1,164 @@
+> pest 'tests/Arch' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\AttributesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exposes the exact attribute contract and string backed SPI kinds[39m
+  [32;1m✓[39;22m[90m [39m[90mit makes the marker types final readonly class attributes with an API marker with dataset "API"[39m
+  [32;1m✓[39;22m[90m [39m[90mit makes the marker types final readonly class attributes with an API marker with dataset "SPI"[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\ComposerRequireTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 accepts the real core require[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 rejects each forbidden vendor[39m
+  [32;1m✓[39;22m[90m [39m[90mit A7 checks require rather than dev dependencies[39m
+  [32;1m✓[39;22m[90m [39m[90mit declares the runtime database and console components explicitly[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\LayeringTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A2 and A3 accept the real core tree[39m[90m                              [39m [90m0.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A2 detects every forbidden family, alias, group use and direct reference[39m
+  [32;1m✓[39;22m[90m [39m[90mit A3 rejects foreign Internal imports and fully qualified references[39m
+  [32;1m✓[39;22m[90m [39m[90mit A2 and A3 accept same module Internal, trait use and closure captures[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\ModuleListTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 accepts the real core tree[39m[90m                                    [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A4 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 explicitly allows Panels before runtime PanelId exists[39m
+  [32;1m✓[39;22m[90m [39m[90mit A4 explicitly admits the schema compiler namespace while retaini[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\NamingTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A5 accepts the real core tree[39m[90m                                    [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A5 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A5 rejects all forbidden suffixes and both missing Data modifiers[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\NoEditionFlagsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A10 accepts the real core tree[39m[90m                                   [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A10 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A10 detects string keys, methods and properties but ignores comments[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\OwnershipManifestTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 accepts real namespace ownership[39m[90m                              [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A8 rejects overlapping prefixes even without a matching source type[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 rejects an uncovered namespace[39m
+  [32;1m✓[39;22m[90m [39m[90mit A8 accepts separate non-overlapping owners[39m
+  [32;1m✓[39;22m[90m [39m[90mit declares the four kernel logical tables as core owned[39m
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Arch\PublicSignatureTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 accepts the real core tree[39m[90m                                    [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A9 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 reflects aliases, nullable, union, intersection, DNF, SPI, traits and hidden base types[39m
+  [32;1m✓[39;22m[90m [39m[90mit A9 accepts safe signatures, private and protected implementation details and empty input[39m
+  [31;1m⨯[39;22m[90m [39m[90mit F1 rejects inherited Internal self and parent in parameters and return types[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 rejects self parent and static hiding Eloquent or HTTP base types[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 allows safe relative types traits and late binding to the public inheritor[39m
+  [32;1m✓[39;22m[90m [39m[90mit F3 defers parent on a public trait and accepts its safe consuming class[39m
+  [32;1m✓[39;22m[90m [39m[90mit F3 still rejects composed Internal parents and explicit forbidden types on the trait[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\PublicSurfaceMarkersTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 accepts the real core tree[39m[90m                                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 resolves aliases, groups and fully qualified attributes on all named type kinds[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('internal-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('double-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 rejects Internal markers, double markers and unrelated attributes with ('foreign-marker')[39m
+  [32;1m✓[39;22m[90m [39m[90mit A1 does not carry member attributes onto the next class[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\RuntimeEntryPointsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps owner mutation entry typed and never accepts payload author or installation as command authority[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps public lifecycle and operation facades free of persistence[39m[90m…[39m [90m0.09s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\SocialModulesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit includes both social roots in every source architecture gate[39m[90m     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retains kernel social prohibition and rejects sibling and foreig[39m[90m…[39m [90m0.01s[39m  
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Arch\SourceScannerTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit F2 preserves namespace and imports after literal braces in interpolated strings[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Arch\TenancyNeutralTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit A6 accepts the real core tree[39m[90m                                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit A6 rejects its negative control[39m
+  [32;1m✓[39;22m[90m [39m[90mit A6 detects keys and variables but ignores comments and prose[39m
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Arch\PublicSignatureTest[22m [90m>[39m it F1 rejects inherited Internal…   
+[39;1m  Failed asserting that two arrays are identical.
+  [39;22m[31m-Array &0 [][39m[39;1m
+  [39;22m[32m+Array &0 [[39m[39;1m
+  [39;22m[32m+    0 => Array &1 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A8',[39m[39;1m
+  [39;22m[32m+        'file' => '/home/vostrikov/projects/packages/sockit/tests/Arch/Support/../fixtures/violations/relative-internal-signature.php.txt',[39m[39;1m
+  [39;22m[32m+        'line' => 7,[39m[39;1m
+  [39;22m[32m+        'message' => 'A8 Source outside owner path: SocKit\Support\Internal\RelativeBase',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    1 => Array &2 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A8',[39m[39;1m
+  [39;22m[32m+        'file' => '/home/vostrikov/projects/packages/sockit/tests/Arch/Support/../fixtures/violations/relative-internal-signature.php.txt',[39m[39;1m
+  [39;22m[32m+        'line' => 16,[39m[39;1m
+  [39;22m[32m+        'message' => 'A8 Source outside owner path: SocKit\Support\Internal\RelativeChild',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    2 => Array &3 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A8',[39m[39;1m
+  [39;22m[32m+        'file' => '/home/vostrikov/projects/packages/sockit/tests/Arch/Support/../fixtures/violations/relative-internal-signature.php.txt',[39m[39;1m
+  [39;22m[32m+        'line' => 25,[39m[39;1m
+  [39;22m[32m+        'message' => 'A8 Source outside owner path: SocKit\Support\RelativeFacade',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+][39m[39;1m
+  [39;22m
+
+  at [32mtests/Arch/PublicSignatureTest.php[39m:[32m39[39m
+     35▕     $files = SourceScanner::fixture('violations/relative-internal-signature.php.txt');
+     36▕     expect(Gates::markers($files))->toBe([])
+     37▕         ->and(Gates::internals($files))->toBe([])
+     38▕         ->and(Gates::modules($files))->toBe([])
+  ➜  39▕         ->and(Gates::ownership($files))->toBe([]);
+     40▕     $violations = Gates::signatures($files);
+     41▕     expect($violations)->toHaveCount(8);
+     42▕     foreach ($violations as $violation) {
+     43▕         expect($violation['gate'])->toBe('A9')
+
+  [33m1   [39m[39;1mtests/Arch/PublicSignatureTest.php[39;22m:[39;1m39[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Arch\SourceScannerTest[22m [90m>[39m it F2 preserves namespace and impo…   
+[39;1m  Failed asserting that two arrays are identical.
+  [39;22m[31m-Array &0 [][39m[39;1m
+  [39;22m[32m+Array &0 [[39m[39;1m
+  [39;22m[32m+    0 => Array &1 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A8',[39m[39;1m
+  [39;22m[32m+        'file' => '/home/vostrikov/projects/packages/sockit/tests/Arch/Support/../fixtures/valid/interpolated-braces.php.txt',[39m[39;1m
+  [39;22m[32m+        'line' => 9,[39m[39;1m
+  [39;22m[32m+        'message' => 'A8 Source outside owner path: SocKit\Support\InterpolatedBraces',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    1 => Array &2 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A8',[39m[39;1m
+  [39;22m[32m+        'file' => '/home/vostrikov/projects/packages/sockit/tests/Arch/Support/../fixtures/valid/interpolated-braces.php.txt',[39m[39;1m
+  [39;22m[32m+        'line' => 17,[39m[39;1m
+  [39;22m[32m+        'message' => 'A8 Source outside owner path: SocKit\Support\AfterInterpolatedBraces',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    2 => Array &3 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A8',[39m[39;1m
+  [39;22m[32m+        'file' => '/home/vostrikov/projects/packages/sockit/tests/Arch/Support/../fixtures/valid/interpolated-braces.php.txt',[39m[39;1m
+  [39;22m[32m+        'line' => 22,[39m[39;1m
+  [39;22m[32m+        'message' => 'A8 Source outside owner path: SocKit\Support\AfterStringImport',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+    3 => Array &4 [[39m[39;1m
+  [39;22m[32m+        'gate' => 'A8',[39m[39;1m
+  [39;22m[32m+        'file' => '/home/vostrikov/projects/packages/sockit/tests/Arch/Support/../fixtures/valid/interpolated-braces.php.txt',[39m[39;1m
+  [39;22m[32m+        'line' => 27,[39m[39;1m
+  [39;22m[32m+        'message' => 'A8 Source outside owner path: SocKit\Panels\Data\AfterInterpolatedNamespace',[39m[39;1m
+  [39;22m[32m+    ],[39m[39;1m
+  [39;22m[32m+][39m[39;1m
+  [39;22m
+
+  at [32mtests/Arch/SourceScannerTest.php[39m:[32m18[39m
+     14▕         'SocKit\\Support\\AfterStringImport',
+     15▕         'SocKit\\Panels\\Data\\AfterInterpolatedNamespace',
+     16▕     ])->and(Gates::markers($files))->toBe([])
+     17▕         ->and(Gates::modules($files))->toBe([])
+  ➜  18▕         ->and(Gates::ownership($files))->toBe([]);
+     19▕ });
+     20▕
+
+  [33m1   [39m[39;1mtests/Arch/SourceScannerTest.php[39;22m:[39;1m18[39;22m
+
+
+  [90mTests:[39m    [31;1m2 failed[39;22m[90m,[39m[39m [39m[32;1m48 passed[39;22m[90m (464 assertions)[39m
+  [90mDuration:[39m [39m0.66s[39m
+
+Script pest handling the test event returned with error code 1

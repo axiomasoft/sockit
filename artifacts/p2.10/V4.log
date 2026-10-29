@@ -1,0 +1,405 @@
+> rector process --dry-run
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+
+16 files with changes
+=====================
+
+1) packages/core/src/Operations/Internal/Envelope/Envelope.php:139
+
+    ---------- begin diff ----------
+@@ Line 139 @@
+                         }
+                         $store->append(event: new EventEnvelope(eventId: Ids::uuid7(), sourceInstallation: $handle->actor->installation, panel: $handle->surface->panel,
+                             sourceGeneration: $this->app->make(SocKitConfig::class)->events->sourceGeneration, surface: $handle->surface,
+-                            sourceRevision: $receipt->revision ?? throw new EnvelopeException(ProblemCode::PayloadInvalid), privacyRevision: $target === null ? $current->privacyGeneration : $target->privacyRevision,
++                            sourceRevision: $receipt->revision ?? throw new EnvelopeException(ProblemCode::PayloadInvalid), privacyRevision: $target?->privacyRevision ?? $current->privacyGeneration,
+                             eventType: $proposal->type, occurredAt: new DateTimeImmutable('now', new DateTimeZone('UTC')), payload: $proposal->refs,
+                             audience: $request->proposedAudience ?? $request->subject->spec, target: $request->target), consumers: $consumers);
+                     }
+    ----------- end diff -----------
+
+Applied rules:
+ * TernaryToNullsafeCoalesceRector
+
+
+2) tests/Integration/Runtime/ReceiptConflictRecoveryTest.php:138
+
+    ---------- begin diff ----------
+@@ Line 138 @@
+                 };
+             });
+             Assert::fail('Unstable/non-recordable outcome committed');
+-        } catch (ReceiptException|InvalidOperationResultException $error) {
++        } catch (ReceiptException|InvalidOperationResultException) {
+             expect($failure)->not->toBe('fault');
+         } catch (RuntimeException $error) {
+             expect($error->getMessage())->toBe('injected failure');
+    ----------- end diff -----------
+
+Applied rules:
+ * RemoveUnusedVariableInCatchRector
+
+
+3) packages/core/src/Operations/Internal/Receipts/ReceiptLedger.php:168
+
+    ---------- begin diff ----------
+@@ Line 168 @@
+
+             return new ReceiptSnapshot(id: $row->id, namespace: $envelope->namespace, keyHash: $envelope->key->hashForLog(), digest: $envelope->digest,
+                 initiatingActor: $actor->actor ?? throw new ReceiptException(ProblemCode::AuthenticationRequired), outcome: OperationOutcome::from($row->outcome), resource: $resource, revision: $row->revision === null ? null : new Revision($row->revision), problem: $row->problem === null ? null : ProblemCode::from($row->problem));
+-        } catch (\JsonException|\ValueError|InvalidPayloadException|InvalidOperationResultException $error) {
++        } catch (\JsonException|\ValueError|InvalidPayloadException|InvalidOperationResultException) {
+             throw new ReceiptException(ProblemCode::ProviderUnavailable);
+         }
+     }
+    ----------- end diff -----------
+
+Applied rules:
+ * RemoveUnusedVariableInCatchRector
+
+
+4) tests/Fixtures/Runtime/ReceiptScenario.php:22
+
+    ---------- begin diff ----------
+@@ Line 22 @@
+
+ final class ReceiptScenario
+ {
+-    public const TYPE = 'acme.runtime.mutate';
++    public const string TYPE = 'acme.runtime.mutate';
+
+     public static function install(RuntimeDatabase $db): void
+     {
+    ----------- end diff -----------
+
+Applied rules:
+ * AddTypeToConstRector
+
+
+5) tests/Fixtures/Runtime/OutboxScenario.php:24
+
+    ---------- begin diff ----------
+@@ Line 24 @@
+ use SocKit\Testing\SocKitFake;
+ use SocKit\Tests\Integration\Support\PgTarget;
+
+-final class OutboxScenario
++final readonly class OutboxScenario
+ {
+-    public readonly Application $app;
++    public Application $app;
+
+-    public readonly SocKitFake $fake;
++    public SocKitFake $fake;
+
+-    public readonly RuntimeDatabase $db;
++    public RuntimeDatabase $db;
+
+-    public readonly SqlInboxConsumer $consumer;
++    public SqlInboxConsumer $consumer;
+
+     public function __construct(string $generation = '1', bool $selected = true, bool $install = true)
+     {
+    ----------- end diff -----------
+
+Applied rules:
+ * ReadOnlyClassRector
+
+
+6) packages/core/src/Audience/Data/AudienceSpec.php:85
+
+    ---------- begin diff ----------
+@@ Line 85 @@
+         if (! isset($wire['version'], $wire['scope']) || ! is_string($wire['version']) || ! is_string($wire['scope'])) {
+             throw new InvalidPayloadException('Invalid audience wire');
+         }
+-        (new WireVersion(major: 1, minor: 0))->requireSupported(WireVersion::fromWire($wire['version']));
++        new WireVersion(major: 1, minor: 0)->requireSupported(WireVersion::fromWire($wire['version']));
+         $scope = Scope::tryFrom($wire['scope']) ?? throw new InvalidPayloadException('Unknown audience scope');
+         $expected = ['version', 'scope', ...match ($scope) {
+             Scope::Direct => ['actors'], Scope::Group => ['group'], Scope::Contour => ['contour_level', 'contour'], default => [],
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+7) tests/Unit/Support/ReferencesTest.php:49
+
+    ---------- begin diff ----------
+@@ Line 49 @@
+ });
+
+ it('enforces revisions, version compatibility and safe key logging', function (): void {
+-    expect((new Revision(1))->next()->isAfter(new Revision(1)))->toBeTrue()->and((new Incarnation(1))->next()->value)->toBe(2);
+-    expect(fn () => (new Revision(PHP_INT_MAX))->next())->toThrow(InvalidPayloadException::class);
++    expect(new Revision(1)->next()->isAfter(new Revision(1)))->toBeTrue()->and(new Incarnation(1)->next()->value)->toBe(2);
++    expect(fn () => new Revision(PHP_INT_MAX)->next())->toThrow(InvalidPayloadException::class);
+     $version = WireVersion::fromWire('1.2');
+     expect($version->supports(new WireVersion(major: 1, minor: 1)))->toBeTrue()->and($version->supports(new WireVersion(major: 2, minor: 0)))->toBeFalse();
+     expect(fn () => $version->requireSupported(new WireVersion(major: 1, minor: 3)))->toThrow(UnsupportedWireVersionException::class);
+-    expect((new CommandKey('1234567890123456'))->hashForLog())->toBe(substr(hash('sha256', '1234567890123456'), 0, 16));
++    expect(new CommandKey('1234567890123456')->hashForLog())->toBe(substr(hash('sha256', '1234567890123456'), 0, 16));
+     expect(Ids::uuid7())->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/');
+ });
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+8) packages/core/src/Modules/ModuleManifest.php:10
+
+    ---------- begin diff ----------
+@@ Line 10 @@
+ #[Spi(kind: SpiKind::Call, since: '1.0')]
+ final readonly class ModuleManifest
+ {
+-    public const ID_PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)+$/D';
++    public const string ID_PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)+$/D';
+
+-    public const DATABASES = ['pgsql', 'mysql', 'sqlite'];
++    public const array DATABASES = ['pgsql', 'mysql', 'sqlite'];
+
+     /** @param array<array-key, string> $databases */
+     public function __construct(public string $id, public ?string $resourceRoot = null, public array $databases = []) {}
+    ----------- end diff -----------
+
+Applied rules:
+ * AddTypeToConstRector
+
+
+9) tests/Unit/Audience/AudienceGateTest.php:43
+
+    ---------- begin diff ----------
+@@ Line 43 @@
+     $subject = Scenario::subject($wire);
+     expect($gate->read(viewer: $viewer, subject: $subject)->reason)->toBe('audience.unknown')
+         ->and($resolver->calls())->toBe([])
+-        ->and((new AudienceGate($resolver))->read(viewer: $viewer, subject: $subject)->canRead())->toBeFalse();
++        ->and(new AudienceGate($resolver)->read(viewer: $viewer, subject: $subject)->canRead())->toBeFalse();
+ });
+
+ it('does not reuse admission across panel target incarnation installation or actor', function (): void {
+@@ Line 208 @@
+     $wire['spec'] = ['version' => '1.0', 'scope' => 'public'];
+     $public = Scenario::subject($wire);
+     $policy = (new FakeSurfaceAudiencePolicy)->allow(viewer: $viewer, surface: $contour->surface);
+-    $contours = (new FakeContourResolver($viewer->installation))->failWith(new Error('Unavailable facts'));
++    $contours = new FakeContourResolver($viewer->installation)->failWith(new Error('Unavailable facts'));
+     $gate = new AudienceGate(resolver: new AudienceEvaluator(contours: $contours, groups: new FakeGroupMembershipResolver($viewer->installation)), surfacePolicy: $policy);
+     $batch = $gate->readMany(viewer: $viewer, subjects: [$contour, $public]);
+     expect($batch['p1'])->toEqual($gate->read(viewer: $viewer, subject: $contour))
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+10) tests/Integration/Runtime/GenerationFenceTest.php:35
+
+    ---------- begin diff ----------
+@@ Line 35 @@
+     try {
+         $api = $s->base->app->make(SurfaceInstances::class);
+         expect($api->get($s->handle)->revision->value)->toBe(1);
+-        $command = function (string $action, int $expected) use ($s, $api): CommandEnvelope {
+-            return new CommandEnvelope(key: new CommandKey('req.2026-10-28.'.$action), namespace: new CommandNamespace(installation: $s->handle->actor->installation, panel: $s->handle->surface->panel, integration: 'acme.client', commandType: 'sockit.surfaces.'.$action),
+-                digest: $api->digest(handle: $s->handle, action: $action, expectedRevision: new Revision($expected)), expectedRevision: new Revision($expected));
+-        };
++        $command = (fn(string $action, int $expected): CommandEnvelope => new CommandEnvelope(key: new CommandKey('req.2026-10-28.'.$action), namespace: new CommandNamespace(installation: $s->handle->actor->installation, panel: $s->handle->surface->panel, integration: 'acme.client', commandType: 'sockit.surfaces.'.$action),
++            digest: $api->digest(handle: $s->handle, action: $action, expectedRevision: new Revision($expected)), expectedRevision: new Revision($expected)));
+         $archive = $api->archive(handle: $s->handle, command: $command('archive', 1));
+         expect($archive->isSuccess())->toBeTrue()->and($api->get($s->handle)->lifecycle->value)->toBe('archived');
+         $resume = $api->resume(handle: $s->handle, command: $command('resume', 2));
+    ----------- end diff -----------
+
+Applied rules:
+ * ClosureToArrowFunctionRector
+
+
+11) tests/Fixtures/Runtime/EnvelopeMutation.php:25
+
+    ---------- begin diff ----------
+@@ Line 25 @@
+ /** Real acme owner state/revision SQL. No social domain is implemented by this fixture. */
+ final class EnvelopeMutation implements OwnerMutation
+ {
+-    public const TYPE = 'acme.runtime.mutate';
++    public const string TYPE = 'acme.runtime.mutate';
+
+     public string $authorizationAction = self::TYPE;
+    ----------- end diff -----------
+
+Applied rules:
+ * AddTypeToConstRector
+
+
+12) tests/Arch/Support/Gates.php:306
+
+    ---------- begin diff ----------
+@@ Line 306 @@
+
+     private static function forbiddenSignature(string $name): bool
+     {
+-        foreach (['Closure', 'Illuminate\\Database\\Eloquent', 'Illuminate\\Http\\Request', 'Illuminate\\Http\\Response', 'Symfony\\Component\\HttpFoundation\\Request', 'Symfony\\Component\\HttpFoundation\\Response'] as $prefix) {
++        foreach (['Closure', 'Illuminate\\Database\\Eloquent', \Illuminate\Http\Request::class, \Illuminate\Http\Response::class, \Symfony\Component\HttpFoundation\Request::class, \Symfony\Component\HttpFoundation\Response::class] as $prefix) {
+             if (self::within($name, $prefix)) {
+                 return true;
+             }
+@@ Line 316 @@
+         }
+         // A consumer's subclass must not hide an Eloquent or HTTP base type.
+         if (class_exists($name) || interface_exists($name)) {
+-            foreach (['Illuminate\\Database\\Eloquent\\Model', 'Illuminate\\Database\\Eloquent\\Builder', 'Symfony\\Component\\HttpFoundation\\Request', 'Symfony\\Component\\HttpFoundation\\Response'] as $base) {
++            foreach ([\Illuminate\Database\Eloquent\Model::class, \Illuminate\Database\Eloquent\Builder::class, \Symfony\Component\HttpFoundation\Request::class, \Symfony\Component\HttpFoundation\Response::class] as $base) {
+                 if (is_a($name, $base, true)) {
+                     return true;
+                 }
+    ----------- end diff -----------
+
+Applied rules:
+ * StringClassNameToClassConstantRector
+
+
+13) tests/Integration/Runtime/WorkerIsolationTest.php:103
+
+    ---------- begin diff ----------
+@@ Line 103 @@
+     try {
+         $a = $s->job();
+         $b = $s->job(b: true);
+-        $make = function (bool $isB, OperationJobReference $job) use ($s): Fiber {
+-            return new Fiber(fn () => new OperationJobs($isB ? $s->b : $s->a)->execute(job: $job, factory: function (OperationHandle $handle) use ($s, $isB): EnvelopeMutation {
+-                Fiber::suspend([$handle->surface->panel->value, $handle->actor->actor?->id]);
+-                expect($handle->actor->actor?->id)->toBe($isB ? '8' : '7');
++        $make = (fn(bool $isB, OperationJobReference $job): Fiber => new Fiber(fn () => new OperationJobs($isB ? $s->b : $s->a)->execute(job: $job, factory: function (OperationHandle $handle) use ($s, $isB): EnvelopeMutation {
++            Fiber::suspend([$handle->surface->panel->value, $handle->actor->actor?->id]);
++            expect($handle->actor->actor?->id)->toBe($isB ? '8' : '7');
+
+-                return $s->mutation($isB);
+-            }));
+-        };
++            return $s->mutation($isB);
++        })));
+         $fa = $make(isB: false, job: $a);
+         $fb = $make(isB: true, job: $b);
+         expect($fa->start())->toBe(['acme.a', '7'])->and($fb->start())->toBe(['acme.b', '8']);
+    ----------- end diff -----------
+
+Applied rules:
+ * ClosureToArrowFunctionRector
+
+
+14) tests/Fixtures/Runtime/EnvelopeScenario.php:19
+
+    ---------- begin diff ----------
+@@ Line 19 @@
+ use SocKit\Surfaces\Contracts\TargetResolver;
+ use SocKit\Tests\Integration\Support\PgTarget;
+
+-final class EnvelopeScenario
++final readonly class EnvelopeScenario
+ {
+-    public readonly OutboxScenario $base;
++    public OutboxScenario $base;
+
+-    public readonly EnvelopeTarget $target;
++    public EnvelopeTarget $target;
+
+-    public readonly EnvelopeMutation $mutation;
++    public EnvelopeMutation $mutation;
+
+-    public readonly EnvelopeAuthorityFence $fence;
++    public EnvelopeAuthorityFence $fence;
+
+-    public readonly EnvelopeMissingReceiptPolicy $absence;
++    public EnvelopeMissingReceiptPolicy $absence;
+
+-    public readonly Operations $operations;
++    public Operations $operations;
+
+-    public readonly OperationHandle $handle;
++    public OperationHandle $handle;
+
+     /** @var array<string, string> */
+-    private readonly array $sentinels;
++    private array $sentinels;
+
+     public function __construct(bool $install = true)
+     {
+    ----------- end diff -----------
+
+Applied rules:
+ * ReadOnlyClassRector
+
+
+15) tests/Fixtures/Runtime/WorkerScenario.php:26
+
+    ---------- begin diff ----------
+@@ Line 26 @@
+ use SocKit\Testing\SocKitFake;
+ use SocKit\Tests\Integration\Support\PgTarget;
+
+-final class WorkerScenario
++final readonly class WorkerScenario
+ {
+-    public readonly EnvelopeScenario $base;
++    public EnvelopeScenario $base;
+
+-    public readonly Application $a;
++    public Application $a;
+
+-    public readonly Application $b;
++    public Application $b;
+
+-    public readonly RuntimeDatabase $dbB;
++    public RuntimeDatabase $dbB;
+
+-    public readonly WorkerActorResolver $actorA;
++    public WorkerActorResolver $actorA;
+
+-    public readonly WorkerActorResolver $actorB;
++    public WorkerActorResolver $actorB;
+
+-    public readonly SocKitFake $fakeB;
++    public SocKitFake $fakeB;
+
+     public function __construct()
+     {
+    ----------- end diff -----------
+
+Applied rules:
+ * ReadOnlyClassRector
+
+
+16) tests/Integration/Support/PgTarget.php:7
+
+    ---------- begin diff ----------
+@@ Line 7 @@
+ use PDO;
+ use RuntimeException;
+
+-final class PgTarget
++final readonly class PgTarget
+ {
+     /** @param array{run: string, container: string, host: string, port: int, owner: string, decoy: string, user: string, password: string} $manifest */
+-    public function __construct(private readonly array $manifest)
++    public function __construct(private array $manifest)
+     {
+         $run = $manifest['run'];
+         if (! preg_match('/^[a-f0-9]{16}$/D', $run) || ! preg_match('/^[a-f0-9]{64}$/D', $manifest['container']) || $manifest['host'] !== '127.0.0.1' || $manifest['port'] < 1 || $manifest['port'] > 65535 || $manifest['owner'] !== 'sockit_p2_'.$run.'_test' || $manifest['decoy'] !== 'sockit_p2_decoy_'.$run.'_test' || $manifest['user'] !== 'postgres') {
+    ----------- end diff -----------
+
+Applied rules:
+ * ReadOnlyClassRector
+
+
+ [OK] 16 files would have been changed (dry-run) by Rector                      
+
+Script rector process --dry-run handling the refactor:check event returned with error code 2

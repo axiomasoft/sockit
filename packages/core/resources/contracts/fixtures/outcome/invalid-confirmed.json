@@ -1,0 +1,16 @@
+{
+  "fixture": "invalid-confirmed",
+  "contract": "outcome",
+  "version": 1,
+  "input": {
+    "outcome": "confirmed",
+    "receipt_id": "r1",
+    "resource": null,
+    "revision": 1,
+    "problem": null,
+    "problem_detail": {}
+  },
+  "expect": {
+    "valid": false
+  }
+}

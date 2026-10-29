@@ -1,0 +1,247 @@
+private container=9d638a9b2bedfe810f8a83181298ba9085eba0a41522a2b4bd4ceaed3a23531a owner=sockit_p2_757301db86fe9908_test decoy=sockit_p2_decoy_757301db86fe9908_test port=33045
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/DoctorReadinessTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=102
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=103
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=104
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=105
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=106
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=118
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=119
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=120
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=121
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=127
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=128
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=129
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=130
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=136
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=137
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=138
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=139
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=145
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=146
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=147
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=148
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=190
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=191
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=192
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=193
+P3.7 SQL drift table -> SCHEMA_TABLE_MISSING; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=205
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=206
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=207
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=208
+P3.7 SQL drift column -> SCHEMA_COLUMN_MISSING; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=220
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=221
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=222
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=223
+P3.7 SQL drift type -> SCHEMA_COLUMN_INCOMPATIBLE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=235
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=236
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=237
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=238
+P3.7 SQL drift nullable -> SCHEMA_COLUMN_INCOMPATIBLE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=250
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=251
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=252
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=253
+P3.7 SQL drift default -> SCHEMA_COLUMN_INCOMPATIBLE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=265
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=266
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=267
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=268
+P3.7 SQL drift index -> SCHEMA_INDEX_INCOMPATIBLE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=280
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=281
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=282
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=283
+P3.7 SQL drift index_shape -> SCHEMA_INDEX_INCOMPATIBLE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=295
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=296
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=297
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=298
+P3.7 SQL drift primary -> SCHEMA_CONSTRAINT_MISSING; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=310
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=311
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=312
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=313
+P3.7 SQL drift check -> SCHEMA_CONSTRAINT_MISSING; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=325
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=326
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=327
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=328
+P3.7 SQL drift check_shape -> SCHEMA_CONSTRAINT_INCOMPATIBLE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=340
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=341
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=342
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=343
+P3.7 SQL drift ownership -> SCHEMA_OWNERSHIP_CHANGED; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=355
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=356
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=357
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=358
+P3.7 SQL drift host_required -> SCHEMA_HOST_COLUMN_REQUIRES_VALUE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=370
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=371
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=372
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=373
+P3.7 SQL drift rls -> SCHEMA_TABLE_INCOMPATIBLE; no diagnostic mutation
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=385
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=386
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=387
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=388
+P3.7 source/identity file -> MIGRATION_FILE_TAMPERED
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=400
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=401
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=402
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=403
+P3.7 source/identity history -> MIGRATION_HISTORY_TAMPERED
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=415
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=416
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=417
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=418
+P3.7 source/identity version -> MIGRATION_HISTORY_TAMPERED
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=430
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=431
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=432
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=433
+P3.7 source/identity gap -> MIGRATION_HISTORY_GAP_OR_BRANCH
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=445
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=446
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=447
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=448
+P3.7 source/identity ledger -> MIGRATION_LEDGER_NOT_PREFIX
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=460
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=461
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=462
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=463
+P3.7 source/identity model -> MODEL_BINDING_INVALID
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=475
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=476
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=477
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=478
+P3.7 source/identity cast -> MODEL_BINDING_INVALID
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=490
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=491
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=492
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=493
+P3.7 source/identity prefix -> SCHEMA_PHYSICAL_IDENTITY_CHANGED
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=505
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=506
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=507
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=508
+P3.7 source/identity identity -> SCHEMA_PHYSICAL_IDENTITY_CHANGED
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=520
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=521
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=522
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=523
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=535
+PG identity database=sockit_p2_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=536
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=537
+PG identity database=sockit_p2_decoy_757301db86fe9908_test server_version_num=160014 marker=sockit-p21-757301db86fe9908 backend_pid=538
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Schema\DoctorReadinessTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit reports ready only for a fully installed compatible panel and ac[39m[90m…[39m [90m0.58s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed for missing and unknown selection with machine read[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed for missing and unknown selection with machine read[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fails closed for missing and unknown selection with machine read[39m[90m…[39m [90m0.28s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit distinguishes missing history, generated pending, and required u[39m[90m…[39m [90m1.75s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.47s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.57s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.45s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.53s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.69s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.61s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.48s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.60s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.87s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.76s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.82s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.90s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects live catalog and ownership drift without repairing stora[39m[90m…[39m [90m0.78s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.73s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.72s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.69s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.60s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.46s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.56s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.86s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.75s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.71s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rejects tampered/missing source, ancestry, unsupported version,[39m[90m… [39m [90m0.66s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit preserves disabled schema and reports pending and quarantined de[39m[90m…[39m [90m0.79s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\DoctorReadinessTest[22m [90m>[39m it reports ready o…   
+[39;1m  {"status":"unready","panel":"acme.article","provider":"SocKit\\Tests\\Fixtures\\Schema\\MigrationPanel","generated":1,"applied":1,"components":{"acme.demo-targets":{"version":1,"status":"selected"},"sockit.kernel":{"version":1,"status":"selected"}},"problems":[],"deliveries":[],"digest":"0c93b281dea5286c332a4715b1733ed8b758453f53a1e068c91f48d04783f4f1","desired_digest":"0c93b281dea5286c332a4715b1733ed8b758453f53a1e068c91f48d04783f4f1","errors":["resolver.unavailable.tenant","resolver.unavailable.actor","resolver.unavailable.contour","resolver.unavailable.audience","resolver.unavailable.authorizer","resolver.unavailable.groups","resolver.unavailable.surface_policy","resolver.unavailable.targets"]}
+Failed asserting that 1 is identical to 0.[39;22m
+
+  at [32mtests/Integration/Schema/DoctorReadinessTest.php[39m:[32m17[39m
+     13▕     try {
+     14▕         expect($f->command()['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
+     15▕         $doctor = new DoctorConsumer($f);
+     16▕         $result = $doctor->run();
+  ➜  17▕         expect($result['exit'])->toBe(0, json_encode($result['data'], JSON_THROW_ON_ERROR))->and($result['data']['status'])->toBe('ready')
+     18▕             ->and($result['data']['generated'])->toBe(1)->and($result['data']['applied'])->toBe(1)->and($result['sql'])->not->toBeEmpty();
+     19▕         $f->pg->owner->exec('ALTER TABLE panel_a.driver_article_demo_targets ADD COLUMN host_note text');
+     20▕         expect($doctor->run()['exit'])->toBe(0)->and($doctor->run(['json' => false])['output'])->toContain('acme.article: ready');
+     21▕         fwrite(STDERR, "P3.7 real SQL ready + host extension; read-only guard, catalog/data/file digests unchanged\n");
+
+  [33m1   [39m[39;1mtests/Integration/Schema/DoctorReadinessTest.php[39;22m:[39;1m17[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\DoctorReadinessTest[22m [90m>[39m it distinguishes m…   
+[39;1m  Failed asserting that 1 is identical to 0.[39;22m
+
+  at [32mtests/Integration/Schema/DoctorReadinessTest.php[39m:[32m52[39m
+     48▕         expect($upgrade['exit'])->toBe(1)->and($upgrade['data']['errors'])->toContain('SCHEMA_UPGRADE_REQUIRED');
+     49▕         $f->boot(selected: true, version: 2);
+     50▕         $f->repairModels();
+     51▕         expect($f->command(upgrade: true)['exit'])->toBe(0)->and($doctor->run(['version' => 2])['data']['errors'])->toContain('SCHEMA_GENERATED_PENDING');
+  ➜  52▕         expect($f->migrate()['exit'])->toBe(0)->and($doctor->run(['version' => 2])['exit'])->toBe(0);
+     53▕     } finally {
+     54▕         $f->cleanup();
+     55▕     }
+     56▕ });
+
+  [33m1   [39m[39;1mtests/Integration/Schema/DoctorReadinessTest.php[39;22m:[39;1m52[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\DoctorReadinessTest[22m [90m>[39m it rejects tampere…   
+[39;1m  Failed asserting that an array contains 'STORAGE_DEPLOYMENT_REQUIRED'.[39;22m
+
+  at [32mtests/Integration/Schema/DoctorReadinessTest.php[39m:[32m139[39m
+    135▕         } else {
+    136▕             $options['config'] = ['sockit.storage.deployments.owner_a' => null];
+    137▕         }
+    138▕         $result = new DoctorConsumer($f)->run($options);
+  ➜ 139▕         expect($result['exit'])->toBe(1)->and($result['data']['errors'])->toContain($expected);
+    140▕         fwrite(STDERR, 'P3.7 source/identity '.$damage.' -> '.$expected."\n");
+    141▕     } finally {
+    142▕         $f->cleanup();
+    143▕     }
+
+  [33m1   [39m[39;1mtests/Integration/Schema/DoctorReadinessTest.php[39;22m:[39;1m139[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\DoctorReadinessTest[22m [90m>[39m it preserves disab…   
+[39;1m  {"status":"unready","panel":"acme.article","provider":"SocKit\\Tests\\Fixtures\\Schema\\MigrationPanel","generated":1,"applied":1,"components":{"acme.demo-targets":{"version":1,"status":"preserved_owned"},"sockit.kernel":{"version":1,"status":"selected"}},"problems":[],"deliveries":{"sink.a:pending":{"consumer":"sink.a","status":"pending","count":1,"reasons":["retry"]},"sink.b:quarantined":{"consumer":"sink.b","status":"quarantined","count":1,"reasons":["consumer_disabled"]}},"digest":"5ad7270d19ec8d64469e168a42d66108e303be1e6c7b9803f2c0b6a284b2ab54","desired_digest":"5ad7270d19ec8d64469e168a42d66108e303be1e6c7b9803f2c0b6a284b2ab54","errors":["resolver.unavailable.tenant","resolver.unavailable.actor","resolver.unavailable.contour","resolver.unavailable.audience","resolver.unavailable.authorizer","resolver.unavailable.groups","resolver.unavailable.surface_policy","resolver.unavailable.targets"]}
+Failed asserting that 1 is identical to 0.[39;22m
+
+  at [32mtests/Integration/Schema/DoctorReadinessTest.php[39m:[32m158[39m
+    154▕         $query = $f->pg->owner->prepare("INSERT INTO panel_a.driver_article_outbox (installation,panel,kind,host_type,host_key,id,incarnation,source_generation,event_id,digest,envelope,deliveries) VALUES ('host','acme.article','feed','article','42',?,1,'1',?,?,'{}',?::jsonb)");
+    155▕         $query->execute(['019a1ba0-0000-7000-8000-000000000042', '019a1ba0-0000-7000-8000-000000000043', 'sha256:'.str_repeat('a', 64),
+    156▕             json_encode(['sink.a' => ['status' => 'pending', 'reason' => 'retry'], 'sink.b' => ['status' => 'quarantined', 'reason' => 'consumer_disabled']], JSON_THROW_ON_ERROR)]);
+    157▕         $result = new DoctorConsumer($f)->run(['selected' => false, 'enableModule' => false]);
+  ➜ 158▕         expect($result['exit'])->toBe(0, json_encode($result['data'], JSON_THROW_ON_ERROR))
+    159▕             ->and($result['data']['components']['acme.demo-targets']['status'])->toBe('preserved_owned')
+    160▕             ->and($result['data']['deliveries']['sink.a:pending']['count'])->toBe(1)
+    161▕             ->and($result['data']['deliveries']['sink.b:quarantined']['reasons'])->toBe(['consumer_disabled'])
+    162▕             ->and(PgTarget::query($f->pg->owner, 'SELECT count(*) FROM panel_a.driver_article_outbox')->fetchColumn())->toBe(1);
+
+  [33m1   [39m[39;1mtests/Integration/Schema/DoctorReadinessTest.php[39;22m:[39;1m158[39;22m
+
+
+  [90mTests:[39m    [31;1m4 failed[39;22m[90m,[39m[39m [39m[32;1m25 passed[39;22m[90m (309 assertions)[39m
+  [90mDuration:[39m [39m19.30s[39m
+
+Script pest handling the test event returned with error code 1

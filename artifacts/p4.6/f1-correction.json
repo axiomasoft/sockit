@@ -1,0 +1,23 @@
+{
+  "finding": "F1",
+  "severity": "Major",
+  "review_provenance": "owner supplied RED finding",
+  "reviewer_session": "01a18650-f40e-70c1-a701-d17bd7030171",
+  "owner_session": "01a18642-887a-7ff0-9077-9a1aed0aab00",
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "sandbox": "danger-full-access",
+  "base": "2de17368962128d0fd96799aefe7637c281e7de4",
+  "source_digest": "efaf011b597943063c6ef70a025acbacec988fd0ab94f60027644987137afd06",
+  "checks": {
+    "V1": 0,
+    "V2": 0,
+    "V3": 0,
+    "V89": 0,
+    "V90": 0,
+    "V91": 0
+  },
+  "evidence_schema_and_sha256_exit": 0,
+  "finish_called": false,
+  "new_review_required": true
+}

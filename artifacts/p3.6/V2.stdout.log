@@ -1,0 +1,20 @@
+private container=cc93103e4efcbe1cfc0ccc1d3cbf6b703ade263ee88ba7f73271b142be4da6ff owner=sockit_p2_a84ead4cd1848222_test decoy=sockit_p2_decoy_a84ead4cd1848222_test port=33034
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\AdditiveUpgradeTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit migrates initial and additive snapshots through Laravel and reve[39m[90m…[39m [90m1.64s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit proves data constraints before generating a new index or check w[39m[90m…[39m [90m0.74s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit proves data constraints before generating a new index or check w[39m[90m…[39m [90m0.81s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit adds defaulted columns and a nullable foreign key without changi[39m[90m…[39m [90m0.99s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit adds defaulted columns and a nullable foreign key without changi[39m[90m…[39m [90m1.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit adds defaulted columns and a nullable foreign key without changi[39m[90m…[39m [90m0.98s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects an ambiguous applied ledger and live ownership drift wit[39m[90m…[39m [90m0.67s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects an ambiguous applied ledger and live ownership drift wit[39m[90m…[39m [90m0.77s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects an ambiguous applied ledger and live ownership drift wit[39m[90m…[39m [90m0.93s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit atomically reverses a failing additive program including its own[39m[90m…[39m [90m0.99s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves custom code while requiring JSON casts and both new FK[39m[90m…[39m [90m2.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit upgrades a real Acme make-panel kernel consumer with missing mod[39m[90m…[39m [90m1.96s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit upgrades a real Acme make-panel kernel consumer with missing mod[39m[90m…[39m [90m2.12s[39m  
+
+  [90mTests:[39m    [32;1m13 passed[39;22m[90m (250 assertions)[39m
+  [90mDuration:[39m [39m15.91s[39m
+

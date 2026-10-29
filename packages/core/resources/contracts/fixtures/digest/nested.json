@@ -1,0 +1,25 @@
+{
+  "fixture": "digest/nested",
+  "contract": "digest",
+  "version": "1.0",
+  "description": "nested",
+  "input": {
+    "command": "sockit.reactions.add",
+    "payload": {
+      "z": 1,
+      "a": [
+        3,
+        1,
+        2
+      ],
+      "m": {
+        "y": true,
+        "b": false
+      }
+    }
+  },
+  "expect": {
+    "canonical": "{\"a\":[3,1,2],\"m\":{\"b\":false,\"y\":true},\"z\":1}",
+    "digest": "sha256:ad986d90fce91183336894865d562729d58bcb0c5d9ef5ee438b83bb1983189b"
+  }
+}

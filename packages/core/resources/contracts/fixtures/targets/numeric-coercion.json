@@ -1,0 +1,17 @@
+{
+  "fixture": "targets/numeric-coercion",
+  "contract": "targets",
+  "version": "1.0",
+  "description": "P2.3 target wire contract; test fixture, not social e2e",
+  "input": {
+    "kind": "ref",
+    "wire": {
+      "host": 42,
+      "incarnation": 1
+    }
+  },
+  "expect": {
+    "valid": false,
+    "problem": "sockit.payload_invalid"
+  }
+}

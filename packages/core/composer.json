@@ -1,0 +1,122 @@
+{
+    "name": "axiomasoft/sockit",
+    "description": "Embeddable social engine for Laravel",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "illuminate/support": "^13.0",
+        "illuminate/contracts": "^13.0",
+        "illuminate/container": "^13.0",
+        "illuminate/config": "^13.0",
+        "ramsey/uuid": "^4.9",
+        "illuminate/database": "^13.0",
+        "illuminate/console": "^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SocKit\\": "src/",
+            "SocKit\\Reactions\\": "modules/reactions/src/",
+            "SocKit\\Posts\\": "modules/posts/src/",
+            "SocKit\\Groups\\": "modules/groups/src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SocKit\\SocKitServiceProvider"
+            ]
+        },
+        "sockit": {
+            "owners": {
+                "core": {
+                    "namespaces": [
+                        "SocKit\\"
+                    ],
+                    "paths": [
+                        "packages/core/src",
+                        "packages/core/config",
+                        "packages/core/resources"
+                    ],
+                    "tables": [
+                        "surface_instances",
+                        "receipts",
+                        "outbox",
+                        "tombstones"
+                    ],
+                    "config": [
+                        "sockit"
+                    ],
+                    "publish-tags": [
+                        "sockit-config"
+                    ],
+                    "commands": [
+                        "sockit:doctor",
+                        "sockit:make-panel",
+                        "sockit:relay"
+                    ],
+                    "module-ids": [],
+                    "exclude-namespaces": [
+                        "SocKit\\Reactions\\",
+                        "SocKit\\Posts\\",
+                        "SocKit\\Groups\\"
+                    ]
+                },
+                "reactions": {
+                    "namespaces": [
+                        "SocKit\\Reactions\\"
+                    ],
+                    "paths": [
+                        "packages/core/modules/reactions/src"
+                    ],
+                    "tables": [
+                        "reactions",
+                        "reaction_counts"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.reactions"
+                    ]
+                },
+                "posts": {
+                    "namespaces": [
+                        "SocKit\\Posts\\"
+                    ],
+                    "paths": [
+                        "packages/core/modules/posts/src"
+                    ],
+                    "tables": [
+                        "posts",
+                        "post_revisions"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.posts"
+                    ]
+                },
+                "groups": {
+                    "namespaces": [
+                        "SocKit\\Groups\\"
+                    ],
+                    "paths": [
+                        "packages/core/modules/groups/src"
+                    ],
+                    "tables": [
+                        "groups",
+                        "group_members"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.groups"
+                    ]
+                }
+            }
+        }
+    }
+}

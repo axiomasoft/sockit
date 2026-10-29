@@ -1,0 +1,20 @@
+{
+  "fixture": "feature-unknown",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "features": [
+          "unknown"
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FEATURE_DISABLED"
+    ]
+  }
+}

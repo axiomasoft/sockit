@@ -1,0 +1,32 @@
+private container=d9dada3d4c035e428f104252d922da93ec343ee474aea4a47eb198e35102d449 owner=sockit_p2_d86ace7311a98619_test decoy=sockit_p2_decoy_d86ace7311a98619_test port=33046
+PG identity database=sockit_p2_d86ace7311a98619_test server_version_num=160014 marker=sockit-p21-d86ace7311a98619 backend_pid=102
+PG identity database=sockit_p2_d86ace7311a98619_test server_version_num=160014 marker=sockit-p21-d86ace7311a98619 backend_pid=103
+PG identity database=sockit_p2_decoy_d86ace7311a98619_test server_version_num=160014 marker=sockit-p21-d86ace7311a98619 backend_pid=104
+PG identity database=sockit_p2_decoy_d86ace7311a98619_test server_version_num=160014 marker=sockit-p21-d86ace7311a98619 backend_pid=105
+CHECK (((octet_length((host_key)::text) >= 1) AND (octet_length((host_key)::text) <= 512)))
+CHECK (((deleted_at IS NOT NULL) = (NOT (lifecycle IS DISTINCT FROM 'deleted'::text))))
+CHECK (((command_key)::text ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$'::text))
+CHECK (((octet_length((host_type)::text) >= 1) AND (octet_length((host_type)::text) <= 96)))
+CHECK ((jsonb_typeof(resource) = 'object'::text))
+CHECK (((id)::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'::text))
+CHECK (((octet_length((actor_ref)::text) >= 1) AND (octet_length((actor_ref)::text) <= 609)))
+CHECK (((problem IS NOT NULL) = (NOT (outcome IS DISTINCT FROM 'rejected'::text))))
+CHECK (((id)::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'::text))
+CHECK ((revision >= 1))
+CHECK ((source_generation >= 1))
+CHECK (((revision IS NOT NULL) = (NOT (outcome IS DISTINCT FROM 'confirmed'::text))))
+CHECK (((octet_length((on_behalf_of)::text) >= 1) AND (octet_length((on_behalf_of)::text) <= 609)))
+CHECK ((outcome = ANY (ARRAY['confirmed'::text, 'rejected'::text])))
+CHECK (((digest)::text ~ '^sha256:[0-9a-f]{64}$'::text))
+CHECK ((privacy_generation >= 1))
+CHECK ((incarnation >= 1))
+CHECK (((octet_length((panel)::text) >= 1) AND (octet_length((panel)::text) <= 96)))
+CHECK (((octet_length((installation)::text) >= 1) AND (octet_length((installation)::text) <= 64)))
+CHECK ((lifecycle = ANY (ARRAY['archived'::text, 'deleted'::text, 'live'::text])))
+CHECK (((octet_length((namespace)::text) >= 1) AND (octet_length((namespace)::text) <= 384)))
+CHECK ((revision >= 1))
+CHECK (((resource IS NOT NULL) = (NOT (outcome IS DISTINCT FROM 'confirmed'::text))))
+CHECK (((octet_length((kind)::text) >= 1) AND (octet_length((kind)::text) <= 96)))
+CHECK (((actor_kind)::text = ANY ((ARRAY['person'::character varying, 'service'::character varying, 'system'::character varying])::text[])))
+PRIMARY KEY (id)
+PRIMARY KEY (id)

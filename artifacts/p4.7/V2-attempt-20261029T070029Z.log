@@ -1,0 +1,158 @@
+STDOUT
+private volume=04f429806ccd2cd5de74dcf1119ac717aa762187395a13db6e235e598c20d495
+private container=7b89ce6f0970387750848391a6bc8fb4dcc6d09a319eac04158371ad274a2ab6 owner=sockit_p2_69384278c0bc54f4_test decoy=sockit_p2_decoy_69384278c0bc54f4_test port=33196
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Social\FeedPaginationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit walks real PG timestamp ties exactly once with strict descending[39m[90m…[39m [90m0.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refills denied gaps and advances empty budget pages past the las[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not drop an unprocessed fetched tail when the page fills or[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps first publication position through concurrent insert edit[39m[90m… [39m [90m0.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rechecks a shortlist changed by a second PG session before hydra[39m[90m…[39m [90m0.43s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds real cursors to full surface panel viewer generation insta[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds real cursors to full surface panel viewer generation insta[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds real cursors to full surface panel viewer generation insta[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds real cursors to full surface panel viewer generation insta[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit binds real cursors to full surface panel viewer generation insta[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit holds a feed shortlist across independent process commits withou[39m[90m…[39m [90m0.78s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit holds a feed shortlist across independent process commits withou[39m[90m…[39m [90m0.45s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit holds a feed shortlist across independent process commits withou[39m[90m…[39m [90m0.50s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit holds a feed shortlist across independent process commits withou[39m[90m…[39m [90m0.52s[39m  
+
+  [90mTests:[39m    [32;1m14 passed[39;22m[90m (145 assertions)[39m
+  [90mDuration:[39m [39m5.91s[39m
+
+
+STDERR
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Social/FeedPaginationTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=102
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=103
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=104
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=105
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=106
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=107
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=108
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=109
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=110
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=111
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=112
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=113
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=114
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=115
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=116
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=117
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=118
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=119
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=120
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=121
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=122
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=123
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=124
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=125
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=126
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=127
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=128
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=129
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=130
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=131
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=132
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=133
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=134
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=135
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=136
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=137
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=138
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=139
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=140
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=141
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=142
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=143
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=144
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=145
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=146
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=147
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=148
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=149
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=150
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=151
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=152
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=153
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=154
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=155
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=156
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=157
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=158
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=159
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=160
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=161
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=162
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=163
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=164
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=165
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=166
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=167
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=168
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=169
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+Feed independent-process barrier exit=0 result=COMMITTED
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=170
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=171
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=172
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=173
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=174
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=175
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=176
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=177
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=178
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=179
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=180
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=181
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=182
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+Feed independent-process barrier exit=0 result=COMMITTED
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=183
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=184
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=185
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=186
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=187
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=188
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=189
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=190
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=191
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=192
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=193
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=194
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=195
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+Feed independent-process barrier exit=0 result=COMMITTED
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=196
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=197
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=198
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=199
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=200
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=201
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=202
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=203
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=204
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=205
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=206
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=207
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=208
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+Feed independent-process barrier exit=0 result=COMMITTED
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=209
+PG identity database=sockit_p2_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=210
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=211
+PG identity database=sockit_p2_decoy_69384278c0bc54f4_test server_version_num=160014 marker=sockit-p21-69384278c0bc54f4 backend_pid=212
+P2.2 Laravel connection=owner_a database=sockit_p2_69384278c0bc54f4_test backend_pid=213
+P2.2 Laravel connection=owner_b database=sockit_p2_69384278c0bc54f4_test backend_pid=214
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_69384278c0bc54f4_test backend_pid=215

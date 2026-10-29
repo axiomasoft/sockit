@@ -1,0 +1,20 @@
+{
+  "fixture": "setting-type",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "settings": {
+          "display_limit": true
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_SETTING_INVALID"
+    ]
+  }
+}

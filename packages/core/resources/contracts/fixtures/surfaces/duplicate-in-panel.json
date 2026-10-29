@@ -1,0 +1,17 @@
+{
+  "fixture": "duplicate-in-panel",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {},
+      {}
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_KIND_DUPLICATE"
+    ]
+  }
+}

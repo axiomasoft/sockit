@@ -1,0 +1,41 @@
+{
+  "fixture": "floor/widening",
+  "contract": "floor",
+  "version": "1.0",
+  "input": {
+    "floor": {
+      "allowed_scopes": [
+        "direct",
+        "contour"
+      ],
+      "default_scope": "direct",
+      "max_scope": "contour",
+      "minor_max_scope": "contour",
+      "minor_default_scope": "direct",
+      "contour_levels": [
+        "class"
+      ]
+    },
+    "surface": {
+      "allowed_scopes": [
+        "direct",
+        "group",
+        "contour",
+        "platform",
+        "public"
+      ],
+      "default_scope": "contour",
+      "max_scope": "public",
+      "minor_max_scope": "contour",
+      "minor_default_scope": "direct",
+      "contour_levels": [
+        "class",
+        "school"
+      ]
+    }
+  },
+  "expect": {
+    "valid": false,
+    "rule": "SURFACE_FLOOR_WIDENS"
+  }
+}

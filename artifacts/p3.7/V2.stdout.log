@@ -1,0 +1,12 @@
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Schema\BootSafetyTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit boots and config caches with zero SQL, no schema history and una[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit boots and config caches with zero SQL, no schema history and una[39m[90m…[39m [90m0.18s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Panels\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.20s[39m  
+
+  [90mTests:[39m    [32;1m4 passed[39;22m[90m (23 assertions)[39m
+  [90mDuration:[39m [39m0.81s[39m
+

@@ -1,0 +1,209 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+
+/** Consumer-owned PostgreSQL additive snapshot v1. No package schema helper or module is needed to run it.
+ * Table comments are durable ownership receipts. Losing or changing them requires explicit repair.
+ * Roll back additive descendants before this initial snapshot; DROP always uses RESTRICT.
+ */
+return new class extends Migration
+{
+    public const string SNAPSHOT = '{{SNAPSHOT}}';
+
+    public const string DIGEST = '{{DIGEST}}';
+
+    public function getConnection(): string
+    {
+        return {{CONNECTION}};
+    }
+
+    public function up(): void
+    {
+        $this->apply(up: true);
+    }
+
+    public function down(): void
+    {
+        $this->apply(up: false);
+    }
+
+    private function apply(bool $up): void
+    {
+        $json = base64_decode(self::SNAPSHOT, strict: true);
+        if ($json === false || ! hash_equals(self::DIGEST, hash('sha256', $json))) {
+            throw new RuntimeException('SNAPSHOT_INTEGRITY_INVALID');
+        }
+        $snapshot = json_decode($json, associative: true, flags: JSON_THROW_ON_ERROR);
+        if ($snapshot['format_version'] !== 1 || $snapshot['mode'] !== 'additive_snapshot') {
+            throw new RuntimeException('SNAPSHOT_FORMAT_UNSUPPORTED');
+        }
+        $connection = DB::connection($snapshot['connection']);
+        $config = $connection->getConfig();
+        if ($connection->getDriverName() !== 'pgsql' || ($config['driver'] ?? null) !== 'pgsql') {
+            throw new RuntimeException('SNAPSHOT_DRIVER_UNSUPPORTED');
+        }
+        // Laravel strips read/write keys when it builds a split connection. Inspect the
+        // unresolved read PDO too; do not let a sanitized config hide ambiguous routing.
+        if ($connection->getRawReadPdo() !== null) {
+            throw new RuntimeException('SNAPSHOT_ENDPOINT_AMBIGUOUS');
+        }
+        foreach (['url', 'dsn', 'read', 'write'] as $key) {
+            if (isset($config[$key]) && $config[$key] !== '' && $config[$key] !== []) {
+                throw new RuntimeException('SNAPSHOT_ENDPOINT_AMBIGUOUS');
+            }
+        }
+        $location = $snapshot['physical']['location'];
+        if (($config['database'] ?? null) !== $location['database'] || ! in_array($this->endpoint($config['host'] ?? null, $config['port'] ?? 5432), $snapshot['endpoints'], true)) {
+            throw new RuntimeException('SNAPSHOT_CONNECTION_CHANGED');
+        }
+        // Uses the write PDO exclusively. Credentials may rotate; they are absent from the snapshot.
+        try {
+            $pdo = $connection->getPdo();
+        } catch (Throwable) {
+            throw new RuntimeException('SNAPSHOT_CONNECTION_UNAVAILABLE');
+        }
+        $ownsTransaction = ! $pdo->inTransaction();
+        $savepoint = 'sockit_snapshot_'.substr(self::DIGEST, 0, 16);
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        } else {
+            $pdo->exec('SAVEPOINT '.$savepoint);
+        }
+        try {
+            $row = $pdo->query("SELECT current_database() AS db, host(inet_server_addr()) AS address, inet_server_port() AS port, current_setting('port') AS socket_port, current_setting('unix_socket_directories') AS sockets")->fetch(PDO::FETCH_ASSOC);
+            if ($row['db'] !== $location['database']) {
+                throw new RuntimeException('SNAPSHOT_CONNECTION_CHANGED');
+            }
+            if ($row['address'] !== null) {
+                if (! in_array($this->endpoint($row['address'], $row['port']), $snapshot['endpoints'], true)) {
+                    throw new RuntimeException('SNAPSHOT_CONNECTION_CHANGED');
+                }
+            } else {
+                $sockets = array_map(fn (string $host): string => $this->endpoint(trim($host), $row['socket_port']), explode(',', $row['sockets']));
+                if (! in_array($this->endpoint($config['host'] ?? null, $config['port'] ?? 5432), $sockets, true)) {
+                    throw new RuntimeException('SNAPSHOT_CONNECTION_CHANGED');
+                }
+            }
+            // Shared namespace lock serializes cooperating snapshots, including alias connections.
+            $lock = $pdo->prepare('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))');
+            $lock->execute(['sockit.snapshot:'.$location['database'].':'.$location['schema']]);
+            $schema = $pdo->prepare('SELECT oid FROM pg_namespace WHERE nspname = ?');
+            $schema->execute([$location['schema']]);
+            if ($schema->fetchColumn() === false) {
+                throw new RuntimeException('SNAPSHOT_SCHEMA_MISSING');
+            }
+            $previousPath = $pdo->query('SHOW search_path')->fetchColumn();
+            // Stable pg_get_* output for catalog fingerprints regardless of caller search_path.
+            $pdo->exec('SET LOCAL search_path TO pg_catalog');
+            $owned = $up ? $snapshot['parent_tables'] : $snapshot['program']['tables'];
+            foreach ($owned as $table) {
+                $pdo->exec('LOCK TABLE '.$table.' IN ACCESS EXCLUSIVE MODE');
+            }
+            foreach ($owned as $table) {
+                $state = $this->catalog(pdo: $pdo, table: $table);
+                $digest = $up ? $snapshot['parent_snapshot_digest'] : self::DIGEST;
+                $expected = 'sockit.snapshot.v1:'.$digest.':'.$state['oid'].':'.$state['signature'];
+                if (! is_string($state['receipt']) || ! hash_equals($expected, $state['receipt'])) {
+                    throw new RuntimeException('SNAPSHOT_OWNERSHIP_CHANGED');
+                }
+            }
+            if ($up) {
+                $catalog = $pdo->prepare('SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname = ? AND c.relname = ?');
+                foreach ($snapshot['relations'] as $relation) {
+                    $catalog->execute([$location['schema'], $relation]);
+                    if ($catalog->fetchColumn() !== false) {
+                        throw new RuntimeException('SNAPSHOT_UNMANAGED_OBJECT');
+                    }
+                }
+            }
+            foreach ($snapshot['program'][$up ? 'up' : 'down'] as $sql) {
+                $pdo->exec($sql);
+            }
+            foreach ($up ? $snapshot['program']['tables'] : $snapshot['parent_tables'] as $table) {
+                $state = $this->catalog(pdo: $pdo, table: $table);
+                $digest = $up ? self::DIGEST : $snapshot['parent_snapshot_digest'];
+                $receipt = 'sockit.snapshot.v1:'.$digest.':'.$state['oid'].':'.$state['signature'];
+                $pdo->exec('COMMENT ON TABLE '.$table.' IS '.$pdo->quote($receipt));
+            }
+            $restore = $pdo->prepare("SELECT set_config('search_path', ?, true)");
+            $restore->execute([$previousPath]);
+            if ($ownsTransaction) {
+                $pdo->commit();
+            } else {
+                $pdo->exec('RELEASE SAVEPOINT '.$savepoint);
+            }
+        } catch (Throwable $error) {
+            if ($ownsTransaction) {
+                $pdo->rollBack();
+            } else {
+                $pdo->exec('ROLLBACK TO SAVEPOINT '.$savepoint);
+                $pdo->exec('RELEASE SAVEPOINT '.$savepoint);
+            }
+            if ($error instanceof PDOException) {
+                // No connection credentials, DSN, user data or driver diagnostics escape.
+                throw new RuntimeException('SNAPSHOT_DDL_FAILED');
+            }
+            throw $error;
+        }
+    }
+
+    /** Structural signature includes OIDs: a same-name replacement cannot inherit ownership.
+     * Row contents and volatile statistics are deliberately absent. New columns/indexes/triggers,
+     * policies/rules/constraints or altered defaults make this initial rollback refuse.
+     * Incoming FKs/views are protected by PostgreSQL DROP RESTRICT, within this same transaction.
+     * @return array{oid:mixed, signature:mixed, receipt:mixed}
+     */
+    private function catalog(PDO $pdo, string $table): array
+    {
+        $query = $pdo->prepare(<<<'SQL'
+SELECT c.oid::text AS oid, obj_description(c.oid, 'pg_class') AS receipt,
+md5(jsonb_build_object(
+    'relation', jsonb_build_array(c.relkind, c.relpersistence, c.relowner, c.relam, c.reltablespace, c.relispartition, c.relrowsecurity, c.relforcerowsecurity, c.reloptions),
+    'columns', (SELECT jsonb_agg(jsonb_build_array(a.attnum, a.attname, a.atttypid, a.atttypmod, a.attcollation, a.attnotnull, a.attidentity, a.attgenerated, a.attisdropped, pg_get_expr(d.adbin, d.adrelid)) ORDER BY a.attnum) FROM pg_attribute a LEFT JOIN pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum WHERE a.attrelid=c.oid AND a.attnum>0),
+    'constraints', (SELECT jsonb_agg(jsonb_build_array(k.oid, k.conname, k.contype, k.convalidated, k.condeferrable, k.condeferred, pg_get_constraintdef(k.oid)) ORDER BY k.conname) FROM pg_constraint k WHERE k.conrelid=c.oid),
+    'indexes', (SELECT jsonb_agg(jsonb_build_array(i.indexrelid, i.indisvalid, i.indisready, pg_get_indexdef(i.indexrelid)) ORDER BY i.indexrelid) FROM pg_index i WHERE i.indrelid=c.oid),
+    'triggers', (SELECT jsonb_agg(jsonb_build_array(t.oid, t.tgname, pg_get_triggerdef(t.oid), t.tgenabled) ORDER BY t.oid) FROM pg_trigger t WHERE t.tgrelid=c.oid AND NOT t.tgisinternal),
+    'policies', (SELECT jsonb_agg(to_jsonb(p) ORDER BY p.oid) FROM pg_policy p WHERE p.polrelid=c.oid),
+    'automatic_dependents', (SELECT jsonb_agg(jsonb_build_array(d.classid, d.objid, d.objsubid, d.refobjsubid, d.deptype) ORDER BY d.classid, d.objid, d.objsubid, d.refobjsubid, d.deptype) FROM pg_depend d WHERE d.refclassid='pg_class'::regclass AND d.refobjid=c.oid AND d.deptype IN ('a','i')),
+    'rules', (SELECT jsonb_agg(jsonb_build_array(r.oid, pg_get_ruledef(r.oid)) ORDER BY r.oid) FROM pg_rewrite r WHERE r.ev_class=c.oid)
+)::text) AS signature
+FROM pg_class c WHERE c.oid = to_regclass(?) AND c.relkind = 'r'
+SQL);
+        $query->execute([$table]);
+        $state = $query->fetch(PDO::FETCH_ASSOC);
+        if (! is_array($state)) {
+            throw new RuntimeException('SNAPSHOT_OWNERSHIP_CHANGED');
+        }
+
+        return $state;
+    }
+
+    private function endpoint(mixed $host, mixed $port): string
+    {
+        if (! is_string($host) || $host === '' || ! (is_int($port) || (is_string($port) && ctype_digit($port))) || (int) $port < 1 || (int) $port > 65535) {
+            throw new RuntimeException('SNAPSHOT_ENDPOINT_AMBIGUOUS');
+        }
+        if (str_starts_with($host, '/')) {
+            if (preg_match('~^/[a-zA-Z0-9_./-]+$~D', $host) !== 1) {
+                throw new RuntimeException('SNAPSHOT_ENDPOINT_AMBIGUOUS');
+            }
+            $parts = array_values(array_filter(explode('/', $host), fn (string $part): bool => $part !== '' && $part !== '.'));
+            if ($parts === [] || in_array('..', $parts, true)) {
+                throw new RuntimeException('SNAPSHOT_ENDPOINT_AMBIGUOUS');
+            }
+
+            return 'unix:/'.implode('/', $parts).':'.(int) $port;
+        }
+        $host = strtolower(rtrim($host, '.'));
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
+            $host = '['.inet_ntop(inet_pton($host)).']';
+        } elseif (strlen($host) > 253 || preg_match('/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/D', $host) !== 1) {
+            throw new RuntimeException('SNAPSHOT_ENDPOINT_AMBIGUOUS');
+        }
+
+        return 'tcp:'.$host.':'.(int) $port;
+    }
+};

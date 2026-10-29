@@ -1,0 +1,10 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+parameters:
+    level: max
+    paths:
+        - packages/core/src
+        - packages/core/modules/reactions/src
+        - packages/core/modules/posts/src
+        - packages/core/modules/groups/src
+        - tests

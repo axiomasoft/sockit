@@ -1,0 +1,788 @@
+--- a/docs/architecture/invariants.md
++++ b/docs/architecture/invariants.md
+@@ -47,6 +47,12 @@
+ hides a deadlock/timeout or CAS conflict. Snapshot/effect predicates and mandatory ref-only event
+ proposals cannot turn Unknown or zero affected rows into Confirmed.
+ 
++The owner envelope requires a composite host authority fence after all owner locks and before
++persist. Its generation is captured before current guards outside tx, then locally checked and
++held through commit; a rolled-back receipt holder cannot hand a stale write grant to its waiter.
++Missing/stale/unprovable authority rejects and rolls back the claim; fresh guards resolve only
++after rollback, without an automatic persistence retry. Target-less lifecycle uses the same fence.
++
+ The owner envelope rejects nested owner transactions before effect. Its transaction boundary catches
+ faults including a failure immediately before PDO commit. State, revision, receipt and outbox either
+ commit together or leave no new rows/revision. Delivery is outside this envelope; rollback cannot
+@@ -55,8 +61,10 @@
+ 
+ Both execute replay and lookup reauthorize current action, surface/audience/containment, lifecycle,
+ target incarnation/privacy/generation and safety-visible owner target before output, including after
+-waiting for a winner. Actor/namespace identity is checked before reading receipt results. Lookup hides
+-another actor's receipt as absence. Receipt context contains no body/command payload and cannot grant
++waiting for a winner. Actor/namespace identity is checked before reading receipt results. Existing lookup authorizes the recorded action independently of commandType. Absent lookup
++and another actor's key use the same explicit host action mapping/policy after current baseline
++surface access; unknown mappings deny. Lookup hides another actor's receipt as absence only
++when that absence policy allows. Receipt context contains no body/command payload and cannot grant
+ access. The original namespace/key/digest/resource remain stable after a lost response. Archive or
+ read-only access can expose only currently readable metadata, and never grants another write.
+ The originating authorized delete can acknowledge its own commit; deleted-resource replay remains denied.
+--- a/docs/architecture/spi.md
++++ b/docs/architecture/spi.md
+@@ -146,7 +146,9 @@
+ 
+ `Operations::execute(OperationHandle, CommandEnvelope, OwnerMutation): OperationResult` is the fixed
+ owner envelope. `lookup(handle, namespace, key): ?OperationResult` returns absent only after current
+-surface/action access. Another actor's key also appears absent. Neither entry trusts an old handle,
++surface/admission/audience access and explicit absence authorization. Another actor's key
++is subject to the same absence policy. Existing receipts authorize their stored action;
++commandType is an idempotency identity and is not implicitly an authorization action. Neither entry trusts an old handle,
+ author or installation from command data. Construct a digest with `Operations::digest(handle,
+ mutation, expectedRevision)`; it binds the complete surface/panel/incarnation, target/incarnation,
+ subject and proposed audiences, action/intent, CAS revision and canonical module data. Namespace
+@@ -166,7 +168,8 @@
+ target visibility are mandatory. Missing providers and Unknown deny. Surface local generations are
+ sampled before remote guards and compared under the surface lock. The host target adapter must
+ provide current owner lifecycle/safety/visibility for replay/lookup and a local `TargetWriteFence`
+-for writes. A remote-only adapter cannot prove mutation and is denied. Owner lock/persist use only
++for writes. The host also binds the mandatory scoped `MutationAuthorityFence` described below;
++target/surface generation alone does not prove current action/admission authority. A remote-only adapter cannot prove mutation and is denied. Owner lock/persist use only
+ local SQL on the exact panel connection: receipt → surface → optional group → target/post → reaction,
+ with deterministic order within a class. Lock returns current resource/revision/lifecycle/safety and
+ local generation; CAS requires the expected revision, or both resource/revision absent and expected
+@@ -205,3 +208,29 @@
+ Current reads are sampled authority; atomic revocation across remote databases is not promised.
+ The `acme.runtime` PostgreSQL fixture proves real CAS/state/revision/receipt/outbox and fault/race
+ behavior through the public SPI; it is not a reactions/posts product or social e2e test.
++
++
++`MutationAuthorityFence::capture(OperationHandle, MutationRequest): string` runs outside the
++owner transaction before current action/admission/audience/containment guards and returns a
++nonempty bounded host generation for the complete request identity. Its
++`recheck(OperationHandle, MutationRequest, string $generation): AuthorizationDecision` runs on
++the exact owner connection after receipt/surface/target/module locks and immediately before
++persist. It proves that all guarded authority facts still permit this operation and holds their
++local fence until commit. Host revocation writers must share that fence and compatible lock
++order. Recheck performs local SQL only, never remote authorizers/resolvers; host facts without
++such proof cannot enable writes. Bind this SPI explicitly as scoped; no permissive default or
++implicit capture at boot. Missing => provider_unavailable; revoked => authorization_denied;
++stale/unproven => authorization_unknown. A failed claim rolls back before state/revision. The
++kernel then re-resolves current guards outside tx without automatically retrying persistence;
++explicit retry uses the original key/digest. This includes a UNIQUE waiter becoming the winner
++after holder rollback, and applies equally to target-less lifecycle commands.
++
++`MissingReceiptPolicy::decide(OperationHandle, CommandNamespace): AuthorizationDecision` is
++the explicit scoped host policy for absent module outcomes. Map supported command types to
++their actual OwnerMutation authorization actions consistently with execute; unknown mappings
++fail closed. This policy is used for both absence and another actor's key, after trusted
++context/surface/admission/audience checks. Missing provider => provider_unavailable; Unknown
++never becomes null. Existing owned receipts instead reauthorize the stored action through
++replay, irrespective of commandType permission or the current absence mapping. Known kernel
++lifecycle commands have an intrinsic exact command-to-action mapping. No new grant is inferred
++from a receipt or supplied by payload.
+--- /dev/null
++++ b/packages/core/src/Operations/Contracts/MissingReceiptPolicy.php
+@@ -0,0 +1,25 @@
++<?php
++
++declare(strict_types=1);
++
++namespace SocKit\Operations\Contracts;
++
++use SocKit\Attributes\Spi;
++use SocKit\Attributes\SpiKind;
++use SocKit\Audience\Data\AuthorizationDecision;
++use SocKit\Operations\Data\OperationHandle;
++use SocKit\Support\Data\CommandNamespace;
++
++/** Explicit host policy for revealing absence when no owned receipt/action exists.
++ * Called only after current trusted context/surface/admission/audience checks, outside tx.
++ * Map supported command namespaces to their actual authorization action, consistently with
++ * OwnerMutation::request; never guess that commandType is an action. An unknown mapping,
++ * missing provider, remote failure or Unknown denies. No receipt/result/key is disclosed.
++ * No default permissive policy, cache or automatic retry. Bind scoped. Stable SPI additions
++ * require a separate capability. Existing receipts always authorize their stored action.
++ */
++#[Spi(kind: SpiKind::Implement, since: '1.0')]
++interface MissingReceiptPolicy
++{
++    public function decide(OperationHandle $handle, CommandNamespace $namespace): AuthorizationDecision;
++}
+--- /dev/null
++++ b/packages/core/src/Operations/Contracts/MutationAuthorityFence.php
+@@ -0,0 +1,32 @@
++<?php
++
++declare(strict_types=1);
++
++namespace SocKit\Operations\Contracts;
++
++use SocKit\Attributes\Spi;
++use SocKit\Attributes\SpiKind;
++use SocKit\Audience\Data\AuthorizationDecision;
++use SocKit\Operations\Data\MutationRequest;
++use SocKit\Operations\Data\OperationHandle;
++
++/** Mandatory host consistency boundary for guarded writes; bind explicitly as scoped.
++ * capture runs outside tx BEFORE current action/admission/audience/containment guards.
++ * It returns a nonempty generation (<=128 bytes) covering those facts for the complete
++ * handle/request identity. No permission is conferred by a token alone.
++ * recheck runs locally on the exact owner connection AFTER all owner locks, before persist.
++ * It must prove those same facts still allow this write and hold their fence until commit.
++ * A revoke writer must participate in this same local fence/lock order. No network,
++ * remote resolvers, ambient actor lookup or cross-connection writes under owner locks.
++ * Missing/stale/unprovable facts => Unknown; revoked => Deny. Errors fail closed.
++ * No automatic retries/cache/batch; caller retries the SAME key/digest after fresh resolution.
++ * Remote authority without a provable local fence cannot enable writes. Stable SPI additions
++ * require a separate capability. The implementation owns its host SQL, never kernel tables.
++ */
++#[Spi(kind: SpiKind::Implement, since: '1.0')]
++interface MutationAuthorityFence
++{
++    public function capture(OperationHandle $handle, MutationRequest $request): string;
++
++    public function recheck(OperationHandle $handle, MutationRequest $request, string $generation): AuthorizationDecision;
++}
+--- a/packages/core/src/Operations/Internal/Envelope/Envelope.php
++++ b/packages/core/src/Operations/Internal/Envelope/Envelope.php
+@@ -20,6 +20,8 @@
+ use SocKit\Configuration\SocKitConfig;
+ use SocKit\Errors\Contracts\ProvidesProblem;
+ use SocKit\Errors\Enums\ProblemCode;
++use SocKit\Operations\Contracts\MissingReceiptPolicy;
++use SocKit\Operations\Contracts\MutationAuthorityFence;
+ use SocKit\Operations\Contracts\OwnerMutation;
+ use SocKit\Operations\Data\CommandEnvelope;
+ use SocKit\Operations\Data\EventEnvelope;
+@@ -30,6 +32,7 @@
+ use SocKit\Operations\Data\OperationResult;
+ use SocKit\Operations\Data\ReceiptSnapshot;
+ use SocKit\Operations\Internal\Outbox\OutboxStore;
++use SocKit\Operations\Internal\Receipts\ReceiptException;
+ use SocKit\Operations\Internal\Receipts\ReceiptLedger;
+ use SocKit\Operations\Internal\Storage\OwnerConnection;
+ use SocKit\Operations\Internal\Storage\OwnerStorage;
+@@ -58,6 +61,7 @@
+         $recordable = false;
+         $context = null;
+         $payload = [];
++        $refreshAuthority = false;
+         try {
+             $this->outside($handle);
+             $this->handles()->assertCurrent(handle: $handle, namespace: $command->namespace);
+@@ -87,11 +91,19 @@
+             $create = $mutation instanceof SurfaceMutation && $mutation->action === 'create';
+             $maintenance = $mutation instanceof SurfaceMutation && in_array($mutation->action, ['resume', 'delete'], true);
+             $this->surfaceState(handle: $handle, current: $sample, create: $create, write: true, maintenance: $maintenance);
++            if (! $this->app->bound(MutationAuthorityFence::class)) {
++                $this->reject(ProblemCode::ProviderUnavailable);
++            }
++            $authority = $this->app->make(MutationAuthorityFence::class);
++            $generation = $authority->capture(handle: $handle, request: $request);
++            if ($generation === '' || strlen($generation) > 128 || preg_match('/[\x00-\x1f\x7f]/', $generation)) {
++                $this->reject(ProblemCode::AuthorizationUnknown);
++            }
+             $this->guards(handle: $handle, request: $request, current: $maintenance ? null : $sample, write: true, target: $target);
+             $consumers = array_keys($this->app->make(OutboxRelay::class)->consumers($handle));
+             $effect = new PersistedEffect;
+             $snapshot = $ledger->transaction(envelope: $command, commandType: $mutation->commandType(), payload: $payload, guardContext: $context,
+-                write: function (string $id) use ($handle, $command, $mutation, $request, $sample, $target, $surfaces, $create, $maintenance, $effect): OperationResult {
++                write: function (string $id) use ($handle, $command, $mutation, $request, $sample, $target, $surfaces, $create, $maintenance, $effect, $authority, $generation, &$refreshAuthority): OperationResult {
+                     $locked = $create ? $surfaces->current() : $surfaces->lock();
+                     $this->surfaceState(handle: $handle, current: $locked, create: $create, write: true, maintenance: $maintenance);
+                     if ($sample?->revision != $locked?->revision || $sample?->privacyGeneration != $locked?->privacyGeneration || $sample?->sourceGeneration != $locked?->sourceGeneration) {
+@@ -102,6 +114,12 @@
+                     }
+                     $before = $mutation->lock($handle);
+                     $this->snapshot(handle: $handle, request: $request, snapshot: $before, expected: $command->expectedRevision, maintenance: $maintenance);
++                    // INSERT can become the winner AFTER waiting for a rolled-back holder.
++                    // All other owner locks can wait too. Prove current authority locally,
++                    // after every such wait and BEFORE any owner state/revision persistence.
++                    $decision = $authority->recheck(handle: $handle, request: $request, generation: $generation);
++                    $refreshAuthority = ! $decision->isAllowed();
++                    $decision->requireAllowed();
+                     $effect->value = $mutation->persist(handle: $handle, snapshot: $before);
+                     $this->effect(handle: $handle, snapshot: $before, effect: $effect->value);
+ 
+@@ -138,6 +156,25 @@
+             return $this->replay(handle: $handle, command: $command, context: $context);
+         } catch (\Throwable $error) {
+             $code = $this->problem($error);
++            if ($refreshAuthority) {
++                // The failed claim has rolled back. Resolve current facts outside tx, with
++                // the SAME key/digest; never silently retry persistence after an Unknown.
++                try {
++                    $this->outside($handle);
++                    $this->handles()->assertCurrent(handle: $handle, namespace: $command->namespace);
++                    $fresh = $mutation->request($handle);
++                    if (! PayloadDigest::of(commandType: $mutation->commandType(), payload: $this->payload(handle: $handle, mutation: $mutation, request: $fresh, expected: $command->expectedRevision))->equals($command->digest)) {
++                        $this->reject(ProblemCode::PayloadInvalid);
++                    }
++                    $current = new SurfaceInstances($this->app->make(OwnerStorage::class)->forHandle($handle))->current();
++                    $maintenance = $mutation instanceof SurfaceMutation && in_array($mutation->action, ['resume', 'delete'], true);
++                    $this->surfaceState(handle: $handle, current: $current, create: $mutation instanceof SurfaceMutation && $mutation->action === 'create', write: true, maintenance: $maintenance);
++                    $this->guards(handle: $handle, request: $fresh, current: $maintenance ? null : $current, write: true, target: $this->target(handle: $handle, request: $fresh));
++                    $this->safety($fresh->safety);
++                } catch (\Throwable $freshError) {
++                    $code = $this->problem($freshError);
++                }
++            }
+             if ($recordable && $context !== null && $code->spec()->receiptRecorded) {
+                 try {
+                     $owner = $this->app->make(OwnerStorage::class)->forHandle(handle: $handle, namespace: $command->namespace);
+@@ -156,19 +193,34 @@
+ 
+     public function lookup(OperationHandle $handle, CommandNamespace $namespace, CommandKey $key): ?OperationResult
+     {
+-        $admitted = false;
+         try {
+             $this->outside($handle);
+             $this->handles()->assertCurrent(handle: $handle, namespace: $namespace);
+-            // Even absence is protected. Unknown command/action grants never return null.
++            // Baseline trusted surface access protects even receipt metadata/absence.
+             $owner = $this->app->make(OwnerStorage::class)->forHandle(handle: $handle, namespace: $namespace);
+             $current = new SurfaceInstances($owner)->current();
+             $this->surfaceState(handle: $handle, current: $current, create: false, write: false);
+-            $baseline = new MutationRequest(action: $namespace->commandType, subject: new AudienceSubject(key: 'sockit.lookup', spec: AudienceSpec::direct($handle->actor->actor ?? throw new EnvelopeException(ProblemCode::AuthenticationRequired)), author: null, surface: $handle->surface, installation: $handle->actor->installation), intent: 'read', safety: AuthorizationDecision::allow('kernel.lookup'), generation: 'lookup');
+-            $this->guards(handle: $handle, request: $baseline, current: $current, write: false, target: null);
+-            $admitted = true;
+-            $context = new ReceiptLedger($owner)->context(namespace: $namespace, key: $key);
++            $subject = new AudienceSubject(key: 'sockit.lookup', spec: AudienceSpec::direct($handle->actor->actor ?? throw new EnvelopeException(ProblemCode::AuthenticationRequired)), author: null, surface: $handle->surface, installation: $handle->actor->installation,
++                surfaceArchived: $current?->lifecycle === SurfaceLifecycle::Archived, archiveReaders: $handle->definition->archiveReaders);
++            $this->verdict(verdict: $this->app->make(AudienceGate::class)->read(viewer: $handle->actor, subject: $subject), write: false);
++            try {
++                $context = new ReceiptLedger($owner)->context(namespace: $namespace, key: $key);
++            } catch (ReceiptException $identityError) {
++                if ($identityError->problem() !== ProblemCode::ActorContextInvalid) {
++                    throw $identityError;
++                }
++                $context = null; // Same policy/answer as absence, never another actor's stored action.
++            }
+             if ($context === null) {
++                if (in_array($namespace->commandType, ['sockit.surfaces.create', 'sockit.surfaces.archive', 'sockit.surfaces.resume', 'sockit.surfaces.delete'], true)) {
++                    $this->app->make(ActionAuthorizer::class)->decide(new ActionRequest(actor: $handle->actor, action: $namespace->commandType, surface: $handle->surface))->requireAllowed();
++                } else {
++                    if (! $this->app->bound(MissingReceiptPolicy::class)) {
++                        $this->reject(ProblemCode::ProviderUnavailable);
++                    }
++                    $this->app->make(MissingReceiptPolicy::class)->decide(handle: $handle, namespace: $namespace)->requireAllowed();
++                }
++
+                 return null;
+             }
+             $wire = $this->decode($context);
+@@ -178,11 +230,6 @@
+ 
+             return $this->replay(handle: $handle, command: new CommandEnvelope(key: $key, namespace: $namespace, digest: new PayloadDigest($wire['digest'])), context: $context);
+         } catch (\Throwable $error) {
+-            if ($admitted && $error instanceof ProvidesProblem && $error->problem() === ProblemCode::ActorContextInvalid) {
+-                // Same answer as an absent key: another actor's receipt does not reveal existence.
+-                return null;
+-            }
+-
+             return OperationResult::rejected($this->problem($error));
+         }
+     }
+--- /dev/null
++++ b/tests/Fixtures/Runtime/EnvelopeAuthorityFence.php
+@@ -0,0 +1,69 @@
++<?php
++
++declare(strict_types=1);
++
++namespace SocKit\Tests\Fixtures\Runtime;
++
++use Illuminate\Database\Connection;
++use SocKit\Audience\Data\AuthorizationDecision;
++use SocKit\Operations\Contracts\MutationAuthorityFence;
++use SocKit\Operations\Data\MutationRequest;
++use SocKit\Operations\Data\OperationHandle;
++use SocKit\Support\CanonicalJson;
++
++/** Test-only local authority row governs the changing grants in this fixture.
++ * Its revoker updates this same row/version. Production hosts supply their own composite fence.
++ */
++final class EnvelopeAuthorityFence implements MutationAuthorityFence
++{
++    /** @var list<int> */
++    public array $captures = [];
++
++    /** @var list<int> */
++    public array $checks = [];
++
++    public bool $unproven = false;
++
++    public function __construct(private readonly Connection $connection) {}
++
++    public function capture(OperationHandle $handle, MutationRequest $request): string
++    {
++        $this->captures[] = $this->connection->transactionLevel();
++        if ($this->connection->transactionLevel() !== 0) {
++            throw new \LogicException('Authority capture under owner lock');
++        }
++        $generation = $this->connection->table('panel_a.envelope_authority')->value('generation');
++        if (! is_int($generation)) {
++            throw new \RuntimeException('Authority generation missing');
++        }
++
++        return $this->token(handle: $handle, request: $request, generation: $generation);
++    }
++
++    public function recheck(OperationHandle $handle, MutationRequest $request, string $generation): AuthorizationDecision
++    {
++        $this->checks[] = $this->connection->transactionLevel();
++        if ($this->unproven || $this->connection->transactionLevel() !== 1) {
++            return AuthorizationDecision::unknown('fixture.authority_unproven');
++        }
++        $row = $this->connection->table('panel_a.envelope_authority')->lockForUpdate()->first();
++        if ($row === null || ! is_int($row->generation)) {
++            return AuthorizationDecision::unknown('fixture.authority_missing');
++        }
++        if ($row->allowed !== true) {
++            return AuthorizationDecision::deny('fixture.revoked');
++        }
++        if ($this->token(handle: $handle, request: $request, generation: $row->generation) !== $generation) {
++            return AuthorizationDecision::unknown('fixture.authority_stale');
++        }
++
++        return AuthorizationDecision::allow('fixture.authority_fence_held');
++    }
++
++    private function token(OperationHandle $handle, MutationRequest $request, int $generation): string
++    {
++        return hash('sha256', CanonicalJson::encode(['installation' => $handle->actor->installation->id, 'actor' => $handle->actor->actor?->toWire(),
++            'actor_generation' => $handle->actor->generation, 'surface' => $handle->surface->toWire(), 'action' => $request->action,
++            'subject' => $request->subject->spec->toWire(), 'proposed' => $request->proposedAudience?->toWire(), 'target' => $request->target?->toWire(), 'generation' => $generation]));
++    }
++}
+--- /dev/null
++++ b/tests/Fixtures/Runtime/EnvelopeMissingReceiptPolicy.php
+@@ -0,0 +1,34 @@
++<?php
++
++declare(strict_types=1);
++
++namespace SocKit\Tests\Fixtures\Runtime;
++
++use Illuminate\Contracts\Foundation\Application;
++use SocKit\Audience\Contracts\ActionAuthorizer;
++use SocKit\Audience\Data\ActionRequest;
++use SocKit\Audience\Data\AuthorizationDecision;
++use SocKit\Operations\Contracts\MissingReceiptPolicy;
++use SocKit\Operations\Data\OperationHandle;
++use SocKit\Support\Data\CommandNamespace;
++
++final class EnvelopeMissingReceiptPolicy implements MissingReceiptPolicy
++{
++    /** @var array<string, string> */
++    public array $actions = [EnvelopeMutation::TYPE => EnvelopeMutation::TYPE];
++
++    public int $calls = 0;
++
++    public function __construct(private readonly Application $app) {}
++
++    public function decide(OperationHandle $handle, CommandNamespace $namespace): AuthorizationDecision
++    {
++        $this->calls++;
++        $action = $this->actions[$namespace->commandType] ?? null;
++        if ($action === null) {
++            return AuthorizationDecision::unknown('fixture.command_action_unmapped');
++        }
++
++        return $this->app->make(ActionAuthorizer::class)->decide(new ActionRequest(actor: $handle->actor, action: $action, surface: $handle->surface));
++    }
++}
+--- a/tests/Fixtures/Runtime/EnvelopeMutation.php
++++ b/tests/Fixtures/Runtime/EnvelopeMutation.php
+@@ -26,6 +26,8 @@
+ final class EnvelopeMutation implements OwnerMutation
+ {
+     public const TYPE = 'acme.runtime.mutate';
++
++    public string $authorizationAction = self::TYPE;
+ 
+     public int $writes = 0;
+ 
+@@ -64,7 +66,7 @@
+             throw new \LogicException('request under tx');
+         }
+ 
+-        return new MutationRequest(action: self::TYPE, subject: new AudienceSubject(key: 'acme.subject', spec: AudienceSpec::direct($handle->actor->actor ?? throw new \RuntimeException('actor required')), author: null, surface: $handle->surface, installation: $handle->actor->installation),
++        return new MutationRequest(action: $this->authorizationAction, subject: new AudienceSubject(key: 'acme.subject', spec: AudienceSpec::direct($handle->actor->actor ?? throw new \RuntimeException('actor required')), author: null, surface: $handle->surface, installation: $handle->actor->installation),
+             intent: $this->proposed === null ? 'write' : 'publish', safety: $this->safety ?? AuthorizationDecision::allow('fixture.safe'), generation: '1',
+             target: new TargetRef(host: new HostEntityRef(type: 'article', value: $this->targetKey), incarnation: new Incarnation($this->incarnation)), proposedAudience: $this->proposed);
+     }
+--- a/tests/Fixtures/Runtime/EnvelopeRace.php
++++ b/tests/Fixtures/Runtime/EnvelopeRace.php
+@@ -13,6 +13,9 @@
+     {
+         $processes = $streams = $pids = [];
+         try {
++            if ($mode === 'revoke') {
++                expect($s->execute()->isSuccess())->toBeTrue();
++            }
+             foreach (['hold', 'wait'] as $i => $role) {
+                 $process = proc_open([PHP_BINARY, __DIR__.'/envelope-child.php', $role, $mode], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+                 if (! is_resource($process)) {
+@@ -29,7 +32,7 @@
+             expect($pids[0])->toBeGreaterThan(0)->and($pids[1])->toBeGreaterThan(0)->and($pids[0])->not->toBe($pids[1]);
+             $deadline = microtime(true) + 5;
+             do {
+-                $query = $s->base->db->owner->prepare('SELECT wait_event_type, pg_blocking_pids(pid) @> ARRAY[?]::int[] AS holder FROM pg_stat_activity WHERE pid=?');
++                $query = $s->base->db->owner->prepare('SELECT query, wait_event_type, pg_blocking_pids(pid) @> ARRAY[?]::int[] AS holder FROM pg_stat_activity WHERE pid=?');
+                 $query->execute([$pids[0], $pids[1]]);
+                 $row = $query->fetch(\PDO::FETCH_ASSOC);
+                 $blocked = is_array($row) && $row['wait_event_type'] === 'Lock' && $row['holder'] === true;
+@@ -39,8 +42,15 @@
+             } while (! $blocked && microtime(true) < $deadline);
+             fwrite(STDERR, 'P2.7 barrier '.$mode.' holder='.$pids[0].' waiter='.$pids[1].' blocked_by_holder='.($blocked ? 'true' : 'FALSE').PHP_EOL);
+             expect($blocked)->toBeTrue();
+-            if ($mode === 'revoke') {
+-                $s->base->db->owner->exec('UPDATE panel_a.driver_envelope_authority SET allowed=false');
++            if (in_array($mode, ['revoke_rollback', 'lifecycle_revoke_rollback', 'generation_rollback'], true)) {
++                expect($row['query'] ?? null)->toBeString()->toContain('INSERT INTO', 'ON CONFLICT');
++                fwrite(STDERR, 'P2.7 UNIQUE wait verified before holder rollback'.PHP_EOL);
++            }
++            if (in_array($mode, ['revoke', 'revoke_rollback', 'lifecycle_revoke_rollback'], true)) {
++                $s->base->db->owner->exec('UPDATE panel_a.driver_envelope_authority SET allowed=false,generation=generation+1');
++            }
++            if ($mode === 'generation_rollback') {
++                $s->base->db->owner->exec('UPDATE panel_a.driver_envelope_authority SET generation=generation+1');
+             }
+             fwrite($streams[0][0], "release\n");
+             fflush($streams[0][0]);
+@@ -68,7 +78,12 @@
+                     if (! is_array($levels)) {
+                         throw new \RuntimeException('Missing resolver levels');
+                     }
+-                    if ($stage === 'authority' || ! in_array($mode, ['archive', 'delete'], true) || $i === 1) {
++                    if ($i === 0 && in_array($mode, ['revoke_rollback', 'lifecycle_revoke_rollback', 'generation_rollback'], true)) {
++                        expect($levels)->toBe([]);
++
++                        continue;
++                    }
++                    if ($stage === 'authority' || (! in_array($mode, ['archive', 'delete', 'lifecycle_revoke_rollback'], true) || ($i === 1 && $mode !== 'lifecycle_revoke_rollback'))) {
+                         foreach ($levels as $level) {
+                             expect($level)->toBe(0);
+                         }
+@@ -76,6 +91,17 @@
+                     } else {
+                         expect($levels)->toBe([]);
+                     }
++                }
++                foreach (['fence_captures' => 0, 'fence_checks' => 1] as $stage => $expectedLevel) {
++                    if (! is_array($result[$stage] ?? null)) {
++                        throw new \RuntimeException('Missing fence instrumentation');
++                    }
++                    foreach ($result[$stage] as $level) {
++                        expect($level)->toBe($expectedLevel);
++                    }
++                }
++                if ($i === 1 && in_array($mode, ['revoke_rollback', 'lifecycle_revoke_rollback', 'generation_rollback'], true)) {
++                    expect($result['fence_captures'])->toBe([0])->and($result['fence_checks'])->toBe([1]);
+                 }
+                 expect($result['level'])->toBe(0);
+                 $outcome = $result['result'] ?? null;
+--- a/tests/Fixtures/Runtime/EnvelopeScenario.php
++++ b/tests/Fixtures/Runtime/EnvelopeScenario.php
+@@ -7,6 +7,8 @@
+ use SocKit\Audience\AudienceEvaluator;
+ use SocKit\Audience\AudienceGate;
+ use SocKit\Audience\Contracts\AudienceResolver;
++use SocKit\Operations\Contracts\MissingReceiptPolicy;
++use SocKit\Operations\Contracts\MutationAuthorityFence;
+ use SocKit\Operations\Data\CommandEnvelope;
+ use SocKit\Operations\Data\OperationHandle;
+ use SocKit\Operations\Data\OperationResult;
+@@ -24,6 +26,10 @@
+     public readonly EnvelopeTarget $target;
+ 
+     public readonly EnvelopeMutation $mutation;
++
++    public readonly EnvelopeAuthorityFence $fence;
++
++    public readonly EnvelopeMissingReceiptPolicy $absence;
+ 
+     public readonly Operations $operations;
+ 
+@@ -50,14 +56,18 @@
+         $this->handle = $this->base->handle();
+         $this->operations = $app->make(Operations::class);
+         $this->mutation = new EnvelopeMutation($this->base->db->capsule->getConnection('owner_a'));
++        $this->fence = new EnvelopeAuthorityFence($this->base->db->capsule->getConnection('owner_a'));
++        $app->instance(abstract: MutationAuthorityFence::class, instance: $this->fence);
++        $this->absence = new EnvelopeMissingReceiptPolicy($app);
++        $app->instance(abstract: MissingReceiptPolicy::class, instance: $this->absence);
+         if ($install) {
+             $pdo = $this->base->db->owner;
+             foreach (['panel_a.driver_a_', 'panel_b.other_b_'] as $prefix) {
+                 $pdo->exec('DROP TABLE '.$prefix.'receipts');
+                 $pdo->exec('CREATE TABLE '.$prefix.'receipts (id uuid PRIMARY KEY, namespace varchar(384) COLLATE "C" NOT NULL, command_key varchar(128) COLLATE "C" NOT NULL, digest text NOT NULL, actor_ref text NOT NULL, actor_kind text NOT NULL, on_behalf_of text, outcome text, resource jsonb, revision bigint, problem text, guard_context text NOT NULL, UNIQUE (namespace,command_key))');
+             }
+-            $pdo->exec('CREATE TABLE panel_a.driver_envelope_authority (allowed boolean NOT NULL)');
+-            $pdo->exec('INSERT INTO panel_a.driver_envelope_authority VALUES (true)');
++            $pdo->exec('CREATE TABLE panel_a.driver_envelope_authority (allowed boolean NOT NULL, generation bigint NOT NULL DEFAULT 1)');
++            $pdo->exec('INSERT INTO panel_a.driver_envelope_authority (allowed) VALUES (true)');
+             $pdo->exec('CREATE TABLE panel_a.driver_envelope_targets (id text PRIMARY KEY, incarnation bigint NOT NULL, generation text NOT NULL, privacy bigint NOT NULL, visible boolean NOT NULL, lifecycle text NOT NULL, held boolean NOT NULL)');
+             $pdo->exec("INSERT INTO panel_a.driver_envelope_targets VALUES ('42',1,'1',1,true,'live',false),('43',1,'1',1,true,'live',false)");
+             $pdo->exec('CREATE TABLE panel_a.driver_envelope_state (target text PRIMARY KEY, effects bigint NOT NULL)');
+@@ -115,6 +125,11 @@
+         return $result;
+     }
+ 
++    public function receiptReads(): int
++    {
++        return count(array_filter($this->base->db->queries, static fn (array $q): bool => str_starts_with($q['sql'], 'select') && str_contains($q['sql'], 'a_receipts')));
++    }
++
+     public function cleanup(): void
+     {
+         $this->base->cleanup();
+--- a/tests/Fixtures/Runtime/envelope-child.php
++++ b/tests/Fixtures/Runtime/envelope-child.php
+@@ -6,7 +6,12 @@
+ 
+ use Illuminate\Database\Events\QueryExecuted;
+ use SocKit\Audience\Contracts\ActionAuthorizer;
++use SocKit\Audience\Data\AudienceSpec;
++use SocKit\Errors\Enums\ProblemCode;
+ use SocKit\Operations\Data\CommandEnvelope;
++use SocKit\Operations\Data\OperationResult;
++use SocKit\Operations\Internal\Receipts\ReceiptLedger;
++use SocKit\Operations\Internal\Storage\OwnerStorage;
+ use SocKit\Support\Data\CommandKey;
+ use SocKit\Support\Data\CommandNamespace;
+ use SocKit\Support\Data\Revision;
+@@ -28,16 +33,20 @@
+ $role = $argv[1];
+ $mode = $argv[2];
+ $held = false;
+-if ($role === 'hold') {
+-    $connection->listen(function (QueryExecuted $query) use (&$held, $mode): void {
++$rollbackClaim = in_array($mode, ['revoke_rollback', 'lifecycle_revoke_rollback', 'generation_rollback'], true);
++$barrier = static function (): void {
++    fwrite(STDOUT, "claimed\n");
++    fflush(STDOUT);
++    stream_set_timeout(STDIN, 10);
++    if (trim((string) fgets(STDIN)) !== 'release') {
++        throw new RuntimeException('Missing envelope barrier');
++    }
++};
++if ($role === 'hold' && ! $rollbackClaim && $mode !== 'revoke') {
++    $connection->listen(function (QueryExecuted $query) use (&$held, $mode, $barrier): void {
+         if (! $held && str_starts_with($query->sql, 'update') && (str_contains($query->sql, 'envelope_state') || (in_array($mode, ['archive', 'delete'], true) && str_contains($query->sql, 'a_surface_instances')))) {
+             $held = true;
+-            fwrite(STDOUT, "claimed\n");
+-            fflush(STDOUT);
+-            stream_set_timeout(STDIN, 10);
+-            if (trim((string) fgets(STDIN)) !== 'release') {
+-                throw new RuntimeException('Missing envelope barrier');
+-            }
++            $barrier();
+             if ($mode === 'rollback') {
+                 throw new RuntimeException('injected winner rollback');
+             }
+@@ -47,18 +56,58 @@
+ if ($role === 'wait' && $mode === 'digest') {
+     $s->mutation->value = 2;
+ }
+-if ($role === 'hold' && in_array($mode, ['archive', 'delete'], true)) {
+-    $lifecycle = $s->base->app->make(SurfaceInstances::class);
+-    $command = new CommandEnvelope(key: new CommandKey('req.2026-10-28.lifecycle'), namespace: new CommandNamespace(installation: $s->handle->actor->installation, panel: $s->handle->surface->panel, integration: 'acme.client', commandType: 'sockit.surfaces.'.$mode),
+-        digest: $lifecycle->digest(handle: $s->handle, action: $mode, expectedRevision: new Revision(1)), expectedRevision: new Revision(1));
+-    $result = $lifecycle->$mode(handle: $s->handle, command: $command);
++$lifecycle = $s->base->app->make(SurfaceInstances::class);
++$isLifecycle = ($role === 'hold' && in_array($mode, ['archive', 'delete'], true)) || $mode === 'lifecycle_revoke_rollback';
++if ($isLifecycle) {
++    $action = $mode === 'delete' ? 'delete' : 'archive';
++    $command = new CommandEnvelope(key: new CommandKey('req.2026-10-28.lifecycle'), namespace: new CommandNamespace(installation: $s->handle->actor->installation, panel: $s->handle->surface->panel, integration: 'acme.client', commandType: 'sockit.surfaces.'.$action),
++        digest: $lifecycle->digest(handle: $s->handle, action: $action, expectedRevision: new Revision(1)), expectedRevision: new Revision(1));
+ } else {
+-    $key = $mode === 'cas' && $role === 'wait' ? 'req.2026-10-28.cas2' : 'req.2026-10-28.0001';
+-    $result = $s->execute($s->command(key: $key));
++    $command = $s->command(key: $mode === 'cas' && $role === 'wait' ? 'req.2026-10-28.cas2' : 'req.2026-10-28.0001');
++}
++if ($role === 'hold' && $rollbackClaim) {
++    // A real uncommitted claim, deliberately rolled back BEFORE any owner/fence/state effect.
++    // Payload follows the documented canonical binding; digest is validated by ReceiptLedger.
++    $request = $s->mutation->request($s->handle);
++    $payload = ['surface' => $s->handle->surface->toWire(), 'target' => $isLifecycle ? null : $request->target?->toWire(), 'audience' => null,
++        'expected_revision' => 1, 'subject_audience' => AudienceSpec::direct($s->handle->actor->actor ?? throw new RuntimeException('actor required'))->toWire(),
++        'action' => $isLifecycle ? 'sockit.surfaces.archive' : $request->action, 'intent' => 'write', 'data' => $isLifecycle ? [] : $s->mutation->payload()];
++    $owner = $s->base->app->make(OwnerStorage::class)->forHandle(handle: $s->handle, namespace: $command->namespace);
++    try {
++        new ReceiptLedger($owner)->transaction(envelope: $command, commandType: $command->namespace->commandType, payload: $payload, guardContext: '{}', write: static function (string $id) use ($barrier): OperationResult {
++            $barrier();
++            throw new RuntimeException('injected claim rollback');
++        });
++        throw new RuntimeException('Claim holder unexpectedly committed');
++    } catch (RuntimeException $error) {
++        if ($error->getMessage() !== 'injected claim rollback') {
++            throw $error;
++        }
++        $result = OperationResult::rejected(ProblemCode::ProviderUnavailable);
++    }
++} elseif ($role === 'hold' && $mode === 'revoke') {
++    // Parent already committed the original effect. Hold ONLY its receipt read lock;
++    // current authority can revoke while another replay waits, without a mutation fence.
++    $owner = $s->base->app->make(OwnerStorage::class)->forHandle(handle: $s->handle, namespace: $command->namespace);
++    $ledger = new ReceiptLedger($owner);
++    $context = $ledger->context(namespace: $command->namespace, key: $command->key) ?? throw new RuntimeException('Missing committed winner');
++    $connection->listen(function (QueryExecuted $query) use (&$held, $barrier): void {
++        if (! $held && str_contains($query->sql, 'a_receipts') && str_contains($query->sql, 'for update')) {
++            $held = true;
++            $barrier();
++        }
++    });
++    $ledger->result(envelope: $command, guardContext: $context);
++    $result = $s->execute($command);
++} elseif ($isLifecycle) {
++    $result = $lifecycle->{$action}(handle: $s->handle, command: $command);
++} else {
++    $result = $s->execute($command);
+ }
+ if ($role === 'lost') {
+     $connection->disconnect();
+     fwrite(STDERR, "P2.7 lost response after REAL commit; no outcome returned\n");
+     exit(0);
+ }
+-fwrite(STDOUT, json_encode(['result' => $result->toWire(), 'writes' => $s->mutation->writes, 'resolvers' => $s->target->levels, 'authority' => $authority->levels, 'level' => $connection->transactionLevel()], JSON_THROW_ON_ERROR).PHP_EOL);
++fwrite(STDOUT, json_encode(['result' => $result->toWire(), 'writes' => $s->mutation->writes, 'resolvers' => $s->target->levels, 'authority' => $authority->levels,
++    'fence_captures' => $s->fence->captures, 'fence_checks' => $s->fence->checks, 'level' => $connection->transactionLevel()], JSON_THROW_ON_ERROR).PHP_EOL);
+--- a/tests/Integration/Runtime/EnvelopeConcurrencyTest.php
++++ b/tests/Integration/Runtime/EnvelopeConcurrencyTest.php
+@@ -5,6 +5,7 @@
+ use SocKit\Errors\Enums\ProblemCode;
+ use SocKit\Tests\Fixtures\Runtime\EnvelopeRace;
+ use SocKit\Tests\Fixtures\Runtime\EnvelopeScenario;
++use SocKit\Tests\Integration\Support\PgTarget;
+ use Symfony\Component\Process\Process;
+ 
+ it('serializes duplicate digest conflict CAS and rollback claimants in real independent PG processes', function (string $mode): void {
+@@ -74,3 +75,31 @@
+         $s->cleanup();
+     }
+ });
++
++it('rolls back a newly won claim before any effect when authority revoked during UNIQUE wait and holder rollback', function (string $mode): void {
++    $s = new EnvelopeScenario;
++    try {
++        $results = EnvelopeRace::run(s: $s, mode: $mode);
++        expect($results[0]->isSuccess())->toBeFalse()->and($results[1]->problem)->toBe(ProblemCode::AuthorizationDenied)->and($results[1]->resource)->toBeNull()
++            ->and($s->counts())->toBe(['effects' => 0, 'revision' => 1, 'receipts' => 1, 'outbox' => 0]);
++        $pdo = $s->base->db->owner;
++        expect(PgTarget::query($pdo, 'SELECT lifecycle FROM panel_a.driver_a_surface_instances')->fetchColumn())->toBe('live')
++            ->and((int) PgTarget::query($pdo, 'SELECT revision FROM panel_a.driver_a_surface_instances')->fetchColumn())->toBe(1)
++            ->and((int) PgTarget::query($pdo, "SELECT count(*) FROM panel_a.driver_a_receipts WHERE outcome='confirmed'")->fetchColumn())->toBe(0)
++            ->and($s->base->consumer->calls)->toBe(0);
++    } finally {
++        $s->cleanup();
++    }
++})->with(['revoke_rollback', 'lifecycle_revoke_rollback']);
++
++it('rolls back an unprovable authority generation then permits only an explicit same-key fresh retry', function (): void {
++    $s = new EnvelopeScenario;
++    try {
++        $command = $s->command();
++        $results = EnvelopeRace::run(s: $s, mode: 'generation_rollback');
++        expect($results[1]->problem)->toBe(ProblemCode::AuthorizationUnknown)->and($s->counts())->toBe(['effects' => 0, 'revision' => 1, 'receipts' => 0, 'outbox' => 0]);
++        expect($s->execute($command)->isSuccess())->toBeTrue()->and($s->counts())->toBe(['effects' => 1, 'revision' => 2, 'receipts' => 1, 'outbox' => 1]);
++    } finally {
++        $s->cleanup();
++    }
++});
+--- a/tests/Integration/Runtime/GenerationFenceTest.php
++++ b/tests/Integration/Runtime/GenerationFenceTest.php
+@@ -4,6 +4,7 @@
+ 
+ use SocKit\Errors\Enums\ProblemCode;
+ use SocKit\Errors\Exceptions\SocKitException;
++use SocKit\Operations\Contracts\MutationAuthorityFence;
+ use SocKit\Operations\Data\CommandEnvelope;
+ use SocKit\Operations\OperationHandles;
+ use SocKit\Support\Data\CommandKey;
+@@ -72,3 +73,19 @@
+         $s->cleanup();
+     }
+ });
++
++it('fails closed before mutation without a provable local composite authority fence', function (string $case): void {
++    $s = new EnvelopeScenario;
++    try {
++        if ($case === 'missing') {
++            $s->base->app->offsetUnset(MutationAuthorityFence::class);
++        } else {
++            $s->fence->unproven = true;
++        }
++        $result = $s->execute();
++        expect($result->problem)->toBe($case === 'missing' ? ProblemCode::ProviderUnavailable : ProblemCode::AuthorizationUnknown)
++            ->and($s->mutation->writes)->toBe(0)->and($s->counts())->toBe(['effects' => 0, 'revision' => 1, 'receipts' => 0, 'outbox' => 0]);
++    } finally {
++        $s->cleanup();
++    }
++})->with(['missing', 'unproven']);
+--- a/tests/Integration/Runtime/ReplayAuthorizationTest.php
++++ b/tests/Integration/Runtime/ReplayAuthorizationTest.php
+@@ -9,6 +9,7 @@
+ use SocKit\Audience\Data\AuthorizationDecision;
+ use SocKit\Audience\Data\GroupRef;
+ use SocKit\Errors\Enums\ProblemCode;
++use SocKit\Operations\Contracts\MissingReceiptPolicy;
+ use SocKit\Operations\Data\CommandEnvelope;
+ use SocKit\Operations\Internal\Storage\OwnerStorage;
+ use SocKit\Operations\OperationHandles;
+@@ -230,3 +231,55 @@
+         $s->cleanup();
+     }
+ })->with(['author', 'type', 'panel']);
++
++it('looks up an existing outcome using its declared action even when commandType is denied and absent mapping differs', function (): void {
++    $s = new EnvelopeScenario;
++    try {
++        $s->mutation->authorizationAction = 'acme.content.edit';
++        $s->base->fake->authorizer->allow('acme.content.edit')->deny(action: EnvelopeMutation::TYPE, reason: 'fixture.command_is_not_action');
++        $command = $s->command();
++        $original = $s->execute($command);
++        expect($original->isSuccess())->toBeTrue();
++        $s->absence->actions[EnvelopeMutation::TYPE] = 'acme.content.unrelated';
++        $readsBefore = $s->receiptReads();
++        $result = $s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key);
++        expect($result?->toWire())->toBe($original->toWire())->and($s->absence->calls)->toBe(0)
++            ->and($s->receiptReads())->toBeGreaterThan($readsBefore);
++        $s->base->fake->authorizer->deny(action: 'acme.content.edit', reason: 'fixture.revoked')->allow(EnvelopeMutation::TYPE);
++        expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->problem)->toBe(ProblemCode::AuthorizationDenied)
++            ->and($s->counts())->toBe(['effects' => 1, 'revision' => 2, 'receipts' => 1, 'outbox' => 1]);
++    } finally {
++        $s->cleanup();
++    }
++});
++
++it('authorizes absent outcomes only through an explicit action mapping consistent with execute', function (): void {
++    $s = new EnvelopeScenario;
++    try {
++        $s->mutation->authorizationAction = 'acme.content.edit';
++        $s->absence->actions[EnvelopeMutation::TYPE] = 'acme.content.edit';
++        $s->base->fake->authorizer->allow('acme.content.edit')->deny(action: EnvelopeMutation::TYPE, reason: 'fixture.command_is_not_action');
++        $command = $s->command();
++        expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key))->toBeNull()->and($s->absence->calls)->toBe(1);
++        $s->base->fake->authorizer->deny(action: 'acme.content.edit', reason: 'fixture.revoked')->allow(EnvelopeMutation::TYPE);
++        expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->problem)->toBe(ProblemCode::AuthorizationDenied);
++        unset($s->absence->actions[EnvelopeMutation::TYPE]);
++        expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->problem)->toBe(ProblemCode::AuthorizationUnknown)
++            ->and($s->counts())->toBe(['effects' => 0, 'revision' => 1, 'receipts' => 0, 'outbox' => 0]);
++    } finally {
++        $s->cleanup();
++    }
++});
++
++it('requires an absence policy only for missing module receipts and still reads an existing receipt through its own guards', function (): void {
++    $s = new EnvelopeScenario;
++    try {
++        $command = $s->command();
++        $s->base->app->offsetUnset(MissingReceiptPolicy::class);
++        expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->problem)->toBe(ProblemCode::ProviderUnavailable);
++        $result = $s->execute($command);
++        expect($result->isSuccess())->toBeTrue()->and($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->toWire())->toBe($result->toWire());
++    } finally {
++        $s->cleanup();
++    }
++});

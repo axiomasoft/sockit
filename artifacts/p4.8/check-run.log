@@ -1,0 +1,14 @@
+START V1 python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Feature/Generation/SocialPanelGenerationTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+EXIT V1 0
+START V2 python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Social/ReactionsConsumerTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+EXIT V2 0
+START V3 python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Social/SocialUpgradeTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+EXIT V3 0
+START V89 composer test -- tests/Arch --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+EXIT V89 0
+START V90 composer analyse -- --memory-limit=512M
+EXIT V90 0
+START V91 composer lint
+EXIT V91 0
+START V92 python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Feature/Consumer/GeneratedPanelsInstallTest.php tests/Feature/Consumer/StandaloneRuntimeTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+EXIT V92 0

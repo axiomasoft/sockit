@@ -1,0 +1,27 @@
+STDOUT
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Social\FeedCursorTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit authenticates and hides a deterministic keyset position bound to canonical context[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('tamper')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('length')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('version')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('expired')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('key')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('malformed')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('installation')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('panel')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('incarnation')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('surface')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('viewer')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('generation')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('filter')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects tamper malformed length version expiry unknown keys and cross context without restarting with ('order')[39m
+  [32;1m✓[39;22m[90m [39m[90mit accepts only retained rotation keys until the original expiry[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects authenticated malformed positions and never accepts a missing secret or unsupported filter[39m
+
+  [90mTests:[39m    [32;1m17 passed[39;22m[90m (25 assertions)[39m
+  [90mDuration:[39m [39m0.05s[39m
+
+
+STDERR
+> pest 'tests/Unit/Social/FeedCursorTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'

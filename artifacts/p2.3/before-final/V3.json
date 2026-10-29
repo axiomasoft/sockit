@@ -1,0 +1,35 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p23-V3",
+  "check_id": "V3",
+  "subject": "PLAN1.P2.3",
+  "procedure": {
+    "cmd": "python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Fixtures/Runtime/TargetFencePgTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "candidate": {
+    "head": "307ffcd42351abd3b98a3c52c3981bc8cec105f5",
+    "dirty_digest": "7aaf7a3a39b2d25024d8828d49949b946f2b3d29853acc4cc0c734ce25d49d70"
+  },
+  "exit": 0,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "php": "8.4.1",
+    "database": "Private owned PostgreSQL16 via P2.1 run manifest",
+    "session": "01a182e5-87da-7130-9539-ae8774485e5f"
+  },
+  "log": {
+    "path": "artifacts/p2.3/before-final/V3.log",
+    "sha256": "40fbbd7ae82b2e2f1bd5c664634d8e66d9aa9ec303d134f775803f8a3e5a95d5"
+  },
+  "started_at": "2026-10-28T14:39:42.423281+00:00",
+  "finished_at": "2026-10-28T14:39:44.655619+00:00",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  }
+}

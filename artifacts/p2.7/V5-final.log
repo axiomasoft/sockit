@@ -1,0 +1,463 @@
+COMMAND python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/SurfaceLifecycleTest.php tests/Integration/Runtime/TombstoneReplayTest.php tests/Integration/Runtime/ReceiptClaimsTest.php tests/Integration/Runtime/ReceiptConflictRecoveryTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+CWD /home/vostrikov/projects/packages/sockit
+STDOUT
+private container=e944e25e4575c96da3879128650e6495a797d3c501f9fcfdcc954e015f0656dd owner=sockit_p2_8971a66adc2497fd_test decoy=sockit_p2_decoy_8971a66adc2497fd_test port=32841
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\SurfaceLifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps typed owner snapshots CAS and Live Archived Deleted transi[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit arbitrates concurrent explicit creation by UNIQUE without an abs[39m[90m…[39m [90m0.51s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.41s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.44s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.54s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializes interfering lifecycle and edit operations on the surf[39m[90m…[39m [90m0.58s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deletes an archived instance and rejects missing and regressing[39m[90m… [39m [90m0.15s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\TombstoneReplayTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects reordered duplicate old generation events and explicitly[39m[90m…[39m [90m0.23s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back instance and tombstone together if the tombstone writ[39m[90m…[39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not resurrect a tombstoned ref even if the current row is m[39m[90m…[39m [90m0.23s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ReceiptClaimsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.50s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.46s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.40s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit blocks on unique identity and resolves same digest conflict roll[39m[90m…[39m [90m0.46s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit isolates installation panel integration command type and exact c[39m[90m…[39m [90m0.27s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ReceiptConflictRecoveryTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit recovers a committed outcome by original key after closing the c[39m[90m…[39m [90m0.51s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects caller digest type namespace and anonymous identity befo[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies another actor before exposing digest conflict or stored r[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit persists only a minimal stable rejection and keeps the original[39m[90m… [39m [90m0.30s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit propagates unrelated unique failures and rejects nested or non R[39m[90m…[39m [90m0.31s[39m  
+
+  [90mTests:[39m    [32;1m29 passed[39;22m[90m (520 assertions)[39m
+  [90mDuration:[39m [39m10.14s[39m
+
+
+STDERR
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Runtime/SurfaceLifecycleTest.php' 'tests/Integration/Runtime/TombstoneReplayTest.php' 'tests/Integration/Runtime/ReceiptClaimsTest.php' 'tests/Integration/Runtime/ReceiptConflictRecoveryTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=102
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=103
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=104
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=105
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=106
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=107
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=108
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 SQL CAS assertions [{"connection":"owner_a","sql":"update \"panel_a\".\"driver_a_surface_instances\" set \"lifecycle\" = ?, \"revision\" = ?, \"source_generation\" = ?, \"privacy_generation\" = ?, \"updated_at\" = ?, \"deleted_at\" = ? where (\"installation\" = ? and \"panel\" = ? and \"kind\" = ? and \"host_type\" = ? and \"host_key\" = ?) and \"incarnation\" = ? and \"revision\" = ?"},{"connection":"owner_a","sql":"update \"panel_a\".\"driver_a_surface_instances\" set \"lifecycle\" = ?, \"revision\" = ?, \"source_generation\" = ?, \"privacy_generation\" = ?, \"updated_at\" = ?, \"deleted_at\" = ? where (\"installation\" = ? and \"panel\" = ? and \"kind\" = ? and \"host_type\" = ? and \"host_key\" = ?) and \"incarnation\" = ? and \"revision\" = ?"},{"connection":"owner_a","sql":"update \"panel_a\".\"driver_a_surface_instances\" set \"revision\" = ?, \"source_generation\" = ?, \"privacy_generation\" = ?, \"updated_at\" = ? where (\"installation\" = ? and \"panel\" = ? and \"kind\" = ? and \"host_type\" = ? and \"host_key\" = ?) and \"incarnation\" = ? and \"revision\" = ?"},{"connection":"owner_a","sql":"update \"panel_a\".\"driver_a_surface_instances\" set \"lifecycle\" = ?, \"revision\" = ?, \"source_generation\" = ?, \"privacy_generation\" = ?, \"updated_at\" = ?, \"deleted_at\" = ? where (\"installation\" = ? and \"panel\" = ? and \"kind\" = ? and \"host_type\" = ? and \"host_key\" = ?) and \"incarnation\" = ? and \"revision\" = ?"},{"connection":"owner_a","sql":"update \"panel_a\".\"driver_a_surface_instances\" set \"lifecycle\" = ?, \"revision\" = ?, \"source_generation\" = ?, \"privacy_generation\" = ?, \"updated_at\" = ?, \"deleted_at\" = ? where (\"installation\" = ? and \"panel\" = ? and \"kind\" = ? and \"host_type\" = ? and \"host_key\" = ?) and \"incarnation\" = ? and \"revision\" = ?"}]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=109
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=110
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=111
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=112
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=113
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=114
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier create vs create holder=118 waiter=124 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=115
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=116
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=117
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=118
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=119
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=120
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=121
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=122
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=123
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=124
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=125
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=126
+P2.4 race results ["committed","sockit.revision_conflict"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=127
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=128
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=129
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=130
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=131
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=132
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier archive vs archive holder=136 waiter=142 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=133
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=134
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=135
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=136
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=137
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=138
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=139
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=140
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=141
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=142
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=143
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=144
+P2.4 race results ["committed","sockit.revision_conflict"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=145
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=146
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=147
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=148
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=149
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=150
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier edit vs edit holder=154 waiter=160 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=151
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=152
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=153
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=154
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=155
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=156
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=157
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=158
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=159
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=160
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=161
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=162
+P2.4 race results ["committed","sockit.revision_conflict"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=163
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=164
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=165
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=166
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=167
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=168
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier edit vs archive holder=172 waiter=178 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=169
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=170
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=171
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=172
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=173
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=174
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=175
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=176
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=177
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=178
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=179
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=180
+P2.4 race results ["committed","sockit.revision_conflict"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=181
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=182
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=183
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=184
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=185
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=186
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier archive vs write holder=190 waiter=196 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=187
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=188
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=189
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=190
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=191
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=192
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=193
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=194
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=195
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=196
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=197
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=198
+P2.4 race results ["committed","sockit.surface_archived"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=199
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=200
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=201
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=202
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=203
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=204
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier write vs archive holder=208 waiter=214 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=205
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=206
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=207
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=208
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=209
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=210
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=211
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=212
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=213
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=214
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=215
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=216
+P2.4 race results ["committed","committed"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=217
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=218
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=219
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=220
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=221
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=222
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier archive vs edit holder=226 waiter=232 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=223
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=224
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=225
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=226
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=227
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=228
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=229
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=230
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=231
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=232
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=233
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=234
+P2.4 race results ["committed","sockit.surface_archived"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=235
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=236
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=237
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=238
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=239
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=240
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier delete vs replay holder=244 waiter=250 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=241
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=242
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=243
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=244
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=245
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=246
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=247
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=248
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=249
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=250
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=251
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=252
+P2.4 race results ["committed","sockit.content_deleted"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=253
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=254
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=255
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=256
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=257
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=258
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 barrier replay vs delete holder=262 waiter=268 wait_event_type=Lock
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=259
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=260
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=261
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=262
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=263
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=264
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=265
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=266
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=267
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=268
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=269
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=270
+P2.4 race results ["committed","committed"]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=271
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=272
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=273
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=274
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=275
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=276
+P2.4 test-only DDL installed AFTER verified PDO identities
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=277
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=278
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=279
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=280
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=281
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=282
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.4 SQL assertions: old/duplicate/generation denied; explicit incarnation 2 revision 1 new UUID; tombstone unchanged; panel B revision 1 Live; other installation and lossless host key isolated
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=283
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=284
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=285
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=286
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=287
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=288
+P2.4 test-only DDL installed AFTER verified PDO identities
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=289
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=290
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=291
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=292
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=293
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=294
+P2.4 test-only DDL installed AFTER verified PDO identities
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=295
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=296
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=297
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=298
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=299
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=300
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=same holder=304 waiter=310 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=301
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=302
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=303
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=304
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=305
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=306
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=307
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=308
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=309
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=310
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=311
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=312
+P2.5 race results [{"outcome":"confirmed","receipt":"01a1836b-c157-713a-9bda-3fb9697bffa7","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a1836b-c157-713a-9bda-3fb9697bffa7"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"outcome":"confirmed","receipt":"01a1836b-c157-713a-9bda-3fb9697bffa7","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a1836b-c157-713a-9bda-3fb9697bffa7"},"revision":1,"writes":0,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=313
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=314
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=315
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=316
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=317
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=318
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=conflict holder=322 waiter=328 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=319
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=320
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=321
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=322
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=323
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=324
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=325
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=326
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=327
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=328
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=329
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=330
+P2.5 race results [{"outcome":"confirmed","receipt":"01a1836b-c344-7147-b45c-72c7c78d8b60","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a1836b-c344-7147-b45c-72c7c78d8b60"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"problem":"sockit.idempotency_conflict","writes":0,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=331
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=332
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=333
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=334
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=335
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=336
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=rollback holder=340 waiter=346 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=337
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=338
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=339
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=340
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=341
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=342
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=343
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=344
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=345
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=346
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=347
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=348
+P2.5 race results [{"rollback":true,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"outcome":"confirmed","receipt":"01a1836b-c567-72cb-a9dd-c61fdf996def","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a1836b-c567-72cb-a9dd-c61fdf996def"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=349
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=350
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=351
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=352
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=353
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=354
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=actor holder=358 waiter=364 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=355
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=356
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=357
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=358
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=359
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=360
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=361
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=362
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=363
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=364
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=365
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=366
+P2.5 race results [{"outcome":"confirmed","receipt":"01a1836b-c6bb-7261-bc68-bb245f9d6910","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a1836b-c6bb-7261-bc68-bb245f9d6910"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"problem":"sockit.actor_context_invalid","writes":0,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=367
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=368
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=369
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=370
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=371
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=372
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=7 receipts=7 unfinished=0 decoy=sentinel
+P2.5 routed SQL without bindings [{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_b","sql":"INSERT INTO \"panel_b\".\"other_b_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"}]
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=373
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=374
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=375
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=376
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=377
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=378
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=379
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=380
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=381
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=382
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=383
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=384
+P2.5 lost response: committed; closed PDO before emitting snapshot
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=385
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=386
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=387
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=388
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=389
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=390
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=0 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=391
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=392
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=393
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=394
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=395
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=396
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=397
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=398
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=399
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=400
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=401
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=402
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=0 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=403
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=404
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=405
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=406
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=407
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=408
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=0 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=409
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=410
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=411
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=412
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=413
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=414
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=0 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=415
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=416
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=417
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=418
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=419
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=420
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=0 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=421
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=422
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=423
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=424
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=425
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=426
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=0 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=427
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=428
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=429
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=430
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=431
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=432
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=433
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=434
+PG identity database=sockit_p2_decoy_8971a66adc2497fd_test server_version_num=160014 marker=sockit-p21-8971a66adc2497fd backend_pid=435
+P2.2 Laravel connection=owner_a database=sockit_p2_8971a66adc2497fd_test backend_pid=436
+P2.2 Laravel connection=owner_b database=sockit_p2_8971a66adc2497fd_test backend_pid=437
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_8971a66adc2497fd_test backend_pid=438
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=0 receipts=0 unfinished=0 decoy=sentinel
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+
+EXIT 0

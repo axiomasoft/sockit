@@ -1,0 +1,28 @@
+{
+  "fixture": "floor/f4",
+  "contract": "floor",
+  "version": "1.0",
+  "input": {
+    "floor": {
+      "allowed_scopes": [
+        "direct",
+        "group",
+        "contour",
+        "platform",
+        "public"
+      ],
+      "default_scope": "contour",
+      "max_scope": "contour",
+      "minor_max_scope": "contour",
+      "minor_default_scope": "direct",
+      "contour_levels": [
+        "class",
+        "school"
+      ]
+    }
+  },
+  "expect": {
+    "valid": false,
+    "rule": "F4"
+  }
+}

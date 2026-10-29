@@ -1,0 +1,10 @@
+{
+  "session": "01a18487-dce7-7d00-b66e-d6f4ba280d2d",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "sandbox": {
+    "type": "danger-full-access"
+  },
+  "approval_policy": "never",
+  "cwd": "/home/vostrikov/projects/packages/sockit"
+}

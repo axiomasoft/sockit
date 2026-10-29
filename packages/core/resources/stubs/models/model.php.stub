@@ -1,0 +1,12 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{NAMESPACE}};
+
+/** Consumer-owned persistence model for {{PANEL}} / {{ENTITY}}. */
+class {{CLASS}} extends \SocKit\Schema\PanelModel
+{
+    public const array BINDING = {{BINDING}};
+{{RELATIONS}}
+}

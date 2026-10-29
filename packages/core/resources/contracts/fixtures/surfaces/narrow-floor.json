@@ -1,0 +1,38 @@
+{
+  "fixture": "narrow-floor",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "floor": {
+          "allowed_scopes": [
+            "direct"
+          ],
+          "default_scope": "direct",
+          "max_scope": "direct",
+          "minor_default_scope": "direct",
+          "minor_max_scope": "direct",
+          "contour_levels": []
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": true,
+    "surfaces": {
+      "crm.public/crm.article": {
+        "panel": "crm.public",
+        "kind": "crm.article",
+        "host": "article",
+        "features": [
+          "reactions"
+        ],
+        "settings": {},
+        "contour": null,
+        "contour_levels": [],
+        "archive_readers": false
+      }
+    }
+  }
+}

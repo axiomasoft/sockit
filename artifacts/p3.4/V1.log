@@ -1,0 +1,34 @@
+COMMAND python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Schema/GeneratedModelsTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+STDOUT
+private container=c533522194d2929f3ff40cacc4b2ef6d67975e13c88cc708ccbeee17f96ea7f8 owner=sockit_p2_72359950568b5e22_test decoy=sockit_p2_decoy_72359950568b5e22_test port=32972
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\GeneratedModelsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit autoloads emitted consumer models and preserves real CRUD hydrat[39m[90m…[39m [90m0.47s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit validates custom class maps and rejects wrong bindings before us[39m[90m…[39m [90m0.35s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exposes composite tombstones only through complete scoped reads[39m[90m… [39m [90m0.29s[39m  
+
+  [90mTests:[39m    [32;1m3 passed[39;22m[90m (140 assertions)[39m
+  [90mDuration:[39m [39m1.17s[39m
+
+
+STDERR
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/GeneratedModelsTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=101
+PG identity database=sockit_p2_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=102
+PG identity database=sockit_p2_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=103
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=104
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=105
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=106
+P3.4 SQL assertions emitted_crud_hydration_replication=true fk_inverse_relations=true uuid7_string=true host_42_0042_lossless=true json_datetime_casts=true decoy_untouched=true
+PG identity database=sockit_p2_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=109
+PG identity database=sockit_p2_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=110
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=111
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=112
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=113
+P3.4 assertions custom_map_compatible=true wrong_binding_rejected=true immutable_table_connection=true
+PG identity database=sockit_p2_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=116
+PG identity database=sockit_p2_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=117
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=118
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=119
+PG identity database=sockit_p2_decoy_72359950568b5e22_test server_version_num=160014 marker=sockit-p21-72359950568b5e22 backend_pid=120
+P3.4 SQL assertions composite_full_identity_read=true composite_find_save_delete_queue_denied=true no_fake_id=true

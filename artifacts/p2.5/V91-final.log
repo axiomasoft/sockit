@@ -1,0 +1,6 @@
+COMMAND: composer lint
+CWD: /home/vostrikov/projects/packages/sockit
+STDOUT:
+{"tool":"pint","result":"passed"}
+STDERR:
+> pint --test

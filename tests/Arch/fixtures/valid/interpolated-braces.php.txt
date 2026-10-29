@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support {
+    use SocKit\Attributes\{Api as PublicApi};
+
+    #[PublicApi]
+    final class InterpolatedBraces
+    {
+        public function trailing(string $id): string { return "{$id}}"; }
+        public function leading(string $id): string { return "{{$id}"; }
+        public function nested(object $value, string $key): string { return "{$value->{$key}}}"; }
+    }
+
+    #[PublicApi]
+    final class AfterInterpolatedBraces {}
+
+    use SocKit\Attributes\Api as AfterStringApi;
+
+    #[AfterStringApi]
+    final class AfterStringImport {}
+}
+
+namespace SocKit\Panels\Data {
+    #[\SocKit\Attributes\Api]
+    final readonly class AfterInterpolatedNamespace {}
+}

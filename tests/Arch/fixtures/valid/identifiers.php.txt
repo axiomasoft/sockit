@@ -1,0 +1,11 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+// tenant_id tenantId proEnabled enterprise_edition
+final class Neutral {
+    public string $installationId;
+    public string $notTenantId;
+    public const string DESCRIPTION = 'A tenant_id explanation, not a key';
+}

@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support;
+class MissingMarker {}
+interface MissingContract {}
+trait MissingTrait {}
+enum MissingEnum: string { case Value = 'value'; }

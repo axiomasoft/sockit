@@ -1,0 +1,74 @@
+{
+  "fixture": "two-panels",
+  "contract": "panels",
+  "version": "1.0",
+  "input": {
+    "panels": [
+      {
+        "id": "host.articles",
+        "prefix": "articles_",
+        "modules": [
+          "demo.module"
+        ],
+        "settings": {
+          "demo.module": {
+            "limit": 30
+          }
+        }
+      },
+      {
+        "id": "host.products",
+        "prefix": "products_",
+        "hosts": [
+          "article",
+          "product"
+        ],
+        "modules": [
+          "other.module"
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "valid": true,
+    "panels": {
+      "host.articles": {
+        "hosts": [
+          "article"
+        ],
+        "tables": {
+          "outbox": "articles_outbox",
+          "receipts": "articles_receipts",
+          "surface_instances": "articles_surface_instances",
+          "tombstones": "articles_tombstones"
+        },
+        "modules": [
+          "demo.module"
+        ],
+        "settings": {
+          "demo.module": {
+            "limit": 30
+          }
+        }
+      },
+      "host.products": {
+        "hosts": [
+          "article",
+          "product"
+        ],
+        "tables": {
+          "outbox": "products_outbox",
+          "receipts": "products_receipts",
+          "surface_instances": "products_surface_instances",
+          "tombstones": "products_tombstones"
+        },
+        "modules": [
+          "other.module"
+        ],
+        "settings": {
+          "other.module": []
+        }
+      }
+    }
+  }
+}

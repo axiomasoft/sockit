@@ -1,0 +1,28 @@
+{
+  "fixture": "floor-platform-widens",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "floor": {
+          "allowed_scopes": [
+            "direct",
+            "public"
+          ],
+          "default_scope": "public",
+          "max_scope": "public",
+          "minor_default_scope": "direct",
+          "minor_max_scope": "direct",
+          "contour_levels": []
+        }
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FLOOR_WIDENS"
+    ]
+  }
+}

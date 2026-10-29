@@ -1,0 +1,12 @@
+{
+  "schema_valid": true,
+  "validator": "local jsonschema Draft7 with bundled check-evidence/defs (all used schema keywords supported)",
+  "checks": {
+    "V1": 0,
+    "V2": 0,
+    "V3": 0,
+    "V90": 0,
+    "V91": 0
+  },
+  "source_fingerprint": "25e3607ef462735b007fb4005911b464d447caacd6a330bed844dcfdf05f571b"
+}

@@ -1,0 +1,77 @@
+> phpstan analyse --no-progress '--memory-limit=512M'
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Schema/SchemaReadiness.php                           
+ ------ ----------------------------------------------------------------------- 
+  107    Offset 'entity' on array{code: string, entity: string, component:      
+         mixed, step: string, path: string, action: mixed, required?:           
+         non-empty-array<string, mixed>} on left side of ?? always exists and   
+         is not nullable.                                                       
+         🪪  nullCoalesce.offset                                                
+  133    Method SocKit\Schema\SchemaReadiness::inspect() should return          
+         array{status: string, panel: string, provider: string, generated:      
+         int, applied: int, components: array<string, array{version: mixed, st  
+         atus: string}>, problems: list<array{code: string, step: string, path  
+         ?: string, action: string, ...}>, deliveries: array<string, mixed>, .  
+         ..} but returns array{status: 'ready'|'unready', panel: string,        
+         provider: string, generated: int<1, max>, applied: int<0, max>,        
+         components: array<string, array{version: mixed, status: 'preserved_ow  
+         ned'|'selected'}>, problems: list<array{code: string, entity: string,  
+          component: mixed, step: string, path: string, action: mixed,          
+         required?: non-empty-array<string, mixed>}|array{code: string, step:   
+         'catalog'|'compile'|'history'|'identity'|'ledger'|'models'|'outbox',   
+         path: non-falsy-string, action: 'Check migrate…'|'Inspect              
+         the…'|'Restore or update…'|'Restore the…'|'Verify the panel…'}>,       
+         deliveries: array<string, mixed>, ...}|array{status: 'unready', panel  
+         : string, provider: string, generated: int<0, max>, applied: 0,        
+         components: array{}, problems: non-empty-list<array{code: string,      
+         entity: string, component: mixed, step: string, path: string, action:  
+         mixed, required?: non-empty-array<string, mixed>}|array{code: string,  
+          step:                                                                 
+         'catalog'|'compile'|'history'|'identity'|'ledger'|'models'|'outbox',   
+         path: non-falsy-string, action: 'Check migrate…'|'Inspect              
+         the…'|'Restore or update…'|'Restore the…'|'Verify the panel…'}>,       
+         deliveries: array{}}.                                                  
+         🪪  return.type                                                        
+         💡  Offset 'problems' (list<array{code: string, step: string, path?:   
+         string, action: string, ...<int|string, mixed>}>) does not accept typ  
+         e non-empty-list<array{code: string, entity: string, component:        
+         mixed, step: string, path: string, action: mixed, required?:           
+         non-empty-array<string, mixed>}|array{code: string, step: 'catalog'|'  
+         compile'|'history'|'identity'|'ledger'|'models'|'outbox', path:        
+         non-falsy-string, action: 'Check migrate…'|'Inspect the…'|'Restore or  
+         update…'|'Restore the…'|'Verify the panel…'}>: Offset 'action'         
+         (string) does not accept type mixed.                                   
+         💡  Offset 'problems' (list<array{code: string, step: string, path?:   
+         string, action: string, ...<int|string, mixed>}>) does not accept typ  
+         e list<array{code: string, entity: string, component: mixed, step:     
+         string, path: string, action: mixed, required?: non-empty-array<strin  
+         g, mixed>}|array{code: string, step: 'catalog'|'compile'|'history'|'i  
+         dentity'|'ledger'|'models'|'outbox', path: non-falsy-string, action:   
+         'Check migrate…'|'Inspect the…'|'Restore or update…'|'Restore          
+         the…'|'Verify the panel…'}>: Offset 'action' (string) does not accept  
+         type mixed.                                                            
+ ------ ----------------------------------------------------------------------- 
+
+
+ [ERROR] Found 2 errors                                                         
+
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1

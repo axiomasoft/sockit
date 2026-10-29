@@ -1,0 +1,19 @@
+command=python3 artifacts/p2.9/verify-evidence.py
+cwd=/home/vostrikov/projects/packages/sockit
+Traceback (most recent call last):
+  File "/home/vostrikov/projects/packages/sockit/artifacts/p2.9/verify-evidence.py", line 10, in <module>
+    d=json.loads((base/(check+'.json')).read_text());validator.validate(d)
+                                                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/jsonschema/validators.py", line 287, in validate
+    raise error
+jsonschema.exceptions.ValidationError: '/home/vostrikov/projects/packages/sockit' does not match '^(@plan/)?[^/\\s][^\\s]*$'
+
+Failed validating 'pattern' in schema['properties']['procedure']['properties']['cwd']:
+    {'description': 'Repository-relative POSIX path; @plan/ prefix means '
+                    "relative to the plan directory; no '..'.",
+     'minLength': 1,
+     'pattern': '^(@plan/)?[^/\\s][^\\s]*$',
+     'type': 'string'}
+
+On instance['procedure']['cwd']:
+    '/home/vostrikov/projects/packages/sockit'

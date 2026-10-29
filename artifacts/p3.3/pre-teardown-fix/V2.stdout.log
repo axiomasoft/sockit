@@ -1,0 +1,26 @@
+private container=1a8fc4b65f94d53aeb65b545543690595004ba8d90080e330fad216387094bad owner=sockit_p2_a0fc43d360c1e909_test decoy=sockit_p2_decoy_a0fc43d360c1e909_test port=32941
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\FrozenSnapshotTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit executes the old frozen file in fresh processes without current[39m[90m… [39m [90m0.48s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renders deterministic canonical source and rejects corrupted des[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renders deterministic canonical source and rejects corrupted des[39m[90m…[39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses redirected aliases and unsupported drivers without touch[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit allows credential rotation while preserving the frozen selector[39m[90m… [39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not adopt unmanaged tables or indexes and atomically leaves[39m[90m…[39m [90m0.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not adopt unmanaged tables or indexes and atomically leaves[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a middle DDL failure including earlier tables indexes[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back a middle DDL failure including earlier tables indexes[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit refuses rollback of changed or replaced owned objects before del[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves later dependent tables and rolls back preceding revers[39m[90m…[39m [90m0.26s[39m  
+
+  [90mTests:[39m    [32;1m19 passed[39;22m[90m (117 assertions)[39m
+  [90mDuration:[39m [39m4.15s[39m
+

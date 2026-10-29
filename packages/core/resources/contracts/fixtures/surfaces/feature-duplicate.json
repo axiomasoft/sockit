@@ -1,0 +1,21 @@
+{
+  "fixture": "feature-duplicate",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "features": [
+          "reactions",
+          "reactions"
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FEATURE_INVALID"
+    ]
+  }
+}

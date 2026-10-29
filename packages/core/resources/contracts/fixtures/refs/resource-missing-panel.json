@@ -1,0 +1,16 @@
+{
+  "fixture": "refs/resource-missing-panel",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "resource-missing-panel",
+  "input": {
+    "kind": "resource",
+    "value": {
+      "kind": "post",
+      "id": "0192-123"
+    }
+  },
+  "expect": {
+    "valid": false
+  }
+}

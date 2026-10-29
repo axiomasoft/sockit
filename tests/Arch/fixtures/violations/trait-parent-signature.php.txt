@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Support\Internal;
+
+class TraitHiddenBase {}
+
+namespace SocKit\Support;
+
+use SocKit\Attributes\Api;
+
+#[Api]
+trait PublicHiddenParentSignature
+{
+    public function base(): parent { return $this; }
+    public function parentArgument(parent $value): void {}
+}
+
+#[Api]
+class PublicHiddenTraitChild extends Internal\TraitHiddenBase
+{
+    use PublicHiddenParentSignature;
+}
+
+#[Api]
+trait ExplicitForbiddenParentSignature
+{
+    public function callback(\Closure $callback): parent { return $this; }
+    public function request(\Illuminate\Http\Request $request): parent { return $this; }
+    public function record(\Illuminate\Database\Eloquent\Model $record): parent { return $this; }
+    public function internal(Internal\TraitHiddenBase $value): parent { return $this; }
+}

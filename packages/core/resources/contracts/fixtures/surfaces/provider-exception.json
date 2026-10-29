@@ -1,0 +1,18 @@
+{
+  "fixture": "provider-exception",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "throw": true
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_PROVIDER_FAILED"
+    ]
+  }
+}

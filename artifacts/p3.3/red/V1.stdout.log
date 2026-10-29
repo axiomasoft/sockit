@@ -1,0 +1,23 @@
+private container=a244c576c965fbb22a9ab858b882539826c39418f70afc1fd31e67dac7188c6b owner=sockit_p2_7dae3d3cd1e17fd3_test decoy=sockit_p2_decoy_7dae3d3cd1e17fd3_test port=32927
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Schema\KernelSchemaTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit provides the production frozen snapshot renderer[39m
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\KernelSchemaTest[22m [90m>[39m it provides the produ…   
+[39;1m  Failed asserting that false is true.[39;22m
+
+  at [32mtests/Integration/Schema/KernelSchemaTest.php[39m:[32m8[39m
+      4▕ 
+      5▕ use SocKit\Schema\SnapshotRenderer;
+      6▕ 
+      7▕ it('provides the production frozen snapshot renderer', function (): void {
+  ➜   8▕     expect(class_exists(SnapshotRenderer::class))->toBeTrue();
+      9▕ });
+     10▕
+
+  [33m1   [39m[39;1mtests/Integration/Schema/KernelSchemaTest.php[39;22m:[39;1m8[39;22m
+
+
+  [90mTests:[39m    [31;1m1 failed[39;22m[90m (1 assertions)[39m
+  [90mDuration:[39m [39m0.07s[39m
+

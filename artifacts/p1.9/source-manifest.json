@@ -1,0 +1,137 @@
+{
+  "head": "574669ca7009a7a8a03fe7532046f4aa3c00a45e",
+  "dirty_digest": "896398e44c314dccb27af53ee97e984d2348042c8df1fe80796d9ad3b0f12bbd",
+  "digest_algorithm": "sha256 of canonical JSON (sort_keys, compact separators) of sorted files entries (path, sha256); scoped source delta, evidence excluded",
+  "files": [
+    {
+      "path": "packages/core/config/sockit.php",
+      "sha256": "6ed86a964d2e748e6f1fa0a7ae797c55f1a15190d8966c5627a946b65e90739e"
+    },
+    {
+      "path": "packages/core/src/Configuration/Data/IdsConfig.php",
+      "sha256": "07b15bf7e4141b6de1117e92b348ca376972be5901ddfad9fd6ab5dcf63308da"
+    },
+    {
+      "path": "packages/core/src/Configuration/Data/ModulesConfig.php",
+      "sha256": "8a535cc2cdd6d392b8727f18c87fd60ba2a954f8a1fb2707c0bca68e5274b8e4"
+    },
+    {
+      "path": "packages/core/src/Configuration/Data/PanelsConfig.php",
+      "sha256": "bfffa116f2cf31195d87d1bcb653da391f02988236e9ef216451f79a923d73c0"
+    },
+    {
+      "path": "packages/core/src/Configuration/Data/PrivacyConfig.php",
+      "sha256": "1db4ab57759f99a4b34d9c1b5de6c32aa5f3f42d374c33547234f96218373534"
+    },
+    {
+      "path": "packages/core/src/Configuration/Data/ResolversConfig.php",
+      "sha256": "f4806c839b6b3e2a0e224b51e0524fbad5a81d7e9398188c877169c3bcbabef2"
+    },
+    {
+      "path": "packages/core/src/Configuration/Data/SurfacesConfig.php",
+      "sha256": "28bd673e6fa7866c4ae6dbfda58d986beca3a1017e309481ea024aebada8b9ba"
+    },
+    {
+      "path": "packages/core/src/Configuration/Exceptions/InvalidConfigurationException.php",
+      "sha256": "fe6fb3b95423a7b3f292564e98779de0e3cb162e888e2949e60f4ee938378774"
+    },
+    {
+      "path": "packages/core/src/Configuration/Exceptions/ProviderUnavailableException.php",
+      "sha256": "3d59668fc19f9460e90d2a22903619d2feafe3009cd4ba249092664ed696f9d3"
+    },
+    {
+      "path": "packages/core/src/Configuration/SocKitConfig.php",
+      "sha256": "52a867a4e8421b226790d152eda43bcf23c155c01147ef7aaa1c65c87cb0edb5"
+    },
+    {
+      "path": "packages/core/src/Modules/Contracts/Module.php",
+      "sha256": "cd31dd3c86daced8b6cf478374d16ea83023c24fa7e8fc9e65b3892a19af1602"
+    },
+    {
+      "path": "packages/core/src/Modules/Contracts/ModuleSettingsSchema.php",
+      "sha256": "daec5d213a37a7395a1989d78454eb221ffa87721e5ad7bd2228f76258fa52dc"
+    },
+    {
+      "path": "packages/core/src/Modules/Exceptions/InvalidModuleException.php",
+      "sha256": "110abec290920350b328af22aa31279d4bd63f04607fbcb824fa6de6189e5585"
+    },
+    {
+      "path": "packages/core/src/Modules/Internal/CompiledModuleGraph.php",
+      "sha256": "6271d280b48972015672df3ef57ac02e578bbd45d3909bb284271c4035f74581"
+    },
+    {
+      "path": "packages/core/src/Modules/Internal/ModuleGraphCompiler.php",
+      "sha256": "6c80e2c8239f0772af3225ee07259801ce14e5b833c245f549d48bca760f9886"
+    },
+    {
+      "path": "packages/core/src/Modules/ModuleManifest.php",
+      "sha256": "78ff882a4d4c2fb0237180d2c66590d5ab5b38a55797e1b2cb91c5e75d0928a7"
+    },
+    {
+      "path": "packages/core/src/Modules/ModuleRegistrar.php",
+      "sha256": "77581dbb4c0d3fcb02acde5b4743bc3087aace4b6125e7af0081cfe0008b74dc"
+    },
+    {
+      "path": "packages/core/src/Modules/Modules.php",
+      "sha256": "8106172821b447af49da79827dbe4d527d56c27ec5a324165994e5d9d4983f3a"
+    },
+    {
+      "path": "packages/core/src/SocKitServiceProvider.php",
+      "sha256": "5401f60938e11d0b943a41dec4a1e08527c580648032689322e808fcd07dfc09"
+    },
+    {
+      "path": "tests/Feature/Configuration/BindingsTest.php",
+      "sha256": "4f4c9f714d5371a4da7cb3e9b49d074f1c5e0cfbee5d4bbb4bc5c12400a940f7"
+    },
+    {
+      "path": "tests/Feature/Configuration/ConfigCacheTest.php",
+      "sha256": "eb74b07e794e5424f7bebe869dcb7896ee00a54801985f80352fea186cc79385"
+    },
+    {
+      "path": "tests/Feature/Modules/LifecycleTest.php",
+      "sha256": "62365a9acf8e2de676bbd3070a48c82917c580a245ad2d583626d9605631ee92"
+    },
+    {
+      "path": "tests/Fixtures/Modules/DemoModule.php",
+      "sha256": "bffa660031a9aa2c7aed42fd3892a845c93677b1c5892296f26f2b1b689d1e22"
+    },
+    {
+      "path": "tests/Fixtures/Modules/DemoProvider.php",
+      "sha256": "2d7c5f38b1c9cc5fe6ed0b24c41830f586c315db1ad11c55cb5a57ae53cd2b24"
+    },
+    {
+      "path": "tests/Fixtures/Modules/DemoSettingsSchema.php",
+      "sha256": "03009a09c427b329014d3e6aa0e5ba6997e62ec0e236023ee789989f851eed6f"
+    },
+    {
+      "path": "tests/Fixtures/Modules/OtherModule.php",
+      "sha256": "bd689884113e4a09a87235908f72e5a49bf3b27bef048ec23646338c02c9b0a2"
+    },
+    {
+      "path": "tests/Fixtures/Modules/OtherProvider.php",
+      "sha256": "0d91c086184d5b7820fb30e8ec3b21be323a5538cbcc62c57dc5fcdcc363beff"
+    },
+    {
+      "path": "tests/Fixtures/Modules/StatefulTenantResolver.php",
+      "sha256": "2813aced6c50438b61e0f91c1fd2f377aa72e203f86f956f03b66b769c5ab07b"
+    },
+    {
+      "path": "tests/Fixtures/Modules/console.php",
+      "sha256": "4af54e6e2eba459046185530743444c8faa94fefc7eec15ebbbc5d4c1d2f61a4"
+    },
+    {
+      "path": "tests/Unit/Configuration/ConfigurationTest.php",
+      "sha256": "81d8f866d57786fd80cf4f02d7a9e9dc040bb79b149a69966d52633fad771402"
+    },
+    {
+      "path": "tests/Unit/Modules/ModulesTest.php",
+      "sha256": "65a97dcf5deb9f3a250378565d79d27e657d0c526ea3822739d1f70aac5e02b3"
+    }
+  ],
+  "reused": [
+    {
+      "path": "packages/core/src/Testing/SocKitFake.php",
+      "sha256": "3596638d081c94ac766d23d11809f75833548046455e59255e8529215704cd88"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+> pest 'tests/Feature/Schema' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Schema\BootSafetyTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit boots and config caches with zero SQL, no schema history and una[39m[90m…[39m [90m0.22s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit boots and config caches with zero SQL, no schema history and una[39m[90m…[39m [90m0.17s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Schema\CompilationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit publishes identical immutable schema-aware maps in either provid[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retains builder freeze and rejects schema registration after freeze[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps enabled but unselected schema fragments out of panel maps[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails before any registry publication for an unused invalid component or missing selected dependency with dataset "unused duplicate kernel entity"[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails before any registry publication for an unused invalid component or missing selected dependency with dataset "dependency enabled but not selected"[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown or unselected logical table overrides with ([['foreign']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown or unselected logical table overrides with ([[], ['foreign']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit does not execute disabled offered schema registration[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps schema contributions separate from settings and rejects duplicate or invalid FQCN slots[39m
+  [32;1m✓[39;22m[90m [39m[90mit rebuilds identical schema snapshots in a fresh process after rea[39m[90m…[39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects schema container bindings with the wrong implementation or owner before publication with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects schema container bindings with the wrong implementation or owner before publication with (false)[39m
+
+  [90mTests:[39m    [32;1m14 passed[39;22m[90m (54 assertions)[39m
+  [90mDuration:[39m [39m0.64s[39m
+

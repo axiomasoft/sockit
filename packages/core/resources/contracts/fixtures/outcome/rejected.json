@@ -1,0 +1,16 @@
+{
+  "fixture": "rejected",
+  "contract": "outcome",
+  "version": 1,
+  "input": {
+    "outcome": "rejected",
+    "receipt_id": "r1",
+    "resource": null,
+    "revision": null,
+    "problem": "sockit.revision_conflict",
+    "problem_detail": {}
+  },
+  "expect": {
+    "valid": true
+  }
+}

@@ -1,0 +1,218 @@
+[
+  {
+    "path": ".gitignore",
+    "sha256": "03c6fb1eebe1a1d754fe265fe5201d2f551ddfd392e52563088322ea9fe59cd2"
+  },
+  {
+    "path": ".serena/project.yml",
+    "sha256": "de4ecd64f128045a86839ffb00c94dfc3ee7918ea578dec0fae544b20ed59ba6"
+  },
+  {
+    "path": "CLAUDE.md",
+    "sha256": "c05b09acbf5380632939ab0ba72e45bc7407eedcf5de56011b3643de698c302c"
+  },
+  {
+    "path": "artifacts/p1.1/V1.json",
+    "sha256": "4d35b09026c29ea4aec1fa64cbc9c3b246078e6c99bd1b00f2a6912dc4f63105"
+  },
+  {
+    "path": "artifacts/p1.1/V1.log",
+    "sha256": "48a8224a2a5983c33d7e225ca235ac9b7a5b10dbcf10db73b701add6441d8600"
+  },
+  {
+    "path": "artifacts/p1.1/V2.json",
+    "sha256": "4bc71bf5853cc67a30a02154dfdb5c89257a08b2806c12d282f4a32e7ea4855d"
+  },
+  {
+    "path": "artifacts/p1.1/V2.log",
+    "sha256": "03ba4f4c6982a6b4b7bfb1e8e5819711d859a31e2e33a588429f510221303a35"
+  },
+  {
+    "path": "artifacts/p1.1/V3.json",
+    "sha256": "8c0201ff4bb94e072886095c14ec5af8fd4e2b4cda2f6229dc676abe96593d0a"
+  },
+  {
+    "path": "artifacts/p1.1/V3.log",
+    "sha256": "f31151ac3984dedc026f1f4e5a3637bc855fa95ed0407419e0b516e8faa847dc"
+  },
+  {
+    "path": "artifacts/p1.1/V4.json",
+    "sha256": "eb1dde0df1e5726003ceec7fd68e7f7522cd0201c4fd51ba010089255bf0f0e6"
+  },
+  {
+    "path": "artifacts/p1.1/V4.log",
+    "sha256": "98029139679fe607129980a302da92fb5e3461fa97a43f54ca9d7cd9a15dd998"
+  },
+  {
+    "path": "artifacts/p1.1/V90.json",
+    "sha256": "5d6bc2b7aef6ac7e27032105b6660164e5a1520a5de21ac226ce84cd4ef1550b"
+  },
+  {
+    "path": "artifacts/p1.1/V90.log",
+    "sha256": "b256a6f0b7b62f737ee68fed04560a83b85b188d2261f326b74c4596b7768594"
+  },
+  {
+    "path": "artifacts/p1.1/V91.json",
+    "sha256": "2e32d99973fe43d1c174353046ee6b47b8170921be1ab85f2fd3a0f23b5832d7"
+  },
+  {
+    "path": "artifacts/p1.1/V91.log",
+    "sha256": "cd1a94fc2cf6a965b86e1a4809d6c7fb9148b1ee374e1010ed2ac96ff4876ec2"
+  },
+  {
+    "path": "artifacts/p1.1/composer-check.log",
+    "sha256": "faf31a43fc05b551332dae0898ccfd806f326efbe1651cfebcb829080dd7dec7"
+  },
+  {
+    "path": "artifacts/p1.1/continuation.md",
+    "sha256": "e74e4f81376e73f32dbb748c16cc4477e35562fc5a2e2a9081b93893e458c85d"
+  },
+  {
+    "path": "artifacts/p1.1/phpstan-default-memory.log",
+    "sha256": "6c35a2da2f1fc777b550e2090d43c36437b602aace803614245c5aa48fdf66cd"
+  },
+  {
+    "path": "artifacts/p1.1/proposed-composer.json",
+    "sha256": "75bb1cd5a79f1c6985f8bd9a2bbce3823dafd61993a3ce76523065a673ebd05a"
+  },
+  {
+    "path": "artifacts/p1.1/proposed-composer.lock",
+    "sha256": "6bdc29bb0c0d53669ad2aa107145339e2e41c999e6251cbce64ee36506f79f3f"
+  },
+  {
+    "path": "artifacts/p1.1/proposed-contract.json",
+    "sha256": "2cba1b6365eb56fd675fc0cbcf73159f2512b883ef9c49cf216bfa1df10e7d82"
+  },
+  {
+    "path": "artifacts/p1.1/solve-initial.log",
+    "sha256": "d8fd9d2b607fccefd3175759056c6241c852cef67549603a36860b2d480f165a"
+  },
+  {
+    "path": "artifacts/p1.1/solve.log",
+    "sha256": "35b7ca1edb4b4d2c1e2dd82fc0e39cf53bca0be1551fd4a64bd6ba5a9aadd49e"
+  },
+  {
+    "path": "artifacts/p1.13/commit.json",
+    "sha256": "9c8b61d160b57391ff833690f0755941b27d7b1995a4cfd5765c54dd30de1faa"
+  },
+  {
+    "path": "artifacts/p1.13/completed-item.json",
+    "sha256": "015badaf1817c6bbf03f2a74cd1f9d2d7820af3a8da35b9b2ec1789e1f92b27d"
+  },
+  {
+    "path": "artifacts/p1.13/final-plan-check.json",
+    "sha256": "10014a7579e4145cfa0f0846b6425554bc94a41b0700ab001cfc9318d503aa16"
+  },
+  {
+    "path": "artifacts/p1.13/finish.json",
+    "sha256": "66984ac9a944a7b94f28bee83beb5aa9312b94a817ca062b682948bff89bb7d8"
+  },
+  {
+    "path": "artifacts/p1.9/arch-initial.log",
+    "sha256": "f534ab29c19eac024aec12bd47eb122d6768fd123fc2477d0f7d81357443bbd7"
+  },
+  {
+    "path": "artifacts/p1.9/check-evidence-schema.json",
+    "sha256": "8b3f796da4025801d475a5f2e7226f77da6930d12c402c0503e1aa3ceba39fcf"
+  },
+  {
+    "path": "artifacts/p1.9/commit-dry-run.json",
+    "sha256": "09e8a3e92e91ad630c6e43b5e6c08b506de8edb039a22dd0325daad355341aa5"
+  },
+  {
+    "path": "artifacts/p1.9/commit-registration.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/p1.9/commit.json",
+    "sha256": "ec58e278ace3a8be5dcc73690e368563ae2839772386eaf42a7209c3420c38bf"
+  },
+  {
+    "path": "artifacts/p1.9/completed-item.json",
+    "sha256": "3ae42a381a6d096195748c557b27ac1b2bd6d25e5011171e3a54f2a8863ae31e"
+  },
+  {
+    "path": "artifacts/p1.9/defs-schema.json",
+    "sha256": "90792003afae9a4bad28cda8871b6873452e59f7397cf88e075ff2f3b167759d"
+  },
+  {
+    "path": "artifacts/p1.9/final-plan-check.json",
+    "sha256": "5646534e3230c13b04bef533946f164596d261c20ee75db54d02973c8c7932fa"
+  },
+  {
+    "path": "artifacts/p1.9/finish-with-commit.json",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/p1.9/native-commits.json",
+    "sha256": "04a86b881d6a3494a94216a1c39c7b8840c95accaa893d1cc3aecac11c13c1ea"
+  },
+  {
+    "path": "artifacts/p1.9/native-item.json",
+    "sha256": "b04ce0dbfd84609d18295c97fe9630eef01c75ee7dbc8c96779f719db460792a"
+  },
+  {
+    "path": "artifacts/p1.9/pest-fourth.log",
+    "sha256": "e56a489c70ad09626c8b2534786d3703d07b3e7be103ac340835059bb5139fc0"
+  },
+  {
+    "path": "artifacts/p1.9/pest-initial.log",
+    "sha256": "50175b6559c016b4007ca8dbb7ab06edb38a72f75433d04090613db130d5f3c5"
+  },
+  {
+    "path": "artifacts/p1.9/pest-second.log",
+    "sha256": "c057e3b8f0d7c54bcb352b76fc56aa5fbbaf17531cf4e2ce44b0a8b99112dac0"
+  },
+  {
+    "path": "artifacts/p1.9/pest-third.log",
+    "sha256": "e139bb14f6c0c3af97d79345174756838059b2e8b0dc678def023016faf1d4b5"
+  },
+  {
+    "path": "artifacts/p1.9/phpstan-acceptance-preflight.log",
+    "sha256": "b256a6f0b7b62f737ee68fed04560a83b85b188d2261f326b74c4596b7768594"
+  },
+  {
+    "path": "artifacts/p1.9/phpstan-initial.log",
+    "sha256": "58a2029e9555dd1f8981902aa89e9b481728ab7fa77e360dbb1e7ca418962ece"
+  },
+  {
+    "path": "artifacts/p1.9/phpstan-types-second.log",
+    "sha256": "fb390bb60088f3182386a105ac4aa8eb552afa3911c9c05d14576640c59210fa"
+  },
+  {
+    "path": "artifacts/p1.9/phpstan-types-third.log",
+    "sha256": "929b91625375c4ccad62193df6ff87d883365e03e0fd5bfaecf30ab2d63f305c"
+  },
+  {
+    "path": "artifacts/p1.9/phpstan-types.log",
+    "sha256": "2bac2d8f22211e64e97da9287cd9c28bebcbc1b0936dc3250f72faef5a0fb8a8"
+  },
+  {
+    "path": "artifacts/p1.9/pint-applied.log",
+    "sha256": "4ba99a66a79779a637cd7512943651f4d0b12acf056dd01b09470b6a58bad61f"
+  },
+  {
+    "path": "artifacts/p1.9/pint-final-applied.log",
+    "sha256": "1a5561ec7209247a937fe386ded95aa33059b94be918f9018a9fcd797b1e4110"
+  },
+  {
+    "path": "artifacts/p1.9/taskfiles-registration.txt",
+    "sha256": "9d3f7a2c087c1e4c05c0b641c9f689cd5dca08eb23103db4479f6f6587bf7021"
+  },
+  {
+    "path": "artifacts/p2.1/commit-preview.json",
+    "sha256": "0e7c1c86c23cf2fc92da1a233f74ee1b504ea21d5a0688f629f4bc986b396506"
+  },
+  {
+    "path": "artifacts/p2.1/commit.json",
+    "sha256": "23b481412c51cf387b9628f47b240c9ca936808910d944cecec657934927ccf9"
+  },
+  {
+    "path": "artifacts/p2.1/finish.json",
+    "sha256": "ebacf304c584adb46fa28457d9c3db9b271d5e868c0c02f7f8a406a273ee06e3"
+  },
+  {
+    "path": "artifacts/p2.1/next.json",
+    "sha256": "728c8fa3086fdb4c2426b56e9575af0ba5c126222d589d040d8dff1da320265a"
+  }
+]

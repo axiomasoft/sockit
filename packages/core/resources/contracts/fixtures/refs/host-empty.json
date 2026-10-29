@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/host-empty",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "host-empty",
+  "input": {
+    "kind": "host",
+    "value": "x:"
+  },
+  "expect": {
+    "valid": false
+  }
+}

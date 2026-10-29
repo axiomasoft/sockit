@@ -1,0 +1,7 @@
+{
+  "php": "PHP 8.4.27 (cli) (built: Oct 21 2026 14:35:21) (NTS)\nCopyright (c) The PHP Group\nBuilt by Ubuntu\nZend Engine v4.4.27, Copyright (c) Zend Technologies\n    with Zend OPcache v8.4.27, Copyright (c), by Zend Technologies\n    with Xdebug v3.5.3, Copyright (c) 2002-2026, by Derick Rethans\n",
+  "php_path": "/home/vostrikov/projects/packages/sockit/artifacts/p3.4/toolchain/php",
+  "platform": "Linux 7.0.0-38-generic x86_64",
+  "PATH": "/home/vostrikov/projects/packages/sockit/artifacts/p3.4/toolchain:/home/vostrikov/.codex/packages/standalone/releases/0.165.0-x86_64-unknown-linux-musl/codex-path:/home/vostrikov/.local/bin:/home/vostrikov/.spin/bin:/home/vostrikov/.codex/tmp/arg0-linux/codex-arg0WLHQqm:/home/vostrikov/.codex/packages/standalone/releases/0.165.0-x86_64-unknown-linux-musl/codex-path:/home/vostrikov/.local/bin:/home/vostrikov/.spin/bin:/home/vostrikov/.grok/bin:/home/vostrikov/.mimocode/bin:/home/vostrikov/.npm-global/bin:/home/vostrikov/.config/herd-lite/bin:/home/vostrikov/.nvm/versions/node/v24.12.0/bin:/home/vostrikov/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/vostrikov/.config/composer/vendor/bin:/home/vostrikov/soft/flutter/bin:/home/vostrikov/soft/android-studio/android-studio/bin:/home/vostrikov/.pub-cache/bin",
+  "PHP_INI_SCAN_DIR": "/etc/php/8.4/cli/conf.d:/home/vostrikov/projects/packages/sockit/artifacts/p3.4/toolchain/conf.d"
+}

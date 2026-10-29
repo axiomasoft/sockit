@@ -1,0 +1,6 @@
+{"check": "V1", "container": "1a025a9a92f57a67df1983836c2153e97f60fe1e8c80f0712926e7233413d04c", "run": "7e98063d3720efa7", "owner": "sockit_p2_7e98063d3720efa7_test", "action": "stop", "exit": 0}
+{"check": "V1", "container": "1a025a9a92f57a67df1983836c2153e97f60fe1e8c80f0712926e7233413d04c", "run": "7e98063d3720efa7", "owner": "sockit_p2_7e98063d3720efa7_test", "action": "remove", "exit": 0}
+{"run": "7e98063d3720efa7", "action": "remove_exact_private_manifest"}
+{"check": "V92", "container": "55cbea5562e04d8481d2a6e81a42f6eaf1d503431fd81ea1642bf88a0e1106a0", "run": "ddfa67c568719bdc", "owner": "sockit_p2_ddfa67c568719bdc_test", "action": "stop", "exit": 0}
+{"check": "V92", "container": "55cbea5562e04d8481d2a6e81a42f6eaf1d503431fd81ea1642bf88a0e1106a0", "run": "ddfa67c568719bdc", "owner": "sockit_p2_ddfa67c568719bdc_test", "action": "remove", "exit": 0}
+{"run": "ddfa67c568719bdc", "action": "remove_exact_private_manifest"}

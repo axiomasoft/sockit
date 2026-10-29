@@ -1,0 +1,127 @@
+COMMAND composer test -- tests/Unit/Configuration tests/Unit/Modules tests/Unit/Docs tests/Feature/Panels tests/Feature/Surfaces tests/Feature/Targets --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+CWD /home/vostrikov/projects/packages/sockit
+STDOUT
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Configuration\ConfigurationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit normalizes nested defaults without widening the default floor[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([true])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([null]) #1[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[null]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([null]) #2[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[[1, 2]]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['uuid4']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([stdClass Object ()])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['demo.module']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[[]]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[[Closure Object ()]]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['stdClass']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([['MissingProvider']])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[['public']]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown keys, objects, invalid shapes, classes and floors with a path and rule with ([[[['unknown']]]])[39m
+  [32;1m✓[39;22m[90m [39m[90mit retains defaults for explicit empty configuration sections[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Modules\ModulesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects early resolution without freezing collection and closes[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit offers distribution modules and leaves disabled declarations inactive[39m
+  [32;1m✓[39;22m[90m [39m[90mit produces identical graphs for provider registration order permutations[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails listed-not-offered and never publishes a partial graph[39m
+  [32;1m✓[39;22m[90m [39m[90mit collects manifest errors before running any draft registration[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate module identity[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps duplicate feature drafts private[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown and invalid module settings without disclosing values with (['secret-value']) #1[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown and invalid module settings without disclosing values with (['secret-value']) #2[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unknown and invalid module settings without disclosing values with ([0])[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects supplied settings without schema and invalid schema slots[39m
+  [32;1m✓[39;22m[90m [39m[90mit merges maps and replaces lists including an explicit empty list[39m
+  [32;1m✓[39;22m[90m [39m[90mit never calls registration on a disabled module[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid module classes and unknown schema interfaces[39m
+  [32;1m✓[39;22m[90m [39m[90mit publishes value snapshots that retained draft registrars cannot mutate[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Docs\CheckDocsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit reports all documentation violations and accepts the actual docu[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires complete S and SN identifiers[39m[90m                           [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Panels\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-03 runs real config cache then fresh process bootstrap wit[39m[90m…[39m [90m0.15s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Panels\LifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-01/04 compiles all 24 provider orders into identical indep[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-02 never falls back for an unknown panel[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-04 rejects an unused invalid graph without publishing modules or panels[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes retained builders and makes all nested snapshots immutable[39m
+  [32;1m✓[39;22m[90m [39m[90mit merges nested defaults/global/panel maps, replaces lists and enforces the schema ceiling with (30)[39m
+  [32;1m✓[39;22m[90m [39m[90mit merges nested defaults/global/panel maps, replaces lists and enforces the schema ceiling with (101)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate configured providers and invalid FQCNs[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Surfaces\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for empty and[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for empty and[39m[90m…[39m [90m0.15s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Surfaces\LifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit compiles identical snapshots in all 24 module panel surface core[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires panel identity for lookup and never falls back[39m
+  [32;1m✓[39;22m[90m [39m[90mit aggregates unused provider errors and leaves every registry unavailable after boot failure[39m
+  [32;1m✓[39;22m[90m [39m[90mit hides all private drafts even during provider validation[39m
+  [32;1m✓[39;22m[90m [39m[90mit collects surfaces from globally enabled module declarations only with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit collects surfaces from globally enabled module declarations only with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid registered surface FQCNs as surface configuration diagnostics[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes every setter and materialize after a successful snapshot[39m
+  [32;1m✓[39;22m[90m [39m[90mit deep copies referenced arrays in the immutable definition including the floor[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes retained invalid builders and redacts arbitrary provider failures[39m
+  [32;1m✓[39;22m[90m [39m[90mit fails closed when a configured provider binding has the wrong runtime implementation[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks configured provider FQCN contracts and detects config module declaration collisions[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Surfaces\ModuleSettingsRegressionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 detaches nested default and global references before merge and registry publication with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 detaches nested default and global references before merge and registry publication with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit F1 detaches aliases throughout normalized nested maps and lists in both directions[39m
+  [32;1m✓[39;22m[90m [39m[90mit F2 rejects every unknown settings module ID with its full path before any registry publication[39m
+  [32;1m✓[39;22m[90m [39m[90mit F2 retains settings for an offered disabled module without invoking its schema[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Targets\ConfigCacheTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps FQCN target declarations and scoped host binding through a[39m[90m…[39m [90m0.16s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Targets\RegistryTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit compiles the public target slot independent of offer order and f[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('bad:alias', 'SocKit\Tests\Fixtures\Runtime…dapter')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('', 'SocKit\Tests\Fixtures\Runtime…dapter')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('article', 'stdClass')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('article', 'SocKit\Surfaces\Contracts\Tar…solver')[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates target aliases and FQCN declarations without instantiating resolvers with ('article', 'MissingTargetAdapter')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects duplicate aliases in a registrar or selected panel before publishing any registry[39m
+  [32;1m✓[39;22m[90m [39m[90mit resolves only the module selected on the panel and leaves unselected resolvers untouched[39m
+  [32;1m✓[39;22m[90m [39m[90mit never resolves disabled or unselected capabilities through a permissive host fallback with (false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit never resolves disabled or unselected capabilities through a permissive host fallback with (true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects early registry access without accidentally freezing the graph[39m
+  [32;1m✓[39;22m[90m [39m[90mit allows the same capability alias on disjoint selected panels and never resolves the other adapter[39m
+  [32;1m✓[39;22m[90m [39m[90mit reports duplicate aliases inside an enabled module as configuration_invalid without publishing the graph[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Targets\ResolutionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit swaps an explicitly configured host adapter lazily and keeps unavailable configuration closed[39m
+  [32;1m✓[39;22m[90m [39m[90mit keeps SocKitFake default deny across actors panels installations and incarnations[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('panel')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('installation')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('target')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('incarnation')[39m
+  [32;1m✓[39;22m[90m [39m[90mit denies malicious allow for mismatched panel installation target or surface incarnation with ('surface')[39m
+  [32;1m✓[39;22m[90m [39m[90mit checks current admission before calling a malicious host allow and observes revocation on replay[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('unknown', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('deleted', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('hidden', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('read_only', true, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('live', true, true)[39m
+  [32;1m✓[39;22m[90m [39m[90mit re-resolves every entry and restricts unknown hidden deleted read-only and expired targets with ('expired', false, false)[39m
+  [32;1m✓[39;22m[90m [39m[90mit does not let a remote target or read-only admission authorize a local write[39m
+  [32;1m✓[39;22m[90m [39m[90mit maps resolver exceptions and invalid runtime bindings to fail-closed stable problems[39m
+  [32;1m✓[39;22m[90m [39m[90mit preserves finite admission expiry and read-only intersection in returned target visibility[39m
+
+  [90mTests:[39m    [32;1m92 passed[39;22m[90m (855 assertions)[39m
+  [90mDuration:[39m [39m1.10s[39m
+
+
+STDERR
+> pest 'tests/Unit/Configuration' 'tests/Unit/Modules' 'tests/Unit/Docs' 'tests/Feature/Panels' 'tests/Feature/Surfaces' 'tests/Feature/Targets' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+
+EXIT 0
+

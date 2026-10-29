@@ -1,0 +1,307 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:item:v1",
+  "id": "P2.7",
+  "title": "Атомарный конверт: current guards, receipt/CAS/state/outbox rollback",
+  "status": "in_progress",
+  "summary": "Один публичный runtime entry исполняет guarded owner mutation: trusted resolve/current admission → claim → locks/fence+CAS → state/revision/receipt/outbox → commit. Replay и lookup повторяют текущие guards, а faults откатывают весь конверт.",
+  "why": "Это tx/privacy anchor P2: SN-08/SN-09/SN-11/SN-14/PANEL-09 должны быть доказаны настоящими PG races и fault injection, не тестом каждой части отдельно.",
+  "scope": {
+    "include": [
+      "Operations execute/lookup и owner mutation SPI с обязательными guard/lock/persist стадиями",
+      "Public SurfaceInstances lifecycle entry через тот же envelope, без прямого write path",
+      "Current reauthorization при replay/lookup, typed non-success; PG full fault/race matrix",
+      "Один выборочный independent review source-bound candidate с max 2 rounds"
+    ],
+    "exclude": [
+      "Реальные posts/reactions/groups/content safety implementations P4/P5",
+      "Network внутри tx, cross-connection atomic commit",
+      "Изменение принятых P1 contracts или ослабление mandatory guard stages"
+    ]
+  },
+  "depends_on": [
+    "P2.3",
+    "P2.4",
+    "P2.5",
+    "P2.6"
+  ],
+  "related": [],
+  "decisions": [
+    "D4",
+    "D6",
+    "D14",
+    "D15",
+    "D16",
+    "D17"
+  ],
+  "reads": [
+    {
+      "ref": "knowledge/execution-policy#routing",
+      "why": "Exact Codex pins и классификация риска D17",
+      "required": true
+    },
+    {
+      "ref": "knowledge/execution-policy#review",
+      "why": "Только выбранный anchor; обязательные checks у всех",
+      "required": true
+    },
+    {
+      "ref": "knowledge/execution-policy#autonomy",
+      "why": "Native API; не выдавать skipped/fake за pass",
+      "required": true
+    },
+    {
+      "ref": "knowledge/invariants#pipeline",
+      "why": "Точный обязательный порядок конверта",
+      "required": true
+    },
+    {
+      "ref": "knowledge/invariants#locks",
+      "why": "Receipt→surface→optional group→owner target/post→reaction",
+      "required": true
+    },
+    {
+      "ref": "knowledge/privacy-model#algorithm",
+      "why": "Current hard guards/containment/no author bypass",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#operations",
+      "why": "Stable result и envelope",
+      "required": true
+    },
+    {
+      "ref": "knowledge/kernel-contracts#problems",
+      "why": "receiptRecorded/error mapping",
+      "required": true
+    },
+    {
+      "ref": "knowledge/panel-design#acceptance",
+      "why": "PANEL-01/06/09; scoped contract vs real runtime",
+      "required": true
+    },
+    {
+      "path": "packages/core/src/Audience/AudienceGate.php",
+      "why": "Действующий P1 enforcement не дублировать permissive путем",
+      "required": true
+    },
+    {
+      "path": "packages/core/src/Actors/ActorContexts.php",
+      "why": "Current actor only",
+      "required": true
+    }
+  ],
+  "task_files": [
+    {
+      "path": "packages/core/src/Operations/Operations.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Operations/Contracts/OwnerMutation.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Operations/Internal/Envelope/**",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/Operations/Internal/Receipts/**",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/Operations/Internal/Outbox/**",
+      "change": "any"
+    },
+    {
+      "path": "packages/core/src/Surfaces/SurfaceInstances.php",
+      "change": "create"
+    },
+    {
+      "path": "packages/core/src/SocKitServiceProvider.php",
+      "change": "any"
+    },
+    {
+      "path": "tests/Integration/Runtime/EnvelopeAtomicityTest.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Integration/Runtime/EnvelopeConcurrencyTest.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Integration/Runtime/ReplayAuthorizationTest.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Integration/Runtime/GenerationFenceTest.php",
+      "change": "create"
+    },
+    {
+      "path": "tests/Fixtures/Runtime/**",
+      "change": "any"
+    },
+    {
+      "path": "tests/Arch/RuntimeEntryPointsTest.php",
+      "change": "create"
+    },
+    {
+      "path": "docs/architecture/invariants.md",
+      "change": "any"
+    },
+    {
+      "path": "docs/architecture/spi.md",
+      "change": "any"
+    },
+    {
+      "path": "artifacts/p2.7/**",
+      "change": "any",
+      "note": "Реальные check logs/evidence и handoff только при исполнении"
+    },
+    {
+      "path": "packages/core/src/Operations/Data/Mutation*.php",
+      "change": "create",
+      "note": "Protocol Request/Snapshot/Effect DTOs; no Internal/framework types"
+    },
+    {
+      "path": "packages/core/src/Operations/Internal/Storage/SurfaceInstances.php",
+      "change": "any",
+      "note": "P2.7 current surface sampling and owned transaction fault boundary"
+    },
+    {
+      "path": "packages/core/src/Operations/Internal/Storage/OwnerConnection.php",
+      "change": "any",
+      "note": "P2.7 current surface sampling and owned transaction fault boundary"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "p27-report",
+      "path": "artifacts/p2.7/REPORT.md",
+      "role": "output"
+    }
+  ],
+  "rules": [
+    "Работа только своего item. Production DDL/generators P3, social reactions/posts P4, comments/external adapters/UI вне P2. Test-only schema и acme.runtime fixture не социальный продукт.",
+    "Соблюдать принятую P1: strict_types, named arguments для >=2 аргументов, Api/Spi, без Internal/framework persistence типов в public domain signatures. Не ослаблять arch-гейты; runtime SQL только на connection/table map immutable панели.",
+    "Не менять global database.default, runtime config, static currentPanel; actor/installation только ActorContexts и текущая host isolation. Unknown/error/revoked deny; anonymous/system fallback запрещён.",
+    "Каждый PG check проходит общий fail-closed bootstrap P2.1: отдельный owned PostgreSQL >=16, реальные PDO backend PIDs/DB identity, *_test и run marker, без ambient dev/prod .env. Missing prerequisites/skip/timeout/failed assertion => не pass и item не done.",
+    "Сохранять actual command/cwd/exit/stdout/stderr/environment identity без секретов и проверяемые SQL assertions в artifacts своего item. Текст expect — требование, не результат. Не создавать result.checks/pass до реального запуска.",
+    "Routes — назначение будущему исполнителю, не доказательство actual model. Native start/finish только при отдельном исполнении; сейчас детализация. Не повторять принятые P1 reviews без изменённого инварианта."
+  ],
+  "guidance": "Public Operations::execute(OperationHandle $handle, CommandEnvelope $command, OwnerMutation $mutation): OperationResult и Operations::lookup(OperationHandle $handle, CommandNamespace $namespace, CommandKey $key): ?OperationResult. Отсутствующий receipt может дать null только после текущего доступа; foreign actor/namespace не выдаёт существование/result. OwnerMutation — узкий Spi Implement для module-owned command/payload, authorization action, subject/proposed audience и local lock/CAS/persist callback через typed domain контекст без ORM в public signatures. Обязательные стадии зашиты в ядре; extension может сузить/deny, не отключить receipt/guard/outbox. Fixture acme.runtime имеет собственные state/revision tables, его вызов доказывает SPI, не social API.\nДо BEGIN: validate+canonical digest, current ActorContexts/isolation, known panel/surface/target and incarnation, ActionAuthorizer, SurfaceAudiencePolicy admission/contains + AudienceGate, owner lifecycle/safety verdict. Не передавать author/installation из command payload. Owner safety пока локальный fixture hook; actual product safety P4. Missing SPI => provider_unavailable/deny, Unknown/Pending не isSuccess. Auth Deny и другие definitive errors с ProblemSpec.receiptRecorded=true записываются отдельным минимальным rejected outcome в том же namespace, после безопасной identity проверки; не перезаписывают winner receipt/не раскрывают чужой result. Unknown/provider/payload/conflict с receiptRecorded=false не сохранять как successful claim.\nBEGIN на resolved owner, INSERT receipt, lock receipt→surface→optional group→owned target/post→reaction (same class ordered); local lifecycle/incarnation/privacy generation/TargetWriteFence recheck; CAS expected revision; persist owner state+revision+final receipt+outbox, COMMIT. Unique wait/replay branch P2.5 после winner читает результат только через fresh guards: при изменившейся authority rollback и re-resolve ВНЕ tx; последующая попытка использует тот же key/digest. Нет auto last-write-wins. Вложенный вызов в активной owner tx поддерживать лишь с savepoint и результатом Pending до outer commit (никакого Confirmed или relay wakeup до внешнего commit), либо явно reject before mutation; выбрать reject nested owner transaction для P2, с типизированным configuration_invalid и документированным ограничением. Чужую outer tx не commit/rollback. Nested независимые panels не объявлять одной atomic operation.\nFault injection с real PG: throw после state, revision, receipt finalization, outbox insert и непосредственно перед commit => все четыре sets без new rows/revision; B и default-decoy неизменны; никакого consume/wakeup на rollback. Lost response после real commit => same key replay original refs и effect=1. Barriers: duplicate same digest effect=1/outbox=1/receipt=1; different digest conflict; два expectedRevision winner=1; concurrent archive/delete vs mutate лок сериализует и stale denied; winner receipt rollback allows next claimant. Зафиксировать backend PIDs/барьеры и SQL counts, deadlock/timeout — failed check, не retry-until-green.\nReplay/lookup after revoke/actor removal/other installation/panel/read_only/archive/target hidden/delete/old incarnation/unknown generation => ни resource ref/body, ни новый effect; custom AudienceResolver allow не обходит policy; same actor two classes cannot publish to unrelated class/group. Target/current resolver instrumentation transactionLevel=0; local fence под lock, unprovable remote write deny. Current read-only replay может показывать только разрешённый текущий результат без нового write, archive не выдаёт write grant. До review заморозить actual source candidate manifest (HEAD+working changes hashes+expanded task paths), приложить PG assertions. Fresh Codex SOL/high reviewer не writer; native review receipt по реальным route/session и final digest. Один основной round, второй только finding-scoped correction/new affected invariant; accepted P1 не replay. В design review не запускать и receipt не фабриковать.\nУточнение digest/subject binding: command.namespace.commandType обязан совпасть с mutation.commandType; namespace.installation/panel сверяются с trusted handle. PayloadDigest.of(commandType, normalizedPayload) включает полный panel-qualified surface ref, target ref/incarnation если есть, предлагаемый audience и expectedRevision при CAS; context refs берутся из validated handle, не из непроверенного payload. Если payload передаёт несовпадающий ref, reject payload_invalid до claim. CommandKey/полный namespace не обрезать. Один key для другой surface/target того же panel не может получить replay старого subject. PG tests включают same panel+key с новым target/incarnation и same digest в ошибочном envelope: effect=0/idempotency_conflict либо payload_invalid; чужой outcome не выдаётся.\nPublic lifecycle freeze: SurfaceInstances::get(OperationHandle): SurfaceInstance, create/archive/resume/delete(OperationHandle, CommandEnvelope): OperationResult. get проходит fresh guards, lifecycle commands создают kernel OwnerMutation и идут через Operations::execute; authorizer actions sockit.surfaces.{create,archive,resume,delete}. Для archive/resume/delete expectedRevision обязателен; create требует отсутствующий текущий instance, явный requested incarnation и tombstone check, не resurrect. Target-less handle допустим для этих kernel операций; module target mutation без target reject.\nOwnerMutation минимальный protocol: commandType(): string; payload(): array (phpdoc canonical scalar/array shape); request(OperationHandle): MutationRequest (action, AudienceSubject, write/publish/read intent, optional proposed audience); lock(OperationHandle): MutationSnapshot (current own ResourceRef/revision/lifecycle/local-generation и owner safety verdict); persist(OperationHandle, MutationSnapshot): MutationEffect (affectedRows, resource, newRevision, list of ref-only event proposals). request side-effect-free вне tx, lock/persist только local owner connection. Snapshot/Effect/Request — final readonly Api DTO без framework/Internal/closure. Kernel сверяет handle/subject identity, mandatory current guards, expectedRevision/affectedRows=1, newRevision=old.next(), выставляет event source/panel/IDs сам; extension не может подменить context/revision или выключить стадии. Новая create mutation отдельно проверяет отсутствие current resource и expectedRevision=null; нарушение protocol => typed reject/rollback. Trusted owner implementation выполняет своё SQL, публичный consumer contract не раскрывает driver. PG fixture подтверждает настоящие SQL affected rows и все return predicates, не один fake MutationEffect.",
+  "validation": [
+    {
+      "id": "V1",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/EnvelopeAtomicityTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "faults after each persist stage/before commit: state+revision+receipt+outbox rollback together; B/decoy unchanged; 0 dispatch; nested-owner rejection before effect",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V2",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/EnvelopeConcurrencyTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "2 independent PG sessions: duplicate effect/receipt/outbox exactly 1; digest conflict; CAS winner 1; archive/delete contention; lost-response replay original ref",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V3",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/ReplayAuthorizationTest.php tests/Integration/Runtime/GenerationFenceTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "revoked/cross-install/panel/unknown deny before output/effect; no network under lock; fence change rollback; current containment mandatory",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V4",
+      "cmd": "composer test -- tests/Arch/RuntimeEntryPointsTest.php tests/Arch --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "no command author/installation spoof or bypass, no public ORM/Internal",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V99",
+      "procedure": "Получить native source-bound review receipt P2.7 от независимой fresh codex/gpt-6.1-sol/high session. Сверить subject=P2.7, final base/candidate.head/digest/expanded paths с actual candidate, actual reviewer != writer, rounds<=2; ответить на каждый finding, unresolved Major/Blocker=0. receipt применять только к reviewed source; отсутствие реального review не pass.",
+      "expect": "Fresh final-candidate receipt принят native finish; tx/privacy findings закрыты; review не выполняется во время детализации",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V90",
+      "cmd": "composer analyse -- --memory-limit=512M",
+      "expect": "exit 0, No errors; нет новых suppressions/baseline",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V91",
+      "cmd": "composer lint",
+      "expect": "exit 0; changed PHP проходит Pint",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V5",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/SurfaceLifecycleTest.php tests/Integration/Runtime/TombstoneReplayTest.php tests/Integration/Runtime/ReceiptClaimsTest.php tests/Integration/Runtime/ReceiptConflictRecoveryTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "Affected original surface/receipt primitives retain SQL CAS/tombstone/unique-claim behavior on isolated PG16",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V6",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/OutboxRelayTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "Affected outbox transaction and lease/crash semantics remain valid on isolated PG16",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V7",
+      "cmd": "composer test -- --configuration phpunit.pg.xml tests/Integration/Runtime/InboxIdentityTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "Consumer SQL inbox and crash/dedup boundary remain valid on isolated PG16",
+      "kind": "acceptance"
+    },
+    {
+      "id": "V8",
+      "cmd": "composer test -- tests/Feature/BootTest.php tests/Feature/Configuration tests/Feature/Targets tests/Unit/Operations --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+      "expect": "Affected scoped runtime bindings/default boot/config-cache/current target handles remain valid",
+      "kind": "acceptance"
+    }
+  ],
+  "deliverables": [
+    "Guarded runtime execute/lookup и lifecycle API",
+    "Real PG atomicity/concurrency/replay evidence",
+    "Независимый review receipt только при будущем исполнении anchor"
+  ],
+  "route": {
+    "class": "frontier",
+    "effort": "xhigh",
+    "provider": "codex",
+    "model": "gpt-6.1-sol"
+  },
+  "review": {
+    "mode": "requested",
+    "reviewer": {
+      "class": "frontier",
+      "model": "gpt-6.1-sol",
+      "note": "Будущее независимое read-only review в fresh session, не owning writer. Anchor P2.7: receipt claim recovery + lock/fence order + current replay guards + atomic rollback; covers только изменённые supporting invariants P2.2–P2.6.",
+      "provider": "codex",
+      "effort": "high"
+    },
+    "reason": "Владелец явно запросил выборочное review конкретного рискованного anchor. P2.7 объединяет tx/privacy границы I-02/I-04/I-05/I-06/I-07/I-12 и зависит от PG concurrency evidence. Не ревью всей фазы.",
+    "rounds_max": 2,
+    "covers": [
+      "P2.2",
+      "P2.3",
+      "P2.4",
+      "P2.5",
+      "P2.6",
+      "P2.7"
+    ]
+  },
+  "authority": {
+    "kind": "routine"
+  },
+  "rag": {
+    "need": "none",
+    "status": "not_needed"
+  },
+  "result": {
+    "started_at": "2026-10-28T16:28:15Z",
+    "executor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "session": "01a18356-1ebf-7ef1-877f-01d40534fd40"
+    }
+  },
+  "updated_at": "2026-10-28T16:50:30Z"
+}

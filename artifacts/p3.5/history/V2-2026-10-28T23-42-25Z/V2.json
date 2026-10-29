@@ -1,0 +1,35 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p3.5-V2-2026-10-28T23:42:25Z",
+  "check_id": "V2",
+  "subject": "PLAN1.P3.5",
+  "procedure": {
+    "cmd": "python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Feature/Consumer/PanelGeneratorInstallTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
+    "cwd": "."
+  },
+  "candidate": {
+    "head": "7969813f5879fd3d20903ce7c573a5568301768f",
+    "dirty_digest": "95c2e81b13be62614abdb469facddcdb02138aafe4c1c8caadeb0f46bdfce6fa"
+  },
+  "exit": 0,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "env_digest": "b96b25768b6867783d4ff2043fe1c302b473de945d87df0d187b0858fdbcb6d6"
+  },
+  "log": {
+    "path": "artifacts/p3.5/history/V2-2026-10-28T23-42-25Z/V2.log",
+    "sha256": "18f34d3a872ab13a9e9b0c67488df03d4c919280816f882eb790b48451706ea2"
+  },
+  "started_at": "2026-10-28T23:42:25Z",
+  "finished_at": "2026-10-28T23:42:29Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "session": "01a184d9-22bf-7eb2-8509-18ad592e8cc7"
+    }
+  }
+}

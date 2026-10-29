@@ -1,0 +1,99 @@
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Runtime/ReceiptClaimsTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=101
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=102
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=103
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=104
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=105
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=106
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=107
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=same holder=111 waiter=117 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=108
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=109
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=110
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=111
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=112
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=113
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=114
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=115
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=116
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=117
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=118
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=119
+P2.5 race results [{"outcome":"confirmed","receipt":"01a18335-baaa-7234-a32e-f9cdad6db883","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a18335-baaa-7234-a32e-f9cdad6db883"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"outcome":"confirmed","receipt":"01a18335-baaa-7234-a32e-f9cdad6db883","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a18335-baaa-7234-a32e-f9cdad6db883"},"revision":1,"writes":0,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=120
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=121
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=122
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=123
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=124
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=125
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=conflict holder=129 waiter=135 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=126
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=127
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=128
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=129
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=130
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=131
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=132
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=133
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=134
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=135
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=136
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=137
+P2.5 race results [{"outcome":"confirmed","receipt":"01a18335-bc99-7139-80f8-6c945cad6898","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a18335-bc99-7139-80f8-6c945cad6898"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"problem":"sockit.idempotency_conflict","writes":0,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=138
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=139
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=140
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=141
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=142
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=143
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=rollback holder=147 waiter=153 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=144
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=145
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=146
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=147
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=148
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=149
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=150
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=151
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=152
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=153
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=154
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=155
+P2.5 race results [{"rollback":true,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"outcome":"confirmed","receipt":"01a18335-bf75-7316-9e82-a9394bf18487","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a18335-bf75-7316-9e82-a9394bf18487"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=156
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=157
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=158
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=159
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=160
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=161
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 barrier mode=actor holder=165 waiter=171 wait_event_type=Lock, blocked by holder
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=162
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=163
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=164
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=165
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=166
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=167
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=168
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=169
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=170
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=171
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=172
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=173
+P2.5 race results [{"outcome":"confirmed","receipt":"01a18335-c0da-73dd-933c-d85e1ec04192","resource":{"panel":"acme.a","kind":"surface_instance","id":"01a18335-c0da-73dd-933c-d85e1ec04192"},"revision":1,"writes":1,"usable_inside":true,"usable":true,"transaction_level":0},{"problem":"sockit.actor_context_invalid","writes":0,"usable_inside":true,"usable":true,"transaction_level":0}]
+P2.5 SQL assertions owner effects=1 receipts=1 unfinished=0 decoy=sentinel
+PG identity database=sockit_p2_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=174
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=175
+PG identity database=sockit_p2_decoy_ed5ca4b2ec427346_test server_version_num=160014 marker=sockit-p21-ed5ca4b2ec427346 backend_pid=176
+P2.2 Laravel connection=owner_a database=sockit_p2_ed5ca4b2ec427346_test backend_pid=177
+P2.2 Laravel connection=owner_b database=sockit_p2_ed5ca4b2ec427346_test backend_pid=178
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_ed5ca4b2ec427346_test backend_pid=179
+P2.5 receipt fixture DDL AFTER verified private PDO identities
+P2.5 SQL assertions owner effects=7 receipts=7 unfinished=0 decoy=sentinel
+P2.5 routed SQL without bindings [{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_b","sql":"INSERT INTO \"panel_b\".\"other_b_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"},{"connection":"owner_a","sql":"INSERT INTO \"panel_a\".\"driver_a_receipts\" (id, namespace, command_key, digest, actor_ref, actor_kind, on_behalf_of) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (namespace, command_key) DO NOTHING RETURNING id"}]

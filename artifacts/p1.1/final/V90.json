@@ -1,0 +1,27 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "PLAN1.P1.1-final-V90",
+  "check_id": "V90",
+  "subject": "PLAN1.P1.1",
+  "procedure": {
+    "cmd": "vendor/bin/phpstan analyse --no-progress",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "candidate": {
+    "head": "2ab8d1cc447fdabb810a5629c0ec9291712f4e43"
+  },
+  "exit": 0,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39 (PHP_INI_SCAN_DIR includes /tmp/sockit-p11-phpini: memory_limit=512M)"
+  },
+  "log": {
+    "path": "/home/vostrikov/projects/packages/sockit/artifacts/p1.1/final/V90.log",
+    "sha256": "b256a6f0b7b62f737ee68fed04560a83b85b188d2261f326b74c4596b7768594"
+  },
+  "started_at": "2026-10-28T11:29:03.967302+00:00",
+  "finished_at": "2026-10-28T11:29:04.589434+00:00",
+  "producer": {
+    "kind": "executor",
+    "actor": "codex/gpt-6.1-terra/medium"
+  }
+}

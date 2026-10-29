@@ -1,0 +1,44 @@
+{
+  "schema": "valid",
+  "logs": "sha256 verified",
+  "commands": "literal V1 V2 V3 V89 V90 V91",
+  "source_digest": "sha256:30537b06eed643791e15b9f44dc65dccc22200ea53697dcdfe4c7e976d9aa632",
+  "results": {
+    "V1": {
+      "exit": 0,
+      "summaries": [
+        "Tests:    17 passed (25 assertions)"
+      ]
+    },
+    "V2": {
+      "exit": 0,
+      "summaries": [
+        "Tests:    14 passed (145 assertions)"
+      ]
+    },
+    "V3": {
+      "exit": 0,
+      "summaries": [
+        "Tests:    35 passed (324 assertions)"
+      ]
+    },
+    "V89": {
+      "exit": 0,
+      "summaries": [
+        "Tests:    53 passed (596 assertions)"
+      ]
+    },
+    "V90": {
+      "exit": 0,
+      "summaries": [
+        "[OK] No errors"
+      ]
+    },
+    "V91": {
+      "exit": 0,
+      "summaries": [
+        "{\"tool\":\"pint\",\"result\":\"passed\"}"
+      ]
+    }
+  }
+}

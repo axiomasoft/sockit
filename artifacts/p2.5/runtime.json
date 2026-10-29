@@ -1,0 +1,8 @@
+{
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "reasoning_effort": null,
+  "cwd": "/home/vostrikov/projects/packages/sockit",
+  "session": "01a1832f-7b78-7db0-a966-18eee2934db4",
+  "source": "actual runtime turn_context"
+}

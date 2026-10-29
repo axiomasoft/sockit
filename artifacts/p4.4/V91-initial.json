@@ -1,0 +1,35 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p4.4-V91-2026-10-29T05:38:25Z",
+  "check_id": "V91",
+  "subject": "PLAN1.P4.4",
+  "procedure": {
+    "cmd": "composer lint",
+    "cwd": "."
+  },
+  "candidate": {
+    "head": "e5399d2c804f3e6601ccd5944499b8458820e223",
+    "dirty_digest": "f8589feba346e19495272c6ac0f210b7c9ad4ccfe470ebfb0054efb43e0142eb"
+  },
+  "exit": 1,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39; PHP 8.4.1 (cli) (built: Nov 21 2024 08:58:25) (NTS)",
+    "python": "3.12.3",
+    "env_digest": "2b5da604bb0ec744c67a69a2cb5f91c2b5a6232b834849fbe3e505445ef628e4"
+  },
+  "log": {
+    "path": "artifacts/p4.4/V91.log",
+    "sha256": "84efaed24b39e807ebe790170c903f7bc0f6d4d1f936cd798dc73ef62d8516c7"
+  },
+  "started_at": "2026-10-29T05:38:25Z",
+  "finished_at": "2026-10-29T05:38:26Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "session": "01a1861c-7ccc-75e3-8d37-fa03616b8bb5"
+    }
+  }
+}

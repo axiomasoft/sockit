@@ -1,0 +1,11 @@
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/KernelSchemaTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=102
+PG identity database=sockit_p2_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=103
+PG identity database=sockit_p2_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=104
+PG identity database=sockit_p2_decoy_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=105
+PG identity database=sockit_p2_decoy_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=106
+P3.3 SQL assertions catalog_exact=true kernel_bounds=true composite_tombstone=true no_host_fk=true module_crud=true module_dependency_fk=true relay_index=true reverse_drop=true
+PG identity database=sockit_p2_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=108
+PG identity database=sockit_p2_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=109
+PG identity database=sockit_p2_decoy_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=110
+PG identity database=sockit_p2_decoy_7e98063d3720efa7_test server_version_num=160014 marker=sockit-p21-7e98063d3720efa7 backend_pid=111

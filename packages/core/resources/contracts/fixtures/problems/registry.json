@@ -1,0 +1,166 @@
+{
+  "fixture": "problems/registry",
+  "contract": "problems",
+  "version": "1.0",
+  "input": {},
+  "expect": {
+    "codes": [
+      {
+        "code": "sockit.authentication_required",
+        "http": 401,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.actor_context_invalid",
+        "http": 403,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.authorization_denied",
+        "http": 403,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.authorization_unknown",
+        "http": 503,
+        "retryable": true,
+        "receipt": false
+      },
+      {
+        "code": "sockit.audience_denied",
+        "http": 403,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.audience_not_contained",
+        "http": 422,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.audience_version_unknown",
+        "http": 422,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.surface_not_found",
+        "http": 404,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.surface_archived",
+        "http": 409,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.surface_incarnation_mismatch",
+        "http": 409,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.backend_binding_mismatch",
+        "http": 409,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.content_held",
+        "http": 202,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.content_hidden",
+        "http": 404,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.content_deleted",
+        "http": 410,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.content_erased",
+        "http": 410,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.revision_conflict",
+        "http": 409,
+        "retryable": false,
+        "receipt": true
+      },
+      {
+        "code": "sockit.idempotency_conflict",
+        "http": 409,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.provider_unavailable",
+        "http": 503,
+        "retryable": true,
+        "receipt": false
+      },
+      {
+        "code": "sockit.external_outcome_unknown",
+        "http": 202,
+        "retryable": true,
+        "receipt": true
+      },
+      {
+        "code": "sockit.event_identity_conflict",
+        "http": 409,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.configuration_invalid",
+        "http": 500,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.payload_invalid",
+        "http": 422,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.wire_version_unsupported",
+        "http": 422,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.module_invalid",
+        "http": 500,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.panel_not_found",
+        "http": 404,
+        "retryable": false,
+        "receipt": false
+      },
+      {
+        "code": "sockit.panel_binding_mismatch",
+        "http": 409,
+        "retryable": false,
+        "receipt": true
+      }
+    ]
+  }
+}

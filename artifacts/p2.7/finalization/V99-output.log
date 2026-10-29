@@ -1,0 +1,45 @@
+COMMAND python3 -W ignore::DeprecationWarning .swissknifeman/state/p2.7-finalization/verify-review.py
+CWD /home/vostrikov/projects/packages/sockit
+STDOUT
+{
+  "subject": "PLAN1.P2.7",
+  "schema_valid": true,
+  "exact_candidate": "sha256:3632920a06b541e0939e275f5d526a65f7da4ed39bc15bd0f54aa5ec0db62d74",
+  "head": "03c852c9ef08bb0294a4facb17394d5453d3fabd",
+  "source_paths": 148,
+  "outside_paths_verified": 1561,
+  "actual_reviewer": {
+    "provider": "codex",
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "session": "01a1837a-61ea-7db3-bb67-66043bbba52e",
+    "selector_source": "actual runtime turn_context"
+  },
+  "writer_session": "01a18356-1ebf-7ef1-877f-01d40534fd40",
+  "round": 2,
+  "verdict": "GREEN",
+  "findings_corrected": [
+    "F1",
+    "F2"
+  ],
+  "open": {
+    "blocker": 0,
+    "major": 0
+  },
+  "receipt_sha256": "f994c8db5d48c902cff9cef0dcb1bb27d4e37a66a931f1d116f58eeb06d69cfb",
+  "review_source": "plans/2026.10.17-\u21161-SOCKIT-FOUNDATION/artifacts/autopilot/p2.7-rereview.jsonl",
+  "review_source_sha256": "46b23dac828e8aab0078837a0b4c3cb3912e4594edbbb6ec56194b11278ddc1e",
+  "review_runtime": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "session": "01a1837a-61ea-7db3-bb67-66043bbba52e"
+  },
+  "source_check_digest": "f9488523f6b2e58eb4b47b9d76deb37dd91d770a4c060838519633621c4a8165",
+  "V99": "pass",
+  "native_status_before": "in_progress"
+}
+
+STDERR
+
+EXIT 0
+

@@ -1,0 +1,31 @@
+{
+  "fixture": "aggregate-unused",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "host": "foreign",
+        "features": [
+          "posts"
+        ]
+      },
+      {
+        "panel": "unknown.panel"
+      },
+      {
+        "reject_graph": true,
+        "kind": "crm.second"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_FEATURE_DISABLED",
+      "SURFACE_HOST_MISMATCH",
+      "SURFACE_PANEL_UNKNOWN",
+      "SURFACE_POLICY_INVALID"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "artifacts": [
+    {
+      "id": "p27-report",
+      "path": "artifacts/p2.7/REPORT.md",
+      "role": "output"
+    },
+    {
+      "id": "p27-correction-1-report",
+      "path": "artifacts/p2.7/correction-1/REPORT.md",
+      "role": "output"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SocKit\Panels\Data;
+#[\SocKit\Attributes\Api]
+final readonly class PanelId {}

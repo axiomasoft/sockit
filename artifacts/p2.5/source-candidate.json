@@ -1,0 +1,13 @@
+{
+  "head": "d8f4042982374526cced7d5a34ecdd63f9bf1bb5",
+  "files": {
+    "packages/core/src/Operations/Data/ReceiptSnapshot.php": "53bf7716a5cf5ad633cdc2d9d59c08956b9ce5d8aa2ce777c97b331a3129a413",
+    "packages/core/src/Operations/Internal/Receipts/ReceiptException.php": "6d1652a6019ca0eda5ce6674e7fc128c2dd98afebe1a4a3869ff6ae01d0e9ce5",
+    "packages/core/src/Operations/Internal/Receipts/ReceiptLedger.php": "c9d6bf38f56947ca760ceef37ecf45c9bf961919044ad6d3a80a368451f6223b",
+    "tests/Fixtures/Runtime/ReceiptScenario.php": "b9bea76463d9bb1e0367d6d6db40ae7fa64d8dc0e021253e47b83aebad5f9987",
+    "tests/Fixtures/Runtime/receipt-child.php": "c2be47927afe4f03336eae2c812ac6722de627a057460535d38482ed07bb34f0",
+    "tests/Integration/Runtime/ReceiptClaimsTest.php": "f4274781c60d0e4d039a5504f62ca92467a565942d8d0b74889cbd78aa88ec6c",
+    "tests/Integration/Runtime/ReceiptConflictRecoveryTest.php": "816d0735865d50002e11edd15f3f337bf487284c2c81ce7eeea6e306a2a5435d"
+  },
+  "sha256": "27dd17d4d7c528ed506ce31d0bfd85dffc566f105210b243b6a81b9f482a139a"
+}

@@ -1,0 +1,18 @@
+{
+  "fixture": "contour-unknown",
+  "contract": "surfaces",
+  "version": "1.0",
+  "input": {
+    "surfaces": [
+      {
+        "contour": "foreign"
+      }
+    ]
+  },
+  "expect": {
+    "valid": false,
+    "rules": [
+      "SURFACE_CONTOUR_INVALID"
+    ]
+  }
+}

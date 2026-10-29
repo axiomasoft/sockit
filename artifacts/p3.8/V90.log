@@ -1,0 +1,15 @@
+command: composer analyse -- --memory-limit=512M
+cwd: /home/vostrikov/projects/packages/sockit
+php: PHP 8.4.27 (cli) (built: Oct 21 2026 14:35:21) (NTS)
+started: 2026-10-29T04:08:20Z
+--- stdout ---
+
+ [OK] No errors                                                                 
+
+
+--- stderr ---
+> phpstan analyse --no-progress '--memory-limit=512M'
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+
+exit: 0
+finished: 2026-10-29T04:08:22Z

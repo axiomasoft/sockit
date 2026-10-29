@@ -1,0 +1,39 @@
+=== stdout ===
+private volume=ad24ebb6bf56c143dd0ebe52aba6b5864fdfd27dc2e93c42817659b43763d143
+private container=53ea3f9fd820021da0f691daeb924dcaca26042ee6d6a3a8de4d7bb9883b52a7 owner=sockit_p2_f2cdbb3899a2e37d_test decoy=sockit_p2_decoy_f2cdbb3899a2e37d_test port=33166
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Social\PostPrivacyTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit versions post events with the owning privacy revision instead of[39m[90m…[39m [90m0.55s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\PostPrivacyTest[22m [90m>[39m it versions post event…   
+[39;1m  Failed asserting that 1 is identical to 2.[39;22m
+
+  at [32mtests/Integration/Social/PostPrivacyTest.php[39m:[32m16[39m
+     12▕         $ref = $created->operation->resource ?? throw new RuntimeException('Missing post');
+     13▕         $edit = $s->post(body: 'Second version', resource: $ref);
+     14▕         expect($s->posts->edit(handle: $s->handle, post: $edit, command: $s->command(post: $edit, expected: new Revision(1), key: 'post.privacy.edit.0001'))->isPublished())->toBeTrue();
+     15▕         $wire = json_decode($s->connection()->table('panel_a.a_outbox')->whereRaw("envelope::jsonb->>'source_revision' = '2'")->value('envelope'), true, flags: JSON_THROW_ON_ERROR);
+  ➜  16▕         expect($wire['privacy_revision'])->toBe(2);
+     17▕         expect($s->connection()->table('panel_a.a_posts')->value('privacy_revision'))->toBe(2);
+     18▕         $s->counts();
+     19▕     } finally {
+     20▕         $s->cleanup();
+
+  [33m1   [39m[39;1mtests/Integration/Social/PostPrivacyTest.php[39;22m:[39;1m16[39;22m
+
+
+  [90mTests:[39m    [31;1m1 failed[39;22m[90m (5 assertions)[39m
+  [90mDuration:[39m [39m0.60s[39m
+
+
+=== stderr ===
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Social/PostPrivacyTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_f2cdbb3899a2e37d_test server_version_num=160014 marker=sockit-p21-f2cdbb3899a2e37d backend_pid=102
+PG identity database=sockit_p2_f2cdbb3899a2e37d_test server_version_num=160014 marker=sockit-p21-f2cdbb3899a2e37d backend_pid=103
+PG identity database=sockit_p2_decoy_f2cdbb3899a2e37d_test server_version_num=160014 marker=sockit-p21-f2cdbb3899a2e37d backend_pid=104
+PG identity database=sockit_p2_decoy_f2cdbb3899a2e37d_test server_version_num=160014 marker=sockit-p21-f2cdbb3899a2e37d backend_pid=105
+P2.2 Laravel connection=owner_a database=sockit_p2_f2cdbb3899a2e37d_test backend_pid=106
+P2.2 Laravel connection=owner_b database=sockit_p2_f2cdbb3899a2e37d_test backend_pid=107
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_f2cdbb3899a2e37d_test backend_pid=108
+P4.4 production posts snapshots installed after owned PG proof; public surface API
+Script pest handling the test event returned with error code 1

@@ -1,0 +1,14 @@
+{
+    "name": "acme/sockit-consumer",
+    "type": "project",
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^13.0",
+        "axiomasoft/sockit": "^0.1@dev"
+    },
+    "repositories": [{"type": "path", "url": "../../../packages/core", "options": {"symlink": false, "versions": {"axiomasoft/sockit": "0.1.x-dev"}}}],
+    "autoload": {"psr-4": {"Acme\\": "app/"}},
+    "config": {"sort-packages": true},
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

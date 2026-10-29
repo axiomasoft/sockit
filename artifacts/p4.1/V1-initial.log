@@ -1,0 +1,249 @@
+> pest 'tests/Feature/Social/ModuleSelectionTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Feature\Social\ModuleSelectionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.02s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules without boot SQL in every provider order with dataset "both"[39m
+  [31;1m⨯[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules without boot SQL in every provider order with dataset "enabled unselected"[39m
+  [31;1m⨯[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules without boot SQL in every provider order with dataset "posts offered only"[39m
+  [31;1m⨯[39;22m[90m [39m[90mit requires explicit provider offering and canonical module IDs and rejects disabled selections[39m
+  [31;1m⨯[39;22m[90m [39m[90mit normalizes reaction kinds through defaults global settings and panel settings and rejects unknown settings[39m
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.20s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.21s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.05s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m…  [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/PanelSchemaCompiler.php[39;22m:[39;1m187[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m…  [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/PanelSchemaCompiler.php[39;22m:[39;1m187[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m…  [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/PanelSchemaCompiler.php[39;22m:[39;1m187[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m…  [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/PanelSchemaCompiler.php[39;22m:[39;1m187[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m [90m>[39m it requires explicit p…   
+[39;1m  Failed asserting that an instance of class SocKit\Configuration\Exceptions\InvalidConfigurationException is an instance of class SocKit\Modules\Exceptions\InvalidModuleException.[39;22m
+
+  at [32mtests/Feature/Social/ModuleSelectionTest.php[39m:[32m48[39m
+     44▕ 
+     45▕ it('requires explicit provider offering and canonical module IDs and rejects disabled selections', function (): void {
+     46▕     expect(fn () => Selection::app(enabled: ['sockit.posts'], providers: [Selection::PROVIDERS[0]])->boot())->toThrow(InvalidModuleException::class);
+     47▕     foreach (['posts', 'reactions', 'unknown.module'] as $id) {
+  ➜  48▕         expect(fn () => Selection::app(enabled: [$id])->boot())->toThrow(InvalidModuleException::class);
+     49▕     }
+     50▕     expect(fn () => Selection::app(selected: ['sockit.posts'])->boot())->toThrow(InvalidPanelException::class);
+     51▕ });
+     52▕
+
+  [33m1   [39m[39;1mtests/Feature/Social/ModuleSelectionTest.php[39;22m:[39;1m48[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m…  [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/PanelSchemaCompiler.php[39;22m:[39;1m187[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m…  [41;1m ProcessFailedException [49;22m  
+[39;1m  The command "'/home/vostrikov/.config/herd-lite/bin/php' '/home/vostrikov/projects/packages/sockit/tests/Fixtures/PanelConsumer/boot.php' '/tmp/sockit-p41-cache-8464dcf81de019b517580e09' 'snapshot'" failed.
+
+Exit Code: 255(Unknown error)
+
+Working directory: /home/vostrikov/projects/packages/sockit
+
+Output:
+================
+
+Fatal error: Uncaught Illuminate\Contracts\Container\BindingResolutionException: Target [Illuminate\Contracts\Debug\ExceptionHandler] is not instantiable. in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php:1444
+Stack trace:
+#0 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(1160): Illuminate\Container\Container->notInstantiable('Illuminate\\Cont...')
+#1 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(939): Illuminate\Container\Container->build('Illuminate\\Cont...')
+#2 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1086): Illuminate\Container\Container->resolve('Illuminate\\Cont...', Array, true)
+#3 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(867): Illuminate\Foundation\Application->resolve('Illuminate\\Cont...', Array)
+#4 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1066): Illuminate\Container\Container->make('Illuminate\\Cont...', Array)
+#5 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(298): Illuminate\Foundation\Application->make('Illuminate\\Cont...')
+#6 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(217): Illuminate\Foundation\Bootstrap\HandleExceptions->getExceptionHandler()
+#7 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(199): Illuminate\Foundation\Bootstrap\HandleExceptions->renderForConsole(Object(SocKit\Schema\Exceptions\InvalidSchemaException))
+#8 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(265): Illuminate\Foundation\Bootstrap\HandleExceptions->handleException(Object(SocKit\Schema\Exceptions\InvalidSchemaException))
+#9 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->{closure:Illuminate\Foundation\Bootstrap\HandleExceptions::forwardsTo():264}(Object(SocKit\Schema\Exceptions\InvalidSchemaException))
+#10 {main}
+  thrown in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php on line 1444
+
+Fatal error: Uncaught Illuminate\Contracts\Container\BindingResolutionException: Target [Illuminate\Contracts\Debug\ExceptionHandler] is not instantiable. in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php:1444
+Stack trace:
+#0 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(1160): Illuminate\Container\Container->notInstantiable('Illuminate\\Cont...')
+#1 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(939): Illuminate\Container\Container->build('Illuminate\\Cont...')
+#2 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1086): Illuminate\Container\Container->resolve('Illuminate\\Cont...', Array, true)
+#3 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(867): Illuminate\Foundation\Application->resolve('Illuminate\\Cont...', Array)
+#4 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1066): Illuminate\Container\Container->make('Illuminate\\Cont...', Array)
+#5 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(298): Illuminate\Foundation\Application->make('Illuminate\\Cont...')
+#6 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(217): Illuminate\Foundation\Bootstrap\HandleExceptions->getExceptionHandler()
+#7 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(199): Illuminate\Foundation\Bootstrap\HandleExceptions->renderForConsole(Object(Symfony\Component\ErrorHandler\Error\FatalError))
+#8 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(241): Illuminate\Foundation\Bootstrap\HandleExceptions->handleException(Object(Symfony\Component\ErrorHandler\Error\FatalError))
+#9 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(265): Illuminate\Foundation\Bootstrap\HandleExceptions->handleShutdown()
+#10 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->{closure:Illuminate\Foundation\Bootstrap\HandleExceptions::forwardsTo():264}()
+#11 {main}
+  thrown in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php on line 1444
+
+
+Error Output:
+================[39;22m
+
+  at [32mvendor/symfony/process/Process.php[39m:[32m293[39m
+    289▕      */
+    290▕     public function mustRun(?callable $callback = null, array $env = []): static
+    291▕     {
+    292▕         if (0 !== $this->run($callback, $env)) {
+  ➜ 293▕             throw new ProcessFailedException($this);
+    294▕         }
+    295▕ 
+    296▕         return $this;
+    297▕     }
+
+      [2m+1 vendor frames [22m
+  [33m2   [39m[39;1mtests/Feature/Social/ModuleSelectionTest.php[39;22m:[39;1m79[39;22m
+  [33m3   [39m[39;1mtests/Feature/Social/ModuleSelectionTest.php[39;22m:[39;1m84[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\Social\ModuleSelectionTest[22m…  [41;1m ProcessFailedException [49;22m  
+[39;1m  The command "'/home/vostrikov/.config/herd-lite/bin/php' '/home/vostrikov/projects/packages/sockit/tests/Fixtures/PanelConsumer/boot.php' '/tmp/sockit-p41-cache-de2b530ffa79892aab1aa074' 'snapshot'" failed.
+
+Exit Code: 255(Unknown error)
+
+Working directory: /home/vostrikov/projects/packages/sockit
+
+Output:
+================
+
+Fatal error: Uncaught Illuminate\Contracts\Container\BindingResolutionException: Target [Illuminate\Contracts\Debug\ExceptionHandler] is not instantiable. in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php:1444
+Stack trace:
+#0 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(1160): Illuminate\Container\Container->notInstantiable('Illuminate\\Cont...')
+#1 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(939): Illuminate\Container\Container->build('Illuminate\\Cont...')
+#2 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1086): Illuminate\Container\Container->resolve('Illuminate\\Cont...', Array, true)
+#3 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(867): Illuminate\Foundation\Application->resolve('Illuminate\\Cont...', Array)
+#4 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1066): Illuminate\Container\Container->make('Illuminate\\Cont...', Array)
+#5 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(298): Illuminate\Foundation\Application->make('Illuminate\\Cont...')
+#6 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(217): Illuminate\Foundation\Bootstrap\HandleExceptions->getExceptionHandler()
+#7 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(199): Illuminate\Foundation\Bootstrap\HandleExceptions->renderForConsole(Object(SocKit\Schema\Exceptions\InvalidSchemaException))
+#8 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(265): Illuminate\Foundation\Bootstrap\HandleExceptions->handleException(Object(SocKit\Schema\Exceptions\InvalidSchemaException))
+#9 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->{closure:Illuminate\Foundation\Bootstrap\HandleExceptions::forwardsTo():264}(Object(SocKit\Schema\Exceptions\InvalidSchemaException))
+#10 {main}
+  thrown in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php on line 1444
+
+Fatal error: Uncaught Illuminate\Contracts\Container\BindingResolutionException: Target [Illuminate\Contracts\Debug\ExceptionHandler] is not instantiable. in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php:1444
+Stack trace:
+#0 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(1160): Illuminate\Container\Container->notInstantiable('Illuminate\\Cont...')
+#1 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(939): Illuminate\Container\Container->build('Illuminate\\Cont...')
+#2 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1086): Illuminate\Container\Container->resolve('Illuminate\\Cont...', Array, true)
+#3 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php(867): Illuminate\Foundation\Application->resolve('Illuminate\\Cont...', Array)
+#4 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1066): Illuminate\Container\Container->make('Illuminate\\Cont...', Array)
+#5 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(298): Illuminate\Foundation\Application->make('Illuminate\\Cont...')
+#6 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(217): Illuminate\Foundation\Bootstrap\HandleExceptions->getExceptionHandler()
+#7 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(199): Illuminate\Foundation\Bootstrap\HandleExceptions->renderForConsole(Object(Symfony\Component\ErrorHandler\Error\FatalError))
+#8 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(241): Illuminate\Foundation\Bootstrap\HandleExceptions->handleException(Object(Symfony\Component\ErrorHandler\Error\FatalError))
+#9 /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(265): Illuminate\Foundation\Bootstrap\HandleExceptions->handleShutdown()
+#10 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->{closure:Illuminate\Foundation\Bootstrap\HandleExceptions::forwardsTo():264}()
+#11 {main}
+  thrown in /home/vostrikov/projects/packages/sockit/vendor/laravel/framework/src/Illuminate/Container/Container.php on line 1444
+
+
+Error Output:
+================[39;22m
+
+  at [32mvendor/symfony/process/Process.php[39m:[32m293[39m
+    289▕      */
+    290▕     public function mustRun(?callable $callback = null, array $env = []): static
+    291▕     {
+    292▕         if (0 !== $this->run($callback, $env)) {
+  ➜ 293▕             throw new ProcessFailedException($this);
+    294▕         }
+    295▕ 
+    296▕         return $this;
+    297▕     }
+
+      [2m+1 vendor frames [22m
+  [33m2   [39m[39;1mtests/Feature/Social/ModuleSelectionTest.php[39;22m:[39;1m79[39;22m
+  [33m3   [39m[39;1mtests/Feature/Social/ModuleSelectionTest.php[39;22m:[39;1m84[39;22m
+
+
+  [90mTests:[39m    [31;1m8 failed[39;22m[90m,[39m[39m [39m[32;1m4 passed[39;22m[90m (80 assertions)[39m
+  [90mDuration:[39m [39m0.68s[39m
+
+Script pest handling the test event returned with error code 2

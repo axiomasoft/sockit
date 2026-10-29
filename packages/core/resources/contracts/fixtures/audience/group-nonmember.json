@@ -1,0 +1,47 @@
+{
+  "fixture": "audience/group-nonmember",
+  "contract": "audience",
+  "version": "1.0",
+  "input": {
+    "viewer": {
+      "actor": "user:1",
+      "kind": "person",
+      "installation": "i1",
+      "age_band": "adult"
+    },
+    "subject": {
+      "key": "p1",
+      "installation": "i1",
+      "spec": {
+        "version": "1.0",
+        "scope": "group",
+        "group": "club-7"
+      },
+      "author": "user:9",
+      "surface": {
+        "panel": "edufy.community",
+        "kind": "edufy.class-feed",
+        "host": "edufy.class:42",
+        "incarnation": 1
+      },
+      "surface_archived": false,
+      "archive_readers": false,
+      "admission": "allow",
+      "containment": "allow"
+    },
+    "contours": [
+      {
+        "actor": "user:1",
+        "level": "class",
+        "contour": "edufy.class:42",
+        "membership": "live"
+      }
+    ],
+    "groups": [],
+    "resolver_throws": false
+  },
+  "expect": {
+    "decision": "deny",
+    "reason": "audience.denied.not_in_group"
+  }
+}

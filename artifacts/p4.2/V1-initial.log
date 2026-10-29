@@ -1,0 +1,764 @@
+=== stdout ===
+private volume=835eec9dc6c0d21b67c6f53413d17cbf750c7a064a677c532d08e65db254fced
+private container=d36dc034c96fc7151c2556bff25c8d7f7b47b5a282f1f6f12fd0047eceb8958e owner=sockit_p2_fae42e22a7719abb_test decoy=sockit_p2_decoy_fae42e22a7719abb_test port=33120
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Social\ReactionMutationTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit adds removes and readds one Article membership with CAS and dete[39m[90m…[39m [90m0.23s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit guards original-key replay lookup digest and exact subject bindi[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies stale handles and forged namespace actor installation pan[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies stale handles and forged namespace actor installation pan[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies stale handles and forged namespace actor installation pan[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies stale handles and forged namespace actor installation pan[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies stale handles and forged namespace actor installation pan[39m[90m…[39m [90m0.20s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies stale handles and forged namespace actor installation pan[39m[90m…[39m [90m0.11s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit denies nonwritable unproven hidden unknown or recycled targets a[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rejects disabled feature module kind and absent remove without o[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rejects disabled feature module kind and absent remove without o[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rejects disabled feature module kind and absent remove without o[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rejects disabled feature module kind and absent remove without o[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rolls back membership counter receipt and outbox at each real SQ[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rolls back membership counter receipt and outbox at each real SQ[39m[90m…[39m [90m0.09s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rolls back membership counter receipt and outbox at each real SQ[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rolls back membership counter receipt and outbox at each real SQ[39m[90m…[39m [90m0.08s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m… [41;1m RuntimeException [49;22m  
+[39;1m  Public surface create failed[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m116[39m
+    112▕             foreach (['acme.a', 'acme.b'] as $panel) {
+    113▕                 $handle = $this->app->make(OperationHandles::class)->forSurface(RuntimeScenario::surface($panel));
+    114▕                 $surfaces = $this->app->make(SurfaceInstances::class);
+    115▕                 $command = new CommandEnvelope(key: new CommandKey('surface.creation.0001'), namespace: new CommandNamespace(installation: $handle->actor->installation, panel: $handle->surface->panel, integration: 'host.client', commandType: 'sockit.surfaces.create'), digest: $surfaces->digest(handle: $handle, action: 'create'));
+  ➜ 116▕                 if (! $surfaces->create(handle: $handle, command: $command)->isSuccess()) { throw new \RuntimeException('Public surface create failed'); }
+    117▕             }
+    118▕             fwrite(STDERR, "P4.2 production reactions-only snapshots installed after owned PG proof; public surface API; no posts provider/tables\n");
+    119▕         }
+    120▕         $this->sentinels = $this->sentinels();
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m116[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m20[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m50[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m76[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m76[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m76[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m76[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m76[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m76[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m95[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m124[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m124[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m124[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m124[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m143[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m143[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m143[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Social\ReactionMutationTest[22m [90m>[39m it…  [41;1m PDOException [49;22m  
+[39;1m  SQLSTATE[42P06]: Duplicate schema: 7 ERROR:  schema "panel_a" already exists[39;22m
+
+  at [32mtests/Fixtures/Social/ReactionScenario.php[39m:[32m97[39m
+     93▕         }
+     94▕         if ($install) {
+     95▕             foreach ($this->app->make(PanelDefinitions::class)->all() as $panel) {
+     96▕                 $id = $panel->id->value === 'acme.a' ? 'a' : 'b';
+  ➜  97▕                 $this->db->owner->exec('CREATE SCHEMA panel_'.$id);
+     98▕                 $connection = $this->connection($id);
+     99▕                 $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $this->app->make(Modules::class)->schemaComponents());
+    100▕                 $config = Scenario::object($connection->getConfig());
+    101▕                 $observed = PgTarget::query($this->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
+
+  [33m1   [39m[39;1mtests/Fixtures/Social/ReactionScenario.php[39;22m:[39;1m97[39;22m
+  [33m2   [39m[39;1mtests/Integration/Social/ReactionMutationTest.php[39;22m:[39;1m143[39;22m
+
+
+  [90mTests:[39m    [31;1m30 failed[39;22m[90m (90 assertions)[39m
+  [90mDuration:[39m [39m2.67s[39m
+
+
+=== stderr ===
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Social/ReactionMutationTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=102
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=103
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=104
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=105
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=106
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=107
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=108
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=109
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=110
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=111
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=112
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=113
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=114
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=115
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=116
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=117
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=118
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=119
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=120
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=121
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=122
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=123
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=124
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=125
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=126
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=127
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=128
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=129
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=130
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=131
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=132
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=133
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=134
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=135
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=136
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=137
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=138
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=139
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=140
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=141
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=142
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=143
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=144
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=145
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=146
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=147
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=148
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=149
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=150
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=151
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=152
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=153
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=154
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=155
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=156
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=157
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=158
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=159
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=160
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=161
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=162
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=163
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=164
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=165
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=166
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=167
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=168
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=169
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=170
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=171
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=172
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=173
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=174
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=175
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=176
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=177
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=178
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=179
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=180
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=181
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=182
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=183
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=184
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=185
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=186
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=187
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=188
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=189
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=190
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=191
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=192
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=193
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=194
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=195
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=196
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=197
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=198
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=199
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=200
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=201
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=202
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=203
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=204
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=205
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=206
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=207
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=208
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=209
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=210
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=211
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=212
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=213
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=214
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=215
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=216
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=217
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=218
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=219
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=220
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=221
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=222
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=223
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=224
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=225
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=226
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=227
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=228
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=229
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=230
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=231
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=232
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=233
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=234
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=235
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=236
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=237
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=238
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=239
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=240
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=241
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=242
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=243
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=244
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=245
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=246
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=247
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=248
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=249
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=250
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=251
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=252
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=253
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=254
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=255
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=256
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=257
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=258
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=259
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=260
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=261
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=262
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=263
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=264
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=265
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=266
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=267
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=268
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=269
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=270
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=271
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=272
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=273
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=274
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=275
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=276
+PG identity database=sockit_p2_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=277
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=278
+PG identity database=sockit_p2_decoy_fae42e22a7719abb_test server_version_num=160014 marker=sockit-p21-fae42e22a7719abb backend_pid=279
+P2.2 Laravel connection=owner_a database=sockit_p2_fae42e22a7719abb_test backend_pid=280
+P2.2 Laravel connection=owner_b database=sockit_p2_fae42e22a7719abb_test backend_pid=281
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_fae42e22a7719abb_test backend_pid=282
+Script pest handling the test event returned with error code 2

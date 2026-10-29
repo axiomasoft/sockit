@@ -1,0 +1,32 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "PLAN1.P1.2.V2",
+  "check_id": "V2",
+  "subject": "PLAN1.P1.2",
+  "procedure": {
+    "cmd": "test $(ls docs/adr/*.md | wc -l) -ge 13",
+    "cwd": "/home/vostrikov/projects/packages/sockit"
+  },
+  "candidate": {
+    "head": "5ff076d34306108c65af07b09a588bb71bb2abe3",
+    "dirty_digest": "0e1ffa36c810e1410a9a0db26cbc75e10e4c6d3585ded303096fc1b41165483d"
+  },
+  "exit": 0,
+  "environment": {
+    "platform": "8.4.1"
+  },
+  "log": {
+    "path": "/home/vostrikov/projects/packages/sockit/artifacts/p1.2/V2.log",
+    "sha256": "23a79710f39f15731a93f0a1b8df80ef9b8a13d38e335e787d56125ee705592b"
+  },
+  "started_at": "2026-10-28T11:31:39.174880Z",
+  "finished_at": "2026-10-28T11:31:39.176711Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-terra",
+      "effort": "medium"
+    }
+  }
+}

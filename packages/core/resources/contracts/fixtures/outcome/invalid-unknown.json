@@ -1,0 +1,20 @@
+{
+  "fixture": "invalid-unknown",
+  "contract": "outcome",
+  "version": 1,
+  "input": {
+    "outcome": "unknown",
+    "receipt_id": "r1",
+    "resource": {
+      "panel": "acme.main",
+      "kind": "post",
+      "id": "p1"
+    },
+    "revision": 1,
+    "problem": "sockit.revision_conflict",
+    "problem_detail": {}
+  },
+  "expect": {
+    "valid": false
+  }
+}

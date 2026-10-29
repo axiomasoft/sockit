@@ -1,0 +1,17 @@
+private container=c183fb9e9fb2a9d65d9799ed74446eec5038725c7e7b605226ac18e5c239fb4a owner=sockit_p2_3bcf04257e35cc6d_test decoy=sockit_p2_decoy_3bcf04257e35cc6d_test port=32819
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\ReceiptConflictRecoveryTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit recovers a committed outcome by original key after closing the c[39m[90m…[39m [90m0.32s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects caller digest type namespace and anonymous identity befo[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit denies another actor before exposing digest conflict or stored r[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.20s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back claims and effects for faults non-recordable problems[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit persists only a minimal stable rejection and keeps the original[39m[90m… [39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit propagates unrelated unique failures and rejects nested or non R[39m[90m…[39m [90m0.16s[39m  
+
+  [90mTests:[39m    [32;1m10 passed[39;22m[90m (123 assertions)[39m
+  [90mDuration:[39m [39m1.95s[39m
+

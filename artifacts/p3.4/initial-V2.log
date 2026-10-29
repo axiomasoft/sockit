@@ -1,0 +1,114 @@
+COMMAND python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Schema/ModelQueueRestoreTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+STDOUT
+private container=a5eb84d331707c6a2a780b066a22e24aceed6fda08d4cd2714e1e1d1daf25168 owner=sockit_p2_9e83b47e7344b898_test decoy=sockit_p2_decoy_9e83b47e7344b898_test port=32957
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Schema\ModelQueueRestoreTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit restores real Illuminate identifiers in fresh consumer processes[39m[90m…[39m [90m0.27s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rechecks current actor and authorization after model restoration[39m[90m…[39m [90m0.40s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit rechecks current actor and authorization after model restoration[39m[90m…[39m [90m0.42s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\ModelQueueRestoreTest[22m [90m>[39m…  [41;1m QueryException [49;22m  
+[39;1m  SQLSTATE[42P01]: Undefined table: 7 ERROR:  missing FROM-clause entry for table "a_demo_links"
+LINE 1: ...lect * from "panel_a"."driver_a_demo_links" where "driver_pa...
+                                                             ^ (Connection: owner_a, Host: 127.0.0.1, Port: 32957, Database: sockit_p2_9e83b47e7344b898_test, SQL: select * from "panel_a"."driver_a_demo_links" where "driver_panel_a"."a_demo_links"."target_id" in (01a184d0-ab2d-70de-af38-881d4e5c845c))[39;22m
+
+  at [32mvendor/laravel/framework/src/Illuminate/Database/Connection.php[39m:[32m447[39m
+    443▕             );
+    444▕ 
+    445▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    446▕ 
+  ➜ 447▕             $statement->execute();
+    448▕ 
+    449▕             return $statement->fetchAll(...$fetchUsing);
+    450▕         });
+    451▕     }
+
+      [2m+13 vendor frames [22m
+  [33m14  [39m[39;1mtests/Integration/Schema/ModelQueueRestoreTest.php[39;22m:[39;1m30[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\ModelQueueRestoreTest[22m [90m>[39m…  [41;1m QueryException [49;22m  
+[39;1m  SQLSTATE[42P01]: Undefined table: 7 ERROR:  missing FROM-clause entry for table "a_demo_targets"
+LINE 1: ...ct * from "panel_a"."driver_a_demo_targets" where "driver_pa...
+                                                             ^ (Connection: owner_a, Host: 127.0.0.1, Port: 32957, Database: sockit_p2_9e83b47e7344b898_test, SQL: select * from "panel_a"."driver_a_demo_targets" where "driver_panel_a"."a_demo_targets"."id" = 01a184d0-acc0-73d1-bd9b-c99ee5508cc0 limit 1)[39;22m
+
+  at [32mvendor/laravel/framework/src/Illuminate/Database/Connection.php[39m:[32m447[39m
+    443▕             );
+    444▕ 
+    445▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    446▕ 
+  ➜ 447▕             $statement->execute();
+    448▕ 
+    449▕             return $statement->fetchAll(...$fetchUsing);
+    450▕         });
+    451▕     }
+
+      [2m+13 vendor frames [22m
+  [33m14  [39m[39;1mtests/Integration/Schema/ModelQueueRestoreTest.php[39;22m:[39;1m113[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\ModelQueueRestoreTest[22m [90m>[39m…  [41;1m QueryException [49;22m  
+[39;1m  SQLSTATE[42P01]: Undefined table: 7 ERROR:  missing FROM-clause entry for table "a_demo_targets"
+LINE 1: ...ct * from "panel_a"."driver_a_demo_targets" where "driver_pa...
+                                                             ^ (Connection: owner_a, Host: 127.0.0.1, Port: 32957, Database: sockit_p2_9e83b47e7344b898_test, SQL: select * from "panel_a"."driver_a_demo_targets" where "driver_panel_a"."a_demo_targets"."id" = 01a184d0-ae60-7194-9972-60693c2b61a7 limit 1)[39;22m
+
+  at [32mvendor/laravel/framework/src/Illuminate/Database/Connection.php[39m:[32m447[39m
+    443▕             );
+    444▕ 
+    445▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    446▕ 
+  ➜ 447▕             $statement->execute();
+    448▕ 
+    449▕             return $statement->fetchAll(...$fetchUsing);
+    450▕         });
+    451▕     }
+
+      [2m+13 vendor frames [22m
+  [33m14  [39m[39;1mtests/Integration/Schema/ModelQueueRestoreTest.php[39;22m:[39;1m113[39;22m
+
+
+  [90mTests:[39m    [31;1m3 failed[39;22m[90m (16 assertions)[39m
+  [90mDuration:[39m [39m1.14s[39m
+
+
+STDERR
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/ModelQueueRestoreTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=102
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=103
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=104
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=105
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=106
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=107
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=110
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=111
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=112
+P2.2 Laravel connection=owner_a database=sockit_p2_9e83b47e7344b898_test backend_pid=113
+P2.2 Laravel connection=owner_b database=sockit_p2_9e83b47e7344b898_test backend_pid=114
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e83b47e7344b898_test backend_pid=115
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.6 consumer-owned SQL snapshots installed AFTER verified identities
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=116
+P2.7 all acme/schema DDL AFTER verified isolated identities
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=117
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=118
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=119
+P2.2 Laravel connection=owner_a database=sockit_p2_9e83b47e7344b898_test backend_pid=120
+P2.2 Laravel connection=owner_b database=sockit_p2_9e83b47e7344b898_test backend_pid=121
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e83b47e7344b898_test backend_pid=122
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=123
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=124
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=125
+P2.2 Laravel connection=owner_a database=sockit_p2_9e83b47e7344b898_test backend_pid=126
+P2.2 Laravel connection=owner_b database=sockit_p2_9e83b47e7344b898_test backend_pid=127
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e83b47e7344b898_test backend_pid=128
+P2.4 test-only DDL installed AFTER verified PDO identities
+P2.6 consumer-owned SQL snapshots installed AFTER verified identities
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=129
+P2.7 all acme/schema DDL AFTER verified isolated identities
+PG identity database=sockit_p2_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=130
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=131
+PG identity database=sockit_p2_decoy_9e83b47e7344b898_test server_version_num=160014 marker=sockit-p21-9e83b47e7344b898 backend_pid=132
+P2.2 Laravel connection=owner_a database=sockit_p2_9e83b47e7344b898_test backend_pid=133
+P2.2 Laravel connection=owner_b database=sockit_p2_9e83b47e7344b898_test backend_pid=134
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_9e83b47e7344b898_test backend_pid=135
+Script pest handling the test event returned with error code 2

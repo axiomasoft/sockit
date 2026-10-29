@@ -1,0 +1,89 @@
+COMMAND composer analyse -- --memory-limit=512M
+CWD /home/vostrikov/projects/packages/sockit
+STDOUT
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+ ------ --------------------------------------------------------- 
+  Line   tests/Fixtures/Runtime/SqlInboxConsumer.php              
+ ------ --------------------------------------------------------- 
+  40     Cannot call method fetchColumn() on PDOStatement|false.  
+         🪪  method.nonObject                                     
+  88     If condition is always false.                            
+         🪪  if.alwaysFalse                                       
+ ------ --------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------ 
+  Line   tests/Fixtures/Runtime/outbox-child.php                           
+ ------ ------------------------------------------------------------------ 
+  12     Binary operation "." between mixed and "\n" results in an error.  
+         🪪  binaryOp.invalid                                              
+  12     Cannot access property $pid on mixed.                             
+         🪪  property.nonObject                                            
+  34     Cannot call method fetchAll() on PDOStatement|false.              
+         🪪  method.nonObject                                              
+ ------ ------------------------------------------------------------------ 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   tests/Fixtures/Runtime/outbox-console.php                             
+ ------ ---------------------------------------------------------------------- 
+  11     Cannot call method make() on mixed.                                   
+         🪪  method.nonObject                                                  
+  13     Cannot call method bootstrap() on mixed.                              
+         🪪  method.nonObject                                                  
+  14     Cannot access property $events on mixed.                              
+         🪪  property.nonObject                                                
+  14     Cannot call method declarations() on mixed.                           
+         🪪  method.nonObject                                                  
+  14     Cannot call method make() on mixed.                                   
+         🪪  method.nonObject                                                  
+  14     Cannot call method make() on mixed.                                   
+         🪪  method.nonObject                                                  
+  15     Cannot call method getConnections() on mixed.                         
+         🪪  method.nonObject                                                  
+  15     Cannot call method make() on mixed.                                   
+         🪪  method.nonObject                                                  
+  15     Parameter #1 $value of function count expects array|Countable, mixed  
+         given.                                                                
+         🪪  argument.type                                                     
+  18     Cannot call method call() on mixed.                                   
+         🪪  method.nonObject                                                  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   tests/Integration/Runtime/OutboxRelayTest.php                      
+ ------ ------------------------------------------------------------------- 
+  70     Variable $first might not be defined.                              
+         🪪  variable.undefined                                             
+  71     Variable $first might not be defined.                              
+         🪪  variable.undefined                                             
+  188    Method SocKit\Testing\FakeActionAuthorizer::deny() invoked with 1  
+         parameter, 2 required.                                             
+         🪪  arguments.count                                                
+ ------ ------------------------------------------------------------------- 
+
+ [ERROR] Found 18 errors                                                        
+
+
+STDERR
+> phpstan analyse --no-progress '--memory-limit=512M'
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+Script phpstan analyse --no-progress handling the analyse event returned with error code 1
+
+EXIT 1
+

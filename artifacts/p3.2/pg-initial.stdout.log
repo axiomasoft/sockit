@@ -1,0 +1,83 @@
+private container=694662e7a61c6a22372123fd0352d355a992215e1bd69c8f0b6df1872a967046 owner=sockit_p2_83311f5055b529ff_test decoy=sockit_p2_decoy_83311f5055b529ff_test port=32914
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Integration\Schema\StorageIdentityTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mit discovers actual catalog identity and refuses two connection nam[39m[90m…[39m [90m0.08s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit freezes the resolved search_path schema and checks real final ta[39m[90m…[39m [90m0.13s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit accepts 63 byte final identifiers and rejects 64 bytes before ca[39m[90m…[39m [90m0.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mit fails closed on live database endpoint and schema disagreement[39m[90m   [39m [90m0.05s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\StorageIdentityT[22m… [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/Internal/StorageEndpoint.php[39;22m:[39;1m28[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\StorageIdentityT[22m… [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/Internal/StorageEndpoint.php[39;22m:[39;1m28[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\StorageIdentityT[22m… [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/Internal/StorageEndpoint.php[39;22m:[39;1m28[39;22m
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Integration\Schema\StorageIdentityT[22m… [41;1m InvalidSchemaException [49;22m  
+[39;1m  Invalid SocKit schema declaration[39;22m
+
+  at [32mpackages/core/src/Schema/Internal/SchemaValues.php[39m:[32m15[39m
+     11▕     /** @phpstan-assert true $valid */
+     12▕     public static function require(bool $valid, string $key, string $rule = 'SCHEMA_INVALID'): void
+     13▕     {
+     14▕         if (! $valid) {
+  ➜  15▕             throw new InvalidSchemaException(message: 'Invalid SocKit schema declaration', detail: ['key' => $key, 'rule' => $rule]);
+     16▕         }
+     17▕     }
+     18▕ 
+     19▕     public static function identifier(string $value): bool
+
+  [33m1   [39m[39;1mpackages/core/src/Schema/Internal/SchemaValues.php[39;22m:[39;1m15[39;22m
+  [33m2   [39m[39;1mpackages/core/src/Schema/Internal/StorageEndpoint.php[39;22m:[39;1m28[39;22m
+
+
+  [90mTests:[39m    [31;1m4 failed[39;22m[90m (0 assertions)[39m
+  [90mDuration:[39m [39m0.40s[39m
+

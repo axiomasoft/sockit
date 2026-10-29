@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/host-lossless",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "host-lossless",
+  "input": {
+    "kind": "host",
+    "value": "a:b:c"
+  },
+  "expect": {
+    "valid": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "fixture": "refs/host-bad-type",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "host-bad-type",
+  "input": {
+    "kind": "host",
+    "value": "Bad:1"
+  },
+  "expect": {
+    "valid": false
+  }
+}

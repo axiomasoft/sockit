@@ -1,0 +1,10 @@
+{
+  "session": "01a18642-887a-7ff0-9077-9a1aed0aab00",
+  "provider": "codex",
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "sandbox": "danger-full-access",
+  "approval_policy": "never",
+  "observed_from": "current session turn_context",
+  "base_head": "84c39f38916ce3599333e92a2e508d80ea41d091"
+}

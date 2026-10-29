@@ -1,0 +1,5 @@
+cwd=/home/vostrikov/projects/packages/sockit
+command=composer lint
+source_sha256=1ed11e66c4d2d03d5473b59c82bb88c9ff11bffb6b0e0b5928f3be1eace9a0e1
+> pint --test
+{"tool":"pint","result":"passed"}

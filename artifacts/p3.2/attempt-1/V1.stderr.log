@@ -1,0 +1,1 @@
+> pest 'tests/Unit/Schema/StorageIdentityTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'

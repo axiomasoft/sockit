@@ -1,0 +1,18 @@
+{
+  "fixture": "digest/reaction",
+  "contract": "digest",
+  "version": "1.0",
+  "description": "reaction",
+  "input": {
+    "command": "sockit.reactions.add",
+    "payload": {
+      "target": "article:42",
+      "actor": "user:7",
+      "kind": "like"
+    }
+  },
+  "expect": {
+    "canonical": "{\"actor\":\"user:7\",\"kind\":\"like\",\"target\":\"article:42\"}",
+    "digest": "sha256:8f86b1e7004833507671d7d3c84c6ef905396e64b4b99a722017389172649a7c"
+  }
+}

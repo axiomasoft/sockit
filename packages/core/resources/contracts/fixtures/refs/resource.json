@@ -1,0 +1,17 @@
+{
+  "fixture": "refs/resource",
+  "contract": "refs",
+  "version": "1.0",
+  "description": "resource",
+  "input": {
+    "kind": "resource",
+    "value": {
+      "panel": "edufy.community",
+      "kind": "post",
+      "id": "0192-123"
+    }
+  },
+  "expect": {
+    "valid": true
+  }
+}

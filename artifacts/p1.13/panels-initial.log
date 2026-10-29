@@ -1,0 +1,13 @@
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Panels\PanelTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit materializes a detached immutable storage snapshot and closes its builder[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Panels\LifecycleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-01/04 compiles all 24 provider orders into identical indep[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-02 never falls back for an unknown panel[39m
+  [32;1m✓[39;22m[90m [39m[90mit PANEL-04 rejects an unused invalid graph without publishing modules or panels[39m
+  [32;1m✓[39;22m[90m [39m[90mit freezes retained builders and makes all nested snapshots immutable[39m
+
+  [90mTests:[39m    [32;1m5 passed[39;22m[90m (278 assertions)[39m
+  [90mDuration:[39m [39m0.10s[39m
+

@@ -1,0 +1,14 @@
+private container=1e7e209db7ba3466a0510a60f4cbbcd1e1916aedb38f8fb609cc62345791b184 owner=sockit_p2_9e45988d5035edc6_test decoy=sockit_p2_decoy_9e45988d5035edc6_test port=32939
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\KernelSchemaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs production component tables with exact catalog keys bou[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs actual P2 surface receipt envelope and durable outbox write[39m[90m…[39m [90m0.50s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back P2 receipt state revision and outbox together after a[39m[90m…[39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit arbitrates unique receipt claims with independent processes on p[39m[90m…[39m [90m0.86s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit arbitrates unique receipt claims with independent processes on p[39m[90m…[39m [90m0.75s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit enforces DTO byte bounds UUID7 lifecycle and nullable in-flight[39m[90m… [39m [90m0.23s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit materializes the selected module version history in a new initia[39m[90m…[39m [90m0.17s[39m  
+
+  [90mTests:[39m    [32;1m7 passed[39;22m[90m (200 assertions)[39m
+  [90mDuration:[39m [39m3.12s[39m
+

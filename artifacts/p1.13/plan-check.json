@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "errors": 0,
+  "warnings": 3,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "execution_prompt_heavy",
+      "where": "phases/P1/P1.10.json",
+      "message": "rules, guidance and whole-file reads weigh 95247 bytes (warning threshold 16384); audit whether this item fits one or two executor rounds"
+    },
+    {
+      "level": "warning",
+      "code": "execution_prompt_heavy",
+      "where": "phases/P1/P1.12.json",
+      "message": "rules, guidance and whole-file reads weigh 75948 bytes (warning threshold 16384); audit whether this item fits one or two executor rounds"
+    },
+    {
+      "level": "warning",
+      "code": "execution_prompt_heavy",
+      "where": "phases/P1/P1.13.json",
+      "message": "rules, guidance and whole-file reads weigh 78920 bytes (warning threshold 16384); audit whether this item fits one or two executor rounds"
+    }
+  ]
+}

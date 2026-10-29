@@ -1,0 +1,11 @@
+private container=07a6e8c7e52cfd4c8038cd6f4ab00633b4f10c86b7e4aca5f711eae010570b80 owner=sockit_p2_4dbe748246c9f54b_test decoy=sockit_p2_decoy_4dbe748246c9f54b_test port=32786
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Runtime/Infrastructure' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Runtime\Infrastructure\HarnessIsolationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects unsafe targets before connecting[39m
+  [32;1m✓[39;22m[90m [39m[90mit isolates schemas and decoy and rolls back after a fault[39m[90m          [39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit observes two child backends blocked on a row lock[39m[90m                [39m [90m0.13s[39m  
+
+  [90mTests:[39m    [32;1m3 passed[39;22m[90m (18 assertions)[39m
+  [90mDuration:[39m [39m0.35s[39m
+

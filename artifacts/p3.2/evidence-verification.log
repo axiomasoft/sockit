@@ -1,0 +1,7 @@
+V1: schema/log/source/command/exit verified
+V2: schema/log/source/command/exit verified
+V90: schema/log/source/command/exit verified
+V91: schema/log/source/command/exit verified
+V92: schema/log/source/command/exit verified
+V93: schema/log/source/command/exit verified
+Verified 605 source files, 427 outside files and actual PostgreSQL SQL assertions

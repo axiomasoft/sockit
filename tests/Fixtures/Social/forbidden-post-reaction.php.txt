@@ -1,0 +1,10 @@
+<?php
+namespace SocKit\Reactions\Internal;
+use SocKit\Posts\Internal\PostStore as Sibling;
+final class ForbiddenPostReaction {
+    public function leak(): void {
+        new Sibling($this->app);
+        new \SocKit\Posts\Posts($this->app, $this->operations);
+        $this->connection->table('panel_a.driver_a_posts')->lockForUpdate()->first();
+    }
+}

@@ -1,0 +1,50 @@
+ ------ ----------------------------------------------------------------------- 
+  Line   packages/core/src/Schema/Internal/PhysicalSchema.php                   
+ ------ ----------------------------------------------------------------------- 
+  28     Method SocKit\Schema\Internal\PhysicalSchema::toArray() should return  
+         array<string, mixed> but returns array<mixed>.                         
+         🪪  return.type                                                        
+ ------ ----------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------- 
+  Line   packages/core/src/Schema/Internal/StorageIdentityResolver.php       
+ ------ -------------------------------------------------------------------- 
+  32     Parameter $connection of method                                     
+         SocKit\Schema\Internal\StorageIdentityResolver::assertConnection()  
+         expects array<string, mixed>, array<mixed, mixed> given.            
+         🪪  argument.type                                                   
+  43     Cannot cast mixed to string.                                        
+         🪪  cast.string                                                     
+  43     Cannot cast mixed to string.                                        
+         🪪  cast.string                                                     
+  64     Parameter $connection of method                                     
+         SocKit\Schema\Internal\StorageIdentityResolver::declared() expects  
+         array<string, mixed>, array<mixed> given.                           
+         🪪  argument.type                                                   
+ ------ -------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------- 
+  Line   packages/core/src/Schema/Internal/StoragePreflight.php               
+ ------ --------------------------------------------------------------------- 
+  119    Method SocKit\Schema\Internal\StoragePreflight::map() should return  
+         array<string, mixed> but returns array<mixed>.                       
+         🪪  return.type                                                      
+ ------ --------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   tests/Fixtures/Schema/StorageFixtures.php                             
+ ------ ---------------------------------------------------------------------- 
+  40     Parameter $components of class SocKit\Schema\PanelSchema constructor  
+         expects array<string, mixed>, array<mixed, mixed> given.              
+         🪪  argument.type                                                     
+  40     Parameter $entities of class SocKit\Schema\PanelSchema constructor    
+         expects array<string, mixed>, array<mixed, mixed> given.              
+         🪪  argument.type                                                     
+  40     Parameter $order of class SocKit\Schema\PanelSchema constructor       
+         expects list<string>, array<mixed, mixed> given.                      
+         🪪  argument.type                                                     
+         💡  array<int|string, mixed> might not be a list.                     
+ ------ ---------------------------------------------------------------------- 
+
+ [ERROR] Found 9 errors                                                         
+

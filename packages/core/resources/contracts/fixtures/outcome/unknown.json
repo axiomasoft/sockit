@@ -1,0 +1,16 @@
+{
+  "fixture": "unknown",
+  "contract": "outcome",
+  "version": 1,
+  "input": {
+    "outcome": "unknown",
+    "receipt_id": "r1",
+    "resource": null,
+    "revision": null,
+    "problem": "sockit.external_outcome_unknown",
+    "problem_detail": {}
+  },
+  "expect": {
+    "valid": true
+  }
+}

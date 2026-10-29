@@ -1,0 +1,232 @@
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+
+10 files with changes
+=====================
+
+1) tests/Unit/Audience/AudienceGateTest.php:43
+
+    ---------- begin diff ----------
+@@ Line 43 @@
+     $subject = Scenario::subject($wire);
+     expect($gate->read(viewer: $viewer, subject: $subject)->reason)->toBe('audience.unknown')
+         ->and($resolver->calls())->toBe([])
+-        ->and((new AudienceGate($resolver))->read(viewer: $viewer, subject: $subject)->canRead())->toBeFalse();
++        ->and(new AudienceGate($resolver)->read(viewer: $viewer, subject: $subject)->canRead())->toBeFalse();
+ });
+
+ it('does not reuse admission across panel target incarnation installation or actor', function (): void {
+@@ Line 208 @@
+     $wire['spec'] = ['version' => '1.0', 'scope' => 'public'];
+     $public = Scenario::subject($wire);
+     $policy = (new FakeSurfaceAudiencePolicy)->allow(viewer: $viewer, surface: $contour->surface);
+-    $contours = (new FakeContourResolver($viewer->installation))->failWith(new Error('Unavailable facts'));
++    $contours = new FakeContourResolver($viewer->installation)->failWith(new Error('Unavailable facts'));
+     $gate = new AudienceGate(resolver: new AudienceEvaluator(contours: $contours, groups: new FakeGroupMembershipResolver($viewer->installation)), surfacePolicy: $policy);
+     $batch = $gate->readMany(viewer: $viewer, subjects: [$contour, $public]);
+     expect($batch['p1'])->toEqual($gate->read(viewer: $viewer, subject: $contour))
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+2) packages/core/src/Audience/Data/AudienceSpec.php:85
+
+    ---------- begin diff ----------
+@@ Line 85 @@
+         if (! isset($wire['version'], $wire['scope']) || ! is_string($wire['version']) || ! is_string($wire['scope'])) {
+             throw new InvalidPayloadException('Invalid audience wire');
+         }
+-        (new WireVersion(major: 1, minor: 0))->requireSupported(WireVersion::fromWire($wire['version']));
++        new WireVersion(major: 1, minor: 0)->requireSupported(WireVersion::fromWire($wire['version']));
+         $scope = Scope::tryFrom($wire['scope']) ?? throw new InvalidPayloadException('Unknown audience scope');
+         $expected = ['version', 'scope', ...match ($scope) {
+             Scope::Direct => ['actors'], Scope::Group => ['group'], Scope::Contour => ['contour_level', 'contour'], default => [],
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+3) packages/core/src/Configuration/SocKitConfig.php:124
+
+    ---------- begin diff ----------
+@@ Line 124 @@
+     /** @phpstan-assert-if-true class-string $value */
+     public static function implementation(mixed $value, string $contract): bool
+     {
+-        return is_string($value) && class_exists($value) && is_subclass_of($value, $contract) && (new \ReflectionClass($value))->isInstantiable();
++        return is_string($value) && class_exists($value) && is_subclass_of($value, $contract) && new \ReflectionClass($value)->isInstantiable();
+     }
+
+     /** @param list<string>|null $allowed
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+4) tests/Unit/Support/ReferencesTest.php:49
+
+    ---------- begin diff ----------
+@@ Line 49 @@
+ });
+
+ it('enforces revisions, version compatibility and safe key logging', function (): void {
+-    expect((new Revision(1))->next()->isAfter(new Revision(1)))->toBeTrue()->and((new Incarnation(1))->next()->value)->toBe(2);
+-    expect(fn () => (new Revision(PHP_INT_MAX))->next())->toThrow(InvalidPayloadException::class);
++    expect(new Revision(1)->next()->isAfter(new Revision(1)))->toBeTrue()->and(new Incarnation(1)->next()->value)->toBe(2);
++    expect(fn () => new Revision(PHP_INT_MAX)->next())->toThrow(InvalidPayloadException::class);
+     $version = WireVersion::fromWire('1.2');
+     expect($version->supports(new WireVersion(major: 1, minor: 1)))->toBeTrue()->and($version->supports(new WireVersion(major: 2, minor: 0)))->toBeFalse();
+     expect(fn () => $version->requireSupported(new WireVersion(major: 1, minor: 3)))->toThrow(UnsupportedWireVersionException::class);
+-    expect((new CommandKey('1234567890123456'))->hashForLog())->toBe(substr(hash('sha256', '1234567890123456'), 0, 16));
++    expect(new CommandKey('1234567890123456')->hashForLog())->toBe(substr(hash('sha256', '1234567890123456'), 0, 16));
+     expect(Ids::uuid7())->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/');
+ });
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+5) packages/core/src/Modules/ModuleRegistrar.php:25
+
+    ---------- begin diff ----------
+@@ Line 25 @@
+         if ($this->schema !== null) {
+             $this->fail(key: 'settings', rule: 'MODULE_SETTINGS_SCHEMA_DUPLICATE');
+         }
+-        if (! is_subclass_of($schema, ModuleSettingsSchema::class) || ! (new \ReflectionClass($schema))->isInstantiable()) {
++        if (! is_subclass_of($schema, ModuleSettingsSchema::class) || ! new \ReflectionClass($schema)->isInstantiable()) {
+             $this->fail(key: 'settings', rule: 'MODULE_SETTINGS_SCHEMA_INVALID');
+         }
+         $this->schema = $schema;
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+6) packages/core/src/Configuration/Data/PanelsConfig.php:19
+
+    ---------- begin diff ----------
+@@ Line 19 @@
+     {
+         $validated = [];
+         foreach ($providers as $provider) {
+-            if (! is_subclass_of($provider, PanelProvider::class) || ! (new \ReflectionClass($provider))->isInstantiable()) {
++            if (! is_subclass_of($provider, PanelProvider::class) || ! new \ReflectionClass($provider)->isInstantiable()) {
+                 throw new InvalidConfigurationException(message: 'Invalid panel provider implementation', detail: ['key' => 'sockit.panels', 'provider' => $provider, 'rule' => 'PANEL_PROVIDER_INVALID']);
+             }
+             $validated[] = $provider;
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+7) tests/Arch/Support/Gates.php:306
+
+    ---------- begin diff ----------
+@@ Line 306 @@
+
+     private static function forbiddenSignature(string $name): bool
+     {
+-        foreach (['Closure', 'Illuminate\\Database\\Eloquent', 'Illuminate\\Http\\Request', 'Illuminate\\Http\\Response', 'Symfony\\Component\\HttpFoundation\\Request', 'Symfony\\Component\\HttpFoundation\\Response'] as $prefix) {
++        foreach (['Closure', 'Illuminate\\Database\\Eloquent', \Illuminate\Http\Request::class, \Illuminate\Http\Response::class, \Symfony\Component\HttpFoundation\Request::class, \Symfony\Component\HttpFoundation\Response::class] as $prefix) {
+             if (self::within($name, $prefix)) {
+                 return true;
+             }
+@@ Line 316 @@
+         }
+         // A consumer's subclass must not hide an Eloquent or HTTP base type.
+         if (class_exists($name) || interface_exists($name)) {
+-            foreach (['Illuminate\\Database\\Eloquent\\Model', 'Illuminate\\Database\\Eloquent\\Builder', 'Symfony\\Component\\HttpFoundation\\Request', 'Symfony\\Component\\HttpFoundation\\Response'] as $base) {
++            foreach ([\Illuminate\Database\Eloquent\Model::class, \Illuminate\Database\Eloquent\Builder::class, \Symfony\Component\HttpFoundation\Request::class, \Symfony\Component\HttpFoundation\Response::class] as $base) {
+                 if (is_a($name, $base, true)) {
+                     return true;
+                 }
+    ----------- end diff -----------
+
+Applied rules:
+ * StringClassNameToClassConstantRector
+
+
+8) tests/Feature/Panels/LifecycleTest.php:97
+
+    ---------- begin diff ----------
+@@ Line 97 @@
+     assert($builder !== null);
+     expect(fn () => $builder->modules())->toThrow(InvalidPanelException::class);
+     $panel = $app->make(PanelDefinitions::class)->get(new PanelId('host.articles'));
+-    expect(fn () => (new ReflectionProperty($panel, 'moduleSettings'))->setValue($panel, []))->toThrow(Error::class);
+-    expect(fn () => (new ReflectionProperty($panel->storage, 'tables'))->setValue($panel->storage, []))->toThrow(Error::class);
++    expect(fn () => new ReflectionProperty($panel, 'moduleSettings')->setValue($panel, []))->toThrow(Error::class);
++    expect(fn () => new ReflectionProperty($panel->storage, 'tables')->setValue($panel->storage, []))->toThrow(Error::class);
+ });
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+9) tests/Unit/Panels/PanelTest.php:55
+
+    ---------- begin diff ----------
+@@ Line 55 @@
+     try {
+         $builder = (new Panel)->id('host.articles')->hostTypes('article');
+         // Reflection supplies an intentionally unresolved generated class name.
+-        (new ReflectionMethod($builder, 'models'))->invoke($builder, ['receipts' => 'Future\\GeneratedReceipt']);
++        new ReflectionMethod($builder, 'models')->invoke($builder, ['receipts' => 'Future\\GeneratedReceipt']);
+         expect($builder->materialize()->storage->models['receipts'])->toBe('Future\\GeneratedReceipt')
+             ->and($loads)->toBe([]);
+     } finally {
+@@ Line 65 @@
+
+ it('rejects callback and object settings with panel/provider/key diagnostics', function (): void {
+     foreach ([static fn (): bool => true, new stdClass] as $value) {
+-        $builder = (new Panel(provider: 'HostPanel'))->id('host.articles')->hostTypes('article');
+-        (new ReflectionMethod($builder, 'moduleSettings'))->invoke($builder, 'demo.module', ['nested' => [$value]]);
++        $builder = new Panel(provider: 'HostPanel')->id('host.articles')->hostTypes('article');
++        new ReflectionMethod($builder, 'moduleSettings')->invoke($builder, 'demo.module', ['nested' => [$value]]);
+         try {
+             $builder->materialize();
+             \PHPUnit\Framework\Assert::fail('Invalid settings accepted');
+    ----------- end diff -----------
+
+Applied rules:
+ * NewMethodCallWithoutParenthesesRector
+
+
+10) packages/core/src/Modules/ModuleManifest.php:10
+
+    ---------- begin diff ----------
+@@ Line 10 @@
+ #[Spi(kind: SpiKind::Call, since: '1.0')]
+ final readonly class ModuleManifest
+ {
+-    public const ID_PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)+$/D';
++    public const string ID_PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)+$/D';
+
+-    public const DATABASES = ['pgsql', 'mysql', 'sqlite'];
++    public const array DATABASES = ['pgsql', 'mysql', 'sqlite'];
+
+     /** @param array<array-key, string> $databases */
+     public function __construct(public string $id, public ?string $resourceRoot = null, public array $databases = []) {}
+    ----------- end diff -----------
+
+Applied rules:
+ * AddTypeToConstRector
+
+
+ [OK] 10 files would have been changed (dry-run) by Rector                      
+

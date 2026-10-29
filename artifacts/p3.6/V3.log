@@ -1,0 +1,35 @@
+command=python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Schema/DisabledModuleTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+cwd=/home/vostrikov/projects/packages/sockit
+started_at=2026-10-29T00:05:57Z
+finished_at=2026-10-29T00:06:00Z
+exit=0
+php=PHP 8.4.27 (cli) (built: Oct 21 2026 14:35:21) (NTS)
+Copyright (c) The PHP Group
+Built by Ubuntu
+Zend Engine v4.4.27, Copyright (c) Zend Technologies
+    with Zend OPcache v8.4.27, Copyright (c), by Zend Technologies
+    with Xdebug v3.5.3, Copyright (c) 2002-2026, by Derick Rethans
+source_digest=8ff5dfe6161d4066773950a731eefd67603c6f621f46ce934a7f28649a5ce578
+--- stdout ---
+private container=ae26b5c11dc199832016adf524195bb05f7bfbb3067f4e494f5a14cc6b653214 owner=sockit_p2_52f4adce30d2ca0e_test decoy=sockit_p2_decoy_52f4adce30d2ca0e_test port=33018
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\DisabledModuleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit preserves installed data and history through disable and re-enab[39m[90m…[39m [90m0.39s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit durably quarantines a pending delivery after disable without los[39m[90m…[39m [90m0.26s[39m  
+
+  [90mTests:[39m    [32;1m2 passed[39;22m[90m (25 assertions)[39m
+  [90mDuration:[39m [39m0.72s[39m
+
+
+--- stderr ---
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=102
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=103
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=104
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=105
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=106
+P3.6 SQL fresh disabled=zero module tables; disable preserved row/history; re-enable retained original table OID
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=111
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=112
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=113
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=114
+P3.6 SQL pending event retained; disabled consumer never resolved; durable quarantine reason=outbox.consumer_unavailable; re-enable does not discard or redeliver quarantined rows

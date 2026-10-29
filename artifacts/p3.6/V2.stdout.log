@@ -1,0 +1,17 @@
+private container=6b462cf6fb2148f6f9710444de48563198a57c1f66f1a4de61358198ac841200 owner=sockit_p2_2110c5153d6ccb98_test decoy=sockit_p2_decoy_2110c5153d6ccb98_test port=33017
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\AdditiveUpgradeTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit migrates initial and additive snapshots through Laravel and reve[39m[90m…[39m [90m0.56s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit proves data constraints before generating a new index or check w[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit proves data constraints before generating a new index or check w[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit adds defaulted columns and a nullable foreign key without changi[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit adds defaulted columns and a nullable foreign key without changi[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit adds defaulted columns and a nullable foreign key without changi[39m[90m…[39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects an ambiguous applied ledger and live ownership drift wit[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects an ambiguous applied ledger and live ownership drift wit[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects an ambiguous applied ledger and live ownership drift wit[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit atomically reverses a failing additive program including its own[39m[90m…[39m [90m0.30s[39m  
+
+  [90mTests:[39m    [32;1m10 passed[39;22m[90m (169 assertions)[39m
+  [90mDuration:[39m [39m3.16s[39m
+

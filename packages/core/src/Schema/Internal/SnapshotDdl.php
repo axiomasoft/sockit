@@ -65,15 +65,10 @@ final class SnapshotDdl
     }
 
     /** @param array<string, mixed> $definition */
-    private function column(array $definition, bool $identity): string
+    public function column(array $definition, bool $identity): string
     {
         $type = self::text($definition['type']);
-        $sql = match ($type) {
-            'uuid' => 'uuid', 'text' => 'text', 'bigint' => 'bigint', 'integer' => 'integer',
-            'boolean' => 'boolean', 'json' => 'jsonb', 'timestamp' => 'timestamp(6) with time zone',
-            'string' => 'varchar('.self::number($definition['length']).')',
-            default => throw new \LogicException('Invalid compiled column'),
-        };
+        $sql = $this->type($definition);
         if ($definition['collation'] === 'C') {
             $sql .= ' COLLATE "C"';
         }
@@ -90,8 +85,19 @@ final class SnapshotDdl
         return $sql.($definition['nullable'] === true ? '' : ' NOT NULL');
     }
 
+    /** @param array<string, mixed> $definition */
+    public function type(array $definition): string
+    {
+        return match (self::text($definition['type'])) {
+            'uuid' => 'uuid', 'text' => 'text', 'bigint' => 'bigint', 'integer' => 'integer',
+            'boolean' => 'boolean', 'json' => 'jsonb', 'timestamp' => 'timestamp(6) with time zone',
+            'string' => 'varchar('.self::number($definition['length']).')',
+            default => throw new \LogicException('Invalid compiled column'),
+        };
+    }
+
     /** @param array<string, mixed> $check */
-    private function predicate(array $check): string
+    public function predicate(array $check): string
     {
         $columns = $check['columns'];
         $values = $check['values'];
@@ -127,26 +133,26 @@ final class SnapshotDdl
         return $value;
     }
 
-    private static function columns(mixed $columns): string
+    public static function columns(mixed $columns): string
     {
         assert(is_array($columns));
 
         return implode(', ', array_map(fn (mixed $column): string => self::identifier(self::text($column)), $columns));
     }
 
-    private static function identifier(string $identifier): string
+    public static function identifier(string $identifier): string
     {
         SchemaValues::require(valid: SchemaValues::identifier($identifier), key: 'identifier', rule: 'STORAGE_IDENTIFIER_INVALID');
 
         return '"'.$identifier.'"';
     }
 
-    private static function qualified(string $schema, string $table): string
+    public static function qualified(string $schema, string $table): string
     {
         return self::identifier($schema).'.'.self::identifier($table);
     }
 
-    private static function literal(string|int|bool|null $value): string
+    public static function literal(string|int|bool|null $value): string
     {
         return match (true) {
             $value === null => 'NULL', is_bool($value) => $value ? 'TRUE' : 'FALSE', is_int($value) => (string) $value,

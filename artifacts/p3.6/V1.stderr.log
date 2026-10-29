@@ -1,0 +1,78 @@
+private container=526c80156ab17ec2cdf9b08dc7e039a87d4e5d14eaf7dbce4794243a154596d9 owner=sockit_p2_b3b3eafa5cd700e3_test decoy=sockit_p2_decoy_b3b3eafa5cd700e3_test port=33019
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Generation\PanelMigrationsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit creates initial immutable files and missing models then reports[39m[90m… [39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit plans an entire upgrade without writes and preserves custom prov[39m[90m…[39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or tampered ancestry before any writes with ('so[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or tampered ancestry before any writes with ('ma[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or tampered ancestry before any writes with ('ga[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or tampered ancestry before any writes with ('br[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or tampered ancestry before any writes with ('mi[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects missing or tampered ancestry before any writes with ('mi[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects rewritten steps required columns and physical rebinding[39m[90m… [39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects rewritten steps required columns and physical rebinding[39m[90m… [39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects rewritten steps required columns and physical rebinding[39m[90m… [39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cleans the unified model migration manifest write after injected[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cleans the unified model migration manifest write after injected[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit repairs only a missing model without creating another snapshot a[39m[90m…[39m [90m0.18s[39m  
+
+  [90mTests:[39m    [32;1m14 passed[39;22m[90m (115 assertions)[39m
+  [90mDuration:[39m [39m2.08s[39m
+
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=102
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=103
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=104
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=105
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=106
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=108
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=109
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=110
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=111
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=114
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=115
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=116
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=117
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=119
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=120
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=121
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=122
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=124
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=125
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=126
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=127
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=129
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=130
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=131
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=132
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=134
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=135
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=136
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=137
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=139
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=140
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=141
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=142
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=144
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=145
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=146
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=147
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=149
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=150
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=151
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=152
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=155
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=156
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=157
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=158
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=160
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=161
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=162
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=163
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=166
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=167
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=168
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=169
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=172
+PG identity database=sockit_p2_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=173
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=174
+PG identity database=sockit_p2_decoy_b3b3eafa5cd700e3_test server_version_num=160014 marker=sockit-p21-b3b3eafa5cd700e3 backend_pid=175

@@ -1,0 +1,26 @@
+# PLAN1 P3.6 — consumer migration ancestry
+
+Base: `afde589f0e21ffeb4aeea5443c9eda49727a092c`. Session: `01a184ec-56dc-7703-bade-7925b7958439`.
+Actual session turn_context: `codex/gpt-6.1-sol/xhigh`, `danger-full-access` (`runtime.json`). Start exit 0; no scout/take-over/strict-route, reviewer, second executor or subagents.
+
+Implemented `sockit:panel:migrations <panel> [--upgrade] [--dry-run]`. Initial and upgrade create only missing models, a new self-contained migration in `database/migrations/`, and a sequential immutable manifest in `database/sockit/<panel>/`. The JSON output lists paths, output hashes, model/table maps, fixed component versions and actual generated/applied counts; manifests retain the parent digest. Generation reads the owner catalog and Laravel ledger; it executes no DDL. Apply explicitly with `php artisan migrate --database=<panel connection>`.
+
+Complete ancestry validates manifest/source/snapshot/schema hashes, sequential filenames, parent links, original steps and bindings, orphan files and the applied ledger prefix. Pending generated ancestors remain the upgrade baseline. Physical preflight includes frozen ownership of disabled/unregistered panels. Rewrites, dropped/renamed entities, type/key/model/storage rebinding, gaps, ambiguous ledgers, occupied pending objects and changed applied ownership fail before writes. No change reports `no_op` with no output files.
+
+Additive DDL supports new tables/entities, nullable/defaulted columns, indexes, checks and FKs. Read-only data predicates prove new constraints against existing rows; pending ancestors requiring a live data proof must be applied first (`MIGRATION_APPLY_PENDING_FOR_DATA_PROOF`). New tables and additive columns/indexes precede FKs. Generated migrations embed SQL and physical identity, use the P3.3 endpoint/catalog/ownership guards, and update ownership receipts transactionally. Descendants prevent ancestor rollback; reverse delta restores the parent receipt and removes only new owned objects. Existing consumer provider/models and all prior migrations/manifests remain byte-for-byte unchanged. Existing model code is left for the consumer to maintain when adding fields/relations.
+
+The existing P3.5 exclusive staged writer installs models + migration + manifest together, manifest last. Failure cleanup preserves consumer edits and reports exact recovery paths, including changed staging hard links. Disable retains the union of installed ownership, data and outbox; re-enable preserves the original table OID. Existing P2 relay durably quarantines unavailable consumers with `outbox.consumer_unavailable`, without resolving them or dropping the event; quarantine remains explicit after re-enable.
+
+| Check | Exit | Actual result |
+|---|---:|---|
+| V1 | 0 | Literal command; owned PG child through `pg-run.py`: 14 tests / 115 assertions; initial/upgrade dry-run, no-op, custom hashes, pending ancestry, tamper/gaps/branches, unsafe diff, staged failures/recovery and missing models |
+| V2 | 0 | Literal wrapper command: 10 tests / 169 assertions; real Laravel migrate/rollback, module/column/default/index/check/FK upgrades, FK to a newly created entity, invalid-data refusal, ledger/catalog failures, transactional DDL failure, Product/host preservation |
+| V3 | 0 | Literal wrapper command: 2 tests / 25 assertions; fresh disabled module has zero tables; disable/re-enable preserves data/history/OID; pending outbox survives with durable reasoned quarantine |
+| V90 | 0 | Literal `composer analyse -- --memory-limit=512M`: No errors; no suppressions/baseline changes |
+| V91 | 0 | Literal `composer lint`: passed; rules unchanged |
+
+All five final receipts use source fingerprint `8ff5dfe6161d4066773950a731eefd67603c6f621f46ce934a7f28649a5ce578`. `V*.json` use native check-evidence schema; command/cwd/time/exit/stdout/stderr, log hashes and per-file source hashes are recorded. `validate-evidence.py` verifies schema, logs and unchanged sources (exit 0). Runner selects existing system PHP 8.4.27 and Composer with Xdebug off; validation commands and failure flags are unchanged. Earlier red runs were repaired and repeated; their logs are archived outside the commit at `/tmp/sockit-p36-history-01a184ec-56dc-7703-bade-7925b7958439/`.
+
+Additional regressions: architecture/compiler/P3.5 generation — 150 tests / 888 assertions, exit 0 (`regression.log`); P3.3 kernel/frozen snapshots — 26 tests / 317 assertions, exit 0 (`snapshot-regression.log`). PostgreSQL only through `scripts/testing/pg-run.py`; PgTarget proved exact container label, loopback endpoint, owner/decoy `_test` names, PostgreSQL 16.14 and database marker before test mutations. Wrapper removed each owned container; fixtures removed their private temporary roots. No dev/prod targets or database dumps.
+
+Only P3.6 scope changed; no routes, foreign dirty files or foreign artifacts were edited. `acme.demo-targets` and `acme.runtime` remain test fixtures. Review mode is requested: independent receipt belongs to the coordinator's later fresh read-only session. This report does not assert review acceptance. Commit uses the prescribed planner command after dry-run; the subsequent finish attempt and its exact result are recorded separately after commit, without changing committed files.

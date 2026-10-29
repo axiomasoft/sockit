@@ -1,0 +1,11 @@
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=102
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=103
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=104
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=105
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=106
+P3.6 SQL fresh disabled=zero module tables; disable preserved row/history; re-enable retained original table OID
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=111
+PG identity database=sockit_p2_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=112
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=113
+PG identity database=sockit_p2_decoy_52f4adce30d2ca0e_test server_version_num=160014 marker=sockit-p21-52f4adce30d2ca0e backend_pid=114
+P3.6 SQL pending event retained; disabled consumer never resolved; durable quarantine reason=outbox.consumer_unavailable; re-enable does not discard or redeliver quarantined rows

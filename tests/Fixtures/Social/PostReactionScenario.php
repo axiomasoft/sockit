@@ -34,9 +34,10 @@ final readonly class PostReactionScenario
 
     public OutsideActor $actors;
 
-    public function __construct(bool $install = true, bool $posts = true)
+    /** @param array<string, mixed> $feed */
+    public function __construct(bool $install = true, bool $posts = true, array $feed = [])
     {
-        $this->s = new PostScenario(install: $install, module: $posts, reactions: true);
+        $this->s = new PostScenario(install: $install, module: $posts, reactions: true, feed: $feed);
         $this->actors = new OutsideActor(connection: $this->s->connection(), delegate: $this->s->fake->actors);
         $this->s->app->instance(ActorContexts::class, new ActorContexts(resolver: $this->actors, tenants: $this->s->fake->tenants));
         $this->s->app->forgetInstance(OperationHandles::class);

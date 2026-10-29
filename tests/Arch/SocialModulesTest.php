@@ -5,8 +5,8 @@ declare(strict_types=1);
 use SocKit\Tests\Arch\Support\Gates;
 use SocKit\Tests\Arch\Support\SourceScanner;
 
-it('includes both social roots in every source architecture gate', function (): void {
-    $files = [...SourceScanner::php('packages/core/modules/reactions/src'), ...SourceScanner::php('packages/core/modules/posts/src')];
+it('includes all social roots in every source architecture gate', function (): void {
+    $files = [...SourceScanner::php('packages/core/modules/reactions/src'), ...SourceScanner::php('packages/core/modules/posts/src'), ...SourceScanner::php('packages/core/modules/groups/src')];
     expect($files)->not->toBe([]);
     foreach (['markers', 'dependencies', 'internals', 'modules', 'naming', 'tenancy', 'editions', 'ownership', 'signatures'] as $gate) {
         expect(Gates::$gate($files))->toBe([]);
@@ -18,7 +18,7 @@ it('includes both social roots in every source architecture gate', function (): 
 
 it('retains kernel social prohibition and rejects sibling and foreign Internal dependencies', function (): void {
     // The path is the production source root; changing namespace cannot grant another owner.
-    foreach (['reactions' => 'Reactions', 'posts' => 'Posts'] as $module => $namespace) {
+    foreach (['reactions' => 'Reactions', 'posts' => 'Posts', 'groups' => 'Groups'] as $module => $namespace) {
         $path = 'packages/core/modules/'.$module.'/src/Internal/ArchitectureControl'.bin2hex(random_bytes(8)).'.php';
         $file = fopen($path, 'x');
         if ($file === false) {

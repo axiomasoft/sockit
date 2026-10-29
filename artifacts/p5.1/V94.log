@@ -1,0 +1,75 @@
+cwd=/home/vostrikov/projects/packages/sockit
+command=python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Social/SchemaContributionsTest.php tests/Integration/Schema/DisabledModuleTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+source_sha256=1ed11e66c4d2d03d5473b59c82bb88c9ff11bffb6b0e0b5928f3be1eace9a0e1
+private volume=38dfc8cc5ec33362c906e2247ab9d2d68f001e27d502149a85959e8825f1d11d
+private container=3889af7d17dc303c9e75dd67bfbeba21ddac75fc49ccc7b57bbaa44298d8c5cc owner=sockit_p2_2a6a5c3ca04b9519_test decoy=sockit_p2_decoy_2a6a5c3ca04b9519_test port=33244
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Social/SchemaContributionsTest.php' 'tests/Integration/Schema/DisabledModuleTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=102
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=103
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=104
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=105
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=106
+P4.1 catalogs selected=[]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=109
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=110
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=111
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=112
+P4.1 catalogs selected=["sockit.reactions"]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=115
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=116
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=117
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=118
+P4.1 catalogs selected=["sockit.posts"]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=121
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=122
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=123
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=124
+P4.1 catalogs selected=["sockit.reactions","sockit.posts"]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=127
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=128
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=129
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=130
+P4.1 maximum 512-byte opaque host/target keys and 609-byte actor; zero count accepted, negative/revision zero rejected; collision rejected; inactive membership retains UUID/revision
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=133
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=134
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=135
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=136
+P4.1 mapped custom post models, immutable revision uniqueness, own FK, hydration/casts/relations, Pending/Held overlay restore and chronology tie verified
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=139
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=140
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=141
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=142
+P4.1 disabled registry preserves social data; frozen A rollback drops only A; B checksum unchanged and B remains writable; host sentinel preserved
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Social\SchemaContributionsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.43s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retains lossless maximum refs verifies digest collisions and iso[39m[90m…[39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit hydrates custom concrete posts and mapped revision relations wit[39m[90m…[39m [90m0.25s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves installed data on disable and rolls back only the froz[39m[90m…[39m [90m0.29s[39m  
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=145
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=146
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=147
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=148
+P3.6 SQL fresh disabled=zero module tables; disable preserved row/history; re-enable retained original table OID
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=171
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=172
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=173
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=174
+P3.6 F2 SQL real make-panel provider boots after module removal with module model entry retained and globally disabled module; re-enable preserves data/table OID
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=195
+PG identity database=sockit_p2_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=196
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=197
+PG identity database=sockit_p2_decoy_2a6a5c3ca04b9519_test server_version_num=160014 marker=sockit-p21-2a6a5c3ca04b9519 backend_pid=198
+P3.6 SQL pending event retained; disabled consumer never resolved; durable quarantine reason=outbox.consumer_unavailable; re-enable does not discard or redeliver quarantined rows
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\DisabledModuleTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit preserves installed data and history through disable and re-enab[39m[90m…[39m [90m0.81s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit boots an actual make-panel provider with its disabled module mod[39m[90m…[39m [90m1.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit durably quarantines a pending delivery after disable without los[39m[90m…[39m [90m0.96s[39m  
+
+  [90mTests:[39m    [32;1m10 passed[39;22m[90m (1530 assertions)[39m
+  [90mDuration:[39m [39m5.36s[39m
+

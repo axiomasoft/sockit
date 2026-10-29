@@ -17,7 +17,8 @@
         "psr-4": {
             "SocKit\\": "src/",
             "SocKit\\Reactions\\": "modules/reactions/src/",
-            "SocKit\\Posts\\": "modules/posts/src/"
+            "SocKit\\Posts\\": "modules/posts/src/",
+            "SocKit\\Groups\\": "modules/groups/src/"
         }
     },
     "extra": {
@@ -57,7 +58,8 @@
                     "module-ids": [],
                     "exclude-namespaces": [
                         "SocKit\\Reactions\\",
-                        "SocKit\\Posts\\"
+                        "SocKit\\Posts\\",
+                        "SocKit\\Groups\\"
                     ]
                 },
                 "reactions": {
@@ -94,6 +96,24 @@
                     "commands": [],
                     "module-ids": [
                         "sockit.posts"
+                    ]
+                },
+                "groups": {
+                    "namespaces": [
+                        "SocKit\\Groups\\"
+                    ],
+                    "paths": [
+                        "packages/core/modules/groups/src"
+                    ],
+                    "tables": [
+                        "groups",
+                        "group_members"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.groups"
                     ]
                 }
             }

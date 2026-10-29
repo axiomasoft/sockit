@@ -352,7 +352,7 @@ final class Gates
 
     private static function socialRoot(string $file): ?string
     {
-        foreach (['reactions' => 'Reactions', 'posts' => 'Posts'] as $path => $name) {
+        foreach (['reactions' => 'Reactions', 'posts' => 'Posts', 'groups' => 'Groups'] as $path => $name) {
             if (str_starts_with($file, 'packages/core/modules/'.$path.'/src/')) {
                 return $name;
             }

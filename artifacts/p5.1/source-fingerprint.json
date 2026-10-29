@@ -1,0 +1,31 @@
+{
+  "base_head": "508f30f896f61406205a8d7c1c8f61497a97cff4",
+  "algorithm": "SHA-256 of compact sorted JSON mapping source paths to SHA-256 contents; artifacts and pre-existing foreign dirty paths excluded",
+  "sha256": "1ed11e66c4d2d03d5473b59c82bb88c9ff11bffb6b0e0b5928f3be1eace9a0e1",
+  "files": {
+    "composer.lock": "7c51f5baf57f1c2eb9d8c76ba86abf14f2afc63d84a2c5c71cbb392cab02bb21",
+    "packages/core/composer.json": "7b43f64b96dd45dffa22ad5d9d9c71eb04a6b25b40881147deb402719bf17667",
+    "packages/core/modules/groups/src/Enums/JoinPolicy.php": "5325e514ced1fcb2f13f5eb207a72c2a24858fb80a3ed63606d84f91db0b3fbb",
+    "packages/core/modules/groups/src/Enums/MembershipState.php": "c10d41b68439d009be98bd7c84251d9a9543221d5ba7c329895ea1c0f8e423ac",
+    "packages/core/modules/groups/src/Internal/GroupIdentity.php": "eee5cb11f6b132e751416b88c0fe0116725236995999d53d13e6cd8eceff23be",
+    "packages/core/modules/groups/src/Internal/GroupsModule.php": "c2d905e5e6dce92f174dbe3b1bbb331b56262fbe67a713e4d99d430eecd3db84",
+    "packages/core/modules/groups/src/Internal/GroupsServiceProvider.php": "c9a665e04ccce2683c7e088da2d0f6e62f35b0c698ddff03b2270fe975218abd",
+    "packages/core/modules/groups/src/Internal/GroupsSettings.php": "24a4ed88687f4b837e33d17936217e2adeeff76b7d6d1d2d8e0ef037b7829be8",
+    "packages/core/modules/groups/src/Internal/InitialSchema.php": "32f8287b6dafe027971b6ae03b92969d52c54783bb4019793d586b7605ac85ea",
+    "packages/core/modules/groups/src/Internal/MemberIdentity.php": "84e8dfa3beb00f4188da1b6a681acbd7f43ff3e55e047bf22e1892b828e4bbab",
+    "phpstan.neon": "39d2b7f73f180eaae43357920c211d722fcdbec451f60752c90760942fed4b3f",
+    "phpunit.pg.xml": "74aacd3d2c43da91fd09fbe7b5bc025ca5f501de53270be52546cde04c02bed2",
+    "rector.php": "c8007d5e15855c7e2ab1b04fafa30318fbb59dfb0df711a0f0f6c97d4e47ddec",
+    "scripts/testing/pg-run.py": "48e6b6ca4220adea0b65c277dbee926999ba412a5bde38f31e23d01a8756881a",
+    "tests/Arch/GroupsModuleBoundaryTest.php": "616a36eb57dd03315a036bd335237adfdb747ea40a438d68751bd7aeb325d547",
+    "tests/Arch/SocialModulesTest.php": "f408ed93862f9638d30939872b6ab2af90c1df5e488a36738ea81404ce60ad3f",
+    "tests/Arch/Support/Gates.php": "da5dc14144eb223227552ac44e61d871ff63283990c630a9bcfad913f8d0aefa",
+    "tests/Feature/Groups/ModuleSelectionTest.php": "2c0099989ff3486520880ac33a0f62751d06af2fabfa81778cbb4722c81d5189",
+    "tests/Fixtures/Groups/Rows.php": "63ae9c54f5df7c7ee1971a4c7c75d3f3922a4c22695ae4dcd4f0fc6628c756ba",
+    "tests/Fixtures/Groups/SchemaFixture.php": "8ca1419ce079d2ba1773853c8eb4cb0a19b4d222dcb52e8e5964af4ef5406acd",
+    "tests/Fixtures/Groups/Selection.php": "da746a3e37f185726a4ff373e77d82369793bad8fbbedd2adc32228bfa71f01e",
+    "tests/Integration/Groups/SchemaTest.php": "151eb07df71b89c44f4a7cae767ac5689c12afe7d274dd988e7ed54780dd8f53",
+    "tests/Integration/Support/PgTarget.php": "57b4ff35ee8d7e312df2941388f64fa9f31aefe05293a39cf89ce1a76c22bf2a",
+    "tests/Integration/Support/bootstrap.php": "ecb4009bea294548ee691c11c72a2895e1463fa15cd05da201509e46b802ddc6"
+  }
+}

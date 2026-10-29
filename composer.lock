@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/core",
-                "reference": "71e63f01350b2e74fac5e51242c8536b99e1b71e"
+                "reference": "469d1aa48561eed52cb8eb0b2b3b97c87dddb6b7"
             },
             "require": {
                 "illuminate/config": "^13.0",
@@ -62,7 +62,8 @@
                             "module-ids": [],
                             "exclude-namespaces": [
                                 "SocKit\\Reactions\\",
-                                "SocKit\\Posts\\"
+                                "SocKit\\Posts\\",
+                                "SocKit\\Groups\\"
                             ]
                         },
                         "reactions": {
@@ -100,6 +101,24 @@
                             "module-ids": [
                                 "sockit.posts"
                             ]
+                        },
+                        "groups": {
+                            "namespaces": [
+                                "SocKit\\Groups\\"
+                            ],
+                            "paths": [
+                                "packages/core/modules/groups/src"
+                            ],
+                            "tables": [
+                                "groups",
+                                "group_members"
+                            ],
+                            "config": [],
+                            "publish-tags": [],
+                            "commands": [],
+                            "module-ids": [
+                                "sockit.groups"
+                            ]
                         }
                     }
                 }
@@ -108,7 +127,8 @@
                 "psr-4": {
                     "SocKit\\": "src/",
                     "SocKit\\Reactions\\": "modules/reactions/src/",
-                    "SocKit\\Posts\\": "modules/posts/src/"
+                    "SocKit\\Posts\\": "modules/posts/src/",
+                    "SocKit\\Groups\\": "modules/groups/src/"
                 }
             },
             "license": [

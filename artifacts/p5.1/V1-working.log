@@ -1,0 +1,30 @@
+> pest 'tests/Feature/Groups/ModuleSelectionTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Groups\ModuleSelectionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit selects only explicitly enabled and panel selected modules witho[39m[90m…[39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit requires explicit provider offering and canonical module IDs and[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit normalizes reaction kinds through defaults global settings and p[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit runs real config cache and fresh process bootstrap for every sel[39m[90m…[39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects posts feature on a reactions-only panel even when posts[39m[90m… [39m [90m0.01s[39m  
+
+  [90mTests:[39m    [32;1m23 passed[39;22m[90m (2131 assertions)[39m
+  [90mDuration:[39m [39m2.37s[39m
+

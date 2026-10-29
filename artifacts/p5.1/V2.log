@@ -1,0 +1,55 @@
+cwd=/home/vostrikov/projects/packages/sockit
+command=python3 scripts/testing/pg-run.py composer test -- --configuration phpunit.pg.xml tests/Integration/Groups/SchemaTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+source_sha256=1ed11e66c4d2d03d5473b59c82bb88c9ff11bffb6b0e0b5928f3be1eace9a0e1
+private volume=17732eaf5a3efc5093352db6976b77f360982def59fccbd1da824f3691fc2d96
+private container=e8d829b94969309c821079722aef40b77a6ad1ba36cc72d546fc662f1d55b365 owner=sockit_p2_3a7d85388abcb9bf_test decoy=sockit_p2_decoy_3a7d85388abcb9bf_test port=33243
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Groups/SchemaTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=102
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=103
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=104
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=105
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=106
+P5.1 real catalogs/checks/indexes/FKs/casts selected=[]; two panel mappings verified
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=109
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=110
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=111
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=112
+P5.1 real catalogs/checks/indexes/FKs/casts selected=["sockit.reactions"]; two panel mappings verified
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=115
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=116
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=117
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=118
+P5.1 real catalogs/checks/indexes/FKs/casts selected=["sockit.groups"]; two panel mappings verified
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=121
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=122
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=123
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=124
+P5.1 real catalogs/checks/indexes/FKs/casts selected=["sockit.groups","sockit.reactions","sockit.posts"]; two panel mappings verified
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=127
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=128
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=129
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=130
+P5.1 maximum multibyte refs/name, 609-byte actor, all identity dimensions, same UUID across panels, unique collisions/full-ref guards and typed round trips verified
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=133
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=134
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=135
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=136
+P5.1 real SQLSTATE 23514 bounds/enums/positive/UUID/digest, 23503 own FK/restrict verified; valid rows retained
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=138
+PG identity database=sockit_p2_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=139
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=140
+PG identity database=sockit_p2_decoy_3a7d85388abcb9bf_test server_version_num=160014 marker=sockit-p21-3a7d85388abcb9bf backend_pid=141
+P5.1 frozen reverse down removes only owning panel; other panel OID/data and host/decoy sentinels unchanged
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Groups\SchemaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected module tables and verifies real catalogs[39m[90m… [39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected module tables and verifies real catalogs[39m[90m… [39m [90m0.38s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected module tables and verifies real catalogs[39m[90m… [39m [90m0.45s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected module tables and verifies real catalogs[39m[90m… [39m [90m0.49s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retains full maximum refs names and actor wires with bounded uni[39m[90m…[39m [90m0.46s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects invalid enums bounds revisions UUIDs digests and foreign[39m[90m…[39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rolls back the frozen owning panel with changed configuration pr[39m[90m…[39m [90m0.43s[39m  
+
+  [90mTests:[39m    [32;1m7 passed[39;22m[90m (1635 assertions)[39m
+  [90mDuration:[39m [39m2.98s[39m
+

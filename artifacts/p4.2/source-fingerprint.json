@@ -1,0 +1,29 @@
+{
+  "head": "31ca5cedb431caf64f3363dc46474481f8dacda3",
+  "digest": "sha256:7806e52f61903a9f229d737ee7f7a0ca5112faf9f56271378b1c1828b1823bdb",
+  "paths": {
+    "packages/core/modules/reactions/src/Data/ReactionCommand.php": "100644 b6d0d04fc6aa86c5818e3580d7fc0ab406aeeb2a",
+    "packages/core/modules/reactions/src/Internal/InitialSchema.php": "100644 86b377c8978f4af4ce02f41cb3aebd4be9b45192",
+    "packages/core/modules/reactions/src/Internal/ReactionException.php": "100644 151a5301c02aadc9a5fd03fc29cc4aa673312641",
+    "packages/core/modules/reactions/src/Internal/ReactionIdentity.php": "100644 20a57b0c6ca228f289dd34983db73a7715776856",
+    "packages/core/modules/reactions/src/Internal/ReactionMutation.php": "100644 bb7fc57dd87ec3d3b232e20ad50903aa6af36483",
+    "packages/core/modules/reactions/src/Internal/ReactionsModule.php": "100644 8140ac94a2be046bce1b2c9c8f5d329172d1877b",
+    "packages/core/modules/reactions/src/Internal/ReactionsServiceProvider.php": "100644 b6eef114bb109119cc4975809f9095d6b3478b66",
+    "packages/core/modules/reactions/src/Internal/ReactionsSettings.php": "100644 265e361d768991cac1ff8e71a795ee71683fe9b6",
+    "packages/core/modules/reactions/src/Reactions.php": "100644 1cf9bbac7bfa0cae7866c1529890c8f1007f2a7a",
+    "tests/Arch/SocialModuleBoundaryTest.php": "100644 09f215a1511cdc0f539a8ccb29a7ae538d53fc58",
+    "tests/Fixtures/Social/OtherReactionPanel.php": "100644 31f240f2f78345bb02d540654687b3d7bb1717a6",
+    "tests/Fixtures/Social/OtherReactionSurface.php": "100644 d54ced5476afed780509d0078063a814913541cd",
+    "tests/Fixtures/Social/ReactionPanel.php": "100644 39664254cd37857900d451caa8b1282ccd8ecc50",
+    "tests/Fixtures/Social/ReactionRace.php": "100644 4047359c14c648350bb9bd1a7f432053098172f3",
+    "tests/Fixtures/Social/ReactionScenario.php": "100644 5cfa532ecda641a262ad3acfbd6cfbc0d4bc3d66",
+    "tests/Fixtures/Social/ReactionSurface.php": "100644 49fae94702119d2c1d1a886801deb030cb8de30c",
+    "tests/Fixtures/Social/Rows.php": "100644 e89a9eb7a012b2b55e12d1021cdbae9c944573ed",
+    "tests/Fixtures/Social/SchemaFixture.php": "100644 f4dc32ce09c9a88e7faba28464d643ad5bd016a8",
+    "tests/Fixtures/Social/Selection.php": "100644 5f5e2ee65f066c91e9fc6db74b2dfb867ad9c5ca",
+    "tests/Fixtures/Social/SocialPanel.php": "100644 2049071941d69d7b803c43e2bf255a92bdbd0200",
+    "tests/Fixtures/Social/reaction-child.php": "100644 bf41fc0759a9156de3819263a5eee1ae3f46a18d",
+    "tests/Integration/Social/ReactionConcurrencyTest.php": "100644 48ee14014af223832261c05c4022c7dfb0e44ce0",
+    "tests/Integration/Social/ReactionMutationTest.php": "100644 af925d3f4c862a5686a2ff4e5e036cc31e3c2e3e"
+  }
+}

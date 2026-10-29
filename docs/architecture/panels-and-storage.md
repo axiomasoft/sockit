@@ -14,10 +14,12 @@ Schema compiler материализует выбранные fragments, model/t
 
 ## Генерация и upgrade
 
-P3 строит полный manifest provider, models и migration, проверяет пути, имена, modules и коллизии до записи, предлагает dry-run и staging с cleanup. Ошибка файловой системы сообщает уже записанные пути; атомарность filesystem не обещается. Повторный запуск — явный no-op или конфликт без перезаписи. Consumer владеет provider, models и миграциями; custom provider сохраняется.
+P3 строит manifest provider и models, затем отдельный manifest migration, проверяет пути, имена, modules и коллизии до записи, предлагает dry-run и staging с cleanup. Ошибка файловой системы сообщает уже записанные пути; атомарность filesystem не обещается. Повторный запуск — явный no-op или конфликт без перезаписи. Consumer владеет provider, models и миграциями; custom provider сохраняется.
 
 Initial migration содержит frozen descriptor и fixed component versions или самодостаточный DDL snapshot; старые migrations не зависят от нового config. Create следует dependency order, drop — обратному. Добавление модуля создаёт additive migration; disable сохраняет данные, schema history и pending outbox с явным draining или quarantine. Удаление только явное и только для принадлежащих snapshot таблиц. Vendor и published migrations одновременно не запускаются.
 
 ## Приёмка
 
 P3 проверяет реальный consumer с fixture module acme.demo-targets: генерация двух панелей, загрузка моделей, migrate/write/read, одинаковые IDs, rollback одной без изменения другой, старые snapshots после смены config, конфликт последнего файла и partial failure manifest. Это не social e2e: настоящий reactions smoke принадлежит P4. PostgreSQL integration требуется для DDL и concurrency; fixture или SQLite не заменяют его. Worker восстанавливает scalar refs и повторно проверяет actor и доступ, без system fallback.
+
+Consumer-owned snapshots хранят versions, digest и ancestry; generated не означает applied. Для конкретных команд, preflight и recovery см. [runbook](../guides/panel-install-upgrade.md). Concrete Eloquent models — persistence extension; domain API не содержит ORM. Tombstone имеет composite identity: обычные одно-ключевые Eloquent операции по primary key не заменяют scoped composite операции.

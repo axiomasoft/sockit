@@ -279,3 +279,7 @@ and real host consumer qualification remains P6. These fixtures are not social e
 The standalone `tests/Fixtures/Consumer` shows host-supplied actor, installation, target,
 authority fence and policy adapters with package discovery. It supplies its own module mutation
 and inbox; these are test fixtures, not product adapters or production schema.
+
+## Panel persistence extension — P3
+
+Приложение владеет сгенерированным SocKit PanelProvider и concrete Eloquent models каждой панели; provider объявляется в SocKit panels config. Schema fragments принадлежат kernel или соответствующему module, а frozen migrations и ancestry принадлежат consumer. ORM не входит в domain API. Composite tombstone identity требует полного scoped key, а не обычного Eloquent single-key lookup. Процедура и ограничения: [runbook](../guides/panel-install-upgrade.md).

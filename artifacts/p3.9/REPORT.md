@@ -1,0 +1,3 @@
+# P3.9 — runbook и handoff
+
+Runbook фиксирует consumer workflow по P3.5/P3.6/P3.8; doctor отдельно не подтверждён, production reactions e2e остаётся pending в P4. V1 `php scripts/check-docs.php`: exit 0, OK. V2 — сверка команд, путей, receipts и логов, frozen/custom hash и SQL assertions: exit 0, подробности в V2.log. Сверены исторические fingerprints на внутреннюю целостность, без утверждения, что все исторические исходники совпадают с текущими. Первая попытка V2 завершилась exit 1 из-за различий форматов сериализации fingerprints; исправлена процедура сверки и повторены обе проверки. Ограничения и ссылки на evidence указаны в runbook и traceability. Doc checker не изменён.

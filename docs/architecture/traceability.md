@@ -122,3 +122,7 @@ checked in a separate process. `tests/Integration/Runtime` covers the wider P2 t
 concurrency, fence, worker and outbox matrix. These observations do not establish complete
 SN/PANEL acceptance: P3 generated migrations and models, P4 social functions, P6 real host
 conformance and P9 release qualification remain pending. See `artifacts/p2.10/REPORT.md`.
+
+## P3 evidence handoff
+
+P3.5 [consumer generation](../../artifacts/p3.5/REPORT.md) подтвердил dry-run, регистрацию и conflict; P3.6 [upgrade](../../artifacts/p3.6/REPORT.md) — additive ancestry, сохранение custom files и disable. P3.8 [standalone consumer](../../artifacts/p3.8/REPORT.md), V1 exit 0, проверил две generated панели на owned PostgreSQL, операции, frozen/custom hashes, quarantine и изолированный rollback. Это evidence инфраструктуры PANEL-05/06/07/11, не полная production acceptance. Production reactions e2e остаётся pending в P4; conditional adapters P7/P8 и host qualification P6 остаются открытыми. [Runbook](../guides/panel-install-upgrade.md) разделяет подтверждённые шаги и неподтверждённый doctor.

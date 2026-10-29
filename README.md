@@ -4,7 +4,7 @@ SocKit is an embeddable social engine for Laravel. The project is pre-1.0; its p
 
 ## Статус и что дальше
 
-P1 defines the core contracts, panel and surface configuration, fixtures, architecture boundaries and checks. These are contract-level evidence, not end-to-end or production readiness. The P2 core runtime has an isolated PostgreSQL and standalone Laravel consumer fixture; P3 generated schema infrastructure is exercised by an isolated consumer; social modules and host qualification follow in P4–P6; Forum and Chatom integrations are conditional. See the [traceability matrix](docs/architecture/traceability.md) for requirements, evidence and pending work.
+P1 defines the core contracts, panel and surface configuration, fixtures, architecture boundaries and checks. These are contract-level evidence, not end-to-end or production readiness. The P2 core runtime has an isolated PostgreSQL and standalone Laravel consumer fixture; P3 generated schema infrastructure is exercised by an isolated consumer; P4 supplies reactions and posts/feed with isolated consumer evidence; host qualification follows in P6; Forum and Chatom integrations are conditional. See the [traceability matrix](docs/architecture/traceability.md) for requirements, evidence and pending work.
 
 
 ## Standalone consumer fixture
@@ -17,3 +17,5 @@ The runner creates an isolated disposable PostgreSQL target. The fixture exercis
 runtime APIs; it is not a production schema generator or a reactions/posts implementation.
 
 [Panel install, upgrade and recovery runbook](docs/guides/panel-install-upgrade.md) documents the verified fixture workflow and its limits.
+
+[Social modules and host recipe](docs/guide/social.md) describes the actual P4 APIs and their limits.

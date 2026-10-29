@@ -18,6 +18,7 @@ use SocKit\Operations\OperationHandles;
 use SocKit\Panels\PanelDefinitions;
 use SocKit\Posts\Data\PostCommand;
 use SocKit\Posts\Enums\PublicationState;
+use SocKit\Posts\Internal\PostsModule;
 use SocKit\Posts\Posts;
 use SocKit\Reactions\Reactions;
 use SocKit\Schema\ModelBindings;
@@ -44,7 +45,7 @@ $mode = $argv[1] ?? '';
 $result = [];
 if ($mode === 'boot') {
     $modules = $app->make(Modules::class);
-    Runtime::check(array_keys($modules->manifests()) === ['sockit.reactions'] && ! class_exists('SocKit\\Posts\\Internal\\PostsModule', false), 'Reactions-only boot loaded posts');
+    Runtime::check(array_keys($modules->manifests()) === ['sockit.reactions'] && ! class_exists(PostsModule::class, false), 'Reactions-only boot loaded posts');
     foreach ($app->make(PanelDefinitions::class)->all() as $panel) {
         $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $modules->schemaComponents());
         new ModelBindings()->validate($schema);

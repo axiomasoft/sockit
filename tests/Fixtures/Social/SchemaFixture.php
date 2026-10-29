@@ -35,7 +35,7 @@ final class SchemaFixture
     /** @var list<string> */
     private array $paths = [];
 
-    private mixed $previousDb;
+    private readonly mixed $previousDb;
 
     /** @param list<string> $selected */
     public function __construct(array $selected = ['sockit.reactions', 'sockit.posts'])

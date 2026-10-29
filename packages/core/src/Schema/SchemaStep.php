@@ -69,9 +69,9 @@ final readonly class SchemaStep
             'action' => $this->model === null ? 'add' : 'create',
             'columns' => array_map(fn (SchemaColumn $column): array => $column->toArray(), $this->columns),
             'model' => $this->model === null ? null : get_object_vars($this->model),
-            'indexes' => array_map(fn (SchemaIndex $index): array => get_object_vars($index), $this->indexes),
-            'checks' => array_map(fn (SchemaCheck $check): array => get_object_vars($check), $this->checks),
-            'foreign_keys' => array_map(fn (SchemaForeignKey $key): array => get_object_vars($key), $this->foreignKeys)];
+            'indexes' => array_map(get_object_vars(...), $this->indexes),
+            'checks' => array_map(get_object_vars(...), $this->checks),
+            'foreign_keys' => array_map(get_object_vars(...), $this->foreignKeys)];
     }
 
     public function digest(): string

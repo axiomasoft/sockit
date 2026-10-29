@@ -157,7 +157,7 @@ it('fails closed on repeated owner instability during media resolution without r
         {
             public int $calls = 0;
 
-            public function __construct(private Connection $connection, private string $id) {}
+            public function __construct(private readonly Connection $connection, private readonly string $id) {}
 
             public function associate(OperationHandle $handle, MediaReference $media): AuthorizationDecision
             {
@@ -325,7 +325,7 @@ it('checks the whole owner page after B final media hydration revokes earlier A 
 
             public ?int $revocationAt = null;
 
-            public function __construct(private Connection $connection, private string $a, private string $change) {}
+            public function __construct(private readonly Connection $connection, private readonly string $a, private readonly string $change) {}
 
             public function associate(OperationHandle $handle, MediaReference $media): AuthorizationDecision
             {

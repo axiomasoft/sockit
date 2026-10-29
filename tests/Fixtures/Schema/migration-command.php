@@ -52,7 +52,7 @@ if (($options['operation'] ?? null) === 'validate') {
             if (! $relation instanceof Relation) {
                 throw new RuntimeException('Invalid consumer relation');
             }
-            $result['relations'][] = get_class($relation);
+            $result['relations'][] = $relation::class;
         }
     }
     echo json_encode($result, JSON_THROW_ON_ERROR);

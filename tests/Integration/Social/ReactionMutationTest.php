@@ -132,9 +132,9 @@ it('denies nonwritable unproven hidden unknown or recycled targets and current a
             case 'surface-generation': $s->target->changeSurfaceAfterResolve = true;
                 break;
             case 'remote-only':
-                $remote = new class($s->target) implements TargetResolver
+                $remote = new readonly class($s->target) implements TargetResolver
                 {
-                    public function __construct(private readonly TargetResolver $delegate) {}
+                    public function __construct(private TargetResolver $delegate) {}
 
                     public function resolve(ActorContext $actor, SurfaceRef $surface, TargetRef $target): TargetResolution
                     {

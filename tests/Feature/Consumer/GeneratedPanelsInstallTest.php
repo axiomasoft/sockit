@@ -23,6 +23,13 @@ it('installs generated panels in a fresh consumer with isolated production snaps
     $target = PgTarget::fromEnvironment();
     $owner = $target->connect();
     $decoy = $target->connect(decoy: true);
+    $ownedPattern = '/^(?:p38_host|driver_(?:article|product|envelope)_[a-z0-9_]+|driver_migrations)$/D';
+    $tables = PgTarget::query($owner, "SELECT tablename FROM pg_tables WHERE schemaname='public'")->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($tables as $table) {
+        if (! is_string($table) || preg_match($ownedPattern, $table) === 1) {
+            throw new RuntimeException('P3 consumer table already exists before test');
+        }
+    }
     $root = sys_get_temp_dir().'/sockit-p38-'.bin2hex(random_bytes(16));
     $project = dirname(__DIR__, 3);
     $consumer = $root.'/tests/Fixtures/PanelConsumer';
@@ -172,5 +179,15 @@ it('installs generated panels in a fresh consumer with isolated production snaps
         fwrite(STDERR, "SQL assertions: both panels' five tables exist in owner; decoy remains empty\n");
     } finally {
         $files->deleteDirectory($root);
+        $tables = PgTarget::query($owner, "SELECT tablename FROM pg_tables WHERE schemaname='public'")->fetchAll(PDO::FETCH_COLUMN);
+        $owned = [];
+        foreach ($tables as $table) {
+            if (is_string($table) && preg_match($ownedPattern, $table) === 1) {
+                $owned[] = 'public."'.$table.'"';
+            }
+        }
+        if ($owned !== []) {
+            $owner->exec('DROP TABLE '.implode(', ', $owned));
+        }
     }
 });

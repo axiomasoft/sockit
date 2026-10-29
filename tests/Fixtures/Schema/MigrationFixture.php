@@ -51,9 +51,9 @@ final class MigrationFixture
 
     public Manager $capsule;
 
-    private ClassLoader $loader;
+    private readonly ClassLoader $loader;
 
-    private mixed $previousDb;
+    private readonly mixed $previousDb;
 
     /** @var array<string, mixed> */
     private array $bootOptions = [];

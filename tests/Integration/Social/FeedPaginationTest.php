@@ -66,7 +66,7 @@ it('refills denied gaps and advances empty budget pages past the last scanned ca
         expect(FeedScenario::ids($c))->toBe([$refs[6]->id, $refs[7]->id]);
         $d = $f->page(cursor: $c->nextCursor);
         expect($d->items)->toBe([])->and($d->nextCursor)->toBeNull();
-        expect(array_sum(array_map('count', $policy->batches)))->toBe(8);
+        expect(array_sum(array_map(count(...), $policy->batches)))->toBe(8);
     } finally {
         $s->cleanup();
     }

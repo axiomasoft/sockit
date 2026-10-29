@@ -1,0 +1,10 @@
+{
+  "session": "01a186c0-245b-7f41-b049-0f343f206418",
+  "provider": "codex",
+  "model": "gpt-6.1-terra",
+  "effort": "medium",
+  "sandbox_policy": {
+    "type": "danger-full-access"
+  },
+  "source": "local Codex session turn_context"
+}

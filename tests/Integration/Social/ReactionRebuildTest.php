@@ -123,9 +123,9 @@ it('requires explicit trusted maintenance permission current fences and projecti
         $before = $s->counts();
         switch ($mode) {
             case 'permission':
-                $s->app->instance(ActionAuthorizer::class, new class($s->authority) implements ActionAuthorizer
+                $s->app->instance(ActionAuthorizer::class, new readonly class($s->authority) implements ActionAuthorizer
                 {
-                    public function __construct(private readonly ActionAuthorizer $delegate) {}
+                    public function __construct(private ActionAuthorizer $delegate) {}
 
                     public function decide(ActionRequest $request): AuthorizationDecision
                     {

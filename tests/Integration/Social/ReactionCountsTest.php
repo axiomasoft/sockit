@@ -51,29 +51,19 @@ it('does not disclose target existence counts or membership under current denial
     try {
         expect($s->execute()->isSuccess())->toBeTrue();
         $before = $s->counts();
-        switch ($mode) {
-            case 'hide': $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['visible' => false]);
-                break;
-            case 'delete': $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['lifecycle' => 'deleted']);
-                break;
-            case 'hold': $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['held' => true]);
-                break;
-            case 'missing': $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->delete();
-                break;
-            case 'incarnation': $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['incarnation' => 2]);
-                break;
-            case 'revoke': $s->connection()->table('panel_a.envelope_authority')->update(['allowed' => false]);
-                break;
-            case 'admission': $s->fake->surfaces->deny(viewer: $s->handle->actor, surface: $s->handle->surface);
-                break;
-            case 'admission-expiry': $s->app->instance(SurfaceAudiencePolicy::class, new ExpiredAdmission);
-                break;
-            case 'actor': $s->fake->actors->actingAs(RuntimeScenario::actor(generation: '2'));
-                break;
-            case 'other-installation': $s->fake->actors->actingAs(RuntimeScenario::actor(installation: 'other'));
-                break;
-            default: $s->app->instance(TargetResolver::class, new ProjectionTarget(delegate: $s->target, mode: $mode));
-        }
+        match ($mode) {
+            'hide' => $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['visible' => false]),
+            'delete' => $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['lifecycle' => 'deleted']),
+            'hold' => $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['held' => true]),
+            'missing' => $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->delete(),
+            'incarnation' => $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['incarnation' => 2]),
+            'revoke' => $s->connection()->table('panel_a.envelope_authority')->update(['allowed' => false]),
+            'admission' => $s->fake->surfaces->deny(viewer: $s->handle->actor, surface: $s->handle->surface),
+            'admission-expiry' => $s->app->instance(SurfaceAudiencePolicy::class, new ExpiredAdmission),
+            'actor' => $s->fake->actors->actingAs(RuntimeScenario::actor(generation: '2')),
+            'other-installation' => $s->fake->actors->actingAs(RuntimeScenario::actor(installation: 'other')),
+            default => $s->app->instance(TargetResolver::class, new ProjectionTarget(delegate: $s->target, mode: $mode)),
+        };
         $queries = 0;
         $s->connection()->listen(function (QueryExecuted $query) use (&$queries): void {
             if (str_contains($query->sql, '"driver_a_reaction_counts"') || str_contains($query->sql, '"driver_a_reactions"')) {

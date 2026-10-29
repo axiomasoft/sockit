@@ -19,7 +19,7 @@ final class GeneratedModelFixture
     /** @var array<string, string> */
     public array $files = [];
 
-    private ?ConnectionResolverInterface $resolver;
+    private readonly ?ConnectionResolverInterface $resolver;
 
     public function __construct()
     {

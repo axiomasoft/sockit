@@ -66,10 +66,10 @@ final class ReactionScenario
 
     public Operations $operations;
 
-    private mixed $previousDb;
+    private readonly mixed $previousDb;
 
     /** @var array<string, string> */
-    private array $sentinels;
+    private readonly array $sentinels;
 
     public function __construct(bool $install = true, bool $feature = true, bool $module = true)
     {

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace SocKit\Internal\Generation;
 
 /** Cooperative root lock + atomic link(2) no-replace; never rename over a host file. */
-final class ExclusiveWriter
+final readonly class ExclusiveWriter
 {
     /** @param (\Closure(string, string): void)|null $observe Internal failure/race injection seam. */
-    public function __construct(private readonly ?\Closure $observe = null) {}
+    public function __construct(private ?\Closure $observe = null) {}
 
     public function install(GenerationPlan $plan): void
     {

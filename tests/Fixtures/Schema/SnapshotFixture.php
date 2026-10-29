@@ -37,7 +37,7 @@ final class SnapshotFixture
     /** @var array<string, PanelSchema> */
     public array $schemas = [];
 
-    private mixed $previousDb;
+    private readonly mixed $previousDb;
 
     public function __construct(bool $explicitSchema = true, int $version = 1, bool $modelRelations = false)
     {

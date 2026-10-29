@@ -66,10 +66,10 @@ final class PostScenario
 
     public Operations $operations;
 
-    private mixed $previousDb;
+    private readonly mixed $previousDb;
 
     /** @var array<string, string> */
-    private array $sentinels;
+    private readonly array $sentinels;
 
     /** @param array<string, mixed> $privacy
      * @param array<string, mixed> $feed */

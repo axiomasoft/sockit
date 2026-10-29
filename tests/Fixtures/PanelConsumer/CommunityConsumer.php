@@ -8,7 +8,7 @@ use SocKit\Tests\Integration\Support\PgTarget;
 use SocKit\Tests\Unit\Audience\Support\Scenario;
 
 /** Standalone Composer installation with two generated production social panels. */
-final class CommunityConsumer
+final readonly class CommunityConsumer
 {
     private SocialConsumer $base;
 

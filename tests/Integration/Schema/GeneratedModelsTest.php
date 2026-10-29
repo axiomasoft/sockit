@@ -135,7 +135,7 @@ it('exposes composite tombstones only through complete scoped reads and refuses 
         $f->snapshot->connection()->table('panel_a.a_tombstones')->insert([...$identity, 'surface_id' => Ids::uuid7(), 'max_revision' => 2, 'source_generation' => 1, 'deleted_at' => '2026-10-29 00:00:00+00']);
         expect(($class::readIdentity($identity) ?? throw new RuntimeException('Missing tombstone'))['host_key'])->toBe('0042')->and($class::readIdentity(array_replace($identity, ['host_key' => '42'])))->toBeNull();
         $model = new $class;
-        foreach ([fn () => $class::find('42'), fn () => $model->save(), fn () => $model->delete(), fn () => $model->getQueueableId(), fn () => $model->newQueryForRestoration('42'), fn () => $class::readIdentity(['host_key' => '0042']), fn () => $class::readIdentity(array_replace($identity, ['panel' => 'acme.b']))] as $call) {
+        foreach ([fn () => $class::find('42'), fn () => $model->save(), $model->delete(...), $model->getQueueableId(...), fn () => $model->newQueryForRestoration('42'), fn () => $class::readIdentity(['host_key' => '0042']), fn () => $class::readIdentity(array_replace($identity, ['panel' => 'acme.b']))] as $call) {
             expect($call)->toThrow(InvalidSchemaException::class);
         }
         expect($f->snapshot->connection()->table('panel_a.a_tombstones')->count())->toBe(1);

@@ -35,7 +35,7 @@ it('selects only explicitly enabled and panel selected modules without boot SQL 
         $features = [];
         foreach ($selected as $id) {
             $features = [...$features, ...$modules->declarations()[$id]['features']];
-            expect($modules->declarations()[$id]['targets'])->toBe($id === 'sockit.posts' ? ['post' => PostTarget::class] : []);
+            expect($modules->declarations()[$id]['targets'])->toBe($id === 'sockit.posts' ? ['post' => PostTarget::class, 'sockit.post' => PostTarget::class] : []);
         }
         expect(in_array('posts', $features, true))->toBe(in_array('sockit.posts', $selected, true));
     }

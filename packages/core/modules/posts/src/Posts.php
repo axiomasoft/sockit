@@ -12,11 +12,14 @@ use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Operations;
+use SocKit\Posts\Data\FeedPage;
+use SocKit\Posts\Data\FeedQuery;
 use SocKit\Posts\Data\PostCommand;
 use SocKit\Posts\Data\PostResult;
 use SocKit\Posts\Data\PostTransition;
 use SocKit\Posts\Data\PostView;
 use SocKit\Posts\Enums\PublicationState;
+use SocKit\Posts\Internal\PostFeed;
 use SocKit\Posts\Internal\PostLifecycleMutation;
 use SocKit\Posts\Internal\PostMutation;
 use SocKit\Posts\Internal\PostStore;
@@ -71,6 +74,12 @@ final readonly class Posts
         $store = new PostStore($this->app);
 
         return $store->view(handle: $handle, resource: $resource, row: $store->readable($handle, $resource));
+    }
+
+    /** Current sampled reads, never a historical snapshot. Refresh to see new publications above the cursor. */
+    public function feed(OperationHandle $handle, FeedQuery $query): FeedPage
+    {
+        return new PostFeed($this->app)->read($handle, $query);
     }
 
     public function revision(OperationHandle $handle, ResourceRef $resource, Revision $revision): PostView

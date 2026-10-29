@@ -71,13 +71,14 @@ final class PostScenario
     /** @var array<string, string> */
     private array $sentinels;
 
-    /** @param array<string, mixed> $privacy */
-    public function __construct(bool $install = true, bool $feature = true, bool $module = true, array $privacy = [], bool $reactions = false)
+    /** @param array<string, mixed> $privacy
+     * @param array<string, mixed> $feed */
+    public function __construct(bool $install = true, bool $feature = true, bool $module = true, array $privacy = [], bool $reactions = false, array $feed = [])
     {
         $this->app = new Application;
         $this->app->instance('config', new Repository(['sockit' => [
             'panels' => [PostPanel::class, OtherPostPanel::class], 'surfaces' => [PostSurface::class, OtherPostSurface::class],
-            'modules' => ['enabled' => ['sockit.posts', ...($reactions ? ['sockit.reactions'] : [])]],
+            'modules' => ['enabled' => ['sockit.posts', ...($reactions ? ['sockit.reactions'] : [])], 'settings' => ['sockit.posts' => $feed]],
             ...($privacy === [] ? [] : ['privacy' => $privacy]),
         ]]));
         $this->app->instance(PostPanel::class, new PostPanel(enabled: $module, reactions: $reactions));

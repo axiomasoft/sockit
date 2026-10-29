@@ -28,6 +28,7 @@ use SocKit\Support\Data\Revision;
 use SocKit\Support\Enums\ResourceKind;
 use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
+use SocKit\Surfaces\Enums\SurfaceLifecycle;
 
 final readonly class PostStore
 {
@@ -149,8 +150,10 @@ final readonly class PostStore
     /** @param array<string, mixed> $row */
     public function audience(OperationHandle $handle, array $row): AudienceVerdict
     {
+        $surface = $this->app->make(Operations::class)->surface($handle);
         $subject = new AudienceSubject(key: 'posts.current', spec: AudienceSpec::fromWire($this->object($this->text($row, 'audience'))), author: null,
-            surface: $handle->surface, installation: $handle->actor->installation);
+            surface: $handle->surface, installation: $handle->actor->installation,
+            surfaceArchived: $surface->lifecycle === SurfaceLifecycle::Archived, archiveReaders: $handle->definition->archiveReaders);
         $verdict = $this->app->make(AudienceGate::class)->read(viewer: $handle->actor, subject: $subject);
         if (! $verdict->canRead() || ($verdict->expiresAt !== null && $verdict->expiresAt <= new \DateTimeImmutable('now'))) {
             throw new PostException(ProblemCode::AudienceDenied);

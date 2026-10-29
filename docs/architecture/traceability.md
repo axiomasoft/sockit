@@ -101,13 +101,13 @@
 | PANEL-02 | Неизвестная панель, foreign binding, collision и server identity | P1.13 контракт; P3 schema pending |
 | PANEL-03 | Boot без SQL, config:cache и fresh bootstrap | P1.9/13 проверки конфигурации; runtime DB не заявлен |
 | PANEL-04 | Порядок providers, invalid graph, freeze и late mutation | P1.9/13/10 compile checks; не e2e |
-| PANEL-05 | Две реальные панели, миграция, read/write и независимый rollback | P3/4 pending |
-| PANEL-06 | Hydration и worker A→B→A без stale context | P2/3/6 pending |
-| PANEL-07 | Module schema isolation, additive enable и disabled outbox | P3/4 pending |
+| PANEL-05 | Две реальные панели, миграция, read/write и независимый rollback | P3 infrastructure: installed consumer P3.8; P4 social e2e pending |
+| PANEL-06 | Hydration и worker A→B→A без stale context | P3 infrastructure: installed consumer P3.8; P6 host pilot pending |
+| PANEL-07 | Module schema isolation, additive enable и disabled outbox | P3 infrastructure: installed consumer P3.8; P4 social e2e pending |
 | PANEL-08 | Reactions-only host без внешних пакетов и sibling import | P4/6 pending |
 | PANEL-09 | Atomic mutation/receipt/outbox и concurrent claim | P2/4 PostgreSQL pending |
 | PANEL-10 | Cross-installation, revoke, archive, containment и unknown deny | P1.7 контракт/fixture; P4 pending |
-| PANEL-11 | Frozen migration, no overwrite, partial failure manifest | P3/4 pending |
+| PANEL-11 | Frozen migration, no overwrite, partial failure manifest | P3 infrastructure: installed consumer P3.8; P4 social e2e pending |
 | PANEL-12 | Нет comments domain/schema или mandatory Chatom; adapter не пишет чужие таблицы | P1.3 arch; P6 и conditional P7/8 pending |
 
 

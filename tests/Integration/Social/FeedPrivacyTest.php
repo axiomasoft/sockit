@@ -308,3 +308,57 @@ it('rejects ambient transactions and stale trusted handles before feed output', 
         $s->cleanup();
     }
 })->with(['transaction', 'installation']);
+
+it('checks the whole owner page after B final media hydration revokes earlier A on a valid continuation', function (string $change, int $budget): void {
+    $f = new FeedScenario(budget: $budget);
+    $s = $f->s;
+    try {
+        $refs = $f->tied(5);
+        $first = $f->page(1);
+        expect(FeedScenario::ids($first))->toBe([$refs[0]->id])->and($first->nextCursor)->not->toBeNull();
+        [$a, $b] = [$refs[1], $refs[2]];
+        $aBody = $s->posts->read($s->handle, $a)->body;
+        $s->connection()->table('panel_a.a_posts')->where('id', $b->id)->update(['media_refs' => json_encode([['owner' => 'host.media', 'id' => 'b-private-media']])]);
+        $resolver = new class($s->connection(), $a->id, $change) implements MediaResolver
+        {
+            public int $calls = 0;
+
+            public ?int $revocationAt = null;
+
+            public function __construct(private Connection $connection, private string $a, private string $change) {}
+
+            public function associate(OperationHandle $handle, MediaReference $media): AuthorizationDecision
+            {
+                expect($this->connection->transactionLevel())->toBe(0);
+                expect($media->id)->toBe('b-private-media');
+                $this->calls++;
+                // B's first hydrate must finish normally. Only its final hydrate revokes already checked A.
+                if ($this->calls === 2) {
+                    $this->revocationAt = $this->calls;
+                    if ($this->change === 'post') {
+                        $this->connection->table('panel_a.a_posts')->where('id', $this->a)->update(['visibility' => 'hidden', 'privacy_revision' => 2]);
+                    } else {
+                        $this->connection->table('panel_a.a_surface_instances')->increment('privacy_generation');
+                    }
+                }
+
+                return AuthorizationDecision::allow('fixture.current_media');
+            }
+        };
+        $s->app->instance(MediaResolver::class, $resolver);
+        $page = $f->page(2, $first->nextCursor);
+        expect($resolver->revocationAt)->toBe(2);
+        if ($change === 'post') {
+            expect(fn () => $s->posts->read($s->handle, $a))->toThrow(SocKitException::class);
+        }
+        $expected = $budget === 2 ? [$b->id] : [$b->id, $refs[3]->id];
+        expect(FeedScenario::ids($page))->toBe($expected);
+        expect(json_encode($page))->not->toContain($a->id, $aBody);
+        expect($page->nextCursor)->not->toBeNull();
+        $next = $f->page(2, $page->nextCursor);
+        expect(FeedScenario::ids($next))->toBe($budget === 2 ? [$refs[3]->id, $refs[4]->id] : [$refs[4]->id]);
+        $s->assertSentinels();
+    } finally {
+        $s->cleanup();
+    }
+})->with(['post', 'surface'])->with([2, 3]);

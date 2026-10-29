@@ -1,24 +1,20 @@
-PLAN1.P4.7. Session `01a1866a-7654-7791-a5d9-a1cd15bdd1ee`; actual runtime `codex/gpt-6.1-sol/high`, `danger-full-access` подтверждён в runtime.json. Base: `34a47ab763a6a074197bece222fd55b7174693b3`.
+PLAN1.P4.7 — исправление F1 Major после RED, переданного владельцем: reviewer `01a1867f-7c35-7453-bec0-22cd74585e2e`, codex/gpt-6.1-sol/high, read-only. Owning session прежняя: `01a1866a-7654-7791-a5d9-a1cd15bdd1ee`, codex/gpt-6.1-sol/high, danger-full-access. Base: `4422fe0a9eb6ed0c44e917685da400d8d4505b07`; повторного planner start нет.
 
-Добавлены Posts::feed, FeedQuery/FeedPage и внутренний encrypted/MAC cursor. Порядок — immutable first published_at + id DESC, strict keyset без OFFSET. Контекст включает installation/panel/full surface incarnation/viewer generation/filters/order. Refill ограничен scan budget; cursor идёт по последнему проверенному кандидату, включая пустую страницу. Перед выходом повторно проверяются current audience/action/host, post/privacy/safety/consent и surface generations; media разрешается вне транзакций. Нестабильность закрывает выход. Финальная проверка всей страницы удаляет ранее собранный отозванный пост и заполняет место. Реакционные counts в DTO отсутствуют; P4.3 guards сохранены.
+После всех policy/media callbacks PostFeed одним owner SQL statement сверяет всю выдачу и surface instance в общем statement snapshot. FeedCandidate сохраняет состояние, по которому разрешена гидратация. Любое несовпадение post row либо surface lifecycle/revision/source/privacy generation исключает кандидата. Затем bounded refill продолжает сканирование ниже последнего проверенного кандидата. Существующие batch/scalar/current host/media guards сохранены; после итоговой сверки callbacks перед выходом нет. Новых транзакций, locks, kernel/routes или sibling imports нет. Remote authority остаётся sampled-read boundary.
 
-Scalar PostStore теперь передаёт current archive/archiveReaders в AudienceSubject, что согласует feed/scalar для архивных читателей. В дополнительном прогоне исправлено только устаревшее ожидание ModuleSelectionTest относительно уже принятого alias `sockit.post`; файл зарегистрирован в task_files через planner push. Registry/kernel/routes не менялись.
+Регрессия использует действительный cursor следующей страницы: первый media callback B проходит, второй — в финальной hydrate B — скрывает уже проверенный A и повышает privacy_revision. Scalar read A после feed запрещён. Дополнительно проверяется изменение surface privacy generation; scan budgets 2/3 доказывают короткую страницу с continuation либо refill без пропусков следующей страницы. До исправления V3 дал exit 1: четыре новых failures, прежние 31 tests passed. RED evidence сохранено как V3-attempt-20261029T072247Z.*.
 
-| Check | Exit | Результат |
+| Проверка исправления | Exit | Результат |
 |---|---:|---|
-| V1 | 0 | 17 tests / 25 assertions: tamper, context, expiry, rotation, malformed positions |
-| V2 | 0 | 14 / 145: ties, refill/budget, continuation, четыре independent-process PG barriers |
-| V3 | 0 | 31 / 234: lifecycle, revoke/shrink/class replacement, hydration races, media, scalar=batch |
-| V89 | 0 | 53 / 594: architecture |
+| V1 | 0 | 17 tests / 25 assertions |
+| V2 | 0 | 14 / 145 |
+| V3 | 0 | 35 / 324 |
+| V89 | 0 | 53 / 596 |
 | V90 | 0 | PHPStan max, без новых suppressions/baseline |
 | V91 | 0 | Pint |
-| V92 (доп.) | 0 | 401 / 8665: social и P2 guards/atomicity/receipts/concurrency/tombstones |
-| V93 (доп.) | 0 | 417 / 5276: Unit/Feature и настоящие consumer checks |
 
-V1/V2/V3/V89/V90/V91 выполнены буквально. Каждый PG-прогон — через pg-run.py: owned container label/private endpoint/exact *_test/run marker/PIDs проверяются до тестовых мутаций; B/decoy sentinels сохранены. Skipped/incomplete/warning/risky не засчитывались. V90 сохраняет прежнее PHP startup warning об optional turbo extension; анализ завершился без ошибок. Ранние неуспешные попытки и причины повторов сохранены, включая отказ source guard при параллельной корректировке теста.
+Все шесть команд выполнены буквально. PostgreSQL — только pg-run.py; owned container/endpoint/exact *_test/run marker/PIDs доказаны до мутаций; B/decoy sentinels сохранены. Missing/skip/incomplete/warning/risky/timeout не засчитываются pass. V90 сохраняет прежнее startup warning optional turbo extension, анализ без ошибок.
 
-Итоговые evidence по schema check-evidence, literal commands, SHA-256 logs и единый source digest проверяются verify-evidence.py; результат — evidence-verification.json. Digest: `030a42a565ff0ade9f89c7029134f61ac214ef6443e183c20e4f2831e4d53f23`.
+Актуальные V1/V2/V3/V89/V90/V91.json и logs прошли schema/log SHA-256/literal command/source verification: evidence-verification.json. Source digest: `30537b06eed643791e15b9f44dc65dccc22200ea53697dcdfe4c7e976d9aa632`. V92/V93, старые attempts и finalization/finish logs — история прежнего кандидата, не evidence исправления F1.
 
-Настройка через scalar module settings `sockit.posts`: feed_keys (base64 32-byte server secrets), feed_key (active ID), feed_ttl (1..86400), feed_chunk (1..100), feed_budget (1..10000). Без серверного ключа feed отклонён; секретов в fixtures/logs нет, тесты генерируют случайные ключи. Допустим author wire filter, limit 1..100. Cursor — позиция, не разрешение. Консистентность sampled current read; атомарный remote revoke и исторический snapshot не обещаются.
-
-После scoped dry-run создаётся executor commit; independent reviewer/receipt не запускался и не создавался. Требуется отдельный coordinator review requested. После commit исходники и этот отчёт остаются неизменны; точный результат последующего planner finish будет в новом untracked finalization.json.
+После scoped dry-run создаётся executor commit; после него исходники и отчёт неизменны. Для исправленного кандидата нужен новый independent review координатора. Reviewer/receipt не создавался; finish и blocked при исправлении не вызываются.

@@ -1,6 +1,6 @@
 {
   "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
-  "evidence_id": "p4.7-V2-2026-10-29T07:03:28Z",
+  "evidence_id": "p4.7-V2-2026-10-29T07:24:17Z",
   "check_id": "V2",
   "subject": "PLAN1.P4.7",
   "procedure": {
@@ -8,21 +8,21 @@
     "cwd": "."
   },
   "candidate": {
-    "head": "34a47ab763a6a074197bece222fd55b7174693b3",
-    "dirty_digest": "030a42a565ff0ade9f89c7029134f61ac214ef6443e183c20e4f2831e4d53f23"
+    "head": "4422fe0a9eb6ed0c44e917685da400d8d4505b07",
+    "dirty_digest": "30537b06eed643791e15b9f44dc65dccc22200ea53697dcdfe4c7e976d9aa632"
   },
   "exit": 0,
   "environment": {
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "env_digest": "a665b3cb3a0b0f980ad4dbe653271dbaaa87a3408c3b9b5f48ed30b8d0e6c7ed"
+    "env_digest": "9ad6e040c0a5da822dfc872ac33d5d2b76c2763659b9ddf5b91fa6b3ffe0d1a1"
   },
   "log": {
     "path": "artifacts/p4.7/V2.log",
-    "sha256": "850406342a7b10380dc4bac1906bfb0ff14962908dcc935f3865d130a38f110c"
+    "sha256": "af3f27f6c7c78f2349de0d1e92afced451b91d78001c215c1154b48535d97f74"
   },
-  "started_at": "2026-10-29T07:03:28Z",
-  "finished_at": "2026-10-29T07:03:35Z",
+  "started_at": "2026-10-29T07:24:17Z",
+  "finished_at": "2026-10-29T07:24:23Z",
   "producer": {
     "kind": "executor",
     "actor": {

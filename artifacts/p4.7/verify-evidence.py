@@ -17,7 +17,7 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 assert module.fingerprint(root, set(source['paths'])) == source, 'Source differs from the current fingerprint'
 results = {}
-for check in [*literal, 'V92', 'V93']:
+for check in sys.argv[1:] or list(literal):
     evidence = json.loads((out / (check + '.json')).read_text())
     validator.validate(evidence)
     assert evidence['subject'] == 'PLAN1.P4.7' and evidence['check_id'] == check

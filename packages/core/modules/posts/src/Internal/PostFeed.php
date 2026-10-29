@@ -101,30 +101,30 @@ final readonly class PostFeed
                 }
             }
 
-            // No more shortlist reads before this output boundary. Later candidates may revoke earlier ones.
+            // Complete every yielding policy/media callback before checking the whole owner page.
             $currentItems = [];
             foreach ($items as $item) {
-                $time = $item->publishedAt?->format('Y-m-d H:i:s.u');
+                $time = $item->view->publishedAt?->format('Y-m-d H:i:s.u');
                 if ($time === null) {
                     continue;
                 }
-                $current = $this->hydrate($handle, $store, $item->resource, ['time' => $time, 'id' => $item->resource->id], $query);
+                $current = $this->hydrate($handle, $store, $item->view->resource, ['time' => $time, 'id' => $item->view->resource->id], $query);
                 if ($current !== null) {
                     $currentItems[] = $current;
                 }
             }
-            $items = $currentItems;
+            $items = $this->currentOwnerItems($handle, $store, $currentItems);
             // A final denial leaves a hole: continue below the last evaluated candidate while budget remains.
         } while (count($items) < $query->limit && ! $exhausted && $scanned < $budget);
 
-        return new FeedPage(items: $items, nextCursor: $exhausted || $position === null ? null : $codec->encode($context, $position));
+        return new FeedPage(items: array_map(static fn (FeedCandidate $item): PostView => $item->view, $items), nextCursor: $exhausted || $position === null ? null : $codec->encode($context, $position));
     }
 
     /** Each output samples current authority outside transactions. Remote revocation cannot be atomic with owner SQL.
      * A change during hydration restarts current authorization; repeated instability suppresses that candidate.
      *
      * @param array{time:string, id:string} $position */
-    private function hydrate(OperationHandle $handle, PostStore $store, ResourceRef $resource, array $position, FeedQuery $query): ?PostView
+    private function hydrate(OperationHandle $handle, PostStore $store, ResourceRef $resource, array $position, FeedQuery $query): ?FeedCandidate
     {
         try {
             for ($attempt = 0; $attempt < 2; $attempt++) {
@@ -142,7 +142,7 @@ final readonly class PostFeed
                 $currentSurface = $this->app->make(Operations::class)->surface($handle);
                 if ($row === $current && $this->surfaceVersion($surface) === $this->surfaceVersion($currentSurface)
                     && $this->hostVersion($host) === $this->hostVersion($currentHost)) {
-                    return $view;
+                    return new FeedCandidate(view: $view, row: $current, surface: $currentSurface);
                 }
             }
         } catch (\Throwable) {
@@ -150,6 +150,49 @@ final readonly class PostFeed
         }
 
         return null;
+    }
+
+    /** One owner SQL statement samples every returned post and its surface together after all callbacks.
+     * No authority/media SPI or per-item hydration may run after this checkpoint before output.
+     * A later external/remote revoke is outside this sampled-read boundary.
+     *
+     * @param list<FeedCandidate> $items
+     * @return list<FeedCandidate> */
+    private function currentOwnerItems(OperationHandle $handle, PostStore $store, array $items): array
+    {
+        if ($items === []) {
+            return [];
+        }
+        $store->outside($handle);
+        $surfaceColumns = ['id', 'lifecycle', 'revision', 'source_generation', 'privacy_generation'];
+        $surface = $store->table($handle, 'surface_instances')->where([
+            'id' => $items[0]->surface->id, 'installation' => $handle->actor->installation->id,
+            'panel' => $handle->surface->panel->value, 'kind' => $handle->surface->kind->value,
+            'host_type' => $handle->surface->host->type, 'host_key' => $handle->surface->host->value,
+            'incarnation' => $handle->surface->incarnation->value,
+        ])->select(array_map(static fn (string $column): string => $column.' as feed_surface_'.$column, $surfaceColumns));
+        $rows = $store->table($handle, 'posts')->where($store->identity($handle))
+            ->whereIn('id', array_map(static fn (FeedCandidate $item): string => $item->view->resource->id, $items))
+            ->crossJoinSub($surface, 'feed_surface')->get();
+        $snapshots = [];
+        foreach ($rows as $raw) {
+            $row = $store->columns($raw);
+            $version = [];
+            foreach ($surfaceColumns as $column) {
+                $version[] = $row['feed_surface_'.$column] ?? null;
+                unset($row['feed_surface_'.$column]);
+            }
+            $snapshots[$store->text($row, 'id')] = ['row' => $row, 'surface' => $version];
+        }
+        $current = [];
+        foreach ($items as $item) {
+            $snapshot = $snapshots[$item->view->resource->id] ?? null;
+            if ($snapshot !== null && $snapshot['row'] === $item->row && $snapshot['surface'] === $this->surfaceVersion($item->surface)) {
+                $current[] = $item;
+            }
+        }
+
+        return $current;
     }
 
     /** @return array<string, mixed> */

@@ -23,6 +23,7 @@ use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\OperationHandles;
 use SocKit\Operations\Operations;
 use SocKit\Panels\PanelDefinitions;
+use SocKit\Posts\Internal\PostsServiceProvider;
 use SocKit\Reactions\Internal\ReactionsServiceProvider;
 use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\Schema\SnapshotRenderer;
@@ -65,17 +66,25 @@ final class GroupScenario
     private readonly mixed $previousDb;
 
     /** @param array<string, mixed> $privacy */
-    public function __construct(bool $install = true, array $privacy = [], bool $reactions = false)
+    public function __construct(bool $install = true, array $privacy = [], bool $reactions = false, bool $content = false)
     {
+        if ($content && $privacy === []) {
+            $privacy = ['floor' => ['allowed_scopes' => ['direct', 'group'], 'default_scope' => 'direct', 'max_scope' => 'group',
+                'minor_default_scope' => 'direct', 'minor_max_scope' => 'direct', 'contour_levels' => []]];
+        }
         $this->app = new Application;
         $this->app->instance('config', new Repository(['sockit' => [
-            'panels' => [GroupPanel::class], 'surfaces' => [GroupSurface::class],
-            'modules' => ['enabled' => ['sockit.groups'], 'settings' => []],
+            'panels' => $content ? [ContentPanel::class, NeighborPanel::class] : [GroupPanel::class],
+            'surfaces' => $content ? [GroupSurface::class, ContentSurface::class, NeighborSurface::class] : [GroupSurface::class],
+            'modules' => ['enabled' => $content ? ['sockit.groups', 'sockit.posts', 'sockit.reactions'] : ['sockit.groups'], 'settings' => []],
             ...($privacy === [] ? [] : ['privacy' => $privacy]),
         ]]));
         $this->app->register(SocKitServiceProvider::class);
         $this->app->register(GroupsServiceProvider::class);
-        if ($reactions) {
+        if ($content) {
+            $this->app->register(PostsServiceProvider::class);
+        }
+        if ($reactions || $content) {
             $this->app->register(ReactionsServiceProvider::class);
         }
         $this->app->boot();

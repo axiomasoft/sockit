@@ -13,5 +13,6 @@ final class GroupsServiceProvider extends ServiceProvider
     public function register(): void
     {
         Modules::add($this->app, GroupsModule::class);
+        $this->app->scoped(GroupTarget::class);
     }
 }

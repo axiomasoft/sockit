@@ -31,13 +31,15 @@ final class MembershipScenario
 
     private int $sequence = 0;
 
-    public function __construct()
+    public function __construct(bool $content = false, bool $install = true)
     {
-        $this->f = new GroupScenario;
+        $this->f = new GroupScenario(install: $install, content: $content);
         $connection = $this->f->connection();
-        $connection->statement('CREATE TABLE panel_a.driver_membership_consent (installation text NOT NULL, subject text NOT NULL, allowed boolean NOT NULL, generation bigint NOT NULL, PRIMARY KEY (installation, subject))');
-        foreach (['7', '8'] as $id) {
-            $connection->table('panel_a.membership_consent')->insert(['installation' => 'runtime-test', 'subject' => new ActorRef('user', $id)->toWire(), 'allowed' => true, 'generation' => 1]);
+        if ($install) {
+            $connection->statement('CREATE TABLE panel_a.driver_membership_consent (installation text NOT NULL, subject text NOT NULL, allowed boolean NOT NULL, generation bigint NOT NULL, PRIMARY KEY (installation, subject))');
+            foreach (['7', '8'] as $id) {
+                $connection->table('panel_a.membership_consent')->insert(['installation' => 'runtime-test', 'subject' => new ActorRef('user', $id)->toWire(), 'allowed' => true, 'generation' => 1]);
+            }
         }
         $this->consent = new Consent($connection);
         $this->f->app->instance(MembershipConsent::class, $this->consent);

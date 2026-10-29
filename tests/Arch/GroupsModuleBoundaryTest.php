@@ -2,16 +2,23 @@
 
 declare(strict_types=1);
 
+use SocKit\Attributes\Api;
 use SocKit\Attributes\Spi;
+use SocKit\Audience\Contracts\AudienceResolver;
 use SocKit\Groups\Contracts\MembershipConsent;
 use SocKit\Groups\Data\ConsentDecision;
 use SocKit\Groups\Data\MembershipActivation;
 use SocKit\Groups\Data\MembershipCommand;
 use SocKit\Groups\Enums\JoinPolicy;
 use SocKit\Groups\Enums\MembershipState;
+use SocKit\Groups\GroupAudienceResolver;
+use SocKit\Groups\Internal\GroupTarget;
 use SocKit\SocKitServiceProvider;
+use SocKit\Surfaces\Contracts\TargetResolver;
+use SocKit\Surfaces\Contracts\TargetWriteFence;
 use SocKit\Tests\Arch\Support\Gates;
 use SocKit\Tests\Arch\Support\SourceScanner;
+use SocKit\Tests\Fixtures\Groups\Selection;
 
 it('keeps Groups on public kernel contracts with explicit owned state and no sibling or host persistence', function (): void {
     $files = SourceScanner::php('packages/core/modules/groups/src');
@@ -60,4 +67,21 @@ it('requires explicit module-local consent without a permissive production defau
     foreach (['packages/core/src/SocKitServiceProvider.php', 'packages/core/modules/groups/src/Internal/GroupsServiceProvider.php'] as $provider) {
         expect(file_get_contents($provider))->not->toContain('MembershipConsent');
     }
+});
+
+it('composes group audiences and targets only through existing contracts with scoped target preparation', function (): void {
+    $resolver = new ReflectionClass(GroupAudienceResolver::class);
+    expect($resolver->implementsInterface(AudienceResolver::class))->toBeTrue()
+        ->and($resolver->isReadOnly())->toBeTrue()
+        ->and($resolver->getAttributes(Api::class))->toHaveCount(1);
+    $target = new ReflectionClass(GroupTarget::class);
+    expect($target->implementsInterface(TargetResolver::class))->toBeTrue()
+        ->and($target->implementsInterface(TargetWriteFence::class))->toBeTrue();
+    $app = Selection::app();
+    $app->boot();
+    $first = $app->make(GroupTarget::class);
+    expect($app->make(GroupTarget::class))->toBe($first);
+    $app->forgetScopedInstances();
+    expect($app->make(GroupTarget::class))->not->toBe($first);
+    $app->flush();
 });

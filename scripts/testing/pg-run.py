@@ -23,6 +23,10 @@ try:
     binding = inspect['NetworkSettings']['Ports']['5432/tcp']
     if len(binding) != 1 or binding[0]['HostIp'] != '127.0.0.1':
         raise RuntimeError('container endpoint is not private loopback')
+    mounts = inspect.get('Mounts', [])
+    if len(mounts) != 1 or mounts[0]['Type'] != 'volume' or mounts[0]['Destination'] != '/var/lib/postgresql/data':
+        raise RuntimeError('unexpected private PostgreSQL mounts')
+    print('private volume=' + mounts[0]['Name'], flush=True)
     port = int(binding[0]['HostPort'])
     for attempt in range(60):
         if subprocess.run(['docker', 'exec', container, 'psql', '-U', 'postgres', '-d', owner, '-Atqc', 'SELECT current_database()'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
@@ -51,7 +55,8 @@ finally:
             info = json.loads(docker('inspect', container))[0]
             if info['Config']['Labels'].get('sockit.test.run') == run:
                 subprocess.run(['docker', 'container', 'stop', container], check=True, stdout=subprocess.DEVNULL)
-                subprocess.run(['docker', 'container', 'remove', container], check=True, stdout=subprocess.DEVNULL)
+                # This invocation created every anonymous volume; no host/named mounts are accepted.
+                subprocess.run(['docker', 'container', 'remove', '--volumes', container], check=True, stdout=subprocess.DEVNULL)
         except (subprocess.SubprocessError, KeyError, ValueError) as exc:
             print('cleanup failed: ' + str(exc), file=sys.stderr)
             raise

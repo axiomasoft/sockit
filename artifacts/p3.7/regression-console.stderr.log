@@ -1,0 +1,1 @@
+> pest 'tests/Feature/Console/RuntimeCommandsTest.php' 'tests/Arch' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'

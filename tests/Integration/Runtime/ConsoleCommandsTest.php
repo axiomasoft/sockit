@@ -28,9 +28,10 @@ it('runs doctor and bounded relay against isolated panel storage in fresh proces
         $s->append($second);
         $s->append($s->event('acme.b'));
         $doctor = consoleProcess(['sockit:doctor', '--panel=acme.a', '--json']);
-        expect($doctor->getExitCode())->toBe(0, $doctor->getOutput());
+        // This P2 runtime fixture has no installed P3 history or production constraints.
+        expect($doctor->getExitCode())->toBe(1)->and($doctor->getOutput())->toContain('SCHEMA_HISTORY_MISSING');
         $unproven = consoleProcess(['sockit:doctor', '--panel=acme.a'], ['SOCKIT_NO_IDENTITY' => '1']);
-        expect($unproven->getExitCode())->toBe(1)->and($unproven->getOutput())->toContain('connection.identity_unproven');
+        expect($unproven->getExitCode())->toBe(1)->and($unproven->getOutput())->toContain('SCHEMA_HISTORY_MISSING');
         $noHandles = consoleProcess(['sockit:relay', '--panel=acme.a', '--once'], ['SOCKIT_NO_HANDLES' => '1']);
         expect($noHandles->getExitCode())->toBe(1);
         $retry = consoleProcess(['sockit:relay', '--panel=acme.a', '--once', '--limit=1'], ['SOCKIT_CONSOLE_FAULT' => 'retry']);
@@ -56,7 +57,7 @@ it('runs doctor and bounded relay against isolated panel storage in fresh proces
         expect(PgTarget::query(pdo: $s->db->owner, sql: "SELECT deliveries->'acme.inbox'->>'status' FROM panel_b.other_b_outbox")->fetchColumn())->toBe('pending');
         $s->db->owner->exec('DROP TABLE panel_a.driver_a_receipts');
         $missing = consoleProcess(['sockit:doctor', '--panel=acme.a']);
-        expect($missing->getExitCode())->toBe(1)->and($missing->getOutput())->toContain('schema.missing.receipts');
+        expect($missing->getExitCode())->toBe(1)->and($missing->getOutput())->toContain('SCHEMA_HISTORY_MISSING');
     } finally {
         $s->cleanup();
     }

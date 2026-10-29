@@ -1,0 +1,38 @@
+[
+  {
+    "check": "V1",
+    "exit": 0,
+    "schema": "valid",
+    "literal_command": true,
+    "logs": "valid",
+    "sources": "unchanged",
+    "digest": "da2322d3237e354af02c2dc5fdccadfd43668c8204d3c371c36361fe891eb968"
+  },
+  {
+    "check": "V2",
+    "exit": 0,
+    "schema": "valid",
+    "literal_command": true,
+    "logs": "valid",
+    "sources": "unchanged",
+    "digest": "da2322d3237e354af02c2dc5fdccadfd43668c8204d3c371c36361fe891eb968"
+  },
+  {
+    "check": "V90",
+    "exit": 0,
+    "schema": "valid",
+    "literal_command": true,
+    "logs": "valid",
+    "sources": "unchanged",
+    "digest": "da2322d3237e354af02c2dc5fdccadfd43668c8204d3c371c36361fe891eb968"
+  },
+  {
+    "check": "V91",
+    "exit": 0,
+    "schema": "valid",
+    "literal_command": true,
+    "logs": "valid",
+    "sources": "unchanged",
+    "digest": "da2322d3237e354af02c2dc5fdccadfd43668c8204d3c371c36361fe891eb968"
+  }
+]

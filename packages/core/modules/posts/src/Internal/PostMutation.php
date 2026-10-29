@@ -35,6 +35,8 @@ final class PostMutation implements OwnerMutation
     /** @var array<string, mixed>|null */
     private ?array $locked = null;
 
+    private ?Revision $preparedRevision = null;
+
     public function __construct(private readonly Application $app, private readonly PostCommand $post) {}
 
     public function commandType(): string
@@ -58,6 +60,7 @@ final class PostMutation implements OwnerMutation
         $actor = $handle->actor->actor ?? throw new PostException(ProblemCode::AuthenticationRequired);
         if ($this->post->resource !== null) {
             $row = $store->row($handle, $this->post->resource);
+            $this->preparedRevision = new Revision($store->integer($row, 'revision'));
             if ($store->text($row, 'author_ref') !== $actor->toWire()) {
                 throw new PostException(ProblemCode::AuthorizationDenied);
             }
@@ -82,6 +85,9 @@ final class PostMutation implements OwnerMutation
         if ($this->locked !== null && $store->text($this->locked, 'author_ref') !== $handle->actor->actor?->toWire()) {
             throw new PostException(ProblemCode::AuthorizationDenied);
         }
+        if ($this->locked !== null && $this->preparedRevision?->value !== $store->integer($this->locked, 'revision')) {
+            throw new PostException(ProblemCode::RevisionConflict);
+        }
 
         return new MutationSnapshot(resource: $this->post->resource, revision: $this->locked === null ? null : new Revision($store->integer($this->locked, 'revision')),
             lifecycle: TargetLifecycle::Live, generation: 'posts.v1', safety: AuthorizationDecision::allow('posts.retained_owner_storage'));
@@ -103,7 +109,8 @@ final class PostMutation implements OwnerMutation
         $resource = $snapshot->resource ?? new ResourceRef(panel: $handle->surface->panel, kind: ResourceKind::Post, id: Ids::uuid7());
         $revision = $snapshot->revision?->next() ?? new Revision(1);
         $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-        $privacy = $this->locked === null ? 1 : $store->integer($this->locked, 'privacy_revision') + ($store->object($store->text($this->locked, 'audience')) == $audience->toWire() ? 0 : 1);
+        // Conservative invalidation: every immutable content/safety revision is a privacy fence.
+        $privacy = $revision->value;
         $media = json_encode(array_map(fn ($ref): array => $ref->toWire(), $this->post->media), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $values = ['body' => $this->post->body, 'media_refs' => $media, 'audience' => CanonicalJson::encode($audience->toWire()),
             'revision' => $revision->value, 'privacy_revision' => $privacy, 'publication_state' => $state->value,

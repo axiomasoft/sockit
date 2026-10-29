@@ -14,8 +14,10 @@ use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Operations;
 use SocKit\Posts\Data\PostCommand;
 use SocKit\Posts\Data\PostResult;
+use SocKit\Posts\Data\PostTransition;
 use SocKit\Posts\Data\PostView;
 use SocKit\Posts\Enums\PublicationState;
+use SocKit\Posts\Internal\PostLifecycleMutation;
 use SocKit\Posts\Internal\PostMutation;
 use SocKit\Posts\Internal\PostStore;
 use SocKit\Support\Data\CommandKey;
@@ -49,6 +51,20 @@ final readonly class Posts
         return $this->execute(handle: $handle, post: $post, command: $command, create: false);
     }
 
+    public function transitionDigest(OperationHandle $handle, PostTransition $transition, Revision $expectedRevision): PayloadDigest
+    {
+        return $this->operations->digest(handle: $handle, mutation: new PostLifecycleMutation($this->app, $transition), expectedRevision: $expectedRevision);
+    }
+
+    public function transition(OperationHandle $handle, PostTransition $transition, CommandEnvelope $command): PostResult
+    {
+        if ($command->expectedRevision === null) {
+            return new PostResult(OperationResult::rejected(ProblemCode::PayloadInvalid), null);
+        }
+
+        return $this->result($handle, $this->operations->execute(handle: $handle, command: $command, mutation: new PostLifecycleMutation($this->app, $transition)));
+    }
+
     /** Current hard guards, stored audience, publication and safety protect every historical body too. */
     public function read(OperationHandle $handle, ResourceRef $resource): PostView
     {
@@ -69,7 +85,7 @@ final readonly class Posts
     {
         try {
             new PostStore($this->app)->outside($handle);
-            if (! in_array($namespace->commandType, ['posts.create', 'posts.edit'], true)) {
+            if (! in_array($namespace->commandType, ['posts.create', 'posts.edit', 'posts.publish', 'posts.hold', 'posts.reject', 'posts.hide', 'posts.restore', 'posts.delete', 'posts.audience'], true)) {
                 return new PostResult(OperationResult::rejected(ProblemCode::PayloadInvalid), null);
             }
             $result = $this->operations->lookup(handle: $handle, namespace: $namespace, key: $key);
@@ -105,6 +121,6 @@ final readonly class Posts
             return new PostResult(OperationResult::rejected(ProblemCode::ProviderUnavailable), null);
         }
 
-        return new PostResult($result, PublicationState::from($store->text($store->columns($row), 'publication_state')));
+        return new PostResult($result, PublicationState::from($store->text($store->columns($row), 'publication_state')), $store->text($store->columns($row), 'visibility'));
     }
 }

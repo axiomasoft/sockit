@@ -84,3 +84,33 @@ relay with a consumer-owned SQL inbox. Its rollback assertion compares owner sta
 receipts and outbox, plus panel B and decoy snapshots. The fixture confirms one inbox effect
 for the delivered event; stale events may be quarantined. This does not establish remote
 exactly-once delivery or atomic revocation across databases.
+
+## Posts lifecycle — P4.5
+
+Publication (`Pending/Published/Held/Rejected`) and visibility (`visible/hidden/deleted`) are
+independent. Hide preserves publication; restore of Hidden preserves that exact state. Only an
+explicit publish or an author edit requesting publication can promote Pending/Held/Rejected.
+Publishing and restoring a previously Published post require fresh host permission, admission,
+set containment, consent and safety/media assessment outside the transaction. Unknown fails closed.
+Moderator hold/reject/hide/restore and author delete have distinct actions and trusted audit actors.
+Every transition requires an exact expected revision, installation/panel/surface/target incarnation,
+current authority fence and a retained owner record. The prepared content revision is checked again
+after the owner lock; stale safety/audience preparation cannot act on a newer body.
+
+Each post revision advances its privacy revision conservatively, including body/safety changes.
+The envelope uses the committed content-owner revision for Post/Group event privacy versions;
+host target privacy/generation remains a separate mandatory fence for receipt replay. Events are
+versioned refs-only facts, never body/reason/media snapshots. `published_at` is the first successful
+publication and survives hide/restore/audience changes and edits without changing chronology.
+
+Host consent is current host authority, not an immutable proof that a requested hide ran. Its revoke
+closes body/revision/facade and generic receipt access immediately, even when hide persistence fails.
+The hide effect, immutable revision, receipt and outbox roll back together; retry uses the original
+key/digest after rollback. Read-only/archive allows eligible historical reads but no new social writes.
+Current audience sets govern historical bodies and receipt resource metadata, without author bypass.
+
+Deleted and Erased are terminal for this API. Author delete retains the owner row and required history,
+plus a content-free terminal revision (identity/revision/actor/reason/visibility, null body, no media).
+Erasure from the future purge owner remains terminal; delayed publication/edit/restore cannot revive it.
+Retention, legal holds, full erasure orchestration and projection purging remain P9 work. These checks
+establish owner-store/read/receipt fencing, not cross-database revocation atomicity or purge completion.

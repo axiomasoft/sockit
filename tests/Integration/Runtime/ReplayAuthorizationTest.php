@@ -24,6 +24,7 @@ use SocKit\Tests\Fixtures\Runtime\EnvelopeMutation;
 use SocKit\Tests\Fixtures\Runtime\EnvelopeScenario;
 use SocKit\Tests\Fixtures\Runtime\RuntimeScenario;
 use SocKit\Tests\Fixtures\Runtime\UnavailableActor;
+use SocKit\Tests\Fixtures\Social\PostLifecycle;
 use SocKit\Tests\Fixtures\Social\PostScenario;
 
 it('reauthorizes execute replay and lookup after current revoke removal visibility generation or lifecycle change', function (string $case): void {
@@ -294,6 +295,27 @@ it('protects a committed resource reference in generic lookup after a current ow
         $s->connection()->table('panel_a.a_posts')->update(['publication_state' => 'held']);
         $lookup = $s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key);
         expect($lookup?->resource)->toBeNull()->and($lookup?->revision)->toBeNull()->and($lookup?->isSuccess())->toBeFalse();
+    } finally {
+        $s->cleanup();
+    }
+});
+
+it('binds content events to the committed owner revision while preserving the original host replay fence', function (): void {
+    $s = new PostScenario;
+    try {
+        $created = $s->posts->create(handle: $s->handle, post: $s->post(), command: $s->command());
+        $ref = $created->operation->resource ?? throw new RuntimeException('Missing post');
+        $edit = $s->post(body: 'Content revision two', resource: $ref);
+        $command = $s->command(post: $edit, expected: new Revision(1), key: 'content.owner.revision.0001');
+        expect($s->posts->edit(handle: $s->handle, post: $edit, command: $command)->isPublished())->toBeTrue();
+        $event = new PostLifecycle($s)->event(2);
+        expect($event['source_revision'])->toBe(2)->and($event['privacy_revision'])->toBe(2)
+            ->and($event['payload'])->toEqual(['post' => $ref->toWire()]);
+        expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->isSuccess())->toBeTrue();
+        $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['privacy' => 2]);
+        $lookup = $s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key);
+        expect($lookup?->problem)->toBe(ProblemCode::AuthorizationUnknown)->and($lookup?->resource)->toBeNull()->and($lookup?->revision)->toBeNull();
+        expect($s->counts())->toBe(['posts' => 1, 'revisions' => 2, 'receipts' => 2, 'outbox' => 2]);
     } finally {
         $s->cleanup();
     }

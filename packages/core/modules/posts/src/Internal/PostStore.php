@@ -19,6 +19,7 @@ use SocKit\Operations\OperationHandles;
 use SocKit\Operations\Operations;
 use SocKit\Posts\Contracts\MediaResolver;
 use SocKit\Posts\Data\MediaReference;
+use SocKit\Posts\Data\PostCommand;
 use SocKit\Posts\Data\PostView;
 use SocKit\Posts\Enums\PublicationState;
 use SocKit\Support\Data\ActorRef;
@@ -63,6 +64,18 @@ final readonly class PostStore
     /** @return array<string, mixed> */
     public function row(OperationHandle $handle, ResourceRef $resource, bool $lock = false): array
     {
+        $row = $this->retained($handle, $resource, $lock);
+        if (($row['visibility'] ?? null) !== 'visible') {
+            throw new PostException(($row['visibility'] ?? null) === 'deleted' ? ProblemCode::ContentDeleted : ProblemCode::ContentHidden);
+        }
+
+        return $row;
+    }
+
+    /** Owner lifecycle access preserves hidden publication state, but never admits a terminal record.
+     * @return array<string, mixed> */
+    public function retained(OperationHandle $handle, ResourceRef $resource, bool $lock = false): array
+    {
         if ($resource->kind !== ResourceKind::Post || ! $resource->panel->equals($handle->surface->panel)) {
             throw new PostException(ProblemCode::PanelBindingMismatch);
         }
@@ -80,11 +93,30 @@ final readonly class PostStore
         if (($row['content_state'] ?? null) !== 'retained') {
             throw new PostException(ProblemCode::ContentErased);
         }
-        if (($row['visibility'] ?? null) !== 'visible') {
-            throw new PostException(($row['visibility'] ?? null) === 'deleted' ? ProblemCode::ContentDeleted : ProblemCode::ContentHidden);
+        if (($row['visibility'] ?? null) === 'deleted') {
+            throw new PostException(ProblemCode::ContentDeleted);
         }
 
         return $row;
+    }
+
+    /** @param array<string, mixed> $row */
+    public function content(OperationHandle $handle, ResourceRef $resource, array $row, bool $publish): PostCommand
+    {
+        $raw = json_decode($this->text($row, 'media_refs'), true, flags: JSON_THROW_ON_ERROR);
+        if (! is_array($raw) || ! array_is_list($raw)) {
+            throw new PostException(ProblemCode::PayloadInvalid);
+        }
+        $media = [];
+        foreach ($raw as $ref) {
+            if (! is_array($ref) || ! is_string($ref['owner'] ?? null) || ! is_string($ref['id'] ?? null)) {
+                throw new PostException(ProblemCode::PayloadInvalid);
+            }
+            $media[] = new MediaReference($ref['owner'], $ref['id']);
+        }
+
+        return new PostCommand(surface: $handle->surface, resource: $resource, body: $this->text($row, 'body'),
+            audience: AudienceSpec::fromWire($this->object($this->text($row, 'audience'))), publish: $publish, media: $media);
     }
 
     /** @return array<string, string|int> */

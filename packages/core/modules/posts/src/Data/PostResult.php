@@ -12,10 +12,10 @@ use SocKit\Posts\Enums\PublicationState;
 #[Api(since: '1.0')]
 final readonly class PostResult
 {
-    public function __construct(public OperationResult $operation, public ?PublicationState $publication) {}
+    public function __construct(public OperationResult $operation, public ?PublicationState $publication, public ?string $visibility = 'visible') {}
 
     public function isPublished(): bool
     {
-        return $this->operation->isSuccess() && $this->publication === PublicationState::Published;
+        return $this->operation->isSuccess() && $this->publication === PublicationState::Published && $this->visibility === 'visible';
     }
 }

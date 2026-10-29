@@ -12,9 +12,18 @@ final class {{CLASS}} extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel->id({{ID}})->hostTypes({{HOST}})
+        $panel->id({{ID}})->hostTypes({{HOST}})
             ->connection({{CONNECTION}})->schema({{SCHEMA}})->prefix({{PREFIX}})
-            ->modules({{MODULES}})
-            ->models({{MODELS}});
+            ->modules({{MODULES}});
+        $models = {{MODELS}};
+        // Keep consumer bindings when disabling a module; only active owners enter the runtime map.
+        $owners = {{MODEL_OWNERS}};
+        foreach ($owners as $entity => $owner) {
+            if ($owner !== 'sockit.kernel' && ! in_array($owner, $panel->selectedModules(), true)) {
+                unset($models[$entity]);
+            }
+        }
+
+        return $panel->models($models);
     }
 }

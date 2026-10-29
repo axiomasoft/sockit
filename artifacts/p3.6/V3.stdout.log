@@ -1,9 +1,10 @@
-private container=ae26b5c11dc199832016adf524195bb05f7bfbb3067f4e494f5a14cc6b653214 owner=sockit_p2_52f4adce30d2ca0e_test decoy=sockit_p2_decoy_52f4adce30d2ca0e_test port=33018
+private container=e1ea9c47fca271413f192cd7a9ae3c3e812bf9b0223b9cce41810e23fd2b6bce owner=sockit_p2_9620a2d7f4925ea0_test decoy=sockit_p2_decoy_9620a2d7f4925ea0_test port=33033
 
   [30;42;1m PASS [39;49;22m[39m Tests\Integration\Schema\DisabledModuleTest[39m
-  [32;1m✓[39;22m[90m [39m[90mit preserves installed data and history through disable and re-enab[39m[90m…[39m [90m0.39s[39m  
-  [32;1m✓[39;22m[90m [39m[90mit durably quarantines a pending delivery after disable without los[39m[90m…[39m [90m0.26s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves installed data and history through disable and re-enab[39m[90m…[39m [90m0.98s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit boots an actual make-panel provider with its disabled module mod[39m[90m…[39m [90m0.82s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit durably quarantines a pending delivery after disable without los[39m[90m…[39m [90m0.74s[39m  
 
-  [90mTests:[39m    [32;1m2 passed[39;22m[90m (25 assertions)[39m
-  [90mDuration:[39m [39m0.72s[39m
+  [90mTests:[39m    [32;1m3 passed[39;22m[90m (37 assertions)[39m
+  [90mDuration:[39m [39m2.60s[39m
 

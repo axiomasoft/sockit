@@ -6,8 +6,8 @@ out = root / 'artifacts/p3.6'
 context = json.loads((root / 'plans/2026.10.17-№1-SOCKIT-FOUNDATION/artifacts/autopilot/p3.6-context.json').read_text())
 check_id = sys.argv[1]
 command = next(c['cmd'] for c in context['item']['validation'] if c['id'] == check_id)
-paths = ['packages/core/composer.json', 'packages/core/src/SocKitServiceProvider.php', 'packages/core/src/Internal/Console/PanelMigrationsCommand.php', 'tests/Feature/Generation/PanelMigrationsTest.php', 'tests/Integration/Schema/AdditiveUpgradeTest.php', 'tests/Integration/Schema/DisabledModuleTest.php']
-for directory in ['packages/core/src/Schema', 'packages/core/src/Internal/Generation', 'packages/core/resources/stubs/schema', 'tests/Fixtures/Schema', 'tests/Fixtures/PanelConsumer']:
+paths = ['packages/core/composer.json', 'packages/core/src/SocKitServiceProvider.php', 'packages/core/src/Internal/Console/PanelMigrationsCommand.php', 'packages/core/src/Panels/Internal/PanelGraphCompiler.php', 'tests/Feature/Generation/PanelMigrationsTest.php', 'tests/Integration/Schema/AdditiveUpgradeTest.php', 'tests/Integration/Schema/DisabledModuleTest.php']
+for directory in ['packages/core/src/Schema', 'packages/core/src/Internal/Generation', 'packages/core/resources/stubs/schema', 'packages/core/resources/stubs/panels', 'tests/Fixtures/Schema', 'tests/Fixtures/PanelConsumer']:
     paths.extend(str(p.relative_to(root)) for p in (root / directory).rglob('*') if p.is_file())
 paths = [p for p in paths if (root / p).is_file()]
 fingerprints = {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in sorted(paths)}

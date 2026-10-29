@@ -22,7 +22,7 @@ final class PanelMigrationsCommand extends Command
             $result = $migrations->run(root: $this->laravel->basePath(), panel: $panel, upgrade: (bool) $this->option('upgrade'), dryRun: (bool) $this->option('dry-run'));
             $this->line(json_encode($result, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES));
 
-            return self::SUCCESS;
+            return $result['status'] === 'manual_changes_required' ? self::FAILURE : self::SUCCESS;
         } catch (\Throwable $error) {
             $problem = match (true) {
                 $error instanceof GenerationFailure => $error->getMessage(),

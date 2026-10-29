@@ -43,6 +43,9 @@ final readonly class UpgradeVariant implements SchemaContribution
             'check' => new SchemaStep(id: 'add_check', version: 2, entity: 'demo_targets', columns: [], checks: ['allowed_external' => new SchemaCheck(kind: 'one_of', columns: ['external_key'], values: ['allowed'])]),
             'fk' => new SchemaStep(id: 'add_fk', version: 2, entity: 'demo_targets', columns: ['parent_id' => new SchemaColumn(type: 'uuid', nullable: true)],
                 foreignKeys: ['parent' => new SchemaForeignKey(columns: ['parent_id'], entity: 'demo_targets', references: ['id'])]),
+            'json_fk' => new SchemaStep(id: 'add_metadata_parent', version: 2, entity: 'demo_targets', columns: [
+                'metadata' => new SchemaColumn(type: 'json', nullable: true), 'parent_id' => new SchemaColumn(type: 'uuid', nullable: true)],
+                foreignKeys: ['parent' => new SchemaForeignKey(columns: ['parent_id'], entity: 'demo_targets', references: ['id'])]),
             default => throw new \RuntimeException('Unknown upgrade variant'),
         };
 

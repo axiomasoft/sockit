@@ -1,6 +1,6 @@
 {
   "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
-  "evidence_id": "p3.6-V2-2026-10-29T00:05:22Z",
+  "evidence_id": "p3.6-V2-2026-10-29T00:34:51Z",
   "check_id": "V2",
   "subject": "PLAN1.P3.6",
   "procedure": {
@@ -8,8 +8,8 @@
     "cwd": "."
   },
   "candidate": {
-    "head": "afde589f0e21ffeb4aeea5443c9eda49727a092c",
-    "dirty_digest": "8ff5dfe6161d4066773950a731eefd67603c6f621f46ce934a7f28649a5ce578"
+    "head": "ae333b3c59f72967a9d2a72cb76e706cefac3653",
+    "dirty_digest": "a92a07676442939bc8c7150f4e6b9c24a3b678a48a726662fe6e8e9df16b95d2"
   },
   "exit": 0,
   "environment": {
@@ -19,10 +19,10 @@
   },
   "log": {
     "path": "artifacts/p3.6/V2.log",
-    "sha256": "2ab3e7bfe7b603d2eac27ea4cc29332632cf997eb29c9b1f9fde4713427e7d70"
+    "sha256": "e5c730754f942b18742938cf1e233b294004891868efa1712c1cffd5a5da2c90"
   },
-  "started_at": "2026-10-29T00:05:22Z",
-  "finished_at": "2026-10-29T00:05:27Z",
+  "started_at": "2026-10-29T00:34:51Z",
+  "finished_at": "2026-10-29T00:35:09Z",
   "producer": {
     "kind": "executor",
     "actor": {

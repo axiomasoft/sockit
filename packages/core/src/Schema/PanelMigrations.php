@@ -55,6 +55,9 @@ final readonly class PanelMigrations
         $deployments = SchemaValues::map($this->config->get('sockit.storage.deployments', []));
         $planner = new MigrationPlanner;
         $plan = $planner->plan(root: $root, desired: $schema, connection: $connection, deployment: $deployments[$schema->storage->connection] ?? null, ran: $ran, upgrade: $upgrade);
+        if ($plan->manifest['models_compatible'] !== true) {
+            return [...$plan->manifest, 'status' => 'manual_changes_required', 'problem' => 'MODEL_BINDING_UPDATE_REQUIRED'];
+        }
         if (! $dryRun && $plan->sources !== []) {
             $baseline = new MigrationHistory()->read(root: $root, panel: $panel);
             $checked = false;

@@ -18,13 +18,18 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
+use SocKit\Internal\Console\MakePanelCommand;
 use SocKit\Internal\Console\PanelMigrationsCommand;
+use SocKit\Internal\Generation\GenerationPaths;
 use SocKit\Internal\Generation\GenerationPlan;
 use SocKit\Modules\Modules;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\PanelDefinitions;
+use SocKit\Schema\Internal\MigrationHistory;
 use SocKit\Schema\Internal\MigrationPlanner;
 use SocKit\Schema\Internal\SchemaValues;
+use SocKit\Schema\ModelEmitter;
+use SocKit\Schema\PanelSchema;
 use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\SocKitServiceProvider;
 use SocKit\Tests\Fixtures\Runtime\OutboxModule;
@@ -33,6 +38,7 @@ use SocKit\Tests\Integration\Support\PgTarget;
 use SocKit\Tests\Unit\Audience\Support\Scenario;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Process\Process;
 
 /** Filesystem root and PDO targets are owned before the first mutation. Uses real Laravel commands. */
 final class MigrationFixture
@@ -49,21 +55,31 @@ final class MigrationFixture
 
     private mixed $previousDb;
 
-    public function __construct(bool $selected = false, int $version = 1)
+    /** @var array<string, mixed> */
+    private array $bootOptions = [];
+
+    public function __construct(bool $selected = false, int $version = 1, ?string $root = null, ?string $namespace = null, string $directory = 'app')
     {
         $this->pg = new StoragePgFixture;
         $this->previousDb = DB::getFacadeRoot();
-        $this->root = sys_get_temp_dir().'/sockit-migrations-'.bin2hex(random_bytes(12));
-        if (! mkdir($this->root, 0700)) {
+        $this->root = $root ?? sys_get_temp_dir().'/sockit-migrations-'.bin2hex(random_bytes(12));
+        if ($root === null && ! mkdir($this->root, 0700)) {
             throw new \RuntimeException('Cannot create owned migration consumer');
         }
-        file_put_contents($this->root.'/composer.json', json_encode(['autoload' => ['psr-4' => ['App\\' => 'app/']]], JSON_THROW_ON_ERROR));
-        mkdir($this->root.'/app');
-        mkdir($this->root.'/app/Panels');
-        file_put_contents($this->root.'/app/Panels/CustomProvider.php', "<?php\n// consumer sentinel: custom provider\n");
+        if ($root === null) {
+            $namespace ??= 'App\\Test'.bin2hex(random_bytes(8)).'\\';
+            file_put_contents($this->root.'/composer.json', json_encode(['autoload' => ['psr-4' => [$namespace => $directory.'/']]], JSON_THROW_ON_ERROR));
+            mkdir($this->root.'/'.$directory);
+            mkdir($this->root.'/'.$directory.'/Panels');
+            file_put_contents($this->root.'/'.$directory.'/Panels/CustomProvider.php', "<?php\n// consumer sentinel: custom provider\n");
+        }
+        $mapping = GenerationPaths::mapping($this->root);
         $this->loader = new ClassLoader;
-        $this->loader->addPsr4('App\\', $this->root.'/app');
+        $this->loader->addPsr4($mapping['namespace'], $this->root.'/'.$mapping['directory']);
         $this->loader->register();
+        if ($root !== null) {
+            return;
+        }
         $this->pg->owner->exec('CREATE SCHEMA panel_a');
         $this->pg->owner->exec('CREATE SCHEMA panel_b');
         $this->pg->owner->exec('CREATE TABLE public.p36_host (sentinel text)');
@@ -71,14 +87,15 @@ final class MigrationFixture
         $this->boot(selected: $selected, version: $version);
     }
 
-    public function boot(bool $selected = false, int $version = 1, string $prefix = 'article_', string $contribution = '', bool $enableModule = true, string $variant = '', bool $consumers = false): void
+    public function boot(bool $selected = false, int $version = 1, string $prefix = 'article_', string $contribution = '', bool $enableModule = true, string $variant = '', bool $consumers = false, string $generated = ''): void
     {
+        $this->bootOptions = ['selected' => $selected, 'version' => $version, 'prefix' => $prefix, 'contribution' => $contribution, 'enableModule' => $enableModule, 'variant' => $variant, 'consumers' => $consumers, 'generated' => $generated];
         $this->app = new Application($this->root);
         $this->app->instance('env', 'testing');
         $connection = $this->pg->connection(name: 'owner_a', prefix: 'driver_');
         $config = SchemaValues::map($connection->getConfig());
         $observed = PgTarget::query($this->pg->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(\PDO::FETCH_ASSOC);
-        $this->app->instance('config', new Repository(['app' => ['env' => 'testing'], 'sockit' => ['panels' => [MigrationPanel::class, ProductMigrationPanel::class],
+        $this->app->instance('config', new Repository(['app' => ['env' => 'testing'], 'sockit' => ['panels' => [$generated !== '' ? $generated : MigrationPanel::class, ProductMigrationPanel::class],
             'surfaces' => [RuntimeSurface::class], 'modules' => ['enabled' => [...($enableModule ? ['acme.demo-targets'] : []), 'acme.runtime']], 'storage' => ['deployments' => [
                 'owner_a' => ['cluster' => 'owned_pg', 'endpoint' => ['host' => $config['host'], 'port' => $config['port']], 'aliases' => [$observed]],
             ]]], 'database' => ['default' => 'owner_a', 'migrations' => ['table' => 'migrations']],
@@ -103,10 +120,100 @@ final class MigrationFixture
     /** @return array{exit:int, data:array<string, mixed>} */
     public function command(bool $upgrade = false, bool $dryRun = false, string $panel = 'acme.article'): array
     {
+        $data = $this->child(['upgrade' => $upgrade, 'dryRun' => $dryRun, 'panel' => $panel]);
+        $exit = $data['exit'];
+        if (! is_int($exit)) {
+            throw new \RuntimeException('Invalid migration command exit');
+        }
+
+        return ['exit' => $exit, 'data' => Scenario::object($data['data'])];
+    }
+
+    /** @param array<string, mixed> $options
+     * @return array<string, mixed> */
+    public function child(array $options): array
+    {
+        $process = new Process([PHP_BINARY, __DIR__.'/migration-command.php', $this->root, json_encode($this->bootOptions, JSON_THROW_ON_ERROR),
+            json_encode($options, JSON_THROW_ON_ERROR)]);
+        $process->setTimeout(30);
+        $process->mustRun();
+
+        return Scenario::object(json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR));
+    }
+
+    /** @return array{exit:int, data:array<string, mixed>} */
+    public function commandLocal(bool $upgrade = false, bool $dryRun = false, string $panel = 'acme.article'): array
+    {
         $result = $this->console(new PanelMigrationsCommand, ['command' => 'sockit:panel:migrations', 'panel' => $panel, '--upgrade' => $upgrade, '--dry-run' => $dryRun]);
         $data = Scenario::object(json_decode(trim($result['output']), true, flags: JSON_THROW_ON_ERROR));
 
         return ['exit' => $result['exit'], 'data' => $data];
+    }
+
+    /** @return array{exit:int, data:array<string, mixed>} */
+    public function makePanel(bool $selected = false): array
+    {
+        // A separate empty panel registry is compiled before invoking the real make-panel CLI.
+        $app = $this->app;
+        $empty = new Application($this->root);
+        $empty->instance('env', 'testing');
+        $config = new Repository($app->make('config')->all());
+        $config->set('sockit.panels', []);
+        $config->set('sockit.surfaces', []);
+        $empty->instance('config', $config);
+        $empty->register(SocKitServiceProvider::class);
+        $empty->register(SchemaProvider::class);
+        Modules::add($empty, OutboxModule::class);
+        $empty->boot();
+        $this->app = $empty;
+        $result = $this->console(new MakePanelCommand, ['command' => 'sockit:make-panel', 'name' => 'Article', '--id' => 'acme.article', '--host' => 'article',
+            '--modules' => $selected ? 'acme.demo-targets' : '', '--prefix' => 'article_', '--connection' => 'owner_a', '--schema' => 'panel_a']);
+        $this->app = $app;
+
+        return ['exit' => $result['exit'], 'data' => Scenario::object(json_decode(trim($result['output']), true, flags: JSON_THROW_ON_ERROR))];
+    }
+
+    public function generated(string $class): void
+    {
+        $this->bootOptions['generated'] = $class;
+    }
+
+    public function schema(): PanelSchema
+    {
+        $schema = new PanelSchemaCompiler()->compile(panel: $this->app->make(PanelDefinitions::class)->get(new PanelId('acme.article')), components: $this->app->make(Modules::class)->schemaComponents());
+        $history = new MigrationHistory()->read(root: $this->root, panel: 'acme.article');
+
+        return $history === [] ? $schema : MigrationHistory::union(previous: Scenario::object($history[array_key_last($history)]['schema']), desired: $schema);
+    }
+
+    /** Simulate the consumer explicitly applying required repairs, preserving every other byte. */
+    public function repairModels(bool $relations = true): void
+    {
+        $schema = MigrationHistory::schema(Scenario::object($this->child(['operation' => 'schema'])['schema']));
+        $methods = new ModelEmitter()->methods($schema);
+        $mapping = GenerationPaths::mapping($this->root);
+        foreach (new ModelEmitter()->render($schema) as $class => $expected) {
+            $path = $this->root.'/'.$mapping['directory'].'/'.str_replace('\\', '/', substr($class, strlen($mapping['namespace']))).'.php';
+            if (! is_file($path)) {
+                continue;
+            }
+            $source = (string) file_get_contents($path);
+            if (preg_match('/public const array BINDING = .*?;\n/s', $expected, $match) !== 1) {
+                throw new \RuntimeException('Missing expected model binding');
+            }
+            $source = preg_replace_callback('/public const array BINDING = .*?;\n/s', static fn (): string => $match[0], $source);
+            if (! is_string($source)) {
+                throw new \RuntimeException('Invalid model source');
+            }
+            $entity = array_search($class, $schema->storage->models, true);
+            foreach ($relations ? ($methods[$entity] ?? []) : [] as $method => $definition) {
+                if (preg_match('/function\s+'.preg_quote($method, '/').'\s*\(/i', $source) !== 1) {
+                    $position = (int) strrpos($source, '}');
+                    $source = substr($source, 0, $position).$definition."\n".substr($source, $position);
+                }
+            }
+            file_put_contents($path, $source);
+        }
     }
 
     /** @return array{exit:int, output:string} */

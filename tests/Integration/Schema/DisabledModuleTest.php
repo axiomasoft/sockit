@@ -40,6 +40,37 @@ it('preserves installed data and history through disable and re-enable while fre
     }
 });
 
+it('boots an actual make-panel provider with its disabled module model map retained', function (): void {
+    $f = new MigrationFixture(namespace: 'Consumer\\Disabled\\');
+    try {
+        $generated = $f->makePanel(selected: true);
+        expect($generated['exit'])->toBe(0);
+        $provider = Scenario::text($generated['data']['provider']);
+        $f->generated($provider);
+        expect($f->command()['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
+        $f->pg->owner->exec("INSERT INTO panel_a.driver_article_demo_targets (id,installation,panel,external_key) VALUES ('019a1ba0-0000-7000-8000-000000000042','host','acme.article','generated-provider-data')");
+        $oid = PgTarget::query($f->pg->owner, "SELECT 'panel_a.driver_article_demo_targets'::regclass::oid")->fetchColumn();
+        $file = $f->root.'/app/Panels/ArticlePanelProvider.php';
+        $original = (string) file_get_contents($file);
+        file_put_contents($file, str_replace("->modules('acme.demo-targets')", '->modules()', $original));
+        $f->boot(enableModule: false);
+        $f->generated($provider);
+        $before = $f->tree();
+        $disabled = $f->command(upgrade: true);
+        expect($disabled['exit'])->toBe(0, json_encode($disabled, JSON_THROW_ON_ERROR))->and($disabled['data']['status'])->toBe('no_op')
+            ->and($f->tree())->toBe($before)->and(file_get_contents($file))->toContain("'demo_targets'", 'DemoTarget::class')
+            ->and(PgTarget::query($f->pg->owner, 'SELECT external_key FROM panel_a.driver_article_demo_targets')->fetchColumn())->toBe('generated-provider-data');
+        file_put_contents($file, $original);
+        $f->boot(selected: true);
+        $f->generated($provider);
+        expect($f->command(upgrade: true)['data']['status'])->toBe('no_op')->and($f->child(['operation' => 'validate'])['models_valid'])->toBeTrue()
+            ->and(PgTarget::query($f->pg->owner, "SELECT 'panel_a.driver_article_demo_targets'::regclass::oid")->fetchColumn())->toBe($oid);
+        fwrite(STDERR, "P3.6 F2 SQL real make-panel provider boots after module removal with module model entry retained and globally disabled module; re-enable preserves data/table OID\n");
+    } finally {
+        $f->cleanup();
+    }
+});
+
 it('durably quarantines a pending delivery after disable without losing the event or resolving its consumer', function (): void {
     $f = new MigrationFixture;
     try {

@@ -9,6 +9,8 @@ use SocKit\Audience\Exceptions\FloorWidensException;
 use SocKit\Configuration\Data\ModulesConfig;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Configuration\SocKitConfig;
+use SocKit\Internal\Generation\GenerationFailure;
+use SocKit\Internal\Generation\GenerationPaths;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Modules\Modules;
 use SocKit\Panels\Exceptions\InvalidPanelException;
@@ -55,6 +57,20 @@ final class PanelGraphCompiler
         // Repeated FQCN declarations are errors rather than silently hiding duplicate IDs.
         sort($providers);
         $definitions = $instances = $storage = [];
+        $modelNamespace = 'App\\';
+        if (is_file($app->basePath('composer.json'))) {
+            try {
+                $modelNamespace = $app->getNamespace();
+            } catch (\RuntimeException) {
+                try {
+                    // The supported single consumer mapping may use src/ without Laravel's app/ path.
+                    $modelNamespace = GenerationPaths::mapping($app->basePath())['namespace'];
+                } catch (GenerationFailure) {
+                    // Explicit maps remain valid in nonstandard hosts; generation still requires
+                    // an unambiguous safe mapping before writing missing models.
+                }
+            }
+        }
         foreach ($providers as $provider) {
             if (! SocKitConfig::implementation(value: $provider, contract: PanelProvider::class)) {
                 $this->fail(panel: '', provider: $provider, key: 'panels', rule: 'PANEL_PROVIDER_INVALID');
@@ -105,7 +121,7 @@ final class PanelGraphCompiler
                     $this->fail(panel: $id, provider: $provider, key: 'moduleSettings.'.$module, rule: 'PANEL_SETTING_INVALID', previous: $error);
                 }
             }
-            $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $modules->schemaComponents());
+            $schema = new PanelSchemaCompiler()->compile(panel: $panel, components: $modules->schemaComponents(), modelNamespace: $modelNamespace);
             foreach ($schema->storage->tables as $key => $table) {
                 // Declared identities only. Connection aliases and driver prefixes require P3.
                 $identity = json_encode([$panel->storage->connection, $panel->storage->schema, $table], JSON_THROW_ON_ERROR);

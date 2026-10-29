@@ -31,8 +31,9 @@ final class PanelSchemaCompiler
 
     /** Compile only kernel + panel selection. No class autoload, SQL or physical identity probe.
      * @param array<string, SchemaComponent> $components */
-    public function compile(PanelDefinition $panel, array $components, ?PanelSchema $previous = null): PanelSchema
+    public function compile(PanelDefinition $panel, array $components, ?PanelSchema $previous = null, string $modelNamespace = 'App\\'): PanelSchema
     {
+        SchemaValues::require(valid: preg_match('~^(?:[A-Za-z_][A-Za-z0-9_]*\\\\)+$~D', $modelNamespace) === 1, key: 'models.namespace', rule: 'MODEL_NAMESPACE_REQUIRED');
         $ordered = $this->select(selected: $panel->modules, components: $components);
         $entities = $this->compose($ordered);
         $tables = $panel->storage->tables;
@@ -52,7 +53,7 @@ final class PanelSchemaCompiler
             $tables[$entity] = $table;
             $model = $spec['model'];
             // The hash distinguishes panel IDs that would otherwise normalize to the same namespace.
-            $models[$entity] ??= 'App\\SocKit\\Generated\\Panel'.substr(hash('sha256', $panel->id->value), 0, 16).'\\'.$model->name;
+            $models[$entity] ??= $modelNamespace.'SocKit\\Generated\\Panel'.substr(hash('sha256', $panel->id->value), 0, 16).'\\'.$model->name;
             $indexes = $foreignKeys = $checks = [];
             foreach ($spec['indexes'] as $name => $index) {
                 $indexes[$name] = ['name' => $this->constraint(panel: $panel, entity: $entity, kind: 'idx', key: $name), 'columns' => $index->columns, 'unique' => $index->unique];

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use SocKit\Schema\Internal\MigrationHistory;
 use SocKit\Schema\Internal\SchemaValues;
 use SocKit\Tests\Fixtures\Schema\MigrationFixture;
@@ -26,6 +28,8 @@ it('migrates initial and additive snapshots through Laravel and reverses only th
         }
         $pdo->exec("INSERT INTO panel_a.driver_article_demo_targets (id,installation,panel,external_key) VALUES ('019a1ba0-0000-7000-8000-000000000042','host','acme.article','article-data')");
         $f->boot(selected: true, version: 2);
+        expect($f->command(upgrade: true)['data']['status'])->toBe('manual_changes_required');
+        $f->repairModels();
         expect($f->command(upgrade: true)['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
         expect(PgTarget::query($pdo, 'SELECT label FROM panel_a.driver_article_demo_targets')->fetchColumn())->toBeNull();
         $pdo->exec("UPDATE panel_a.driver_article_demo_targets SET label='kept-until-rollback'");
@@ -77,8 +81,11 @@ it('adds defaulted columns and a nullable foreign key without changing prior row
     try {
         expect($f->command()['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
         $f->pg->owner->exec("INSERT INTO panel_a.driver_article_demo_targets (id,installation,panel,external_key) VALUES ('019a1ba0-0000-7000-8000-000000000042','host','acme.article','original')");
-        $old = $f->tree();
         $f->boot(selected: true, contribution: UpgradeVariant::class, variant: $variant);
+        $beforeRepair = $f->tree();
+        expect($f->command(upgrade: true)['data']['status'])->toBe('manual_changes_required')->and($f->tree())->toBe($beforeRepair);
+        $f->repairModels();
+        $old = $f->tree();
         $result = $f->command(upgrade: true);
         expect($result['exit'])->toBe(0, json_encode($result, JSON_THROW_ON_ERROR))->and($f->migrate()['exit'])->toBe(0);
         $column = $variant === 'default' ? 'label' : 'parent_id';
@@ -127,6 +134,7 @@ it('atomically reverses a failing additive program including its ownership recei
     try {
         expect($f->command()['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
         $f->boot(selected: true, version: 2);
+        $f->repairModels();
         $plan = $f->plan(upgrade: true);
         $source = $plan->sources[Scenario::text($plan->manifest['migration'])];
         $snapshot = MigrationHistory::snapshot($source);
@@ -152,3 +160,82 @@ it('atomically reverses a failing additive program including its ownership recei
         $f->cleanup();
     }
 });
+
+it('preserves custom code while requiring JSON casts and both new FK relations before generation', function (): void {
+    $f = new MigrationFixture(selected: true);
+    try {
+        expect($f->command()['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
+        $models = array_values(array_filter(array_keys($f->tree()), fn (string $path): bool => str_ends_with($path, '/DemoTarget.php')));
+        $path = $f->root.'/'.$models[0];
+        file_put_contents($path, "\n// custom JSON/FK sentinel\n", FILE_APPEND);
+        $f->boot(selected: true, contribution: UpgradeVariant::class, variant: 'json_fk');
+        $before = $f->tree();
+        $result = $f->command(upgrade: true);
+        $changes = Scenario::object(Scenario::object($result['data']['model_changes'])['demo_targets']);
+        expect($result['exit'])->toBe(1)->and($result['data']['status'])->toBe('manual_changes_required')
+            ->and(Scenario::object($changes['required_casts'])['metadata'])->toBe('array')
+            ->and(Scenario::object($changes['required_methods']))->toHaveKeys(['parent', 'demotargetsparent'])
+            ->and($f->tree())->toBe($before)->and($f->manifests())->toHaveCount(1);
+        $f->repairModels(relations: false);
+        $bindingOnly = $f->tree();
+        $still = $f->command(upgrade: true);
+        expect($still['exit'])->toBe(1)->and($still['data']['status'])->toBe('manual_changes_required')
+            ->and(Scenario::object(Scenario::object($still['data']['model_changes'])['demo_targets'])['binding_valid'])->toBeTrue()
+            ->and($f->tree())->toBe($bindingOnly);
+        $f->repairModels();
+        $repaired = $f->tree();
+        expect($f->command(upgrade: true)['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
+        foreach ($repaired as $file => $digest) {
+            expect($f->tree()[$file])->toBe($digest);
+        }
+        expect(file_get_contents($path))->toContain('custom JSON/FK sentinel');
+        $probe = $f->child(['operation' => 'validate', 'crud' => true]);
+        expect($probe['models_valid'])->toBeTrue()->and($probe['metadata'])->toBe(['nested' => ['ok' => true]])
+            ->and($probe['relations'])->toBe([BelongsTo::class, HasMany::class]);
+        $validSource = (string) file_get_contents($path);
+        file_put_contents($path, str_replace('parent(): \\Illuminate\\Database\\Eloquent\\Relations\\BelongsTo', 'parent(): bool', $validSource));
+        $badSignature = $f->tree();
+        $signatureResult = $f->command(upgrade: true);
+        expect($signatureResult['exit'])->toBe(1)->and($signatureResult['data']['status'])->toBe('manual_changes_required')
+            ->and(Scenario::object(Scenario::object(Scenario::object($signatureResult['data']['model_changes'])['demo_targets'])['required_methods']))->toHaveKey('parent')
+            ->and($f->tree())->toBe($badSignature);
+        file_put_contents($path, $validSource);
+        expect($f->command(upgrade: true)['data']['status'])->toBe('no_op');
+        fwrite(STDERR, "P3.6 F1 SQL manual JSON casts and both FK methods required; consumer code retained; ModelBindings validates; JSON array roundtrip and real Eloquent relations passed\n");
+    } finally {
+        $f->cleanup();
+    }
+});
+
+it('upgrades a real Acme make-panel kernel consumer with missing module and entity models', function (string $directory): void {
+    $f = new MigrationFixture(namespace: 'Acme\\', directory: $directory);
+    try {
+        $generated = $f->makePanel();
+        expect($generated['exit'])->toBe(0);
+        $provider = Scenario::text($generated['data']['provider']);
+        $f->generated($provider);
+        expect($f->command()['exit'])->toBe(0)->and($f->migrate()['exit'])->toBe(0);
+        $file = $f->root.'/'.$directory.'/Panels/ArticlePanelProvider.php';
+        file_put_contents($file, str_replace('->modules()', "->modules('acme.demo-targets')", (string) file_get_contents($file)));
+        $providerHash = hash_file('sha256', $file);
+        $enable = $f->command(upgrade: true);
+        expect($enable['exit'])->toBe(0, json_encode($enable, JSON_THROW_ON_ERROR));
+        $class = Scenario::text(Scenario::object($enable['data']['models'])['demo_targets']);
+        expect($class)->toStartWith('Acme\\')->and(class_exists($class))->toBeTrue()
+            ->and($f->migrate()['exit'])->toBe(0)->and($f->child(['operation' => 'validate'])['models_valid'])->toBeTrue();
+        $f->boot(selected: true, contribution: UpgradeVariant::class, variant: 'new_fk');
+        $f->generated($provider);
+        expect($f->command(upgrade: true)['data']['status'])->toBe('manual_changes_required');
+        $f->repairModels();
+        $entity = $f->command(upgrade: true);
+        expect($entity['exit'])->toBe(0, json_encode($entity, JSON_THROW_ON_ERROR));
+        $newClass = Scenario::text(Scenario::object($entity['data']['models'])['demo_notes']);
+        expect($newClass)->toStartWith('Acme\\')->and(class_exists($newClass))->toBeTrue()
+            ->and($f->migrate()['exit'])->toBe(0)->and($f->child(['operation' => 'validate'])['models_valid'])->toBeTrue()
+            ->and($f->command(upgrade: true)['data']['status'])->toBe('no_op')
+            ->and(hash_file('sha256', $file))->toBe($providerHash);
+        fwrite(STDERR, "P3.6 F3 SQL actual Acme make-panel kernel consumer enabled module and appended entity; missing models generated in consumer namespace and ModelBindings passed; provider preserved\n");
+    } finally {
+        $f->cleanup();
+    }
+})->with(['app', 'src']);

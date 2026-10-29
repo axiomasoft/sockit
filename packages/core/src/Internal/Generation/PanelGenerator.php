@@ -69,9 +69,13 @@ final readonly class PanelGenerator
             $modelMap .= '                '.var_export($entity, true).' => \\'.$class."::class,\n";
         }
         $modelMap .= '            ]';
+        $owners = [];
+        foreach (GenerationFailure::map($draft->jsonSerialize()['entities']) as $entity => $specification) {
+            $owners[$entity] = GenerationFailure::map($specification)['owner'];
+        }
         $providerSource = strtr($stub, ['{{NAMESPACE}}' => $namespace.'Panels', '{{CLASS}}' => $name.'PanelProvider', '{{ID}}' => var_export($id, true),
             '{{HOST}}' => var_export($host, true), '{{CONNECTION}}' => var_export($connection, true), '{{SCHEMA}}' => var_export($schema, true), '{{PREFIX}}' => var_export($prefix, true),
-            '{{MODULES}}' => implode(', ', array_map(fn (string $module): string => var_export($module, true), $modules)), '{{MODELS}}' => $modelMap]);
+            '{{MODULES}}' => implode(', ', array_map(fn (string $module): string => var_export($module, true), $modules)), '{{MODELS}}' => $modelMap, '{{MODEL_OWNERS}}' => var_export($owners, true)]);
         $sources = $classes = [];
         foreach ([$provider => $providerSource, ...new ModelEmitter()->render($draft)] as $class => $source) {
             $path = $directory.'/'.str_replace('\\', '/', substr($class, strlen($namespace))).'.php';

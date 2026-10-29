@@ -38,6 +38,20 @@ it('creates initial immutable files and missing models then reports a zero-outpu
     }
 });
 
+it('requires explicit manual changes to a preserved model before generating its additive migration', function (): void {
+    $f = new MigrationFixture(selected: true);
+    try {
+        expect($f->command()['exit'])->toBe(0);
+        $f->boot(selected: true, version: 2);
+        $before = $f->tree();
+        $result = $f->command(upgrade: true);
+        expect($result['exit'])->toBe(1)->and($result['data']['status'])->toBe('manual_changes_required')
+            ->and($result['data']['model_changes'])->toHaveKey('demo_targets')->and($f->tree())->toBe($before);
+    } finally {
+        $f->cleanup();
+    }
+});
+
 it('plans an entire upgrade without writes and preserves custom provider/model and ancestor hashes', function (): void {
     $f = new MigrationFixture;
     try {

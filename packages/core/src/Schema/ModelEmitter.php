@@ -17,7 +17,26 @@ final class ModelEmitter
     {
         $stub = file_get_contents(dirname(__DIR__, 2).'/resources/stubs/models/model.php.stub');
         SchemaValues::require(valid: is_string($stub), key: 'stub', rule: 'MODEL_STUB_UNAVAILABLE');
-        $sources = $relations = [];
+        $sources = [];
+        $relations = $this->methods($schema);
+        foreach (new ModelBindings()->specifications($schema) as $entity => $binding) {
+            $class = $schema->storage->models[$entity];
+            $position = strrpos($class, '\\');
+            SchemaValues::require(valid: $position !== false, key: 'models.'.$entity, rule: 'MODEL_NAMESPACE_REQUIRED');
+            $methods = $relations[$entity] ?? [];
+            ksort($methods);
+            $sources[$class] = strtr($stub, ['{{NAMESPACE}}' => substr($class, 0, $position), '{{CLASS}}' => substr($class, $position + 1),
+                '{{PANEL}}' => $schema->panel, '{{ENTITY}}' => $entity, '{{BINDING}}' => var_export($binding, true), '{{RELATIONS}}' => implode("\n", $methods)]);
+        }
+
+        return $sources;
+    }
+
+    /** Expected relation method sources, also used for explicit consumer update instructions.
+     * @return array<string, array<string, string>> Entity => method => PHP method source */
+    public function methods(PanelSchema $schema): array
+    {
+        $relations = [];
         $entities = SchemaValues::map($schema->jsonSerialize()['entities']);
         foreach ($entities as $entity => $value) {
             $spec = SchemaValues::map($value);
@@ -37,17 +56,8 @@ final class ModelEmitter
                 $relations[$target][strtolower($inverse)] = $this->relation(method: $inverse, kind: 'hasMany', class: $schema->storage->models[$entity], foreign: SchemaValues::text($columns[0]), local: SchemaValues::text($references[0]));
             }
         }
-        foreach (new ModelBindings()->specifications($schema) as $entity => $binding) {
-            $class = $schema->storage->models[$entity];
-            $position = strrpos($class, '\\');
-            SchemaValues::require(valid: $position !== false, key: 'models.'.$entity, rule: 'MODEL_NAMESPACE_REQUIRED');
-            $methods = $relations[$entity] ?? [];
-            ksort($methods);
-            $sources[$class] = strtr($stub, ['{{NAMESPACE}}' => substr($class, 0, $position), '{{CLASS}}' => substr($class, $position + 1),
-                '{{PANEL}}' => $schema->panel, '{{ENTITY}}' => $entity, '{{BINDING}}' => var_export($binding, true), '{{RELATIONS}}' => implode("\n", $methods)]);
-        }
 
-        return $sources;
+        return $relations;
     }
 
     private function method(string $name): string

@@ -8,6 +8,7 @@ use Illuminate\Database\Connection;
 use SocKit\Internal\Generation\GenerationFailure;
 use SocKit\Internal\Generation\GenerationPaths;
 use SocKit\Internal\Generation\GenerationPlan;
+use SocKit\Schema\ModelBindings;
 use SocKit\Schema\ModelEmitter;
 use SocKit\Schema\PanelSchema;
 use SocKit\Schema\SnapshotRenderer;
@@ -51,10 +52,12 @@ final class MigrationPlanner
         $vacant = array_values(array_diff($physical->relations, array_map(SchemaValues::text(...), $appliedRelations)));
         $preflight->assertVacant(connection: $connection, schema: new PhysicalSchema(location: $physical->location, descriptor: $physical->toArray(), relations: $vacant));
         $delta = $previous === null ? null : new AdditiveDdl()->compile(previous: SchemaValues::map($previous['physical']), current: $physical);
-        $sources = $this->models(root: $root, schema: $schema);
+        $models = $this->models(root: $root, schema: $schema);
+        $sources = $models['sources'];
+        $compatibility = ['model_changes' => $models['changes'], 'models_compatible' => $models['changes'] === []];
         if ($previous !== null && $schema->digest === SchemaValues::map($previous['schema'])['digest']) {
             return new GenerationPlan(root: $root, sources: $sources, manifest: ['status' => $sources === [] ? 'no_op' : 'missing_models', 'panel' => $schema->panel,
-                'files' => array_keys($sources), 'applied' => $appliedCount, 'generated' => count($chain)]);
+                'files' => array_keys($sources), 'applied' => $appliedCount, 'generated' => count($chain), ...$compatibility]);
         }
         if ($previous === null) {
             $source = new SnapshotRenderer()->render(schema: $schema, connection: $connection, deployment: $deployment);
@@ -95,35 +98,41 @@ final class MigrationPlanner
         }
 
         return new GenerationPlan(root: $root, sources: $sources, manifest: ['status' => 'planned', 'panel' => $schema->panel, 'files' => array_keys($sources),
+            ...$compatibility,
             'outputs' => array_map(fn (string $source): string => hash('sha256', $source), $sources),
             'tables' => $physical->toArray()['tables'], 'models' => $schema->storage->models, 'components' => $schema->jsonSerialize()['components'],
             'migration' => $migration, 'ancestry' => $manifest, 'digest' => $record['digest'], 'applied' => $appliedCount, 'generated' => count($chain),
             'instruction' => 'Run php artisan migrate --database='.$schema->storage->connection.' after reviewing these consumer-owned files.']);
     }
 
-    /** @return array<string, string> */
+    /** @return array{sources:array<string, string>, changes:array<string, array<string, mixed>>} */
     private function models(string $root, PanelSchema $schema): array
     {
         $mapping = GenerationPaths::mapping($root);
-        $sources = $classes = [];
-        foreach (new ModelEmitter()->render($schema) as $class => $source) {
-            if (class_exists($class)) {
-                continue;
-            }
-            GenerationFailure::require(valid: str_starts_with($class, $mapping['namespace']), rule: 'MIGRATION_MODEL_MAPPING_MISSING');
-            $path = $mapping['directory'].'/'.str_replace('\\', '/', substr($class, strlen($mapping['namespace']))).'.php';
-            // Existing custom files are consumer-owned, including ones not yet autoloaded.
-            if (is_file($root.'/'.$path) && ! is_link($root.'/'.$path)) {
+        $sources = $classes = $changes = [];
+        $rendered = new ModelEmitter()->render($schema);
+        foreach ($schema->storage->models as $entity => $class) {
+            $path = str_starts_with($class, $mapping['namespace']) ? $mapping['directory'].'/'.str_replace('\\', '/', substr($class, strlen($mapping['namespace']))).'.php' : null;
+            if ($path !== null) {
                 GenerationPaths::check(root: $root, relative: dirname($path), vacant: false);
+                GenerationFailure::require(valid: ! is_link($root.'/'.$path), rule: 'GENERATION_PATH_SYMLINK');
+            }
+            // Existing custom files are consumer-owned, including ones not yet autoloaded.
+            if (($path !== null && is_file($root.'/'.$path)) || class_exists($class)) {
+                $required = new ModelBindings()->changes(schema: $schema, entity: $entity);
+                if ($required !== []) {
+                    $changes[$entity] = [...$required, 'path' => $path];
+                }
 
                 continue;
             }
+            GenerationFailure::require(valid: $path !== null, rule: 'MIGRATION_MODEL_MAPPING_MISSING');
             GenerationPaths::check(root: $root, relative: $path);
-            $sources[$path] = $source;
+            $sources[$path] = $rendered[$class];
             $classes[] = $class;
         }
         GenerationPaths::classes(root: $root, directory: $mapping['directory'], classes: $classes);
 
-        return $sources;
+        return ['sources' => $sources, 'changes' => $changes];
     }
 }

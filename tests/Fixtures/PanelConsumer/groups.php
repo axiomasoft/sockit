@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Acme\Groups\ContentScenario;
 use Acme\Social\Job;
 use Acme\Social\Runtime;
 use Illuminate\Contracts\Console\Kernel;
@@ -71,6 +72,13 @@ if ($mode === 'boot') {
     }
     $result = ['models' => $bindings, 'queries' => $queries, 'connections' => count($app->make(DatabaseManager::class)->getConnections()),
         'default' => $app->make(DatabaseManager::class)->getDefaultConnection()];
+} elseif ($mode === 'content') {
+    try {
+        $result = ContentScenario::run($app);
+    } catch (Throwable $error) {
+        fwrite(STDERR, (string) $error);
+        throw $error;
+    }
 } elseif ($mode === 'smoke') {
     foreach ($app->make(PanelDefinitions::class)->all() as $panel) {
         new ModelBindings()->validate(new PanelSchemaCompiler()->compile($panel, $app->make(Modules::class)->schemaComponents(), modelNamespace: 'Acme\\'));

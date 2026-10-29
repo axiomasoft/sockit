@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use SocKit\Groups\Contracts\MembershipConsent;
 use SocKit\Groups\Internal\GroupsServiceProvider;
 use SocKit\Modules\Modules;
+use SocKit\Operations\Contracts\MutationAuthorityFence;
 
 final class Provider extends ServiceProvider
 {
@@ -17,6 +18,9 @@ final class Provider extends ServiceProvider
         $this->app->register(\Acme\Social\Provider::class);
         $this->app->register(GroupsServiceProvider::class);
         $this->app->bind(MembershipConsent::class, Consent::class);
+        if ($this->app->make('config')->get('groups.content', false) === true) {
+            $this->app->bind(MutationAuthorityFence::class, Authority::class);
+        }
         if ($this->app->make('config')->get('groups.consumer', false) === true) {
             Modules::add($this->app, RuntimeModule::class);
         }

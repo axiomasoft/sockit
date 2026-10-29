@@ -76,7 +76,8 @@ final class GroupScenario
         $this->app->instance('config', new Repository(['sockit' => [
             'panels' => $content ? [ContentPanel::class, NeighborPanel::class] : [GroupPanel::class],
             'surfaces' => $content ? [GroupSurface::class, ContentSurface::class, NeighborSurface::class] : [GroupSurface::class],
-            'modules' => ['enabled' => $content ? ['sockit.groups', 'sockit.posts', 'sockit.reactions'] : ['sockit.groups'], 'settings' => []],
+            'modules' => ['enabled' => $content ? ['sockit.groups', 'sockit.posts', 'sockit.reactions'] : ['sockit.groups'],
+                'settings' => $content ? ['sockit.posts' => ['feed_keys' => ['current' => base64_encode(str_repeat('k', 32))], 'feed_key' => 'current']] : []],
             ...($privacy === [] ? [] : ['privacy' => $privacy]),
         ]]));
         if ($content) {

@@ -1,0 +1,18 @@
+private volume=8f762d5a7d7a5ada6c0174db815a916cf972292ece48aae487a24fe93900d5c3
+private container=3f9eed36a8a36170dd5037fdf1e1dc9277ef84bf20d5f554992c7e63450e811b owner=sockit_p2_745d280e463f6d1d_test decoy=sockit_p2_decoy_745d280e463f6d1d_test port=33248
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Groups/GroupOperationsTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_745d280e463f6d1d_test server_version_num=160014 marker=sockit-p21-745d280e463f6d1d backend_pid=102
+PG identity database=sockit_p2_745d280e463f6d1d_test server_version_num=160014 marker=sockit-p21-745d280e463f6d1d backend_pid=103
+PG identity database=sockit_p2_decoy_745d280e463f6d1d_test server_version_num=160014 marker=sockit-p21-745d280e463f6d1d backend_pid=104
+PG identity database=sockit_p2_decoy_745d280e463f6d1d_test server_version_num=160014 marker=sockit-p21-745d280e463f6d1d backend_pid=105
+P2.2 Laravel connection=owner_a database=sockit_p2_745d280e463f6d1d_test backend_pid=106
+P2.2 Laravel connection=owner_b database=sockit_p2_745d280e463f6d1d_test backend_pid=107
+P2.2 Laravel connection=decoy database=sockit_p2_decoy_745d280e463f6d1d_test backend_pid=108
+P5.2 production groups snapshots installed after owned PG proof; public surface API
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Groups\GroupOperationsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit guards creation, reads, policy CAS and receipt disclosure on an[39m[90m… [39m [90m0.26s[39m  
+
+  [90mTests:[39m    [32;1m1 passed[39;22m[90m (22 assertions)[39m
+  [90mDuration:[39m [39m0.32s[39m
+

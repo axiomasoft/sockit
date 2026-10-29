@@ -1,0 +1,34 @@
+{
+  "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
+  "evidence_id": "p5.2-V91-2026-10-29T09:27:13Z",
+  "check_id": "V91",
+  "subject": "PLAN1.P5.2",
+  "procedure": {
+    "cmd": "composer lint",
+    "cwd": "."
+  },
+  "candidate": {
+    "head": "7f527ccfa208536523cae13c691d559da65198dc",
+    "dirty_digest": "e8e8789ff597fd6373f4f682091715be255348b86f1990222ea34039a5021178"
+  },
+  "exit": 0,
+  "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "log": {
+    "path": "artifacts/p5.2/V91.log",
+    "sha256": "8a57e246283a00079f17b64b5127ec75c43b8a0a70d9ddead1f087ae77379c66"
+  },
+  "started_at": "2026-10-29T09:27:13Z",
+  "finished_at": "2026-10-29T09:27:14Z",
+  "producer": {
+    "kind": "executor",
+    "actor": {
+      "provider": "codex",
+      "model": "gpt-6.1-terra",
+      "effort": "high",
+      "session": "01a186f8-34f9-78f0-965e-c7833687f2db"
+    }
+  }
+}

@@ -17,6 +17,7 @@ final class GroupsModule implements Module
 
     public function register(ModuleRegistrar $registrar): void
     {
-        $registrar->feature('groups')->settings(GroupsSettings::class)->schema(InitialSchema::class);
+        $registrar->feature('groups')->settings(GroupsSettings::class)->schema(InitialSchema::class)
+            ->target(alias: 'group', resolver: GroupTarget::class);
     }
 }

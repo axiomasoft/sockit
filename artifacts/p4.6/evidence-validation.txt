@@ -1,0 +1,1 @@
+exit=0; native check-evidence schema + log SHA-256 validated for 16 evidence files; required final exits all 0.

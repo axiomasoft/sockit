@@ -24,6 +24,7 @@ use SocKit\Panels\PanelDefinitions;
 use SocKit\Posts\Data\PostCommand;
 use SocKit\Posts\Internal\PostsServiceProvider;
 use SocKit\Posts\Posts;
+use SocKit\Reactions\Internal\ReactionsServiceProvider;
 use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\Schema\SnapshotRenderer;
 use SocKit\SocKitServiceProvider;
@@ -71,18 +72,21 @@ final class PostScenario
     private array $sentinels;
 
     /** @param array<string, mixed> $privacy */
-    public function __construct(bool $install = true, bool $feature = true, bool $module = true, array $privacy = [])
+    public function __construct(bool $install = true, bool $feature = true, bool $module = true, array $privacy = [], bool $reactions = false)
     {
         $this->app = new Application;
         $this->app->instance('config', new Repository(['sockit' => [
             'panels' => [PostPanel::class, OtherPostPanel::class], 'surfaces' => [PostSurface::class, OtherPostSurface::class],
-            'modules' => ['enabled' => ['sockit.posts']],
+            'modules' => ['enabled' => ['sockit.posts', ...($reactions ? ['sockit.reactions'] : [])]],
             ...($privacy === [] ? [] : ['privacy' => $privacy]),
         ]]));
-        $this->app->instance(PostPanel::class, new PostPanel(enabled: $module));
-        $this->app->instance(PostSurface::class, new PostSurface(enabled: $feature && $module));
+        $this->app->instance(PostPanel::class, new PostPanel(enabled: $module, reactions: $reactions));
+        $this->app->instance(PostSurface::class, new PostSurface(enabled: $feature && $module, reactions: $reactions));
         $this->app->register(SocKitServiceProvider::class);
         $this->app->register(PostsServiceProvider::class);
+        if ($reactions) {
+            $this->app->register(ReactionsServiceProvider::class);
+        }
         $this->app->boot();
         $this->db = new RuntimeDatabase($this->app); // Proves owned isolated target before any DDL.
         $this->previousDb = DB::getFacadeRoot();
@@ -178,12 +182,17 @@ final class PostScenario
     /** @return array{posts: int, revisions: int, receipts: int, outbox: int} */
     public function counts(): array
     {
-        expect($this->sentinels())->toBe($this->sentinels);
+        $this->assertSentinels();
         $c = $this->connection();
 
         return ['posts' => $c->table('panel_a.a_posts')->count(), 'revisions' => $c->table('panel_a.a_post_revisions')->count(),
             'receipts' => $c->table('panel_a.a_receipts')->where('namespace', 'like', '%/posts.%')->count(),
             'outbox' => $c->table('panel_a.a_outbox')->whereRaw("envelope::jsonb->>'event_type' LIKE 'posts.%'")->count()];
+    }
+
+    public function assertSentinels(): void
+    {
+        expect($this->sentinels())->toBe($this->sentinels);
     }
 
     public function cleanup(): void

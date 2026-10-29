@@ -12,6 +12,7 @@ final class PostsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->scoped(PostTarget::class);
         Modules::add($this->app, PostsModule::class);
     }
 }

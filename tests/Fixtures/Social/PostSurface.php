@@ -10,10 +10,11 @@ use SocKit\Surfaces\SurfaceProvider;
 
 class PostSurface extends SurfaceProvider
 {
-    public function __construct(private readonly string $id = 'a', private readonly bool $enabled = true) {}
+    public function __construct(private readonly string $id = 'a', private readonly bool $enabled = true, private readonly bool $reactions = false) {}
 
     public function surface(Surface $surface): Surface
     {
-        return $surface->panel(new PanelId('acme.'.$this->id))->kind('acme.runtime')->host('article')->archiveReaders()->features(...($this->enabled ? ['posts'] : []));
+        return $surface->panel(new PanelId('acme.'.$this->id))->kind('acme.runtime')->host('article')->archiveReaders()
+            ->features(...[...($this->enabled ? ['posts'] : []), ...($this->reactions ? ['reactions'] : [])]);
     }
 }

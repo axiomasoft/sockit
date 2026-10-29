@@ -17,6 +17,8 @@ final class PostsModule implements Module
 
     public function register(ModuleRegistrar $registrar): void
     {
-        $registrar->feature('posts')->settings(PostsSettings::class)->schema(InitialSchema::class)->target(alias: 'post', resolver: PostTarget::class);
+        $registrar->feature('posts')->settings(PostsSettings::class)->schema(InitialSchema::class)
+            ->target(alias: 'post', resolver: PostTarget::class)
+            ->target(alias: 'sockit.post', resolver: PostTarget::class);
     }
 }

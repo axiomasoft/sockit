@@ -36,3 +36,15 @@ it('keeps Posts on public owner contracts and exposes immutable DTOs without ORM
     $mutation = (string) file_get_contents('packages/core/modules/posts/src/Internal/PostMutation.php');
     expect($mutation)->toContain('implements OwnerMutation', "where('revision'", 'affectedRows: $affected');
 });
+
+it('rejects sibling imports aliases fully qualified calls and direct posts SQL in the negative control', function (): void {
+    $files = ['tests/Fixtures/Social/forbidden-post-reaction.php.txt'];
+    expect(Gates::dependencies($files))->not->toBe([])->and(Gates::internals($files))->not->toBe([]);
+    $forbiddenSql = ["'posts'", "'post_revisions'", 'driver_a_posts', 'post_revisions'];
+    $negative = (string) file_get_contents($files[0]);
+    expect(array_any($forbiddenSql, fn (string $token): bool => str_contains($negative, $token)))->toBeTrue();
+    foreach (SourceScanner::php('packages/core/modules/reactions/src') as $path) {
+        $source = (string) file_get_contents($path);
+        expect(array_any($forbiddenSql, fn (string $token): bool => str_contains($source, $token)))->toBeFalse();
+    }
+});

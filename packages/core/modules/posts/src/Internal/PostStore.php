@@ -27,6 +27,7 @@ use SocKit\Support\Data\ResourceRef;
 use SocKit\Support\Data\Revision;
 use SocKit\Support\Enums\ResourceKind;
 use SocKit\Surfaces\Data\TargetRef;
+use SocKit\Surfaces\Data\TargetResolution;
 
 final readonly class PostStore
 {
@@ -127,11 +128,11 @@ final readonly class PostStore
     }
 
     /** @return array<string, mixed> */
-    public function readable(OperationHandle $handle, ResourceRef $resource): array
+    public function readable(OperationHandle $handle, ResourceRef $resource, ?TargetResolution $host = null): array
     {
         $this->outside($handle);
         $this->app->make(Operations::class)->surface($handle);
-        $host = $this->app->make(OperationHandles::class)->resolveTarget(handle: $handle, target: $this->host($handle));
+        $host ??= $this->app->make(OperationHandles::class)->resolveTarget(handle: $handle, target: $this->host($handle));
         if (! $host->read->canRead()) {
             throw new PostException(ProblemCode::ContentHidden);
         }

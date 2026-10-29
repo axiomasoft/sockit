@@ -157,14 +157,21 @@ final class ReadinessCatalog
         assert(is_array($names) && is_array($values));
         $column = SnapshotDdl::identifier(SchemaValues::text($names[0]));
         $type = SchemaValues::map($columns[SchemaValues::text($names[0])])['type'];
-        $text = in_array($type, ['string', 'uuid'], true) ? '('.$column.')' : $column;
+        $text = in_array($type, ['string', 'uuid', 'bigint', 'integer'], true) ? '('.$column.')' : $column;
+        $other = '';
+        if ($check['kind'] === 'nonnull_iff') {
+            $other = SnapshotDdl::identifier(SchemaValues::text($names[1]));
+            if (SchemaValues::map($columns[SchemaValues::text($names[1])])['type'] === 'string') {
+                $other = '('.$other.')';
+            }
+        }
         $literal = static fn (mixed $value): string => SnapshotDdl::literal(SchemaValues::text($value));
         $list = 'ARRAY['.implode(',', array_map($literal, $values)).']';
 
         return match ($check['kind']) {
             'one_of' => '('.$text.' = ANY ('.($type === 'string' ? '('.$list.')' : $list).'))',
             'byte_length' => '((octet_length('.$text.') >= 1) AND (octet_length('.$text.') <= '.SchemaValues::text($values[0]).'))',
-            'nonnull_iff' => '(('.$column.' IS NOT NULL) = (NOT ('.SnapshotDdl::identifier(SchemaValues::text($names[1])).' IS DISTINCT FROM '.$literal($values[0]).')))',
+            'nonnull_iff' => '(('.$column.' IS NOT NULL) = (NOT ('.$other.' IS DISTINCT FROM '.$literal($values[0]).')))',
             'matches' => '('.$text.' ~ '.$literal($values[0]).')',
             'json_object' => '(jsonb_typeof('.$column.") = 'object')",
             'positive' => '('.$column.' >= 1)',

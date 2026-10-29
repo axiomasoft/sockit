@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/core",
-                "reference": "bef4a8f4a22851ede12889b715b4e7863be4bc58"
+                "reference": "71e63f01350b2e74fac5e51242c8536b99e1b71e"
             },
             "require": {
                 "illuminate/config": "^13.0",
@@ -54,15 +54,61 @@
                             "publish-tags": [
                                 "sockit-config"
                             ],
+                            "commands": [
+                                "sockit:doctor",
+                                "sockit:make-panel",
+                                "sockit:relay"
+                            ],
+                            "module-ids": [],
+                            "exclude-namespaces": [
+                                "SocKit\\Reactions\\",
+                                "SocKit\\Posts\\"
+                            ]
+                        },
+                        "reactions": {
+                            "namespaces": [
+                                "SocKit\\Reactions\\"
+                            ],
+                            "paths": [
+                                "packages/core/modules/reactions/src"
+                            ],
+                            "tables": [
+                                "reactions",
+                                "reaction_counts"
+                            ],
+                            "config": [],
+                            "publish-tags": [],
                             "commands": [],
-                            "module-ids": []
+                            "module-ids": [
+                                "sockit.reactions"
+                            ]
+                        },
+                        "posts": {
+                            "namespaces": [
+                                "SocKit\\Posts\\"
+                            ],
+                            "paths": [
+                                "packages/core/modules/posts/src"
+                            ],
+                            "tables": [
+                                "posts",
+                                "post_revisions"
+                            ],
+                            "config": [],
+                            "publish-tags": [],
+                            "commands": [],
+                            "module-ids": [
+                                "sockit.posts"
+                            ]
                         }
                     }
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "SocKit\\": "src/"
+                    "SocKit\\": "src/",
+                    "SocKit\\Reactions\\": "modules/reactions/src/",
+                    "SocKit\\Posts\\": "modules/posts/src/"
                 }
             },
             "license": [

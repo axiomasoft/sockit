@@ -188,7 +188,7 @@ final class PanelSchemaCompiler
                         'positive' => in_array($column->type, ['bigint', 'integer'], true),
                         'one_of' => in_array($column->type, ['text', 'string'], true),
                         'byte_length' => in_array($column->type, ['text', 'string'], true),
-                        'matches' => in_array($column->type, ['text', 'string', 'uuid'], true),
+                        'matches' => in_array($column->type, ['text', 'string', 'uuid', 'bigint', 'integer'], true),
                         'json_object' => $column->type === 'json',
                         'nonnull_iff' => $column->nullable && in_array($spec['columns'][$check->columns[1]]->type, ['text', 'string'], true),
                         default => false,

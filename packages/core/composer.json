@@ -15,7 +15,9 @@
     },
     "autoload": {
         "psr-4": {
-            "SocKit\\": "src/"
+            "SocKit\\": "src/",
+            "SocKit\\Reactions\\": "modules/reactions/src/",
+            "SocKit\\Posts\\": "modules/posts/src/"
         }
     },
     "extra": {
@@ -52,7 +54,47 @@
                         "sockit:make-panel",
                         "sockit:relay"
                     ],
-                    "module-ids": []
+                    "module-ids": [],
+                    "exclude-namespaces": [
+                        "SocKit\\Reactions\\",
+                        "SocKit\\Posts\\"
+                    ]
+                },
+                "reactions": {
+                    "namespaces": [
+                        "SocKit\\Reactions\\"
+                    ],
+                    "paths": [
+                        "packages/core/modules/reactions/src"
+                    ],
+                    "tables": [
+                        "reactions",
+                        "reaction_counts"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.reactions"
+                    ]
+                },
+                "posts": {
+                    "namespaces": [
+                        "SocKit\\Posts\\"
+                    ],
+                    "paths": [
+                        "packages/core/modules/posts/src"
+                    ],
+                    "tables": [
+                        "posts",
+                        "post_revisions"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.posts"
+                    ]
                 }
             }
         }

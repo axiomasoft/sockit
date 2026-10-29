@@ -64,7 +64,7 @@ final class Gates
         foreach ($files as $file) {
             foreach (SourceScanner::scan($file)['references'] as $reference) {
                 foreach (self::FORBIDDEN as $prefix) {
-                    if (self::within($reference['name'], $prefix)) {
+                    if (self::within($reference['name'], $prefix) && ! self::ownSocial($file, $reference['namespace'], $reference['name'])) {
                         $violations[] = self::violation('A2', $file, $reference['line'], 'Forbidden dependency '.$reference['name']);
                         break;
                     }
@@ -106,6 +106,10 @@ final class Gates
                     (count($parts) === 2 && in_array($parts[1], ['SocKit', 'SocKitServiceProvider'], true))
                     || (count($parts) >= 3 && in_array($parts[1], self::MODULES, true))
                 );
+                $social = self::socialRoot($file);
+                if ($social !== null) {
+                    $allowed = self::within($type['name'], 'SocKit\\'.$social);
+                }
                 if (! $allowed) {
                     $violations[] = self::violation('A4', $file, $type['line'], 'Unknown core namespace '.$type['name']);
                 }
@@ -183,6 +187,8 @@ final class Gates
         $owners = is_array($data) && isset($data['extra']) && is_array($data['extra']) ? ($data['extra']['sockit'] ?? null) : null;
         $owners = is_array($owners) ? ($owners['owners'] ?? null) : null;
         $prefixes = [];
+        $exclusions = [];
+        $paths = [];
         $violations = [];
         if (! is_array($owners) || $owners === []) {
             return [self::violation('A8', $manifest, 1, 'Missing extra.sockit.owners')];
@@ -200,16 +206,25 @@ final class Gates
                     continue;
                 }
                 foreach ($prefixes as $previous) {
-                    if (str_starts_with($prefix, $previous) || str_starts_with($previous, $prefix)) {
+                    if ((str_starts_with($prefix, $previous) && ! in_array($prefix, $exclusions[$previous] ?? [], true))
+                        || str_starts_with($previous, $prefix)) {
                         $violations[] = self::violation('A8', $manifest, 1, 'Overlapping owner prefixes '.$previous.' / '.$prefix);
                     }
                 }
                 $prefixes[] = $prefix;
+                $exclusions[$prefix] = isset($owner['exclude-namespaces']) && is_array($owner['exclude-namespaces']) ? $owner['exclude-namespaces'] : [];
+                $paths[$prefix] = isset($owner['paths']) && is_array($owner['paths']) ? $owner['paths'] : [];
             }
         }
         foreach ($files as $file) {
             foreach (SourceScanner::scan($file)['types'] as $type) {
-                $matches = array_filter($prefixes, fn (string $prefix): bool => str_starts_with($type['name'], $prefix));
+                $matches = array_filter($prefixes, fn (string $prefix): bool => str_starts_with($type['name'], $prefix)
+                    && ! array_any($exclusions[$prefix], fn (mixed $excluded): bool => is_string($excluded) && str_starts_with($type['name'], $excluded)));
+                foreach ($matches as $prefix) {
+                    if (str_starts_with($file, 'packages/') && $paths[$prefix] !== [] && ! array_any($paths[$prefix], fn (mixed $path): bool => is_string($path) && str_starts_with($file, $path.'/'))) {
+                        $violations[] = self::violation('A8', $file, $type['line'], 'Source outside owner path: '.$type['name']);
+                    }
+                }
                 if (count($matches) !== 1) {
                     $violations[] = self::violation('A8', $file, $type['line'], 'Expected exactly one namespace owner: '.$type['name']);
                 }
@@ -333,6 +348,24 @@ final class Gates
     private static function internal(string $name): bool
     {
         return in_array('internal', explode('\\', strtolower($name)), true);
+    }
+
+    private static function socialRoot(string $file): ?string
+    {
+        foreach (['reactions' => 'Reactions', 'posts' => 'Posts'] as $path => $name) {
+            if (str_starts_with($file, 'packages/core/modules/'.$path.'/src/')) {
+                return $name;
+            }
+        }
+
+        return null;
+    }
+
+    private static function ownSocial(string $file, string $namespace, string $reference): bool
+    {
+        $root = self::socialRoot($file);
+
+        return $root !== null && self::within($namespace, 'SocKit\\'.$root) && self::within($reference, 'SocKit\\'.$root);
     }
 
     private static function within(string $name, string $prefix): bool

@@ -1,0 +1,52 @@
+private volume=ab46decc5f1683ad45fd2b7b1e090c94c20459467e81fe81ddad9169ed401882
+private container=c46cc46656f69a42e2a054aa4ca6993a4f46fb1355399927f992921b5015d8ff owner=sockit_p2_2ae4b581bf026f2c_test decoy=sockit_p2_decoy_2ae4b581bf026f2c_test port=33099
+> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Social/SchemaContributionsTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=101
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=102
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=103
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=104
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=105
+P4.1 catalogs selected=[]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=108
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=109
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=110
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=111
+P4.1 catalogs selected=["sockit.reactions"]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=114
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=115
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=116
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=117
+P4.1 catalogs selected=["sockit.posts"]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=120
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=121
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=122
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=123
+P4.1 catalogs selected=["sockit.reactions","sockit.posts"]; exact tables/indexes/check names/FKs/casts verified for both panels
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=126
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=127
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=128
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=129
+P4.1 maximum 512-byte opaque host/target keys and 609-byte actor; zero count accepted, negative/revision zero rejected; collision rejected; inactive membership retains UUID/revision
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=132
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=133
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=134
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=135
+P4.1 mapped custom post models, immutable revision uniqueness, own FK, hydration/casts/relations, Pending/Held overlay restore and chronology tie verified
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=138
+PG identity database=sockit_p2_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=139
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=140
+PG identity database=sockit_p2_decoy_2ae4b581bf026f2c_test server_version_num=160014 marker=sockit-p21-2ae4b581bf026f2c backend_pid=141
+P4.1 disabled registry preserves social data; frozen A rollback drops only A; B checksum unchanged and B remains writable; host sentinel preserved
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Integration\Social\SchemaContributionsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.28s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.31s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.35s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit installs only selected production tables with exact catalog inde[39m[90m…[39m [90m0.37s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retains lossless maximum refs verifies digest collisions and iso[39m[90m…[39m [90m0.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit hydrates custom concrete posts and mapped revision relations wit[39m[90m…[39m [90m0.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserves installed data on disable and rolls back only the froz[39m[90m…[39m [90m0.34s[39m  
+
+  [90mTests:[39m    [32;1m7 passed[39;22m[90m (1493 assertions)[39m
+  [90mDuration:[39m [39m2.38s[39m
+

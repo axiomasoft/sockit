@@ -100,8 +100,13 @@ final class PostTarget implements TargetResolver, TargetWriteFence
     /** @param array<string, mixed> $row */
     private function generation(PostStore $store, array $row, TargetResolution $host): string
     {
-        return hash('sha256', CanonicalJson::encode(['revision' => $store->integer($row, 'revision'),
+        // Sampled verdicts/deadlines authorize this entry; only stable owner facts version the target.
+        return hash('sha256', CanonicalJson::encode(['owner' => ['installation' => $store->text($row, 'installation'),
+            'surface' => $host->surface->toWire(), 'post' => $store->text($row, 'id'), 'incarnation' => 1],
+            'revision' => $store->integer($row, 'revision'),
             'privacy' => $store->integer($row, 'privacy_revision'), 'safety' => $store->integer($row, 'safety_generation'),
-            'consent' => $store->integer($row, 'consent_generation'), 'host' => $host->toWire()]));
+            'consent' => $store->integer($row, 'consent_generation'),
+            'host' => ['installation' => $host->installation->toWire(), 'target' => $host->target->toWire(),
+                'privacy' => $host->privacyRevision->value, 'generation' => $host->generation]]));
     }
 }

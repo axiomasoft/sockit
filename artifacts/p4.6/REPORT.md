@@ -1,23 +1,20 @@
-PLAN1.P4.6 — owning writer: codex/gpt-6.1-sol/xhigh, session `01a18642-887a-7ff0-9077-9a1aed0aab00`, sandbox `danger-full-access`. Runtime подтверждён текущим turn_context; base HEAD `84c39f38916ce3599333e92a2e508d80ea41d091`.
+PLAN1.P4.6 — исправление F1 Major после RED от reviewer `01a18650-f40e-70c1-a701-d17bd7030171` (codex/gpt-6.1-sol/xhigh, read-only; finding передан владельцем). Owning session прежняя: `01a18642-887a-7ff0-9077-9a1aed0aab00`, codex/gpt-6.1-sol/xhigh, danger-full-access. Base исправления: `2de17368962128d0fd96799aefe7637c281e7de4`; повторный planner start не выполнялся.
 
-Posts регистрирует canonical target `sockit.post` через public ModuleRegistrar. Совместимый `post` остаётся read-only для существующего generic receipt lookup и не создаёт второй reaction identity. Reactions использует существующие public contracts; sibling imports, SQL в posts и изменения kernel/routes отсутствуют.
+Generation production PostTarget больше не хэширует sampled host verdicts, expires_at или lifecycle. Hash содержит стабильные owner installation/surface/post ID/incarnation, revision/privacy/safety/consent и host installation/target+incarnation/privacy/generation. Текущие read/write права, TTL, lifecycle, safety, audience и локальные fences проверяются прежними guards отдельно от generation; kernel/registry/routes не изменены.
 
-Scoped resolver каждый раз проверяет текущие host/post audience, publication, lifecycle, installation, panel, surface и permanent incarnation=1. Одноразовая подготовка локального fence включает host snapshot: receipt → surface → host fence → post lock → reaction. Fence повторно проверяет post privacy/safety/consent generation; actor/audience/remote resolve под lock запрещены. Unprovable host fence отклоняется.
+Регрессия на прежнем коде воспроизвела меняющуюся generation и сохранённую reaction с отклонённым acknowledgement; RED V1 сохранён среди *-attempt-*. Production registry tests теперь проверяют fixed/renewed host/admission TTL, scalar/summaryMany counts, успешный initial acknowledgement, same-key replay, module/generic lookup и переход в допустимый read_only. Отрицательные проверки сохраняют отказ при expiry/revoke, запрет новых writes в read_only и invalidation при изменении host privacy/generation.
 
-| Проверка | Exit | Результат |
+| Проверка после F1 | Exit | Результат |
 |---|---:|---|
-| V1 | 0 | 22 теста: host-only/enabled/disabled registry, refs/isolation, current guards, replay/rebuild, replacement |
-| V2 | 0 | 10 тестов: 6 PG barrier orders hide/delete/shrink, revoke while waiting, restore/terminal/stale events, Held/Pending |
-| V3 | 0 | 72 теста P2 envelope/receipt/generation/tombstone |
-| V89 | 0 | 53 arch tests, включая negative sibling/SQL fixture |
+| V1 | 0 | 30 tests, 618 assertions |
+| V2 | 0 | 10 tests, 493 assertions; реальные PG barrier races |
+| V3 | 0 | 72 tests, 1430 assertions; P2 guards/receipts/atomicity/tombstones |
+| V89 | 0 | 53 arch tests, 584 assertions |
 | V90 | 0 | PHPStan max, memory-limit=512M, без suppressions |
 | V91 | 0 | Pint |
-| V92 (дополнительно) | 0 | Затронутые production regressions P4.2–P4.5; команда в V92.json |
 
-Каждая PostgreSQL-команда выполнена через `python3 scripts/testing/pg-run.py`. До DDL/мутаций проверены invocation-owned container, loopback endpoint, exact *_test databases, run marker, PostgreSQL 16 и backend PIDs; B/decoy sentinels проверены. В barrier tests подтверждён `pg_blocking_pids` и реальное ожидание Lock, без skipped/incomplete/warning/risky pass.
+Все команды выполнены буквально из item. PostgreSQL — только через pg-run.py: owned container/loopback endpoint/exact *_test databases/run marker/PIDs доказаны до тестовых мутаций; B/decoy sentinels сохранены. Skipped/incomplete/warning/risky не засчитываются pass.
 
-Persisted event wires в обратном порядке проверены через текущий owner target lookup; stale refs/receipts не дают protected outputs и не меняют terminal state. External delivery/новый event consumer этим пунктом не реализуются. Rebuild изменяет только projection и не возвращает скрытые totals. Revoke может сохранить rejected receipt без resource/revision согласно P2; membership/count/outbox при этом не возникают.
+Актуальные V1/V2/V3/V89/V90/V91.json и .log содержат command/cwd/exit/timestamps/source fingerprint/log SHA-256 по schema check-evidence и один и тот же source digest исправленного кандидата. Предыдущие попытки, V92 и initial finalization/finish logs — исторические evidence прежнего кандидата, не подтверждение исправления F1. Source maps сохранены в source-fingerprint.json и source-fingerprints/.
 
-Команды/cwd/exit/timestamps/merged stdout+stderr/log SHA-256 — V*.json и V*.log по schema check-evidence. Source maps — source-fingerprint.json и source-fingerprints/. После успешных V2/V3 изменена только подготовка cross-installation case в PostTargetTest.php; затронутые V1/V89/V90/V91 повторены. Неуспешные первоначальные попытки сохранены как *-attempt-*; они не засчитаны pass.
-
-Independent review requested: reviewer не запускался, receipt не создавался. После scoped commit будет выполнен native finish с реальными checks/evidence/commit; ожидаемый отказ из-за отсутствующего review сохраняется отдельным post-commit finalization artifact без изменения этого отчёта.
+Исправленный кандидат требует нового independent review. Reviewer не запускался исполнителем; review receipt не создавался, finish и blocked не вызывались. После dry-run создаётся scoped executor commit; после него закоммиченные файлы остаются неизменны.

@@ -7,13 +7,16 @@ use SocKit\Errors\Exceptions\SocKitException;
 use SocKit\Operations\OperationHandles;
 use SocKit\Posts\Contracts\ContentSafety;
 use SocKit\Posts\Enums\SafetyDecision;
+use SocKit\Reactions\Data\ReactionQuery;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\ResourceRef;
+use SocKit\Support\Data\Revision;
 use SocKit\Support\Enums\ResourceKind;
 use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Tests\Fixtures\Runtime\RuntimeScenario;
+use SocKit\Tests\Fixtures\Social\ExpiringTarget;
 use SocKit\Tests\Fixtures\Social\PostLifecycle;
 use SocKit\Tests\Fixtures\Social\PostReactionScenario;
 use SocKit\Tests\Fixtures\Social\ReactionScenario;
@@ -214,5 +217,113 @@ it('creates a distinct replacement post without letting an old incarnation attac
         expect($f->reactions->summary(handle: $f->s->handle, target: $target)->counts)->toBe(['like' => 1]);
     } finally {
         $f->s->cleanup();
+    }
+});
+
+it('keeps production post generation and scalar batch counts stable with fixed or renewed verdict TTLs', function (string $refresh): void {
+    $f = new PostReactionScenario;
+    $s = $f->s;
+    try {
+        $target = $f->target($f->create());
+        $ttl = ExpiringTarget::install($f, $refresh);
+        $handles = $s->app->make(OperationHandles::class);
+        $first = $handles->resolveTarget(handle: $s->handle, target: $target);
+        $second = $handles->resolveTarget(handle: $s->handle, target: $target);
+        expect($first->generation)->toBe($second->generation)->and($first->privacyRevision)->toEqual($second->privacyRevision);
+        foreach (['host', 'admission'] as $stage) {
+            expect(count(array_unique($ttl->expiries[$stage])))->toBe($refresh === $stage || $refresh === 'both' ? count($ttl->expiries[$stage]) : 1);
+        }
+        expect($f->reactions->summary(handle: $s->handle, target: $target)->counts)->toBe(['like' => 0]);
+        $command = $f->command($target);
+        $added = $f->add($target, $command);
+        expect($added->isSuccess())->toBeTrue();
+        expect($f->reactions->summary(handle: $s->handle, target: $target)->counts)->toBe(['like' => 1]);
+        $batch = $f->reactions->summaryMany(handle: $s->handle, queries: [new ReactionQuery('post', $target)]);
+        expect($batch['post']->counts)->toBe(['like' => 1])->and($batch['post']->ownKinds)->toBe(['like']);
+        expect($f->counts())->toBe(['members' => 1, 'active' => 1, 'count' => 1, 'receipts' => 1, 'outbox' => 1]);
+    } finally {
+        $s->cleanup();
+    }
+})->with(['fixed', 'host', 'admission', 'both']);
+
+it('acknowledges a committed reaction and replays its original key with renewed host or admission TTL', function (string $refresh): void {
+    $f = new PostReactionScenario;
+    $s = $f->s;
+    try {
+        $target = $f->target($f->create());
+        ExpiringTarget::install($f, $refresh);
+        $command = $f->command($target);
+        $added = $f->add($target, $command);
+        // Observe the owner commit independently of its returned acknowledgement.
+        expect($f->counts())->toBe(['members' => 1, 'active' => 1, 'count' => 1, 'receipts' => 1, 'outbox' => 1]);
+        expect($added->isSuccess())->toBeTrue();
+        foreach ([$f->add($target, $command),
+            $f->reactions->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key),
+            $s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)] as $result) {
+            expect($result?->isSuccess())->toBeTrue()->and($result?->resource)->toEqual($added->resource)->and($result?->revision)->toEqual($added->revision);
+        }
+        expect($f->counts())->toBe(['members' => 1, 'active' => 1, 'count' => 1, 'receipts' => 1, 'outbox' => 1]);
+    } finally {
+        $s->cleanup();
+    }
+})->with(['host', 'admission']);
+
+it('keeps readable post receipts under current read only admission while denying new mutations', function (): void {
+    $f = new PostReactionScenario;
+    $s = $f->s;
+    try {
+        $target = $f->target($f->create());
+        ExpiringTarget::install($f, 'fixed');
+        $handles = $s->app->make(OperationHandles::class);
+        $before = $handles->resolveTarget(handle: $s->handle, target: $target);
+        $command = $f->command($target);
+        $added = $f->add($target, $command);
+        expect($added->isSuccess())->toBeTrue();
+        $s->fake->surfaces->allowReadOnly(viewer: $s->handle->actor, surface: $s->handle->surface);
+        $current = $handles->resolveTarget(handle: $s->handle, target: $target);
+        expect($current->generation)->toBe($before->generation)->and($current->read->canRead())->toBeTrue()->and($current->write->canWrite())->toBeFalse();
+        expect($f->reactions->summary(handle: $s->handle, target: $target)->counts)->toBe(['like' => 1]);
+        foreach ([$f->add($target, $command),
+            $f->reactions->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key),
+            $s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)] as $result) {
+            expect($result?->isSuccess())->toBeTrue()->and($result?->resource)->toEqual($added->resource);
+        }
+        $remove = $f->command(target: $target, key: 'reaction.read.only.remove', expected: new Revision(1), action: 'remove');
+        PostLifecycle::denied($f->reactions->remove(handle: $s->handle, reaction: $f->reaction($target), command: $remove));
+        expect($f->counts()['active'])->toBe(1)->and($f->counts()['outbox'])->toBe(1);
+        $s->fake->surfaces->deny(viewer: $s->handle->actor, surface: $s->handle->surface);
+        PostLifecycle::denied($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key));
+        expect($f->reactions->summary(handle: $s->handle, target: $target)->counts)->toBeNull();
+    } finally {
+        $s->cleanup();
+    }
+});
+
+it('still expires access and invalidates post receipts when stable host privacy or generation changes', function (): void {
+    $f = new PostReactionScenario;
+    $s = $f->s;
+    try {
+        $target = $f->target($f->create());
+        $ttl = ExpiringTarget::install($f, 'both');
+        $handles = $s->app->make(OperationHandles::class);
+        $before = $handles->resolveTarget(handle: $s->handle, target: $target);
+        $command = $f->command($target);
+        expect($f->add($target, $command)->isSuccess())->toBeTrue();
+        $ttl->expiresAt = new DateTimeImmutable('-1 day');
+        expect($f->reactions->summary(handle: $s->handle, target: $target)->counts)->toBeNull();
+        PostLifecycle::denied($f->add($target, $command));
+        PostLifecycle::denied($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key));
+        $ttl->expiresAt = new DateTimeImmutable('+2 hours');
+        expect($handles->resolveTarget(handle: $s->handle, target: $target)->generation)->toBe($before->generation);
+        expect($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key)?->isSuccess())->toBeTrue();
+        foreach ([['privacy' => 2], ['generation' => 'new-host-generation']] as $changed) {
+            $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update($changed);
+            expect($handles->resolveTarget(handle: $s->handle, target: $target)->generation)->not->toBe($before->generation);
+            PostLifecycle::denied($s->operations->lookup(handle: $s->handle, namespace: $command->namespace, key: $command->key));
+            $s->connection()->table('panel_a.envelope_targets')->where('id', '42')->update(['privacy' => 1, 'generation' => '1']);
+        }
+        expect($f->counts())->toBe(['members' => 1, 'active' => 1, 'count' => 1, 'receipts' => 1, 'outbox' => 1]);
+    } finally {
+        $s->cleanup();
     }
 });

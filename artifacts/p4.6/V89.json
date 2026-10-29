@@ -1,6 +1,6 @@
 {
   "$schema": "urn:swissknifeman:task:plan:check-evidence:v1",
-  "evidence_id": "p4.6-V89-2026-10-29T06:14:36Z",
+  "evidence_id": "p4.6-V89-2026-10-29T06:36:03Z",
   "check_id": "V89",
   "subject": "PLAN1.P4.6",
   "procedure": {
@@ -8,21 +8,21 @@
     "cwd": "."
   },
   "candidate": {
-    "head": "84c39f38916ce3599333e92a2e508d80ea41d091",
-    "dirty_digest": "f52aec8fd3316b9cd50b22b22a61683d35af8c731f93ff494cca5468bd53f2f0"
+    "head": "2de17368962128d0fd96799aefe7637c281e7de4",
+    "dirty_digest": "efaf011b597943063c6ef70a025acbacec988fd0ab94f60027644987137afd06"
   },
   "exit": 0,
   "environment": {
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
     "python": "3.12.3",
-    "env_digest": "965819fec4751fd024d70243283b00481cfe5b9f1a47e7909d44bf21b058d7f1"
+    "env_digest": "9d7c63b3736cbededb13744b2ea4067f91fc58b8478bea0694f5486899e86eef"
   },
   "log": {
     "path": "artifacts/p4.6/V89.log",
-    "sha256": "56730453435cf5cbcf71e5f452287adc739509117323b856baa6e2cecde12dcd"
+    "sha256": "bca4b2277340d38fc723422105d23a571c2009ae71449d3975cbe47b12c38e95"
   },
-  "started_at": "2026-10-29T06:14:36Z",
-  "finished_at": "2026-10-29T06:14:37Z",
+  "started_at": "2026-10-29T06:36:03Z",
+  "finished_at": "2026-10-29T06:36:04Z",
   "producer": {
     "kind": "executor",
     "actor": {

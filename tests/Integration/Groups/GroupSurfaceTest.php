@@ -5,12 +5,17 @@ declare(strict_types=1);
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Audience\Data\GroupRef;
+use SocKit\Audience\Exceptions\AuthorizationDeniedException;
+use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\OperationHandles;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\TargetRef;
+use SocKit\Surfaces\SurfaceInstances;
 use SocKit\Tests\Fixtures\Groups\ContentScenario;
 use SocKit\Tests\Fixtures\Groups\ContentWait;
+use SocKit\Tests\Fixtures\Groups\ManagementWait;
+use SocKit\Tests\Fixtures\Runtime\RuntimeScenario;
 
 it('composes public group content posts and reactions with an early group fence and guarded replay lookup', function (): void {
     $s = new ContentScenario;
@@ -103,3 +108,92 @@ it('serializes leave against publication and post reactions at the group before 
         $s->cleanup();
     }
 })->with([['post', true], ['reaction', true], ['post', false], ['reaction', false]]);
+
+it('F1 rejects changes to the management surface committed after outside guards before the local fence', function (string $mode, string $change): void {
+    $s = new ContentScenario;
+    try {
+        $input = $s->post();
+        $created = $s->posts->create($s->handle, $input, $s->command($input));
+        expect($created->isPublished())->toBeTrue();
+        $post = $created->operation->resource ?? throw new RuntimeException('No initial post');
+        $before = $s->contentEffects();
+        $result = ManagementWait::afterGuards($s, $post, $mode, $change);
+        expect($result->isSuccess())->toBeFalse()->and($s->contentEffects())->toBe($before)
+            ->and($s->f->connection()->transactionLevel())->toBe(0);
+    } finally {
+        $s->cleanup();
+    }
+})->with(['post', 'reaction'])->with(['archive', 'delete', 'revision', 'privacy_generation', 'source_generation', 'leave']);
+
+it('F1 holds the management lifecycle fence until content commit for both surface identity orders', function (string $mode, string $action, string $kind): void {
+    $s = new ContentScenario(kind: $kind);
+    try {
+        $input = $s->post();
+        $created = $s->posts->create($s->handle, $input, $s->command($input));
+        expect($created->isPublished())->toBeTrue();
+        $post = $created->operation->resource ?? throw new RuntimeException('No initial post');
+        $race = ManagementWait::duringContent($s, $post, $mode, $action);
+        expect($race['management']->isSuccess())->toBeTrue()
+            ->and($s->f->connection()->table('panel_a.a_posts')->count())->toBe($mode === 'post' ? 2 : 1)
+            ->and($s->f->connection()->table('panel_a.a_reactions')->count())->toBe($mode === 'reaction' ? 1 : 0)
+            ->and($s->f->connection()->table('panel_a.a_surface_instances')->where('host_key', '42')->value('lifecycle'))->toBe($action === 'archive' ? 'archived' : 'deleted')
+            ->and($s->f->connection()->transactionLevel())->toBe(0);
+    } finally {
+        $s->cleanup();
+    }
+})->with(['post', 'reaction'])->with(['archive', 'delete'])->with(['acme.club', 'acme.zzclub']);
+
+it('F1 proves the local surface binding and transaction without consulting ambient actors', function (): void {
+    $s = new ContentScenario;
+    try {
+        $surfaces = $s->f->app->make(SurfaceInstances::class);
+        $parent = $s->f->handle;
+        $sample = $surfaces->get($parent);
+        $neighbor = $s->f->app->make(OperationHandles::class)->forSurface(RuntimeScenario::surface('acme.b'));
+        $otherActor = new OperationHandle($parent->surface,
+            RuntimeScenario::actor('8'), $parent->panel, $parent->definition);
+        expect($surfaces->recheck($s->handle, $parent, $sample)->isAllowed())->toBeFalse();
+        // Any ambient current() call would fail the trusted installation check. Local
+        // fencing must use the already captured handles, without contacting that resolver.
+        $s->f->fake->actors->actingAs(RuntimeScenario::actor(installation: 'unresolved-ambient-installation'));
+        $s->f->connection()->transaction(function () use ($s, $surfaces, $parent, $sample, $neighbor, $otherActor): void {
+            expect($surfaces->recheck($s->handle, $parent, $sample)->isAllowed())->toBeTrue()
+                ->and($surfaces->recheck($s->handle, $neighbor, $sample)->isAllowed())->toBeFalse()
+                ->and($surfaces->recheck($s->handle, $otherActor, $sample)->isAllowed())->toBeFalse();
+        });
+        expect($s->f->connection()->transactionLevel())->toBe(0);
+    } finally {
+        $s->cleanup();
+    }
+});
+
+it('F1 rejects reverse-order surface contention with NOWAIT and rolls back before any retry', function (): void {
+    $s = new ContentScenario(kind: 'acme.zzclub');
+    try {
+        $surfaces = $s->f->app->make(SurfaceInstances::class);
+        $parent = $s->f->handle;
+        $sample = $surfaces->get($parent);
+        $pdo = $s->f->db->owner;
+        $pdo->beginTransaction();
+        $pdo->query("SELECT id FROM panel_a.driver_a_surface_instances WHERE kind='acme.runtime' AND host_key='42' FOR UPDATE");
+        $sawNowait = false;
+        $s->f->connection()->beforeExecuting(static function (string $query) use (&$sawNowait): void {
+            if (str_contains($query, 'a_surface_instances') && str_contains($query, 'for update nowait')) {
+                $sawNowait = true;
+            }
+        });
+        $s->f->connection()->statement("SET statement_timeout='10s'");
+        $started = microtime(true);
+        expect(fn () => $s->f->connection()->transaction(fn () => $surfaces->recheck($s->handle, $parent, $sample)->requireAllowed()))
+            ->toThrow(AuthorizationDeniedException::class);
+        expect($sawNowait)->toBeTrue()->and(microtime(true) - $started)->toBeLessThan(5.0)
+            ->and($s->f->connection()->transactionLevel())->toBe(0);
+        $pdo->rollBack();
+        expect($s->f->connection()->transaction(fn (): bool => $surfaces->recheck($s->handle, $parent, $sample)->isAllowed()))->toBeTrue();
+    } finally {
+        if ($s->f->db->owner->inTransaction()) {
+            $s->f->db->owner->rollBack();
+        }
+        $s->cleanup();
+    }
+});

@@ -20,6 +20,22 @@ final readonly class OwnerStorage
     public function forHandle(OperationHandle $handle, ?CommandNamespace $namespace = null): OwnerConnection
     {
         $this->handles->assertCurrent(handle: $handle, namespace: $namespace);
+
+        return $this->bind($handle, $namespace);
+    }
+
+    /** Local composition only. The kernel caller verifies frozen definitions and captured
+     * actor/binding equality; never resolve ambient actors or host authority under locks. */
+    public function forLocalHandle(OperationHandle $handle): OwnerConnection
+    {
+        $owner = $this->bind($handle, null);
+        $owner->requireTransaction();
+
+        return $owner;
+    }
+
+    private function bind(OperationHandle $handle, ?CommandNamespace $namespace): OwnerConnection
+    {
         $storage = $handle->panel->storage;
         try {
             $connection = $this->connections->connection($storage->connection);

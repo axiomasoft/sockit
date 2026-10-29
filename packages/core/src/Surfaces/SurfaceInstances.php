@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Surfaces;
 
 use SocKit\Attributes\Api;
+use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\Data\OperationResult;
@@ -21,6 +22,19 @@ final readonly class SurfaceInstances
     public function get(OperationHandle $handle): SurfaceInstance
     {
         return $this->operations->surface($handle);
+    }
+
+    /** Local-only dependency fence before host/group/content locks, on the exact owner connection.
+     * Both handles and expected snapshot must have been sampled by current outside guards.
+     * Holds the current live dependency row until owner commit; compares identity and all
+     * generations. Blocking surface locks follow canonical identity order. If the dependency
+     * sorts before the already locked owner surface, NOWAIT rejects contention instead of
+     * introducing a reverse wait. Unknown/errors require the caller to abort the envelope;
+     * no retry, network, ambient actor lookup or lifecycle mutation occurs here.
+     */
+    public function recheck(OperationHandle $owner, OperationHandle $dependency, SurfaceInstance $expected): AuthorizationDecision
+    {
+        return $this->operations->recheckSurface($owner, $dependency, $expected);
     }
 
     public function create(OperationHandle $handle, CommandEnvelope $command): OperationResult

@@ -29,11 +29,12 @@ use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
 use SocKit\Surfaces\Enums\TargetLifecycle;
+use SocKit\Surfaces\SurfaceInstances;
 
 /** `group` retains nonmember management/receipt access; `sockit.group` requires membership.
  * Scoped preparation is replaced on every resolve and consumed once by the local fence.
- * The host's existing authority fence must also prove the management boundary on this
- * owner connection (including lifecycle/admission changes); remote/unproven facts deny.
+ * The kernel fences the management lifecycle/generations on the owner connection;
+ * the host's existing authority fence independently proves admission. Unknown facts deny.
  */
 final class GroupTarget implements TargetResolver, TargetWriteFence
 {
@@ -114,6 +115,9 @@ final class GroupTarget implements TargetResolver, TargetWriteFence
             || ! $sample->installation->equals($resolved->installation) || $sample->generation !== $resolved->generation || $sample->privacyRevision != $resolved->privacyRevision) {
             return AuthorizationDecision::unknown('groups.target_preparation_unproven');
         }
+        // Finish the surface lock stage before any host/group/content owner lock. Kernel
+        // ownership is preserved: groups never reads or locks surface tables directly.
+        $this->app->make(SurfaceInstances::class)->recheck($handle, $access->management, $access->instance)->requireAllowed();
         // The parent host fence, then group, then content owner. No ambient resolution or
         // network here. The group lock serializes every membership/policy writer until commit.
         $this->app->make(OperationHandles::class)->recheckTarget($access->management, $access->host)->requireAllowed();
@@ -125,7 +129,7 @@ final class GroupTarget implements TargetResolver, TargetWriteFence
             return AuthorizationDecision::unknown('groups.target_changed');
         }
         // Existing host consistency protocol, before any post/reaction lock. It must prove
-        // current parent admission/lifecycle locally; a sampled remote allow is insufficient.
+        // current parent admission locally; a sampled remote allow is insufficient.
         $authority->recheck($access->management, $request, $token)->requireAllowed();
 
         return AuthorizationDecision::allow('groups.target_fenced');

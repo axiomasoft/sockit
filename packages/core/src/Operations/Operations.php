@@ -6,11 +6,13 @@ namespace SocKit\Operations;
 
 use Illuminate\Contracts\Foundation\Application;
 use SocKit\Attributes\Api;
+use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Contracts\OwnerMutation;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Internal\Envelope\Envelope;
+use SocKit\Operations\Internal\Envelope\SurfaceFence;
 use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\PayloadDigest;
@@ -53,5 +55,11 @@ final readonly class Operations
     public function surface(OperationHandle $handle): SurfaceInstance
     {
         return new Envelope($this->app)->surface($handle);
+    }
+
+    /** Local surface dependency check within an owning envelope; no new authority conferred. */
+    public function recheckSurface(OperationHandle $owner, OperationHandle $dependency, SurfaceInstance $expected): AuthorizationDecision
+    {
+        return new SurfaceFence($this->app)->recheck($owner, $dependency, $expected);
     }
 }

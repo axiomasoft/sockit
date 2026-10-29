@@ -31,9 +31,9 @@ final class MembershipScenario
 
     private int $sequence = 0;
 
-    public function __construct(bool $content = false, bool $install = true)
+    public function __construct(bool $content = false, bool $install = true, string $contentKind = 'acme.club')
     {
-        $this->f = new GroupScenario(install: $install, content: $content);
+        $this->f = new GroupScenario(install: $install, content: $content, contentKind: $contentKind);
         $connection = $this->f->connection();
         if ($install) {
             $connection->statement('CREATE TABLE panel_a.driver_membership_consent (installation text NOT NULL, subject text NOT NULL, allowed boolean NOT NULL, generation bigint NOT NULL, PRIMARY KEY (installation, subject))');

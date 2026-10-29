@@ -66,7 +66,7 @@ final class GroupScenario
     private readonly mixed $previousDb;
 
     /** @param array<string, mixed> $privacy */
-    public function __construct(bool $install = true, array $privacy = [], bool $reactions = false, bool $content = false)
+    public function __construct(bool $install = true, array $privacy = [], bool $reactions = false, bool $content = false, string $contentKind = 'acme.club')
     {
         if ($content && $privacy === []) {
             $privacy = ['floor' => ['allowed_scopes' => ['direct', 'group'], 'default_scope' => 'direct', 'max_scope' => 'group',
@@ -79,6 +79,9 @@ final class GroupScenario
             'modules' => ['enabled' => $content ? ['sockit.groups', 'sockit.posts', 'sockit.reactions'] : ['sockit.groups'], 'settings' => []],
             ...($privacy === [] ? [] : ['privacy' => $privacy]),
         ]]));
+        if ($content) {
+            $this->app->instance(ContentSurface::class, new ContentSurface($contentKind));
+        }
         $this->app->register(SocKitServiceProvider::class);
         $this->app->register(GroupsServiceProvider::class);
         if ($content) {

@@ -18,7 +18,9 @@ use SocKit\Surfaces\Enums\SurfaceLifecycle;
 
 /** Internal SQL primitives only: authorization/admission precede the owner transaction in P2.7.
  * Receipt -> surface -> own target lock order. Each object addresses exactly one complete identity;
- * callers handling multiple surfaces must sort installation/panel/kind/host type/key before taking locks.
+ * callers handling multiple surfaces sort installation/panel/kind/host type/key for blocking locks.
+ * An envelope already holding its primary surface can fence an earlier dependency only with
+ * NOWAIT through the kernel SurfaceFence; contention aborts, never waits in reverse order.
  * The current row is permanent, including after deletion. Never lock a missing row to claim creation.
  */
 final readonly class SurfaceInstances
@@ -60,9 +62,9 @@ final readonly class SurfaceInstances
     }
 
     /** Current snapshot under the surface lock, including deleted state for trusted envelope checks. */
-    public function lock(): SurfaceInstance
+    public function lock(bool $nowait = false): SurfaceInstance
     {
-        $current = $this->locked();
+        $current = $this->locked($nowait);
         $this->sameIncarnation($current);
 
         return $current;
@@ -148,10 +150,10 @@ final readonly class SurfaceInstances
         return $this->lock();
     }
 
-    private function locked(): SurfaceInstance
+    private function locked(bool $nowait = false): SurfaceInstance
     {
         $this->owner->requireTransaction();
-        $row = $this->query('surface_instances')->lockForUpdate()->first();
+        $row = $this->query('surface_instances')->lock($nowait ? 'for update nowait' : true)->first();
         if ($row === null) {
             $this->reject(ProblemCode::SurfaceNotFound);
         }

@@ -43,7 +43,7 @@ final class ContentWait
                     usleep(10000);
                 }
             } while (! $blocked && microtime(true) < $deadline);
-            expect($blocked)->toBeTrue()->and($row['query'] ?? '')->toContain('a_groups', 'for update');
+            expect($blocked)->toBeTrue()->and($row['query'] ?? '')->toContain('a_surface_instances', 'for update');
             if ($leaveFirst) {
                 // The waiting content operation must not yet hold its post owner row.
                 $s->f->db->owner->beginTransaction();
@@ -55,7 +55,7 @@ final class ContentWait
                     $s->f->db->owner->rollBack();
                 }
             }
-            fwrite(STDERR, 'P5.4 holder='.$holder.' waiter='.$waiter.' group_lock_wait=true post_lock_not_taken='.($leaveFirst ? 'true' : 'winner_holds_ordered_fence').
+            fwrite(STDERR, 'P5.4 holder='.$holder.' waiter='.$waiter.' management_surface_lock_wait=true post_lock_not_taken='.($leaveFirst ? 'true' : 'winner_holds_ordered_fence').
                 ' mode='.$mode.' leave_first='.($leaveFirst ? 'true' : 'false').PHP_EOL);
         };
         try {

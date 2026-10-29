@@ -16,6 +16,7 @@ use SocKit\Groups\GroupAudienceResolver;
 use SocKit\Operations\Contracts\MutationAuthorityFence;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationHandle;
+use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\OperationHandles;
 use SocKit\Posts\Data\PostCommand;
 use SocKit\Posts\Posts;
@@ -51,9 +52,9 @@ final class ContentScenario
 
     public AudienceGate $gate;
 
-    public function __construct(bool $install = true, ?ResourceRef $group = null, bool $active = true)
+    public function __construct(bool $install = true, ?ResourceRef $group = null, bool $active = true, string $kind = 'acme.club')
     {
-        $this->membership = new MembershipScenario(content: true, install: $install);
+        $this->membership = new MembershipScenario(content: true, install: $install, contentKind: $kind);
         $this->f = $this->membership->f;
         $this->f->app->instance(TargetResolver::class, new ContentHostTarget($this->f->connection(), $this->f->target));
         $resolver = new GroupAudienceResolver($this->f->app, $this->f->app->make(ContourResolver::class));
@@ -64,7 +65,7 @@ final class ContentScenario
         if ($install && $active) {
             expect($this->membership->run($this->group, 'join')->isSuccess())->toBeTrue();
         }
-        $surface = new SurfaceRef($this->group->panel, new SurfaceKindId('acme.club'), new HostEntityRef('sockit.group', $this->group->id), new Incarnation(1));
+        $surface = new SurfaceRef($this->group->panel, new SurfaceKindId($kind), new HostEntityRef('sockit.group', $this->group->id), new Incarnation(1));
         $actor = RuntimeScenario::actor();
         $this->f->fake->surfaces->allow($actor, $surface);
         foreach ([AudienceSpec::direct($actor->actor ?? throw new \RuntimeException), $this->audience()] as $spec) {
@@ -171,5 +172,32 @@ final class ContentScenario
     public function cleanup(): void
     {
         $this->membership->cleanup();
+    }
+
+    public function management(string $action): OperationResult
+    {
+        $surfaces = $this->f->app->make(SurfaceInstances::class);
+        $handle = $this->f->handle;
+        $revision = $surfaces->get($handle)->revision;
+        $command = new CommandEnvelope(new CommandKey('management.race.'.$action.'.0001'), new CommandNamespace($handle->actor->installation,
+            $handle->surface->panel, 'host.client', 'sockit.surfaces.'.$action), $surfaces->digest($handle, $action, $revision), $revision);
+
+        return match ($action) {
+            'archive' => $surfaces->archive($handle, $command),
+            'delete' => $surfaces->delete($handle, $command),
+            default => throw new \RuntimeException('Unsupported management transition'),
+        };
+    }
+
+    /** @return array<string, int> */
+    public function contentEffects(): array
+    {
+        $result = [];
+        foreach (['posts', 'post_revisions', 'reactions', 'reaction_counts'] as $entity) {
+            $result[$entity] = $this->f->connection()->table('panel_a.a_'.$entity)->count();
+        }
+        $result['outbox'] = $this->f->connection()->table('panel_a.a_outbox')->whereRaw("envelope::jsonb->>'event_type' LIKE 'posts.%' OR envelope::jsonb->>'event_type' LIKE 'reactions.%'")->count();
+
+        return $result;
     }
 }

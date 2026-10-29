@@ -12,7 +12,7 @@
   [32;1m✓[39;22m[90m [39m[90mit declares the runtime database and console components explicitly[39m
 
   [30;42;1m PASS [39;49;22m[39m Tests\Arch\GroupsModuleBoundaryTest[39m
-  [32;1m✓[39;22m[90m [39m[90mit keeps Groups on public kernel contracts with explicit owned stat[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps Groups on public kernel contracts with explicit owned stat[39m[90m…[39m [90m0.06s[39m  
   [32;1m✓[39;22m[90m [39m[90mit rejects group imports in the kernel and both sibling owners without weakening their own imports[39m
   [32;1m✓[39;22m[90m [39m[90mit requires explicit module-local consent without a permissive production default[39m
   [32;1m✓[39;22m[90m [39m[90mit composes group audiences and targets only through existing contr[39m[90m…[39m [90m0.01s[39m  
@@ -77,7 +77,7 @@
 
   [30;42;1m PASS [39;49;22m[39m Tests\Arch\SocialModulesTest[39m
   [32;1m✓[39;22m[90m [39m[90mit includes all social roots in every source architecture gate[39m[90m      [39m [90m0.14s[39m  
-  [32;1m✓[39;22m[90m [39m[90mit retains kernel social prohibition and rejects sibling and foreign Internal dependencies[39m
+  [32;1m✓[39;22m[90m [39m[90mit retains kernel social prohibition and rejects sibling and foreig[39m[90m…[39m [90m0.01s[39m  
 
   [30;42;1m PASS [39;49;22m[39m Tests\Arch\SourceScannerTest[39m
   [32;1m✓[39;22m[90m [39m[90mit F2 preserves namespace and imports after literal braces in interpolated strings[39m
@@ -87,6 +87,6 @@
   [32;1m✓[39;22m[90m [39m[90mit A6 rejects its negative control[39m
   [32;1m✓[39;22m[90m [39m[90mit A6 detects keys and variables but ignores comments and prose[39m
 
-  [90mTests:[39m    [32;1m57 passed[39;22m[90m (877 assertions)[39m
-  [90mDuration:[39m [39m0.83s[39m
+  [90mTests:[39m    [32;1m57 passed[39;22m[90m (878 assertions)[39m
+  [90mDuration:[39m [39m0.84s[39m
 

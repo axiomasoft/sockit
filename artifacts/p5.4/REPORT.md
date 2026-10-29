@@ -1,26 +1,25 @@
-# PLAN1 P5.4
+# PLAN1 P5.4 — исправление F1
 
-Реализована panel-bound композиция group audience и content target через существующие SPI. Host явно выбирает `GroupAudienceResolver` через `AudienceResolver`; provider его автоматически не заменяет. Остальные четыре scope используют существующий evaluator и host ContourResolver. GroupRef wire и stable kernel signatures сохранены.
+Исправлен Major из RED review session `01a1872e-31f7-7613-9f15-cb6e877b3ec2`, переданный владельцем. `GroupTarget::recheck` теперь через kernel-owned `SurfaceInstances::recheck` блокирует текущую management SurfaceInstance на том же owner connection до host/group/post/reaction locks. Проверяются installation/panel/actor/frozen bindings, incarnation, live lifecycle, id, revision, privacy/source generations и остальные поля snapshot. Management lock удерживается до owner commit; host admission/authority остаются независимыми guards.
 
-Членство проверяется по текущим active rows конкретной панели, installation, полному management binding/incarnation и trusted actor. Pending/invited/left, авторство и создание группы доступа не дают. Management admission, lifecycle и host target продолжают ограничивать чтение, batch, публикацию и lookup; read_only/archive не дают write. Disabled panel не обращается к groups SQL и не использует host group fallback.
+Добавлен узкий публичный kernel call API, без изменения implement-SPI, extension registry или импортов kernel Internal в Groups. Blocking surface locks следуют порядку installation/panel/kind/host type/key. Для dependency, стоящей раньше уже заблокированной primary surface, используется NOWAIT: contention отклоняет операцию с rollback, без обратного ожидания и автоматического retry. Groups не читает kernel tables напрямую; локальный путь не вызывает ambient actor/host resolvers.
 
-Alias `group` сохраняет отдельный read-only management/receipt путь для явно допущенного nonmember. Consumer SurfaceProvider объявляет content surface с host `sockit.group`; запись поддерживается для той же группы. Необоснованная публикация group audience на иной host surface и unrelated group отклоняются. Target fence выполняет локальный host fence → group lock → проверку текущих group/member rows и management authority → post/reaction owner locks. Group lock сохраняется до commit. Host обязан доказать management admission/lifecycle своим существующим локальным authority fence; remote/unproven authority отклоняется, cross-DB атомарность не заявляется.
+Гонки PostgreSQL доказывают оба порядка archive/delete vs publication/reaction. Если management transition завершается после outside guards, owner effects (posts/revisions/reactions/counts/outbox) отсутствуют. Если content fence выигрывает, management transition наблюдаемо ждёт kernel surface lock до content commit. Проверены также изменения каждой generation/revision, оба порядка surface identities, NOWAIT contention/rollback и отсутствие ambient actor resolution. Прежние privacy/replay/leave checks сохранены; public leave теперь встречает более ранний management surface lock, отдельный group-lock race и group-before-post trace сохранены.
 
-PG acceptance наблюдает `pg_blocking_pids`/`pg_stat_activity` при leave vs publication/reaction в обоих порядках. При ожидающем content contender `FOR UPDATE NOWAIT` подтверждает свободную post row. Если leave выигрывает, content effect отсутствует; если content выигрывает, его durable effect сохраняется, последующий leave отзывает чтение и receipt disclosure. Отзыв после commit может скрыть ответ через финальный current guard.
+Контроль на исходном GroupTarget из `cd66297143fec431ad1be879652bff5484a588d7` воспроизвёл F1: 10 race cases обнаружили лишние durable content effects, 2 membership controls прошли. Исправленный кандидат проходит все проверки ниже.
 
 | Check | Exit | Результат |
 | --- | ---: | --- |
-| V1 | 0 | 78 tests, 207 assertions: composition + прежние Audience tests |
-| V2 | 0 | 20 tests, 266 assertions: текущая приватность, public posts/reactions, PG races |
-| V89 | 0 | 57 tests, 877 assertions: все architecture gates и negative controls |
-| V90 | 0 | PHPStan max, без новых baseline/suppressions |
+| V1 | 0 | 78 tests / 207 assertions |
+| V2 | 0 | 42 tests / 718 assertions, включая F1 races |
+| V89 | 0 | 57 architecture tests / 878 assertions |
+| V90 | 0 | PHPStan max: no errors, без новых suppressions/baseline |
 | V91 | 0 | Pint passed |
-| V92 | 0 | 52 tests, 2268 assertions: весь Integration/Groups, включая P5.1–P5.3 |
-| V93 | 0 | 1 test, 452 assertions: реальный generated posts/feed/reactions consumer P4.9 |
-| V94 | 0 | 7 tests, 120 assertions: весь Unit/Groups |
+| V92 | 0 | весь Integration/Groups: 74 tests / 2720 assertions |
+| V93 | 0 | generated P4.9 consumer: 1 test / 453 assertions |
+| V94 | 0 | весь Unit/Groups: 7 tests / 120 assertions |
+| V96 | 0 | kernel lifecycle/atomicity/generation: 30 tests / 506 assertions |
 
-V1/V2/V89/V90/V91 выполнены буквально по item. Все восемь evidence JSON проверены по native `check-evidence/v1` с `defs`; SHA256 логов и привязка к source fingerprint проверены. Fingerprint 859 файлов не изменился после проверок. PostgreSQL запускался только через `scripts/testing/pg-run.py`: invocation-owned container/volume, loopback endpoint, точные owner/decoy `*_test`, version/run marker и Laravel connection identity доказаны до fixture DDL. Skipped/incomplete/warning/risky tests и timeout не засчитывались. V90 сохраняет прежнее PHP startup warning о недоступной turbo-extension; анализ завершился без ошибок.
+V1/V2/V89/V90/V91 выполнены буквально. Все девять `check-evidence/v1` JSON валидны по native schema/defs; проверены SHA256 логов и source fingerprint 861 файла (`f583f14004e71939bfa80537779b454ffcba8e108cc52209e020d902767471fb`). PostgreSQL — только `pg-run.py`, invocation-owned container/volume, loopback endpoint и точные owner/decoy `*_test`; run marker/version/connection identity проверяются до fixture DDL. Skipped/incomplete/warning/risky tests и timeout не считаются pass. В V90 сохранено прежнее PHP startup warning о turbo-extension; анализ завершился без ошибок.
 
-Session: `01a1871a-9dc1-7690-a6f3-224ee4814e7b`; runtime: `codex/gpt-6.1-sol/xhigh`, `danger-full-access` (проверено по session metadata, `runtime-proof.json`). Base HEAD: `0a9e10ca0ee547eacbec33706be30057c6a75f90`.
-
-Review requested: reviewer/subagents не запускались, review receipt не создавался. После scoped commit следует native finish с настоящими checks/evidence; ожидаемый review gate передаётся координатору для fresh read-only review. Routes и следующий пункт не изменялись; foreign dirty/untracked остаются outside.
+Owning session: `01a1871a-9dc1-7690-a6f3-224ee4814e7b`; `codex/gpt-6.1-sol/xhigh`, `danger-full-access`. Correction base: `cd66297143fec431ad1be879652bff5484a588d7`. Повторный start, reviewer/subagents, finish и blocked не вызывались в correction turn. Для нового committed candidate требуется fresh review координатора; review receipt не создавался. Routes и foreign dirty/untracked не изменялись.

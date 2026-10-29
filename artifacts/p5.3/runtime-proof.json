@@ -1,0 +1,13 @@
+{
+  "session": "01a18701-578c-77c1-8e9b-4dbc00f1e7f5",
+  "execution_provider": "codex",
+  "backend_model_provider": "openai",
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "sandbox": "danger-full-access",
+  "approval_policy": "never",
+  "source": "/home/vostrikov/.codex/sessions/2026/10/29/rollout-2026-10-29T12-32-59-01a18701-578c-77c1-8e9b-4dbc00f1e7f5.jsonl",
+  "turn_context_timestamp": "2026-10-29T09:33:02.596Z",
+  "turn_context_sha256": "328ee18ad430459527ed7f59eeb0388d59ef0305e51b21d99887f7b5cd4db760",
+  "delegation": "none"
+}

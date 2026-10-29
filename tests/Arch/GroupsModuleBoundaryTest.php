@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+use SocKit\Attributes\Spi;
+use SocKit\Groups\Contracts\MembershipConsent;
+use SocKit\Groups\Data\ConsentDecision;
+use SocKit\Groups\Data\MembershipActivation;
+use SocKit\Groups\Data\MembershipCommand;
 use SocKit\Groups\Enums\JoinPolicy;
 use SocKit\Groups\Enums\MembershipState;
 use SocKit\SocKitServiceProvider;
@@ -43,5 +48,16 @@ it('rejects group imports in the kernel and both sibling owners without weakenin
         } finally {
             unlink($path);
         }
+    }
+});
+
+it('requires explicit module-local consent without a permissive production default', function (): void {
+    $contract = new ReflectionClass(MembershipConsent::class);
+    expect($contract->getAttributes(Spi::class))->toHaveCount(1);
+    foreach ([MembershipActivation::class, ConsentDecision::class, MembershipCommand::class] as $dto) {
+        expect(new ReflectionClass($dto)->isReadOnly())->toBeTrue();
+    }
+    foreach (['packages/core/src/SocKitServiceProvider.php', 'packages/core/modules/groups/src/Internal/GroupsServiceProvider.php'] as $provider) {
+        expect(file_get_contents($provider))->not->toContain('MembershipConsent');
     }
 });

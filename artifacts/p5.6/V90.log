@@ -1,0 +1,15 @@
+check=V90
+cmd=composer analyse -- --memory-limit=512M
+cwd=/home/vostrikov/projects/packages/sockit
+source_fingerprint=2fa536cc774adacddec40a1bad89258df8822b5730e5d0b00cac6c611ce66648
+started_at=2026-10-29T11:26:05Z
+> phpstan analyse --no-progress '--memory-limit=512M'
+
+Warning: PHP Startup: Unable to load dynamic library '/home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so' (tried: /home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so (Dynamic loading not supported), /lib/php/extensions/no-debug-non-zts-20240924//home/vostrikov/projects/packages/sockit/vendor/phpstan/phpstan/turbo-ext/linux-gnu-x86_64/phpstan_turbo-8.4.so.so (Dynamic loading not supported)) in Unknown on line 0
+Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.
+
+ [OK] No errors                                                                 
+
+
+exit=0
+finished_at=2026-10-29T11:26:07Z

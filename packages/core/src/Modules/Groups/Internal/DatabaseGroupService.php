@@ -1078,82 +1078,106 @@ final readonly class DatabaseGroupService implements GroupService
 
         $viewer = $this->runtime->actors()->current();
         $connection = $this->tables->connection($panel);
-        $row = $connection
-            ->table($this->tables->table('groups', $panel))
-            ->where('panel_id', $panel->value)
-            ->where('id', $groupId)
-            ->first();
+        $loadConfirmedRows = function () use ($connection, $panel, $groupId): array {
+            $row = $connection
+                ->table($this->tables->table('groups', $panel))
+                ->where('panel_id', $panel->value)
+                ->where('id', $groupId)
+                ->first();
 
-        if (! is_object($row)) {
-            throw OperationException::contentHidden('group.not_found');
+            if (! is_object($row)) {
+                throw OperationException::contentHidden('group.not_found');
+            }
+
+            if (SockitRows::str($row, 'state') !== 'active') {
+                throw OperationException::contentHidden('group.inactive');
+            }
+
+            $surfaceKind = new SurfaceKindId(SockitRows::str($row, 'surface_kind'));
+
+            if (! $this->surfaces->has($panel, $surfaceKind)) {
+                throw OperationException::audienceDenied('audience.unknown');
+            }
+
+            $surfaceDef = $this->surfaces->get($panel, $surfaceKind);
+            $groupSurface = new SurfaceRef(
+                panel: $panel,
+                kind: $surfaceKind,
+                host: new HostEntityRef(SockitRows::str($row, 'surface_host_type'), SockitRows::str($row, 'surface_host_value')),
+                incarnation: new Incarnation(SockitRows::int($row, 'surface_incarnation', 1)),
+            );
+
+            $surfaceInstanceRow = $connection->table($this->tables->table('surface_instances', $panel))
+                ->where('panel_id', $panel->value)
+                ->where('kind', $groupSurface->kind->value)
+                ->where('host_entity_type', $groupSurface->host->type)
+                ->where('host_entity_value', $groupSurface->host->value)
+                ->orderByDesc('incarnation')
+                ->first();
+
+            if (
+                ! is_object($surfaceInstanceRow)
+                || SockitRows::int($surfaceInstanceRow, 'incarnation', 1) !== $groupSurface->incarnation->value
+                || SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value
+            ) {
+                throw OperationException::audienceDenied('audience.denied.surface_inactive');
+            }
+
+            $surfaceArchived = SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+
+            if ($surfaceArchived && ! $surfaceDef->archiveReaders) {
+                throw OperationException::audienceDenied('audience.denied.surface_archived');
+            }
+
+            return [$row, $surfaceDef, $groupSurface, $surfaceInstanceRow, $surfaceArchived];
+        };
+
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            [$row, $surfaceDef, $groupSurface, $surfaceInstanceRow, $surfaceArchived] = $loadConfirmedRows();
+            $visibility = GroupVisibility::from(SockitRows::str($row, 'visibility'));
+            $creator = new ActorRef(SockitRows::str($row, 'created_by_type'), SockitRows::str($row, 'created_by_id'));
+
+            $spec = $visibility === GroupVisibility::Public
+                ? AudienceSpec::platform()
+                : AudienceSpec::group(new GroupRef($groupId));
+
+            $verdict = $this->runtime->audienceGate()->read($viewer, new AudienceSubject(
+                key: $groupId,
+                spec: $spec,
+                author: $creator,
+                surface: $groupSurface,
+                installation: $viewer->installation,
+                surfaceArchived: $surfaceArchived,
+                archiveReaders: $surfaceDef->archiveReaders,
+            ));
+
+            if (! $verdict->canRead()) {
+                throw OperationException::audienceDenied($verdict->reason);
+            }
+
+            // Re-check both local rows after every external admission before exposing group data.
+            [$confirmRow, , , $confirmSurfaceRow] = $loadConfirmedRows();
+            if (get_object_vars($confirmRow) !== get_object_vars($row) || get_object_vars($confirmSurfaceRow) !== get_object_vars($surfaceInstanceRow)) {
+                continue;
+            }
+
+            return new GroupView(
+                id: SockitRows::str($confirmRow, 'id'),
+                panel: $panel,
+                slug: SockitRows::str($confirmRow, 'slug'),
+                title: SockitRows::str($confirmRow, 'title'),
+                visibility: $visibility,
+                state: SockitRows::str($confirmRow, 'state'),
+                revision: new Revision(SockitRows::int($confirmRow, 'revision', 1)),
+                createdBy: $creator,
+                createdAt: SockitRows::date($confirmRow, 'created_at'),
+                updatedAt: SockitRows::date($confirmRow, 'updated_at'),
+                joinPolicy: GroupJoinPolicy::from(SockitRows::str($confirmRow, 'join_policy')),
+                membershipGeneration: SockitRows::int($confirmRow, 'membership_generation', 1),
+            );
         }
 
-        $visibility = GroupVisibility::from(SockitRows::str($row, 'visibility'));
-        $creator = new ActorRef(SockitRows::str($row, 'created_by_type'), SockitRows::str($row, 'created_by_id'));
-        $surfaceKind = new SurfaceKindId(SockitRows::str($row, 'surface_kind'));
-
-        if (! $this->surfaces->has($panel, $surfaceKind)) {
-            throw OperationException::audienceDenied('audience.unknown');
-        }
-
-        $surfaceDef = $this->surfaces->get($panel, $surfaceKind);
-        $groupSurface = new SurfaceRef(
-            panel: $panel,
-            kind: $surfaceKind,
-            host: new HostEntityRef(SockitRows::str($row, 'surface_host_type'), SockitRows::str($row, 'surface_host_value')),
-            incarnation: new Incarnation(SockitRows::int($row, 'surface_incarnation', 1)),
-        );
-
-        $surfaceInstanceRow = $connection->table($this->tables->table('surface_instances', $panel))
-            ->where('panel_id', $panel->value)
-            ->where('kind', $groupSurface->kind->value)
-            ->where('host_entity_type', $groupSurface->host->type)
-            ->where('host_entity_value', $groupSurface->host->value)
-            ->orderByDesc('incarnation')
-            ->first();
-
-        if (
-            ! is_object($surfaceInstanceRow)
-            || SockitRows::int($surfaceInstanceRow, 'incarnation', 1) !== $groupSurface->incarnation->value
-            || SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value
-        ) {
-            throw OperationException::audienceDenied('audience.denied.surface_inactive');
-        }
-
-        $surfaceArchived = SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
-
-        $spec = $visibility === GroupVisibility::Public
-            ? AudienceSpec::platform()
-            : AudienceSpec::group(new GroupRef($groupId));
-
-        $verdict = $this->runtime->audienceGate()->read($viewer, new AudienceSubject(
-            key: $groupId,
-            spec: $spec,
-            author: $creator,
-            surface: $groupSurface,
-            installation: $viewer->installation,
-            surfaceArchived: $surfaceArchived,
-            archiveReaders: $surfaceDef->archiveReaders,
-        ));
-
-        if (! $verdict->canRead()) {
-            throw OperationException::audienceDenied($verdict->reason);
-        }
-
-        return new GroupView(
-            id: SockitRows::str($row, 'id'),
-            panel: $panel,
-            slug: SockitRows::str($row, 'slug'),
-            title: SockitRows::str($row, 'title'),
-            visibility: $visibility,
-            state: SockitRows::str($row, 'state'),
-            revision: new Revision(SockitRows::int($row, 'revision', 1)),
-            createdBy: $creator,
-            createdAt: SockitRows::date($row, 'created_at'),
-            updatedAt: SockitRows::date($row, 'updated_at'),
-            joinPolicy: GroupJoinPolicy::from(SockitRows::str($row, 'join_policy')),
-            membershipGeneration: SockitRows::int($row, 'membership_generation', 1),
-        );
+        throw OperationException::contentHidden('group.concurrent_mutation');
     }
 
     /**

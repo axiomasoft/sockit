@@ -215,18 +215,35 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
         $groupId = SockitRows::str($groupRow, 'id');
         $membersTable = $this->tables->table('group_members', $panel);
 
-        $isMember = $connection->table($membersTable)
+        $memberQuery = $connection->table($membersTable)
             ->where('group_id', $groupId)
             ->where('actor_type', $actorRef->type)
             ->where('actor_id', $actorRef->id)
-            ->where('status', GroupMemberStatus::Active->value)
-            ->exists();
+            ->where('status', GroupMemberStatus::Active->value);
+        $memberRow = $memberQuery->first();
 
-        if (! $isMember) {
+        if (! is_object($memberRow)) {
             return AudienceVerdict::deny('audience.denied.not_in_group');
         }
 
-        return $this->verifyManagementSurface($connection, $panel, $groupRow, $actor, $callSurfacePolicy, $preSampledSurfaceAdmissions);
+        $verdict = $this->verifyManagementSurface($connection, $panel, $groupRow, $actor, $callSurfacePolicy, $preSampledSurfaceAdmissions);
+
+        if ($callSurfacePolicy && $verdict->canRead()) {
+            // External admission can revoke membership or change the group's policy, generation or binding.
+            // An inconsistent sample is unknown, not proven non-membership that an exclusion could invert.
+            $confirmGroupRow = $this->findGroupRow($connection, $panel, $group);
+            $confirmMemberRow = $memberQuery->first();
+            if (
+                ! is_object($confirmGroupRow)
+                || ! is_object($confirmMemberRow)
+                || get_object_vars($confirmGroupRow) !== get_object_vars($groupRow)
+                || get_object_vars($confirmMemberRow) !== get_object_vars($memberRow)
+            ) {
+                return AudienceVerdict::deny('audience.unknown');
+            }
+        }
+
+        return $verdict;
     }
 
     /**
@@ -311,13 +328,13 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
         );
         $incarnationValue = SockitRows::int($groupRow, 'surface_incarnation', 1);
 
-        $surfaceRow = $connection->table($this->tables->table('surface_instances', $panel))
+        $surfaceQuery = $connection->table($this->tables->table('surface_instances', $panel))
             ->where('panel_id', $panel->value)
             ->where('kind', $kind->value)
             ->where('host_entity_type', $host->type)
             ->where('host_entity_value', $host->value)
-            ->orderByDesc('incarnation')
-            ->first();
+            ->orderByDesc('incarnation');
+        $surfaceRow = $surfaceQuery->first();
 
         if (! is_object($surfaceRow)) {
             return AudienceVerdict::deny('audience.unknown');
@@ -340,6 +357,12 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
 
             if (! $admit->canRead()) {
                 return $admit;
+            }
+
+            // Admission must not outlive the bound management surface's lifecycle or incarnation.
+            $confirmSurfaceRow = $surfaceQuery->first();
+            if (! is_object($confirmSurfaceRow) || get_object_vars($confirmSurfaceRow) !== get_object_vars($surfaceRow)) {
+                return AudienceVerdict::deny('audience.unknown');
             }
         } else {
             $surfaceKey = TransactionAudienceSnapshot::surfaceKey($mgmtSurface);

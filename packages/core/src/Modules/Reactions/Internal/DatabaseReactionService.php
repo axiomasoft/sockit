@@ -448,9 +448,10 @@ final readonly class DatabaseReactionService implements ReactionService
                 ->get();
 
             // Final confirmation after reading counts so concurrent deletion/narrowing cannot disclose totals
+            $postReadTarget = $assertTargetState($resolver instanceof TargetResolver ? $resolver->resolve($actor, $surface, $target) : null);
+            // The external target lookup may itself delete or archive the surface.
             $postReadSurface = $loadSurfaceRow();
             $postReadArchived = $assertSurfaceReadable($postReadSurface);
-            $postReadTarget = $assertTargetState($resolver instanceof TargetResolver ? $resolver->resolve($actor, $surface, $target) : null);
 
             if (
                 ! is_object($postReadSurface)

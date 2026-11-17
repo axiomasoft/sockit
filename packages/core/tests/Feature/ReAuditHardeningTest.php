@@ -14,6 +14,7 @@ use Override;
 use Packman\Context\Data\ScopeRef;
 use Packman\Panels\Data\Panel\PanelContext;
 use Packman\Panels\Data\Panel\PanelReference;
+use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Contracts\ActorContextResolver;
@@ -1746,6 +1747,264 @@ final class ReAuditHardeningTest extends SocKitTestCase
         } catch (OperationException $e) {
             self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
         }
+    }
+
+    /** @return array<string, array{string}> */
+    public static function finalTargetSurfaceChanges(): array
+    {
+        return ['deleted' => ['deleted'], 'archived' => ['archived']];
+    }
+
+    #[DataProvider('finalTargetSurfaceChanges')]
+    public function test_reaction_counts_recheck_surface_after_final_external_target_lookup(string $state): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'final-target-race'), Incarnation::initial());
+        $target = new HostEntityRef('article', 'final-target');
+        $fake->targets->withLocalWriteFence()->register($target, audience: AudienceSpec::platform(), privacyRevision: new Revision(1));
+        $reactions = $this->app->make(ReactionService::class);
+        $reactions->add(new AddReactionCommand(new CommandKey('cmd-final-target-add'), $surface, $target, 'like'));
+        self::assertSame(1, $reactions->counts($surface, $target)->total);
+
+        $resolver = new class($fake->targets, $this->app->make(SurfaceService::class), $state) implements TargetResolver
+        {
+            public int $calls = 0;
+
+            public function __construct(
+                private readonly TargetResolver $inner,
+                private readonly SurfaceService $surfaces,
+                private readonly string $state,
+            ) {}
+
+            #[Override]
+            public function supports(HostEntityRef $target): bool
+            {
+                return $this->inner->supports($target);
+            }
+
+            #[Override]
+            public function resolve(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target): TargetResolution
+            {
+                $resolution = $this->inner->resolve($actor, $surface, $target);
+                if (++$this->calls === 3) {
+                    // The third lookup runs after counts have been read; target metadata stays unchanged.
+                    $revision = $this->surfaces->get($surface)->revision;
+                    if ($this->state === 'deleted') {
+                        $this->surfaces->delete(new CommandKey('cmd-final-target-delete'), $surface, $revision);
+                    } else {
+                        $this->surfaces->archive(new CommandKey('cmd-final-target-archive'), $surface, $revision);
+                    }
+                }
+
+                return $resolution;
+            }
+        };
+        $this->app->instance(TargetResolver::class, $resolver);
+
+        try {
+            $reactions->counts($surface, $target);
+            self::fail('Counts must not escape a surface changed during the final target lookup.');
+        } catch (SurfaceException|OperationException $e) {
+            self::assertSame($state === 'deleted' ? SockitErrorCode::ContentDeleted : SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        self::assertSame(3, $resolver->calls);
+        self::assertSame($state, DB::table('sk_surface_instances')->where('host_entity_value', $surface->host->value)->value('lifecycle_state'));
+    }
+
+    /** @return array<string, array{string, string}> */
+    public static function managementAdmissionChanges(): array
+    {
+        $cases = [];
+        foreach (['post', 'counts'] as $read) {
+            foreach (['leave', 'removed', 'banned', 'policy', 'generation', 'inactive', 'deleted', 'archived', 'incarnation'] as $change) {
+                $cases[$read.' '.$change] = [$read, $change];
+            }
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('managementAdmissionChanges')]
+    public function test_reads_recheck_local_group_state_after_management_surface_admission(string $read, string $change): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $fake->consent->allowAll();
+        $management = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'management-race'), Incarnation::initial());
+        $surface = new SurfaceRef($management->panel, $management->kind, new HostEntityRef('board', 'protected-content'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $posts = $this->app->make(PostService::class);
+        $reactions = $this->app->make(ReactionService::class);
+        $created = $groups->create(new CreateGroupCommand(new CommandKey('cmd-mgmt-race-create'), $management, 'management-race', 'Management race', joinPolicy: GroupJoinPolicy::Auto));
+        $groupId = (string) $created->resource?->id;
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-mgmt-race-alice'), $management, $groupId, new Revision(1), new ActorRef('user', 'alice')));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-mgmt-race-bob'), $management, $groupId, new Revision(2), new ActorRef('user', 'bob')));
+        $published = $posts->publish(new PublishPostCommand(new CommandKey('cmd-mgmt-race-post'), $surface, 'Protected body', audience: AudienceSpec::group(new GroupRef($groupId))));
+        $postId = (string) $published->resource?->id;
+        $target = new HostEntityRef('post', $postId);
+        $reactions->add(new AddReactionCommand(new CommandKey('cmd-mgmt-race-reaction'), $surface, $target, 'like'));
+
+        $fake->actors->actAsPerson('bob');
+        self::assertSame('Protected body', $posts->get($surface, $postId)->body);
+        self::assertSame(1, $reactions->counts($surface, $target)->total);
+        $changed = false;
+        $leave = null;
+        $fake->surfacePolicy->admitUsing(static function (ActorContext $viewer, SurfaceRef $admitted) use ($management, $groups, $groupId, $change, &$changed, &$leave): AudienceVerdict {
+            if (! $changed && $admitted->host->equals($management->host)) {
+                $changed = true;
+                if ($change === 'leave') {
+                    // Execute the real public command inside the external management admission.
+                    $leave = $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-mgmt-race-leave'), $management, $groupId, new Revision(3)));
+                } elseif ($change === 'removed' || $change === 'banned') {
+                    DB::table('sk_group_members')->where('group_id', $groupId)->where('actor_id', 'bob')->update(['status' => $change]);
+                } elseif ($change === 'policy') {
+                    DB::table('sk_groups')->where('id', $groupId)->update(['join_policy' => GroupJoinPolicy::Invite->value]);
+                } elseif ($change === 'generation') {
+                    DB::table('sk_groups')->where('id', $groupId)->increment('membership_generation');
+                } elseif ($change === 'inactive') {
+                    DB::table('sk_groups')->where('id', $groupId)->update(['state' => 'deleted']);
+                } elseif ($change === 'incarnation') {
+                    DB::table('sk_surface_instances')->where('host_entity_value', $management->host->value)->increment('incarnation');
+                } else {
+                    DB::table('sk_surface_instances')->where('host_entity_value', $management->host->value)->update(['lifecycle_state' => $change]);
+                }
+            }
+
+            return AudienceVerdict::allow('management.admitted');
+        });
+
+        try {
+            if ($read === 'post') {
+                $posts->get($surface, $postId);
+            } else {
+                $reactions->counts($surface, $target);
+            }
+            self::fail('Management admission must not retain stale membership or surface state.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        self::assertTrue($changed);
+        if ($change === 'leave') {
+            self::assertInstanceOf(OperationResult::class, $leave);
+            self::assertTrue($leave->isSuccess());
+            self::assertSame(GroupMemberStatus::Left->value, DB::table('sk_group_members')->where('group_id', $groupId)->where('actor_id', 'bob')->value('status'));
+        }
+    }
+
+    public function test_public_group_get_denies_archived_surface_before_admission(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'public-archive'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $created = $groups->create(new CreateGroupCommand(new CommandKey('cmd-public-archive-create'), $surface, 'public-archive', 'Public archived group', visibility: GroupVisibility::Public));
+        $groupId = (string) $created->resource?->id;
+        self::assertSame($groupId, $groups->get($surface->panel, $groupId)->id);
+        $surfaces = $this->app->make(SurfaceService::class);
+        $surfaces->archive(new CommandKey('cmd-public-archive'), $surface, $surfaces->get($surface)->revision);
+        $admissions = 0;
+        $fake->surfacePolicy->admitUsing(static function () use (&$admissions): AudienceVerdict {
+            $admissions++;
+
+            return AudienceVerdict::allow('surface.admitted');
+        });
+
+        try {
+            $groups->get($surface->panel, $groupId);
+            self::fail('A public audience must respect archiveReaders=false.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+        self::assertSame(0, $admissions);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function groupReadAdmissionChanges(): array
+    {
+        return [
+            'surface deleted' => ['deleted'],
+            'surface archived' => ['archived'],
+            'surface incarnation' => ['incarnation'],
+            'group removed' => ['removed'],
+            'group inactive' => ['inactive'],
+            'group narrowed' => ['private'],
+            'group surface rebound' => ['rebound'],
+            'group continually changing' => ['generation'],
+        ];
+    }
+
+    #[DataProvider('groupReadAdmissionChanges')]
+    public function test_public_group_get_confirms_group_and_surface_after_admission(string $change): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'public-group-race'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $created = $groups->create(new CreateGroupCommand(new CommandKey('cmd-public-race-create'), $surface, 'public-group-race', 'Public group race', visibility: GroupVisibility::Public));
+        $groupId = (string) $created->resource?->id;
+        self::assertSame($groupId, $groups->get($surface->panel, $groupId)->id);
+        $admissions = 0;
+        $fake->surfacePolicy->admitUsing(static function () use ($surface, $groupId, $change, &$admissions): AudienceVerdict {
+            $admissions++;
+            if ($change === 'generation') {
+                DB::table('sk_groups')->where('id', $groupId)->increment('membership_generation');
+            } elseif ($admissions === 1) {
+                if ($change === 'removed') {
+                    DB::table('sk_groups')->where('id', $groupId)->delete();
+                } elseif ($change === 'inactive') {
+                    DB::table('sk_groups')->where('id', $groupId)->update(['state' => 'deleted']);
+                } elseif ($change === 'private') {
+                    DB::table('sk_groups')->where('id', $groupId)->update(['visibility' => GroupVisibility::Private->value]);
+                } elseif ($change === 'rebound') {
+                    DB::table('sk_groups')->where('id', $groupId)->update(['surface_host_value' => 'missing-management']);
+                } elseif ($change === 'incarnation') {
+                    DB::table('sk_surface_instances')->where('host_entity_value', $surface->host->value)->increment('incarnation');
+                } else {
+                    DB::table('sk_surface_instances')->where('host_entity_value', $surface->host->value)->update(['lifecycle_state' => $change]);
+                }
+            }
+
+            return AudienceVerdict::allow('surface.admitted');
+        });
+
+        try {
+            $groups->get($surface->panel, $groupId);
+            self::fail('Group reads must confirm local rows after external admission.');
+        } catch (OperationException $e) {
+            self::assertSame(in_array($change, ['removed', 'inactive', 'generation'], true) ? SockitErrorCode::ContentHidden : SockitErrorCode::AudienceDenied, $e->problem());
+        }
+        self::assertSame($change === 'generation' ? 3 : ($change === 'private' ? 2 : 1), $admissions);
+    }
+
+    public function test_public_group_get_retries_and_returns_confirmed_group_data(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'public-group-retry'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $created = $groups->create(new CreateGroupCommand(new CommandKey('cmd-public-retry-create'), $surface, 'public-group-retry', 'Old title', visibility: GroupVisibility::Public));
+        $groupId = (string) $created->resource?->id;
+        $admissions = 0;
+        $fake->surfacePolicy->admitUsing(static function () use ($groupId, &$admissions): AudienceVerdict {
+            if (++$admissions === 1) {
+                DB::table('sk_groups')->where('id', $groupId)->update(['title' => 'Confirmed title', 'revision' => 2]);
+            }
+
+            return AudienceVerdict::allow('surface.admitted');
+        });
+
+        $group = $groups->get($surface->panel, $groupId);
+        self::assertSame('Confirmed title', $group->title);
+        self::assertSame(2, $group->revision->value);
+        self::assertSame(2, $admissions);
     }
 
     public function test_post_edit_widening_audience_still_enforces_existing_stored_group_guard(): void

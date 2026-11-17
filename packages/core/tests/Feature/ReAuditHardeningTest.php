@@ -1022,6 +1022,172 @@ final class ReAuditHardeningTest extends SocKitTestCase
         self::assertCount(0, $page->items);
     }
 
+    /** @return array<string, array{string}> */
+    public static function laterFeedRecheckChanges(): array
+    {
+        return [
+            'real audience narrowing' => ['narrow'],
+            'audience changes without a revision bump' => ['audience_wire'],
+            'real post hiding' => ['hidden'],
+            'real post deletion' => ['deleted'],
+            'real surface deletion' => ['surface_deleted'],
+            'real surface archival' => ['surface_archived'],
+            'surface incarnation changes' => ['incarnation'],
+            'real body edit' => ['body'],
+            'body changes without a revision bump' => ['current_body'],
+            'retry exhaustion' => ['unstable'],
+        ];
+    }
+
+    #[DataProvider('laterFeedRecheckChanges')]
+    public function test_feed_confirms_all_items_after_later_post_recheck_admission(string $change): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'feed-later-recheck'), Incarnation::initial());
+        $posts = $this->app->make(PostService::class);
+        $surfaces = $this->app->make(SurfaceService::class);
+        $postIds = [];
+        foreach (['a' => '03', 'b' => '02', 'c' => '01'] as $name => $day) {
+            $published = $posts->publish(new PublishPostCommand(new CommandKey('cmd-later-recheck-publish-'.$name), $surface, 'Original body '.$name, audience: AudienceSpec::platform()));
+            self::assertTrue($published->isSuccess());
+            $postIds[$name] = (string) $published->resource?->id;
+            DB::table('sk_posts')->where('id', $postIds[$name])->update(['published_at' => '2026-01-'.$day.' 00:00:00']);
+        }
+
+        $probe = new class
+        {
+            public bool $armed = false;
+
+            public int $mutations = 0;
+
+            /** @var list<string> */
+            public array $rechecked = [];
+
+            /** @var list<OperationResult> */
+            public array $writes = [];
+        };
+        $inner = $this->app->make(AudienceResolver::class);
+        $this->app->instance(AudienceResolver::class, new readonly class($inner, $postIds['b'], $probe, $change === 'unstable') implements AudienceResolver, ResolvesAudienceInBatch
+        {
+            public function __construct(private AudienceResolver $inner, private string $postB, private object $probe, private bool $unstable) {}
+
+            #[Override]
+            public function decideRead(ActorContext $viewer, AudienceSubject $subject): AudienceVerdict
+            {
+                $this->probe->rechecked[] = $subject->key;
+
+                return $this->inner->decideRead($viewer, $subject);
+            }
+
+            /**
+             * @param  list<AudienceSubject>  $subjects
+             * @return array<string, AudienceVerdict>
+             */
+            #[Override]
+            public function decideReadMany(ActorContext $viewer, array $subjects): array
+            {
+                $verdicts = [];
+                foreach ($subjects as $subject) {
+                    $verdicts[$subject->key] = $this->inner->decideRead($viewer, $subject);
+                }
+
+                if ($this->probe->mutations === 0 || $this->unstable) {
+                    // B drifts after batch authorization, forcing its per-post recheck after A is accepted.
+                    DB::table('sk_posts')->where('id', $this->postB)->increment('privacy_revision');
+                    $this->probe->armed = true;
+                }
+
+                return $verdicts;
+            }
+
+            #[Override]
+            public function decidePublish(ActorContext $author, AudienceSubject $subject, PrivacyFloor $floor): AudienceVerdict
+            {
+                return $this->inner->decidePublish($author, $subject, $floor);
+            }
+        });
+        $fake->surfacePolicy->admitUsing(static function (ActorContext $actor) use ($fake, $posts, $surfaces, $surface, $postIds, $probe, $change): AudienceVerdict {
+            if (! $probe->armed || $actor->actor?->id !== 'bob') {
+                return AudienceVerdict::allow('surface.admitted');
+            }
+
+            // This is B's recheck admission, after the feed has materialized A's old body.
+            $probe->armed = false;
+            $probe->mutations++;
+            $fake->actors->actAsPerson('alice');
+            try {
+                $key = new CommandKey('cmd-later-recheck-mutate-'.$probe->mutations);
+                if (in_array($change, ['narrow', 'body', 'unstable'], true)) {
+                    $probe->writes[] = $posts->edit(new EditPostCommand(
+                        $key, $surface, $postIds['a'], new Revision($probe->mutations),
+                        $change === 'narrow' ? 'Original body a' : 'Updated body a '.$probe->mutations,
+                        audience: $change === 'narrow' ? AudienceSpec::direct(new ActorRef('user', 'alice')) : null,
+                    ));
+                } elseif (in_array($change, ['hidden', 'deleted'], true)) {
+                    $probe->writes[] = $posts->transition(new TransitionPostStateCommand($key, $surface, $postIds['a'], new Revision(1), ContentState::from($change)));
+                } elseif ($change === 'surface_deleted') {
+                    $surfaces->delete($key, $surface, new Revision(1));
+                } elseif ($change === 'surface_archived') {
+                    $surfaces->archive($key, $surface, new Revision(1));
+                } elseif ($change === 'incarnation') {
+                    DB::table('sk_surface_instances')->where('host_entity_value', $surface->host->value)->increment('incarnation');
+                } elseif ($change === 'audience_wire') {
+                    DB::table('sk_posts')->where('id', $postIds['a'])->update(['audience_wire' => json_encode(AudienceSpec::direct(new ActorRef('user', 'alice'))->toWire(), JSON_THROW_ON_ERROR)]);
+                } else {
+                    DB::table('sk_posts')->where('id', $postIds['a'])->update(['current_body' => 'Updated body a 1']);
+                }
+            } finally {
+                $fake->actors->actAsPerson('bob');
+            }
+
+            return AudienceVerdict::allow('surface.admitted');
+        });
+
+        $fake->actors->actAsPerson('bob');
+        $page = null;
+        try {
+            $page = $this->app->make(FeedService::class)->feed(new GetFeedQuery($surface, limit: 2));
+            self::assertNotSame('unstable', $change, 'Repeated mutations must exhaust the bounded retry and fail closed.');
+        } catch (OperationException $e) {
+            self::assertSame('unstable', $change, $e->getMessage());
+            self::assertSame(SockitErrorCode::ContentHidden, $e->problem());
+        }
+
+        self::assertSame($change === 'unstable' ? 3 : 1, $probe->mutations);
+        self::assertSame(array_fill(0, $probe->mutations, $postIds['b']), $probe->rechecked);
+        self::assertCount(in_array($change, ['narrow', 'body', 'unstable', 'hidden', 'deleted'], true) ? $probe->mutations : 0, $probe->writes);
+        foreach ($probe->writes as $write) {
+            self::assertTrue($write->isSuccess());
+        }
+        if ($change === 'unstable') {
+            self::assertNull($page);
+
+            return;
+        }
+
+        self::assertNotNull($page);
+        self::assertNotContains('Original body a', array_map(static fn (PostView $post): ?string => $post->body, $page->items));
+        $expected = match ($change) {
+            'surface_deleted', 'surface_archived', 'incarnation' => [],
+            'body', 'current_body' => [$postIds['a'], $postIds['b']],
+            default => [$postIds['b'], $postIds['c']],
+        };
+        self::assertSame($expected, array_map(static fn (PostView $post): string => $post->id, $page->items));
+        if (in_array($change, ['body', 'current_body'], true)) {
+            self::assertSame('Updated body a 1', $page->items[0]->body);
+            self::assertSame($change === 'body' ? 2 : 1, $page->items[0]->revision->value);
+        } else {
+            // Retrying from the original cursor fills the page with B and C after A is revoked.
+            self::assertFalse($page->hasMore);
+            self::assertNull($page->nextCursor);
+        }
+        if ($change === 'narrow') {
+            self::assertSame(2, (int) DB::table('sk_posts')->where('id', $postIds['a'])->value('privacy_revision'));
+        }
+    }
+
     public function test_transactional_group_reverification_preserves_readonly_management_admission_in_any_of(): void
     {
         $this->migrateSockitSchema();

@@ -39,6 +39,8 @@ use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 #[Internal]
 final readonly class DatabaseFeedService implements FeedService
 {
+    private const int MAX_READ_ATTEMPTS = 3;
+
     private const int MAX_SCAN_ROUNDS = 10;
 
     public function __construct(
@@ -50,6 +52,18 @@ final readonly class DatabaseFeedService implements FeedService
 
     #[Override]
     public function feed(GetFeedQuery $query): FeedPageView
+    {
+        for ($attempt = 0; $attempt < self::MAX_READ_ATTEMPTS; $attempt++) {
+            $page = $this->readAttempt($query);
+            if ($page instanceof FeedPageView) {
+                return $page;
+            }
+        }
+
+        throw OperationException::contentHidden('feed.concurrent_mutation');
+    }
+
+    private function readAttempt(GetFeedQuery $query): ?FeedPageView
     {
         $panelDef = $this->panels->get($query->surface->panel);
         $surfaceDef = $this->surfaces->get($query->surface->panel, $query->surface->kind);
@@ -110,6 +124,7 @@ final readonly class DatabaseFeedService implements FeedService
         $cursor = $query->cursor;
         $batchSize = max($limit * 2, 20);
         $accepted = [];
+        $acceptedRows = [];
         $acceptedSubjects = [];
         $acceptedGroupStates = [];
         $groupGuard = new LocalGroupReadGuard($this->runtime->groupMembershipResolver());
@@ -248,6 +263,7 @@ final readonly class DatabaseFeedService implements FeedService
                 if (
                     $freshPrivacyRevision !== $checkedPrivacyRevisions[$postId]
                     || $freshCanonicalSpec !== $checkedSpecs[$postId]
+                    || $subjects[$index]->author?->equals($freshAuthor) !== true
                     || $latestSurfaceArchived !== $surfaceArchived
                 ) {
                     $subjects[$index] = new AudienceSubject(
@@ -265,35 +281,9 @@ final readonly class DatabaseFeedService implements FeedService
                     if (! $recheckVerdict->canRead()) {
                         continue;
                     }
-
-                    $confirm = $connection->table($postsTable)
-                        ->where('panel_id', $query->surface->panel->value)
-                        ->where('id', $postId)
-                        ->first();
-
-                    $confirmSurface = $connection->table($surfacesTable)
-                        ->where('panel_id', $query->surface->panel->value)
-                        ->where('id', $surfaceInstanceId)
-                        ->first();
-
-                    $confirmArchived = is_object($confirmSurface)
-                        && SockitRows::str($confirmSurface, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
-
-                    if (
-                        ! is_object($confirm)
-                        || SockitRows::str($confirm, 'state') !== ContentState::Published->value
-                        || SockitRows::int($confirm, 'privacy_revision', 1) !== $freshPrivacyRevision
-                        || ! is_object($confirmSurface)
-                        || SockitRows::str($confirmSurface, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value
-                        || ($confirmArchived && ! $surfaceDef->archiveReaders)
-                        || $confirmArchived !== $latestSurfaceArchived
-                    ) {
-                        continue;
-                    }
-
-                    $fresh = $confirm;
                 }
 
+                $acceptedRows[$postId] = get_object_vars($fresh);
                 $acceptedSubjects[] = $subjects[$index];
                 $acceptedGroupStates[$postId] = $checkedGroupStates[$postId];
                 $accepted[] = new PostView(
@@ -346,11 +336,42 @@ final readonly class DatabaseFeedService implements FeedService
             );
         }
 
-        // Later privacy rechecks and scan rounds can also revoke an earlier item's membership.
-        // Confirm all accepted items together, after every body fetch and external admission.
+        // The final confirmation is local SQL only: no external SPI/admission may follow it.
+        // Later rechecks/scan rounds can invalidate ANY earlier post, surface or group snapshot.
+        // Keep the exact rows used for authorization/materialization, including audience_wire,
+        // privacy_revision, state, author, revision and current_body; never hydrate from unchecked rows.
         $confirmedGroupStates = $groupGuard->snapshot($viewer, $acceptedSubjects);
-        $accepted = array_values(array_filter($accepted, static fn (PostView $post): bool => $acceptedGroupStates[$post->id] !== null
-            && $acceptedGroupStates[$post->id] === $confirmedGroupStates[$post->id]));
+        $confirmSurface = $connection->table($surfacesTable)
+            ->where('panel_id', $query->surface->panel->value)
+            ->where('id', $surfaceInstanceId)
+            ->first();
+
+        // The original surface row was admitted with this attempt's immutable archiveReaders policy.
+        // Equality also protects its identity, incarnation, deletion and archive status.
+        if (! is_object($confirmSurface) || get_object_vars($confirmSurface) !== get_object_vars($surfaceRow)) {
+            return null;
+        }
+
+        $confirmedRows = $connection->table($postsTable)
+            ->where('panel_id', $query->surface->panel->value)
+            ->where('surface_instance_id', $surfaceInstanceId)
+            ->whereIn('id', array_keys($acceptedRows))
+            ->get();
+
+        if (count($confirmedRows) !== count($acceptedRows)) {
+            return null;
+        }
+
+        foreach ($confirmedRows as $confirmedRow) {
+            $postId = SockitRows::str($confirmedRow, 'id');
+            if (
+                get_object_vars($confirmedRow) !== $acceptedRows[$postId]
+                || $acceptedGroupStates[$postId] === null
+                || $acceptedGroupStates[$postId] !== $confirmedGroupStates[$postId]
+            ) {
+                return null;
+            }
+        }
 
         return new FeedPageView(
             items: $accepted,

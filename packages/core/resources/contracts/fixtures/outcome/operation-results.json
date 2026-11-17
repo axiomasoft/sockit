@@ -1,0 +1,55 @@
+{
+  "contract": "sockit.fixture.outcome/v1",
+  "results": [
+    {
+      "expected_success": true,
+      "wire": {
+        "outcome": "confirmed",
+        "receipt_id": "0192b100-0000-7000-8000-000000000101",
+        "resource": {
+          "panel": "sockit.default",
+          "kind": "post",
+          "id": "0192b100-0000-7000-8000-000000000201"
+        },
+        "revision": 1,
+        "problem": null,
+        "problem_detail": []
+      }
+    },
+    {
+      "expected_success": false,
+      "wire": {
+        "outcome": "rejected",
+        "receipt_id": "0192b100-0000-7000-8000-000000000102",
+        "resource": null,
+        "revision": null,
+        "problem": "sockit.content_held",
+        "problem_detail": {
+          "reason": "safety.hold"
+        }
+      }
+    },
+    {
+      "expected_success": false,
+      "wire": {
+        "outcome": "pending",
+        "receipt_id": "0192b100-0000-7000-8000-000000000103",
+        "resource": null,
+        "revision": null,
+        "problem": null,
+        "problem_detail": []
+      }
+    },
+    {
+      "expected_success": false,
+      "wire": {
+        "outcome": "unknown",
+        "receipt_id": "0192b100-0000-7000-8000-000000000104",
+        "resource": null,
+        "revision": null,
+        "problem": "sockit.external_outcome_unknown",
+        "problem_detail": []
+      }
+    }
+  ]
+}

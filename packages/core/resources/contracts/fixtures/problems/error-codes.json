@@ -1,0 +1,31 @@
+{
+  "contract": "sockit.fixture.problems/v1",
+  "codes": [
+    {"code": "sockit.authentication_required", "http_status": 401, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.actor_context_invalid", "http_status": 403, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.authorization_denied", "http_status": 403, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.authorization_unknown", "http_status": 503, "retryable": true, "receipt_recorded": false},
+    {"code": "sockit.audience_denied", "http_status": 403, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.audience_not_contained", "http_status": 422, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.audience_version_unknown", "http_status": 422, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.surface_not_found", "http_status": 404, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.surface_archived", "http_status": 409, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.surface_incarnation_mismatch", "http_status": 409, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.backend_binding_mismatch", "http_status": 409, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.content_held", "http_status": 409, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.content_hidden", "http_status": 404, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.content_deleted", "http_status": 410, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.content_erased", "http_status": 410, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.revision_conflict", "http_status": 409, "retryable": false, "receipt_recorded": true},
+    {"code": "sockit.idempotency_conflict", "http_status": 409, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.provider_unavailable", "http_status": 503, "retryable": true, "receipt_recorded": false},
+    {"code": "sockit.external_outcome_unknown", "http_status": 503, "retryable": true, "receipt_recorded": true},
+    {"code": "sockit.event_identity_conflict", "http_status": 409, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.configuration_invalid", "http_status": 500, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.payload_invalid", "http_status": 422, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.wire_version_unsupported", "http_status": 422, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.module_invalid", "http_status": 500, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.panel_not_found", "http_status": 404, "retryable": false, "receipt_recorded": false},
+    {"code": "sockit.panel_binding_mismatch", "http_status": 409, "retryable": false, "receipt_recorded": true}
+  ]
+}

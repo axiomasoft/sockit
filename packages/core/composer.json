@@ -1,0 +1,72 @@
+{
+    "name": "axiomasoft/sockit",
+    "description": "SocKit core — panel-based embedded social engine for Laravel (surfaces, reactions, posts, feeds, groups, and current audience privacy).",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.4 <8.6",
+        "ext-intl": "*",
+        "axiomasoft/packman": "^0.1",
+        "axiomasoft/packman-panels": "^0.1",
+        "axiomasoft/packman-plugins": "^0.1",
+        "axiomasoft/packman-schema": "^0.1",
+        "illuminate/console": "^13.0",
+        "illuminate/contracts": "^13.0",
+        "illuminate/database": "^13.0",
+        "illuminate/events": "^13.0",
+        "illuminate/support": "^13.0",
+        "psr/clock": "^1.0",
+        "psr/log": "^3.0",
+        "ramsey/uuid": "^4.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "SocKit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SocKit\\Core\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SocKit\\Laravel\\SocKitServiceProvider"
+            ]
+        },
+        "packman": {
+            "schema-version": 1,
+            "package-type": "domain",
+            "stability": "dev",
+            "error-prefix": "sockit",
+            "owns": [
+                "Actors",
+                "Audience",
+                "Configuration",
+                "Console",
+                "Contracts",
+                "Data",
+                "Database",
+                "Diagnostics",
+                "Enums",
+                "Errors",
+                "Events",
+                "Exceptions",
+                "Internal",
+                "Laravel",
+                "Modules",
+                "Operations",
+                "Panels",
+                "Plugins",
+                "Registrars",
+                "Schema",
+                "Support",
+                "Surfaces",
+                "Testing"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

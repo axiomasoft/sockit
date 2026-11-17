@@ -1,0 +1,24 @@
+{
+  "contract": "sockit.fixture.descriptor/v1",
+  "descriptors": [
+    {
+      "scope": "platform",
+      "allowed_scopes": ["direct", "group", "platform"],
+      "default_scope": "platform",
+      "max_scope": "platform",
+      "minor_max_scope": "group",
+      "minor_default_scope": "direct",
+      "contour_levels": []
+    },
+    {
+      "scope": "contour",
+      "allowed_scopes": ["direct", "contour"],
+      "default_scope": "contour",
+      "max_scope": "contour",
+      "minor_max_scope": "direct",
+      "minor_default_scope": "direct",
+      "contour_levels": ["team"],
+      "contour_level": "team"
+    }
+  ]
+}

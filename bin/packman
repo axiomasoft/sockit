@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Packman\DevTools\Console\ApplicationFactory;
+
+$root = dirname(__DIR__);
+$autoload = $root.'/vendor/autoload.php';
+if (! is_file($autoload)) {
+    fwrite(STDERR, "Missing Composer autoloader at {$autoload}. Run composer install/update first.\n");
+    exit(1);
+}
+
+require_once $autoload;
+
+exit(ApplicationFactory::create($root)->run());

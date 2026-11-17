@@ -1,0 +1,37 @@
+{
+  "contract": "sockit.fixture.floor/v1",
+  "default_direct": {
+    "allowed_scopes": ["direct"],
+    "default_scope": "direct",
+    "max_scope": "direct",
+    "minor_default_scope": "direct",
+    "minor_max_scope": "direct",
+    "contour_levels": []
+  },
+  "narrowing": {
+    "parent": {
+      "allowed_scopes": ["direct", "group", "contour", "platform", "public"],
+      "default_scope": "platform",
+      "max_scope": "public",
+      "minor_default_scope": "group",
+      "minor_max_scope": "contour",
+      "contour_levels": ["team", "tenant"]
+    },
+    "child": {
+      "allowed_scopes": ["direct", "group", "contour", "platform"],
+      "default_scope": "group",
+      "max_scope": "platform",
+      "minor_default_scope": "direct",
+      "minor_max_scope": "group",
+      "contour_levels": ["team"]
+    },
+    "expected": {
+      "allowed_scopes": ["direct", "group", "contour", "platform"],
+      "default_scope": "group",
+      "max_scope": "platform",
+      "minor_default_scope": "direct",
+      "minor_max_scope": "group",
+      "contour_levels": ["team"]
+    }
+  }
+}

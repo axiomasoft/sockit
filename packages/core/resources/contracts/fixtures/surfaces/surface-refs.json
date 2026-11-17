@@ -1,0 +1,17 @@
+{
+  "contract": "sockit.fixture.surfaces/v1",
+  "surface_refs": [
+    {
+      "panel": "sockit.default",
+      "kind": "sockit.wall",
+      "host": "user:42",
+      "incarnation": 1
+    },
+    {
+      "panel": "community.alpha",
+      "kind": "group.feed",
+      "host": "group:99",
+      "incarnation": 3
+    }
+  ]
+}

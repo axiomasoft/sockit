@@ -1,0 +1,39 @@
+{
+  "contract": "sockit.fixture.refs/v1",
+  "host_entity_refs": [
+    "user:42",
+    "group:alpha_1",
+    "article:uuid-0192b100-0000-7000-8000-000000000001"
+  ],
+  "actor_refs": [
+    "user:42",
+    "bot:moderator-1"
+  ],
+  "installation_refs": [
+    "inst-1",
+    "acme.prod"
+  ],
+  "resource_refs": [
+    {
+      "panel": "sockit.default",
+      "kind": "post",
+      "id": "0192b100-0000-7000-8000-000000000010"
+    },
+    {
+      "panel": "app.community",
+      "kind": "group",
+      "id": "0192b100-0000-7000-8000-000000000020"
+    },
+    {
+      "panel": "sockit.default",
+      "kind": "reaction",
+      "id": "0192b100-0000-7000-8000-000000000030"
+    },
+    {
+      "panel": "sockit.default",
+      "kind": "surface_instance",
+      "id": "0192b100-0000-7000-8000-000000000040"
+    }
+  ],
+  "revisions": [1, 2, 42]
+}

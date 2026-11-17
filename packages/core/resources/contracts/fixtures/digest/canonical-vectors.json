@@ -1,0 +1,41 @@
+{
+  "contract": "sockit.fixture.digest/v1",
+  "vectors": [
+    {
+      "name": "nested-unsorted-unicode-slashes",
+      "command_type": "posts.publish",
+      "payload": {
+        "z": 1,
+        "a": {
+          "b": "тест/путь",
+          "a": true
+        }
+      },
+      "expected_canonical": "{\"a\":{\"a\":true,\"b\":\"тест/путь\"},\"z\":1}",
+      "expected_digest": "sha256:6939c263002cdba3ca962848da973c7705559d1f027bce84b199e39cec62c4e0"
+    },
+    {
+      "name": "empty-map",
+      "command_type": "posts.ping",
+      "payload": {},
+      "expected_canonical": "{}",
+      "expected_digest": "sha256:46d1045069dcabe8751dd08aed97cb00aec8e7ca2e28d88969c5edb63e380ad6"
+    },
+    {
+      "name": "surface-order-and-list-preservation",
+      "command_type": "posts.publish",
+      "payload": {
+        "surface": {
+          "panel": "main",
+          "kind": "wall",
+          "host": "user:42",
+          "incarnation": 1
+        },
+        "body": "Hello 🚀",
+        "tags": ["b", "a"]
+      },
+      "expected_canonical": "{\"body\":\"Hello 🚀\",\"surface\":{\"host\":\"user:42\",\"incarnation\":1,\"kind\":\"wall\",\"panel\":\"main\"},\"tags\":[\"b\",\"a\"]}",
+      "expected_digest": "sha256:47ad64f5ce28d3ce6e29d8685395a6994e42c0f421ae78a2028e934aa0ba2167"
+    }
+  ]
+}

@@ -1,0 +1,292 @@
+{
+    "schema": "packman-error-codes/1",
+    "package": "axiomasoft/sockit",
+    "codes": [
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ActorContextInvalid",
+            "code": "sockit.actor_context_invalid",
+            "type": "urn:packman:problem:sockit.actor_context_invalid",
+            "status": 403,
+            "title": "Invalid actor or installation context",
+            "retryable": false,
+            "category": "authorization"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "AudienceDenied",
+            "code": "sockit.audience_denied",
+            "type": "urn:packman:problem:sockit.audience_denied",
+            "status": 403,
+            "title": "Audience policy denied",
+            "retryable": false,
+            "category": "authorization"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "AudienceNotContained",
+            "code": "sockit.audience_not_contained",
+            "type": "urn:packman:problem:sockit.audience_not_contained",
+            "status": 422,
+            "title": "Audience specification not contained within floor",
+            "retryable": false,
+            "category": "validation"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "AudienceVersionUnknown",
+            "code": "sockit.audience_version_unknown",
+            "type": "urn:packman:problem:sockit.audience_version_unknown",
+            "status": 422,
+            "title": "Unsupported audience wire version",
+            "retryable": false,
+            "category": "unsupported"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "AuthenticationRequired",
+            "code": "sockit.authentication_required",
+            "type": "urn:packman:problem:sockit.authentication_required",
+            "status": 401,
+            "title": "Authentication required",
+            "retryable": false,
+            "category": "authentication"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "AuthorizationDenied",
+            "code": "sockit.authorization_denied",
+            "type": "urn:packman:problem:sockit.authorization_denied",
+            "status": 403,
+            "title": "Action authorization denied",
+            "retryable": false,
+            "category": "authorization"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "AuthorizationUnknown",
+            "code": "sockit.authorization_unknown",
+            "type": "urn:packman:problem:sockit.authorization_unknown",
+            "status": 503,
+            "title": "Authorization outcome unknown",
+            "retryable": true,
+            "category": "unavailable"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "BackendBindingMismatch",
+            "code": "sockit.backend_binding_mismatch",
+            "type": "urn:packman:problem:sockit.backend_binding_mismatch",
+            "status": 409,
+            "title": "Surface backend binding mismatch",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ConfigurationInvalid",
+            "code": "sockit.configuration_invalid",
+            "type": "urn:packman:problem:sockit.configuration_invalid",
+            "status": 500,
+            "title": "Invalid SocKit configuration",
+            "retryable": false,
+            "category": "internal"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ContentDeleted",
+            "code": "sockit.content_deleted",
+            "type": "urn:packman:problem:sockit.content_deleted",
+            "status": 410,
+            "title": "Content deleted",
+            "retryable": false,
+            "category": "not_found"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ContentErased",
+            "code": "sockit.content_erased",
+            "type": "urn:packman:problem:sockit.content_erased",
+            "status": 410,
+            "title": "Content erased",
+            "retryable": false,
+            "category": "not_found"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ContentHeld",
+            "code": "sockit.content_held",
+            "type": "urn:packman:problem:sockit.content_held",
+            "status": 409,
+            "title": "Content held for safety review",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ContentHidden",
+            "code": "sockit.content_hidden",
+            "type": "urn:packman:problem:sockit.content_hidden",
+            "status": 404,
+            "title": "Content not available",
+            "retryable": false,
+            "category": "not_found"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "EventIdentityConflict",
+            "code": "sockit.event_identity_conflict",
+            "type": "urn:packman:problem:sockit.event_identity_conflict",
+            "status": 409,
+            "title": "Event identity payload mismatch",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ExternalOutcomeUnknown",
+            "code": "sockit.external_outcome_unknown",
+            "type": "urn:packman:problem:sockit.external_outcome_unknown",
+            "status": 503,
+            "title": "External outcome unknown",
+            "retryable": true,
+            "category": "unavailable"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "IdempotencyConflict",
+            "code": "sockit.idempotency_conflict",
+            "type": "urn:packman:problem:sockit.idempotency_conflict",
+            "status": 409,
+            "title": "Command idempotency payload mismatch",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ModuleInvalid",
+            "code": "sockit.module_invalid",
+            "type": "urn:packman:problem:sockit.module_invalid",
+            "status": 500,
+            "title": "Invalid SocKit module definition",
+            "retryable": false,
+            "category": "internal"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "PanelBindingMismatch",
+            "code": "sockit.panel_binding_mismatch",
+            "type": "urn:packman:problem:sockit.panel_binding_mismatch",
+            "status": 409,
+            "title": "Panel binding mismatch",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "PanelNotFound",
+            "code": "sockit.panel_not_found",
+            "type": "urn:packman:problem:sockit.panel_not_found",
+            "status": 404,
+            "title": "Panel not found",
+            "retryable": false,
+            "category": "not_found"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "PayloadInvalid",
+            "code": "sockit.payload_invalid",
+            "type": "urn:packman:problem:sockit.payload_invalid",
+            "status": 422,
+            "title": "Invalid command or wire payload",
+            "retryable": false,
+            "category": "validation"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "ProviderUnavailable",
+            "code": "sockit.provider_unavailable",
+            "type": "urn:packman:problem:sockit.provider_unavailable",
+            "status": 503,
+            "title": "Required host provider unavailable",
+            "retryable": true,
+            "category": "unavailable"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "RevisionConflict",
+            "code": "sockit.revision_conflict",
+            "type": "urn:packman:problem:sockit.revision_conflict",
+            "status": 409,
+            "title": "Expected revision conflict",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "SurfaceArchived",
+            "code": "sockit.surface_archived",
+            "type": "urn:packman:problem:sockit.surface_archived",
+            "status": 409,
+            "title": "Surface is archived",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "SurfaceIncarnationMismatch",
+            "code": "sockit.surface_incarnation_mismatch",
+            "type": "urn:packman:problem:sockit.surface_incarnation_mismatch",
+            "status": 409,
+            "title": "Surface incarnation mismatch",
+            "retryable": false,
+            "category": "conflict"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "SurfaceNotFound",
+            "code": "sockit.surface_not_found",
+            "type": "urn:packman:problem:sockit.surface_not_found",
+            "status": 404,
+            "title": "Surface not found",
+            "retryable": false,
+            "category": "not_found"
+        },
+        {
+            "package": "axiomasoft/sockit",
+            "enum": "SocKit\\Errors\\Enums\\SockitErrorCode",
+            "case": "WireVersionUnsupported",
+            "code": "sockit.wire_version_unsupported",
+            "type": "urn:packman:problem:sockit.wire_version_unsupported",
+            "status": 422,
+            "title": "Unsupported wire version",
+            "retryable": false,
+            "category": "unsupported"
+        }
+    ]
+}

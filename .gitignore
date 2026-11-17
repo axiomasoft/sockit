@@ -59,10 +59,16 @@ __pycache__/
 
 # Local dependencies, test caches and secrets.
 /vendor/
+/build/
 /node_modules/
+/packages/*/vendor/
+/packages/*/.phpunit.cache/
 /.phpunit.cache/
 /.phpunit.result.cache
 /.phpstan.cache/
+*.sqlite
+*.sqlite-journal
+*.log
 /.env
 /.env.*
 !/.env.example

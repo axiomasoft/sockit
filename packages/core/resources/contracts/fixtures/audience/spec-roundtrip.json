@@ -1,0 +1,68 @@
+{
+  "contract": "sockit.fixture.audience/v1",
+  "specs": [
+    {
+      "version": "1.0",
+      "scope": "direct",
+      "actors": ["user:1", "user:2"]
+    },
+    {
+      "version": "1.0",
+      "scope": "group",
+      "group_id": "core-team"
+    },
+    {
+      "version": "1.0",
+      "scope": "contour",
+      "contour_level": "team",
+      "contour": "team:99"
+    },
+    {
+      "version": "1.0",
+      "scope": "platform"
+    },
+    {
+      "version": "1.0",
+      "scope": "public"
+    },
+    {
+      "version": "1.0",
+      "operator": "all_of",
+      "specs": [
+        {
+          "version": "1.0",
+          "scope": "platform"
+        },
+        {
+          "version": "1.0",
+          "operator": "exclude",
+          "include": {
+            "version": "1.0",
+            "scope": "platform"
+          },
+          "exclude": {
+            "version": "1.0",
+            "scope": "direct",
+            "actors": ["user:banned"]
+          }
+        }
+      ]
+    },
+    {
+      "version": "1.0",
+      "operator": "any_of",
+      "specs": [
+        {
+          "version": "1.0",
+          "scope": "group",
+          "group_id": "editors"
+        },
+        {
+          "version": "1.0",
+          "scope": "direct",
+          "actors": ["user:1"]
+        }
+      ]
+    }
+  ]
+}

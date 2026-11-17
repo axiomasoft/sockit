@@ -1,0 +1,5 @@
+providers: []
+
+dont-discover:
+  - axiomasoft/sockit
+  - axiomasoft/sockit-testkit

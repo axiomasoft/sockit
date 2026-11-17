@@ -1,0 +1,12 @@
+{
+  "contract": "sockit.fixture.command/v1",
+  "wire_version": "1.0",
+  "command_keys": [
+    "cmd-0192b100-0000-7000-8000-000000000001",
+    "req.publish.2026:42"
+  ],
+  "command_namespaces": [
+    "inst-1/sockit.default/sockit.posts/posts.publish",
+    "acme.prod/app.community/sockit.reactions/reactions.add"
+  ]
+}

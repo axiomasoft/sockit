@@ -6,39 +6,17 @@
         "sections": {
             "type": "object",
             "properties": {
-                "sockit.ids.strategy": {
-                    "type": "string",
-                    "enum": [
-                        "uuid7"
-                    ],
-                    "default": "uuid7",
-                    "description": "Identifier generation strategy."
-                },
-                "sockit.modules.enabled": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "default": [],
-                    "description": "Globally enabled module identifiers."
-                },
-                "sockit.modules.settings": {
+                "sockit.ids": {
                     "type": "object",
-                    "description": "Global per-module setting defaults."
+                    "description": "Identifier generation strategy configuration."
                 },
-                "sockit.operations.outbox_batch_size": {
-                    "type": "integer",
-                    "default": 100,
-                    "minimum": 1,
-                    "maximum": 5000,
-                    "description": "Maximum outbox batch size per claim."
+                "sockit.modules": {
+                    "type": "object",
+                    "description": "Module activation and global per-module setting defaults."
                 },
-                "sockit.operations.receipt_ttl_seconds": {
-                    "type": "integer",
-                    "default": 86400,
-                    "minimum": 60,
-                    "maximum": 31536000,
-                    "description": "Command receipt retention horizon in seconds."
+                "sockit.operations": {
+                    "type": "object",
+                    "description": "Command envelope and outbox execution limits."
                 },
                 "sockit.panels": {
                     "type": "array",
@@ -48,79 +26,17 @@
                     "default": [],
                     "description": "Declared PanelProvider classes."
                 },
-                "sockit.privacy.floor": {
+                "sockit.privacy": {
                     "type": "object",
                     "description": "Platform-wide privacy floor bounds."
                 },
-                "sockit.resolvers.actor": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "Host ActorContextResolver SPI."
+                "sockit.resolvers": {
+                    "type": "object",
+                    "description": "Host SPI resolver class bindings."
                 },
-                "sockit.resolvers.audience": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "AudienceResolver SPI override."
-                },
-                "sockit.resolvers.authorizer": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "Host ActionAuthorizer SPI."
-                },
-                "sockit.resolvers.contour": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "Host ContourResolver SPI."
-                },
-                "sockit.resolvers.groups": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "GroupMembershipResolver SPI."
-                },
-                "sockit.resolvers.surface_policy": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "Host SurfaceAudiencePolicy SPI."
-                },
-                "sockit.resolvers.targets": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "Default TargetResolver SPI."
-                },
-                "sockit.resolvers.tenant": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "Host TenantResolver SPI."
-                },
-                "sockit.storage.connection": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "Default storage connection name."
-                },
-                "sockit.storage.table_prefix": {
-                    "type": "string",
-                    "default": "sk_",
-                    "minLength": 1,
-                    "pattern": "/\\A[a-z][a-z0-9]{1,6}_\\z/",
-                    "description": "Default SQL table prefix."
+                "sockit.storage": {
+                    "type": "object",
+                    "description": "Default database storage settings."
                 },
                 "sockit.surfaces": {
                     "type": "array",

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SocKit\Console;
+namespace SocKit\Console\Diagnostics;
 
 use Illuminate\Console\Command;
 use Packman\Attributes\Internal;

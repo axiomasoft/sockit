@@ -15,7 +15,7 @@ use SocKit\Surfaces\Data\SurfaceRef;
 
 /**
  * Authoritative atomic mutation envelope coordinating pre-tx authorization, receipt claim,
- * panel-scoped SQL transaction, and transactional outbox persistence.
+ * panel-scoped SQL transaction, replay lifecycle verification, and transactional outbox persistence.
  */
 #[Spi(kind: SpiKind::Call, since: '1.0')]
 interface OperationEnvelopeRunner
@@ -23,6 +23,7 @@ interface OperationEnvelopeRunner
     /**
      * @param  Closure(ActorContext): void  $preTransactionChecks
      * @param  Closure(ActorContext, Connection): array{result: OperationResult, event?: array{aggregate_type: string, aggregate_id: string, aggregate_revision: int, event_type: string, payload: array<string, mixed>}|null}  $mutation
+     * @param  (Closure(ActorContext, Connection, OperationResult): void)|null  $replayChecks
      */
     public function run(
         CommandEnvelope $envelope,
@@ -30,5 +31,6 @@ interface OperationEnvelopeRunner
         string $action,
         Closure $preTransactionChecks,
         Closure $mutation,
+        ?Closure $replayChecks = null,
     ): OperationResult;
 }

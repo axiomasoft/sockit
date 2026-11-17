@@ -10,7 +10,7 @@ use Override;
 use Packman\Attributes\Internal;
 use Packman\Foundation\Contracts\PackageRegistrar;
 use Packman\Plugins\Contracts\Registry\ExtensionPlugin;
-use Packman\Plugins\Internal\Contributions\FrozenContributions;
+use Packman\Plugins\Contracts\Registry\PluginInspector;
 use Packman\Plugins\Laravel\ExtensionRegistrar;
 use SocKit\Configuration\Internal\SockitModules;
 use SocKit\Modules\Groups\GroupsPlugin;
@@ -37,7 +37,7 @@ final class SockitPluginRegistrar implements PackageRegistrar
     {
         ExtensionRegistrar::builtIn(SockitCorePlugin::class);
 
-        $app->beforeResolving(FrozenContributions::class, static function (string $abstract, array $parameters, mixed $container): void {
+        $app->beforeResolving(PluginInspector::class, static function (string $abstract, array $parameters, mixed $container): void {
             if ($container instanceof Application) {
                 self::syncConfiguredModulePlugins($container);
             }

@@ -143,10 +143,13 @@ final readonly class SockitDoctorCheck implements DoctorCheck
             } else {
                 foreach ($compiledPanels as $panel) {
                     $connName = $panel->storage->connection !== '' ? $panel->storage->connection : ($options->connection ?? $defaultConnection);
-                    $targetTable = $panel->storage->resolveTable('surface_instances');
+                    $conn = $this->db->connection($connName);
+                    $targetTable = ($panel->storage->schema !== null && $conn->getDriverName() !== 'sqlite')
+                        ? $panel->storage->qualifiedTable('surface_instances')
+                        : $panel->storage->resolveTable('surface_instances');
 
                     try {
-                        if (! $this->db->connection($connName)->getSchemaBuilder()->hasTable($targetTable)) {
+                        if (! $conn->getSchemaBuilder()->hasTable($targetTable)) {
                             $findings[] = DoctorFinding::warning(
                                 code: 'sockit.doctor.missing_panel_table',
                                 message: "Panel [{$panel->id->value}] table [{$targetTable}] does not exist on connection [{$connName}].",

@@ -79,6 +79,30 @@ final class SockitPanelRegistry implements PanelDefinitions
                 );
             }
 
+            $effectiveConnection = $storageConnection !== '' ? $storageConnection : $defaultConnection;
+            $connDriver = is_string($databaseConnections[$effectiveConnection]['driver'] ?? null)
+                ? strtolower($databaseConnections[$effectiveConnection]['driver'])
+                : '';
+
+            if ($raw->storage->schema !== null && $connDriver === 'sqlite') {
+                throw PanelException::invalidConfig(
+                    'PANEL_TABLE_INVALID',
+                    "Panel [{$raw->id->value}] specifies SQL schema [{$raw->storage->schema}] on SQLite connection [{$effectiveConnection}], which does not support schemas.",
+                    ['panel' => $raw->id->value, 'schema' => $raw->storage->schema, 'connection' => $effectiveConnection],
+                );
+            }
+
+            $knownLogicalTables = array_flip(SockitModules::allLogicalTables());
+            foreach (array_keys($raw->storage->tables) as $logicalTable) {
+                if (! isset($knownLogicalTables[$logicalTable])) {
+                    throw PanelException::invalidConfig(
+                        'PANEL_TABLE_INVALID',
+                        "Panel [{$raw->id->value}] declares unknown logical table override [{$logicalTable}].",
+                        ['panel' => $raw->id->value, 'table' => $logicalTable],
+                    );
+                }
+            }
+
             $normalizedModules = [];
             foreach ($raw->modules as $moduleId) {
                 $canonical = SockitModules::normalize($moduleId);
@@ -113,7 +137,7 @@ final class SockitPanelRegistry implements PanelDefinitions
                 $compiledModuleSettings[$canonicalModule] = ModuleSettingsMerger::compile(
                     moduleId: $canonicalModule,
                     panelId: $raw->id->value,
-                    schema: $moduleSchemas[$canonicalModule] ?? null,
+                    schema: $moduleSchemas[$canonicalModule] ?? SockitModules::settingsSchema($canonicalModule),
                     global: $globalSettings,
                     panel: $panelSettings,
                 );

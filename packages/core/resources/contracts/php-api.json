@@ -900,6 +900,64 @@
                     "return": null,
                     "doc": []
                 },
+                "admitForRead": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                },
+                "admitForWrite": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                },
                 "publish": {
                     "visibility": "public",
                     "static": false,
@@ -1235,6 +1293,65 @@
                         {
                             "name": "actor",
                             "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "bool",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": [],
+            "spi_kind": "implement"
+        },
+        "SocKit\\Audience\\Contracts\\PanelGroupMembershipResolver": {
+            "kind": "interface",
+            "layer": "spi",
+            "since": "1.0",
+            "final": false,
+            "readonly": false,
+            "abstract": false,
+            "extends": [
+                "SocKit\\Audience\\Contracts\\GroupMembershipResolver"
+            ],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "isMemberInPanel": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
                             "by_reference": false,
                             "variadic": false,
                             "optional": false,
@@ -3238,6 +3355,44 @@
                             "variadic": false,
                             "optional": false,
                             "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "void",
+                    "doc": []
+                },
+                "forEachPanelStorage": {
+                    "visibility": "protected",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "module",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "callback",
+                            "type": "Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "reverse",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "false",
                             "flags": 0
                         }
                     ],
@@ -7605,6 +7760,15 @@
                             "optional": false,
                             "default": null,
                             "flags": 0
+                        },
+                        {
+                            "name": "replayChecks",
+                            "type": "?Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
                         }
                     ],
                     "return": "SocKit\\Operations\\Data\\OperationResult",
@@ -8990,6 +9154,26 @@
                     "return": null,
                     "doc": []
                 },
+                "qualifiedTable": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "logical",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "string",
+                    "doc": []
+                },
                 "resolveTable": {
                     "visibility": "public",
                     "static": false,
@@ -9623,6 +9807,15 @@
                             "optional": true,
                             "default": "null",
                             "flags": 4
+                        },
+                        {
+                            "name": "container",
+                            "type": "?Illuminate\\Contracts\\Container\\Container",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 4
                         }
                     ],
                     "return": null,
@@ -9702,6 +9895,16 @@
             "doc": [],
             "methods": {
                 "configRoot": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "string",
+                    "doc": []
+                },
+                "configSectionClass": {
                     "visibility": "public",
                     "static": false,
                     "final": false,
@@ -11140,6 +11343,26 @@
             "constants": [],
             "enum_backing": null,
             "enum_cases": []
+        },
+        "SocKit\\Surfaces\\Contracts\\LocksTargetInTransaction": {
+            "kind": "interface",
+            "layer": "spi",
+            "since": "1.0",
+            "final": false,
+            "readonly": false,
+            "abstract": false,
+            "extends": [
+                "SocKit\\Surfaces\\Contracts\\TargetResolver"
+            ],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {},
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": [],
+            "spi_kind": "implement"
         },
         "SocKit\\Surfaces\\Contracts\\SurfaceDefinitions": {
             "kind": "interface",
@@ -12830,164 +13053,7 @@
             "enum_cases": [],
             "spi_kind": "implement"
         },
-        "SocKit\\Testing\\FakeActionAuthorizer": {
-            "kind": "class",
-            "layer": "api",
-            "since": "1.0",
-            "final": true,
-            "readonly": false,
-            "abstract": false,
-            "extends": [],
-            "implements": [
-                "SocKit\\Audience\\Contracts\\ActionAuthorizer"
-            ],
-            "uses": [],
-            "doc": [],
-            "methods": {
-                "allow": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "action",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        },
-                        {
-                            "name": "reason",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": true,
-                            "default": "'test.allowed'",
-                            "flags": 0
-                        }
-                    ],
-                    "return": "self",
-                    "doc": []
-                },
-                "decide": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "request",
-                            "type": "SocKit\\Audience\\Data\\ActionRequest",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        }
-                    ],
-                    "return": "SocKit\\Audience\\Data\\AuthorizationDecision",
-                    "doc": []
-                },
-                "deny": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "action",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        },
-                        {
-                            "name": "reason",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": true,
-                            "default": "'test.denied'",
-                            "flags": 0
-                        }
-                    ],
-                    "return": "self",
-                    "doc": []
-                },
-                "reset": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [],
-                    "return": "self",
-                    "doc": []
-                },
-                "unknown": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "action",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        },
-                        {
-                            "name": "reason",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": true,
-                            "default": "'test.unknown'",
-                            "flags": 0
-                        }
-                    ],
-                    "return": "self",
-                    "doc": []
-                },
-                "using": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "handler",
-                            "type": "Closure",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        }
-                    ],
-                    "return": "self",
-                    "doc": []
-                }
-            },
-            "properties": {},
-            "constants": [],
-            "enum_backing": null,
-            "enum_cases": []
-        },
-        "SocKit\\Testing\\FakeActorContextResolver": {
+        "SocKit\\Testing\\Fakes\\Actors\\FakeActorContextResolver": {
             "kind": "class",
             "layer": "api",
             "since": "1.0",
@@ -13172,7 +13238,7 @@
             "enum_backing": null,
             "enum_cases": []
         },
-        "SocKit\\Testing\\FakeContentSafetyChecker": {
+        "SocKit\\Testing\\Fakes\\Actors\\FakeTenantResolver": {
             "kind": "class",
             "layer": "api",
             "since": "1.0",
@@ -13181,12 +13247,160 @@
             "abstract": false,
             "extends": [],
             "implements": [
-                "SocKit\\Operations\\Contracts\\ContentSafetyChecker"
+                "SocKit\\Actors\\Contracts\\TenantResolver"
             ],
             "uses": [],
             "doc": [],
             "methods": {
-                "allowAll": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "installation",
+                            "type": "?SocKit\\Support\\Data\\InstallationRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "current": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "SocKit\\Support\\Data\\InstallationRef",
+                    "doc": []
+                },
+                "switchTo": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "installation",
+                            "type": "SocKit\\Support\\Data\\InstallationRef|string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Testing\\Fakes\\Audience\\FakeActionAuthorizer": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": false,
+            "abstract": false,
+            "extends": [],
+            "implements": [
+                "SocKit\\Audience\\Contracts\\ActionAuthorizer"
+            ],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "allow": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "action",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "reason",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'test.allowed'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "decide": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "request",
+                            "type": "SocKit\\Audience\\Data\\ActionRequest",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AuthorizationDecision",
+                    "doc": []
+                },
+                "deny": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "action",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "reason",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'test.denied'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "reset": {
                     "visibility": "public",
                     "static": false,
                     "final": false,
@@ -13196,7 +13410,7 @@
                     "return": "self",
                     "doc": []
                 },
-                "assess": {
+                "unknown": {
                     "visibility": "public",
                     "static": false,
                     "final": false,
@@ -13204,25 +13418,7 @@
                     "by_reference": false,
                     "parameters": [
                         {
-                            "name": "actor",
-                            "type": "SocKit\\Actors\\Data\\ActorContext",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        },
-                        {
-                            "name": "surface",
-                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        },
-                        {
-                            "name": "contentType",
+                            "name": "action",
                             "type": "string",
                             "by_reference": false,
                             "variadic": false,
@@ -13230,62 +13426,13 @@
                             "default": null,
                             "flags": 0
                         },
-                        {
-                            "name": "body",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        },
-                        {
-                            "name": "metadata",
-                            "type": "array",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": true,
-                            "default": "[]",
-                            "flags": 0
-                        }
-                    ],
-                    "return": "SocKit\\Operations\\Data\\SafetyVerdict",
-                    "doc": []
-                },
-                "holdAll": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
                         {
                             "name": "reason",
                             "type": "string",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "'safety.hold'",
-                            "flags": 0
-                        }
-                    ],
-                    "return": "self",
-                    "doc": []
-                },
-                "rejectAll": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "reason",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": true,
-                            "default": "'safety.rejected'",
+                            "default": "'test.unknown'",
                             "flags": 0
                         }
                     ],
@@ -13318,7 +13465,7 @@
             "enum_backing": null,
             "enum_cases": []
         },
-        "SocKit\\Testing\\FakeContourResolver": {
+        "SocKit\\Testing\\Fakes\\Audience\\FakeContourResolver": {
             "kind": "class",
             "layer": "api",
             "since": "1.0",
@@ -13397,6 +13544,26 @@
                         }
                     ],
                     "return": "?SocKit\\Support\\Data\\HostEntityRef",
+                    "doc": []
+                },
+                "failWith": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "failure",
+                            "type": "?Throwable",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
                     "doc": []
                 },
                 "membership": {
@@ -13528,7 +13695,7 @@
             "enum_backing": null,
             "enum_cases": []
         },
-        "SocKit\\Testing\\FakeGroupMembershipResolver": {
+        "SocKit\\Testing\\Fakes\\Audience\\FakeGroupMembershipResolver": {
             "kind": "class",
             "layer": "api",
             "since": "1.0",
@@ -13537,7 +13704,7 @@
             "abstract": false,
             "extends": [],
             "implements": [
-                "SocKit\\Audience\\Contracts\\GroupMembershipResolver"
+                "SocKit\\Audience\\Contracts\\PanelGroupMembershipResolver"
             ],
             "uses": [],
             "doc": [],
@@ -13571,6 +13738,64 @@
                     "return": "self",
                     "doc": []
                 },
+                "addForPanel": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef|string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "failWith": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "failure",
+                            "type": "?Throwable",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
                 "isMember": {
                     "visibility": "public",
                     "static": false,
@@ -13581,6 +13806,44 @@
                         {
                             "name": "actor",
                             "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "bool",
+                    "doc": []
+                },
+                "isMemberInPanel": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
                             "by_reference": false,
                             "variadic": false,
                             "optional": false,
@@ -13635,7 +13898,7 @@
             "enum_backing": null,
             "enum_cases": []
         },
-        "SocKit\\Testing\\FakeSurfaceAudiencePolicy": {
+        "SocKit\\Testing\\Fakes\\Audience\\FakeSurfaceAudiencePolicy": {
             "kind": "class",
             "layer": "api",
             "since": "1.0",
@@ -13832,7 +14095,282 @@
             "enum_backing": null,
             "enum_cases": []
         },
-        "SocKit\\Testing\\FakeTargetResolver": {
+        "SocKit\\Testing\\Fakes\\Operations\\FakeContentSafetyChecker": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": false,
+            "abstract": false,
+            "extends": [],
+            "implements": [
+                "SocKit\\Operations\\Contracts\\ContentSafetyChecker"
+            ],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "allowAll": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "self",
+                    "doc": []
+                },
+                "assess": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "contentType",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "body",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "metadata",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "[]",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Operations\\Data\\SafetyVerdict",
+                    "doc": []
+                },
+                "holdAll": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "reason",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'safety.hold'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "rejectAll": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "reason",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'safety.rejected'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "using": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "handler",
+                            "type": "Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Testing\\Fakes\\Operations\\SpyOutboxConsumer": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": false,
+            "abstract": false,
+            "extends": [],
+            "implements": [
+                "SocKit\\Operations\\Contracts\\OutboxConsumer"
+            ],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.test.spy'",
+                            "flags": 68
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "clear": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "void",
+                    "doc": []
+                },
+                "consume": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "event",
+                            "type": "SocKit\\Operations\\Data\\OutboxEventRecord",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "mode",
+                            "type": "SocKit\\Operations\\Enums\\ReplayMode",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "void",
+                    "doc": []
+                },
+                "consumerKey": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "string",
+                    "doc": []
+                },
+                "failNext": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "self",
+                    "doc": []
+                },
+                "recorded": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "array",
+                    "doc": []
+                },
+                "supports": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "eventType",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "bool",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Testing\\Fakes\\Surfaces\\FakeTargetResolver": {
             "kind": "class",
             "layer": "api",
             "since": "1.0",
@@ -14015,76 +14553,6 @@
             "enum_backing": null,
             "enum_cases": []
         },
-        "SocKit\\Testing\\FakeTenantResolver": {
-            "kind": "class",
-            "layer": "api",
-            "since": "1.0",
-            "final": true,
-            "readonly": false,
-            "abstract": false,
-            "extends": [],
-            "implements": [
-                "SocKit\\Actors\\Contracts\\TenantResolver"
-            ],
-            "uses": [],
-            "doc": [],
-            "methods": {
-                "__construct": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "installation",
-                            "type": "?SocKit\\Support\\Data\\InstallationRef",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": true,
-                            "default": "null",
-                            "flags": 0
-                        }
-                    ],
-                    "return": null,
-                    "doc": []
-                },
-                "current": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [],
-                    "return": "SocKit\\Support\\Data\\InstallationRef",
-                    "doc": []
-                },
-                "switchTo": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "installation",
-                            "type": "SocKit\\Support\\Data\\InstallationRef|string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        }
-                    ],
-                    "return": "self",
-                    "doc": []
-                }
-            },
-            "properties": {},
-            "constants": [],
-            "enum_backing": null,
-            "enum_cases": []
-        },
         "SocKit\\Testing\\SocKitFake": {
             "kind": "class",
             "layer": "api",
@@ -14106,74 +14574,74 @@
                     "parameters": [
                         {
                             "name": "tenants",
-                            "type": "SocKit\\Testing\\FakeTenantResolver",
+                            "type": "SocKit\\Testing\\Fakes\\Actors\\FakeTenantResolver",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeTenantResolver()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Actors\\FakeTenantResolver()",
                             "flags": 1
                         },
                         {
                             "name": "actors",
-                            "type": "SocKit\\Testing\\FakeActorContextResolver",
+                            "type": "SocKit\\Testing\\Fakes\\Actors\\FakeActorContextResolver",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeActorContextResolver()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Actors\\FakeActorContextResolver()",
                             "flags": 1
                         },
                         {
                             "name": "authorizer",
-                            "type": "SocKit\\Testing\\FakeActionAuthorizer",
+                            "type": "SocKit\\Testing\\Fakes\\Audience\\FakeActionAuthorizer",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeActionAuthorizer()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Audience\\FakeActionAuthorizer()",
                             "flags": 1
                         },
                         {
                             "name": "surfacePolicy",
-                            "type": "SocKit\\Testing\\FakeSurfaceAudiencePolicy",
+                            "type": "SocKit\\Testing\\Fakes\\Audience\\FakeSurfaceAudiencePolicy",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeSurfaceAudiencePolicy()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Audience\\FakeSurfaceAudiencePolicy()",
                             "flags": 1
                         },
                         {
                             "name": "contours",
-                            "type": "SocKit\\Testing\\FakeContourResolver",
+                            "type": "SocKit\\Testing\\Fakes\\Audience\\FakeContourResolver",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeContourResolver()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Audience\\FakeContourResolver()",
                             "flags": 1
                         },
                         {
                             "name": "groups",
-                            "type": "SocKit\\Testing\\FakeGroupMembershipResolver",
+                            "type": "SocKit\\Testing\\Fakes\\Audience\\FakeGroupMembershipResolver",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeGroupMembershipResolver()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Audience\\FakeGroupMembershipResolver()",
                             "flags": 1
                         },
                         {
                             "name": "targets",
-                            "type": "SocKit\\Testing\\FakeTargetResolver",
+                            "type": "SocKit\\Testing\\Fakes\\Surfaces\\FakeTargetResolver",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeTargetResolver()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Surfaces\\FakeTargetResolver()",
                             "flags": 1
                         },
                         {
                             "name": "safety",
-                            "type": "SocKit\\Testing\\FakeContentSafetyChecker",
+                            "type": "SocKit\\Testing\\Fakes\\Operations\\FakeContentSafetyChecker",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "new \\SocKit\\Testing\\FakeContentSafetyChecker()",
+                            "default": "new \\SocKit\\Testing\\Fakes\\Operations\\FakeContentSafetyChecker()",
                             "flags": 1
                         }
                     ],
@@ -14207,135 +14675,6 @@
                         }
                     ],
                     "return": "self",
-                    "doc": []
-                }
-            },
-            "properties": {},
-            "constants": [],
-            "enum_backing": null,
-            "enum_cases": []
-        },
-        "SocKit\\Testing\\SpyOutboxConsumer": {
-            "kind": "class",
-            "layer": "api",
-            "since": "1.0",
-            "final": true,
-            "readonly": false,
-            "abstract": false,
-            "extends": [],
-            "implements": [
-                "SocKit\\Operations\\Contracts\\OutboxConsumer"
-            ],
-            "uses": [],
-            "doc": [],
-            "methods": {
-                "__construct": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "key",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": true,
-                            "default": "'sockit.test.spy'",
-                            "flags": 68
-                        }
-                    ],
-                    "return": null,
-                    "doc": []
-                },
-                "clear": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [],
-                    "return": "void",
-                    "doc": []
-                },
-                "consume": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "event",
-                            "type": "SocKit\\Operations\\Data\\OutboxEventRecord",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        },
-                        {
-                            "name": "mode",
-                            "type": "SocKit\\Operations\\Enums\\ReplayMode",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        }
-                    ],
-                    "return": "void",
-                    "doc": []
-                },
-                "consumerKey": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [],
-                    "return": "string",
-                    "doc": []
-                },
-                "failNext": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [],
-                    "return": "self",
-                    "doc": []
-                },
-                "recorded": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [],
-                    "return": "array",
-                    "doc": []
-                },
-                "supports": {
-                    "visibility": "public",
-                    "static": false,
-                    "final": false,
-                    "abstract": false,
-                    "by_reference": false,
-                    "parameters": [
-                        {
-                            "name": "eventType",
-                            "type": "string",
-                            "by_reference": false,
-                            "variadic": false,
-                            "optional": false,
-                            "default": null,
-                            "flags": 0
-                        }
-                    ],
-                    "return": "bool",
                     "doc": []
                 }
             },

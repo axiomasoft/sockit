@@ -76,7 +76,7 @@ final class ModuleSettingsMerger
      * @param  array<string, scalar|array<array-key, mixed>|null>  $override
      * @return array<string, scalar|array<array-key, mixed>|null>
      */
-    private static function mergeMaps(array $base, array $override): array
+    public static function mergeMaps(array $base, array $override): array
     {
         $result = $base;
 

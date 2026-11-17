@@ -8,11 +8,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
 use Override;
 use Packman\Attributes\Internal;
-use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Audience\AudienceGate;
-use SocKit\Audience\Contracts\ActionAuthorizer;
-use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
@@ -23,13 +19,14 @@ use SocKit\Modules\Reactions\Contracts\ReactionService;
 use SocKit\Modules\Reactions\Data\AddReactionCommand;
 use SocKit\Modules\Reactions\Data\ReactionCountsView;
 use SocKit\Modules\Reactions\Data\RemoveReactionCommand;
-use SocKit\Operations\Contracts\OperationEnvelopeRunner;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\Exceptions\PanelException;
+use SocKit\Registrars\Internal\SockitRuntime;
+use SocKit\Support\CanonicalJson;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\PayloadDigest;
@@ -38,30 +35,26 @@ use SocKit\Support\Data\Revision;
 use SocKit\Support\Enums\ResourceKind;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Support\Ids;
+use SocKit\Surfaces\Contracts\LocksTargetInTransaction;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
-use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Surfaces\Data\SurfaceDefinition;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
 /**
- * Panel-isolated Reactions service executing through {@see OperationEnvelopeRunner}
- * and resolving targets exclusively via the {@see TargetResolver} slot.
+ * Panel-isolated Reactions service executing through {@see OperationEnvelopeRunner},
+ * rejecting read-only surface admission/observer verdicts on mutations, verifying same-DB
+ * target privacy revision & audience under lock without holding locks across remote resolvers,
+ * and preserving monotonic surface+target+type outbox identity across rebuilds.
  */
 #[Internal]
 final readonly class DatabaseReactionService implements ReactionService
 {
-    /** @param list<TargetResolver> $targetResolvers */
     public function __construct(
         private SockitTables $tables,
         private PanelDefinitions $panels,
         private SurfaceDefinitions $surfaces,
-        private ActorContexts $actors,
-        private OperationEnvelopeRunner $envelope,
-        private ActionAuthorizer $authorizer,
-        private AudienceGate $audienceGate,
-        private ?SurfaceAudiencePolicy $surfacePolicy = null,
-        private array $targetResolvers = [],
+        private SockitRuntime $runtime,
     ) {}
 
     #[Override]
@@ -77,7 +70,7 @@ final readonly class DatabaseReactionService implements ReactionService
             );
         }
 
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $digest = PayloadDigest::of('reactions.add', $command->toDigestPayload());
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'reactions.add');
         $envelope = new CommandEnvelope(
@@ -86,122 +79,144 @@ final readonly class DatabaseReactionService implements ReactionService
             digest: $digest,
         );
 
-        return $this->envelope->run(
-            envelope: $envelope,
-            surface: $command->surface,
-            action: 'sockit.reactions.add',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef): void {
-                $this->authorizer->decide(new ActionRequest(
-                    actor: $verifiedActor,
-                    action: 'sockit.reactions.add',
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $precheck = new class
+            {
+                public ?TargetResolution $target = null;
+            };
+
+            try {
+                return $this->runtime->envelope()->run(
+                    envelope: $envelope,
                     surface: $command->surface,
-                ))->requireAllowed();
+                    action: 'sockit.reactions.add',
+                    preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
+                        $this->runtime->authorizer()->decide(new ActionRequest(
+                            actor: $verifiedActor,
+                            action: 'sockit.reactions.add',
+                            surface: $command->surface,
+                        ))->requireAllowed();
 
-                $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef);
-            },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $options, $namespace): array {
-                $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                        $precheck->target = $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef, requireWrite: true);
+                    },
+                    mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $options, $namespace, $precheck): array {
+                        $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
 
-                // Re-resolve target inside TX so same-DB host/post targets serialize reaction vs hide/delete.
-                $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target);
+                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
 
-                $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
-                $reactionsTable = $this->tables->table('reactions', $command->surface->panel);
-                $countsTable = $this->tables->table('reaction_counts', $command->surface->panel);
+                        $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
+                        $reactionsTable = $this->tables->table('reactions', $command->surface->panel);
+                        $countsTable = $this->tables->table('reaction_counts', $command->surface->panel);
 
-                $existingQuery = $connection->table($reactionsTable)
-                    ->where('panel_id', $command->surface->panel->value)
-                    ->where('surface_instance_id', $surfaceInstanceId)
-                    ->where('target_type', $command->target->type)
-                    ->where('target_key', $command->target->value)
-                    ->where('actor_type', $actorRef->type)
-                    ->where('actor_id', $actorRef->id)
-                    ->where('reaction_type', $command->reactionType);
+                        $existing = $connection->table($reactionsTable)
+                            ->where('panel_id', $command->surface->panel->value)
+                            ->where('surface_instance_id', $surfaceInstanceId)
+                            ->where('target_type', $command->target->type)
+                            ->where('target_key', $command->target->value)
+                            ->where('actor_type', $actorRef->type)
+                            ->where('actor_id', $actorRef->id)
+                            ->where('reaction_type', $command->reactionType)
+                            ->first();
 
-                $existing = $existingQuery->first();
+                        if (is_object($existing)) {
+                            $revision = $this->currentRevision($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType);
 
-                if (is_object($existing)) {
-                    $revision = $this->currentRevision($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType);
+                            return [
+                                'result' => OperationResult::confirmed(
+                                    $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
+                                    new ResourceRef($command->surface->panel, ResourceKind::Reaction, SockitRows::str($existing, 'id')),
+                                    $revision,
+                                ),
+                                'event' => null,
+                            ];
+                        }
 
-                    return [
-                        'result' => OperationResult::confirmed(
-                            $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
-                            new ResourceRef($command->surface->panel, ResourceKind::Reaction, SockitRows::str($existing, 'id')),
-                            $revision,
-                        ),
-                        'event' => null,
-                    ];
+                        $actorDistinctCount = $connection->table($reactionsTable)
+                            ->where('panel_id', $command->surface->panel->value)
+                            ->where('surface_instance_id', $surfaceInstanceId)
+                            ->where('target_type', $command->target->type)
+                            ->where('target_key', $command->target->value)
+                            ->where('actor_type', $actorRef->type)
+                            ->where('actor_id', $actorRef->id)
+                            ->count();
+
+                        if ($actorDistinctCount >= $options->maxPerTarget) {
+                            throw InvalidPayloadException::invalid(
+                                "Actor has reached maximum distinct reactions [{$options->maxPerTarget}] per target.",
+                                ['max_per_target' => $options->maxPerTarget],
+                            );
+                        }
+
+                        $reactionId = Ids::uuid7();
+                        $inserted = true;
+
+                        try {
+                            $connection->transaction(static function () use ($connection, $reactionsTable, $reactionId, $command, $surfaceInstanceId, $actorRef): void {
+                                $connection->table($reactionsTable)->insert([
+                                    'id' => $reactionId,
+                                    'panel_id' => $command->surface->panel->value,
+                                    'surface_instance_id' => $surfaceInstanceId,
+                                    'target_type' => $command->target->type,
+                                    'target_key' => $command->target->value,
+                                    'actor_type' => $actorRef->type,
+                                    'actor_id' => $actorRef->id,
+                                    'reaction_type' => $command->reactionType,
+                                    'created_at' => gmdate('Y-m-d H:i:s.uP'),
+                                ]);
+                            });
+                        } catch (QueryException $exception) {
+                            $sqlState = $exception->errorInfo[0] ?? null;
+                            if (! in_array($sqlState, ['23505', '23000'], true)) {
+                                throw $exception;
+                            }
+                            $inserted = false;
+                        }
+
+                        $revision = new Revision(1);
+                        $event = null;
+
+                        if ($inserted) {
+                            $revision = $this->adjustCount($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType, 1);
+                            $event = [
+                                'aggregate_type' => 'reaction_target',
+                                'aggregate_id' => $this->reactionAggregateId($surfaceInstanceId, $command->target, $command->reactionType),
+                                'aggregate_revision' => $revision->value,
+                                'event_type' => 'sockit.reactions.added',
+                                'payload' => [
+                                    'panel' => $command->surface->panel->value,
+                                    'surface' => $command->surface->toWire(),
+                                    'surface_instance_id' => $surfaceInstanceId,
+                                    'target' => $command->target->toWire(),
+                                    'reaction_type' => $command->reactionType,
+                                ],
+                            ];
+                        }
+
+                        return [
+                            'result' => OperationResult::confirmed(
+                                $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
+                                new ResourceRef($command->surface->panel, ResourceKind::Reaction, $reactionId),
+                                $revision,
+                            ),
+                            'event' => $event,
+                        ];
+                    },
+                    replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $precheck): void {
+                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
+                    },
+                );
+            } catch (ReactionTargetStaleException) {
+                if ($attempt === 2) {
+                    $rev = $precheck->target instanceof TargetResolution && $precheck->target->privacyRevision instanceof Revision
+                        ? $precheck->target->privacyRevision->value
+                        : 1;
+
+                    throw OperationException::revisionConflict($rev, $rev + 1);
                 }
+            }
+        }
 
-                $actorDistinctCount = $connection->table($reactionsTable)
-                    ->where('panel_id', $command->surface->panel->value)
-                    ->where('surface_instance_id', $surfaceInstanceId)
-                    ->where('target_type', $command->target->type)
-                    ->where('target_key', $command->target->value)
-                    ->where('actor_type', $actorRef->type)
-                    ->where('actor_id', $actorRef->id)
-                    ->count();
-
-                if ($actorDistinctCount >= $options->maxPerTarget) {
-                    throw InvalidPayloadException::invalid(
-                        "Actor has reached maximum distinct reactions [{$options->maxPerTarget}] per target.",
-                        ['max_per_target' => $options->maxPerTarget],
-                    );
-                }
-
-                $reactionId = Ids::uuid7();
-                $inserted = true;
-
-                try {
-                    $connection->transaction(static function () use ($connection, $reactionsTable, $reactionId, $command, $surfaceInstanceId, $actorRef): void {
-                        $connection->table($reactionsTable)->insert([
-                            'id' => $reactionId,
-                            'panel_id' => $command->surface->panel->value,
-                            'surface_instance_id' => $surfaceInstanceId,
-                            'target_type' => $command->target->type,
-                            'target_key' => $command->target->value,
-                            'actor_type' => $actorRef->type,
-                            'actor_id' => $actorRef->id,
-                            'reaction_type' => $command->reactionType,
-                            'created_at' => gmdate('Y-m-d H:i:s.uP'),
-                        ]);
-                    });
-                } catch (QueryException $exception) {
-                    $sqlState = $exception->errorInfo[0] ?? null;
-                    if (! in_array($sqlState, ['23505', '23000'], true)) {
-                        throw $exception;
-                    }
-                    $inserted = false;
-                }
-
-                $revision = new Revision(1);
-                $event = null;
-
-                if ($inserted) {
-                    $revision = $this->adjustCount($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType, 1);
-                    $event = [
-                        'aggregate_type' => 'reaction_target',
-                        'aggregate_id' => $command->target->toWire(),
-                        'aggregate_revision' => $revision->value,
-                        'event_type' => 'sockit.reactions.added',
-                        'payload' => [
-                            'panel' => $command->surface->panel->value,
-                            'target' => $command->target->toWire(),
-                            'reaction_type' => $command->reactionType,
-                        ],
-                    ];
-                }
-
-                return [
-                    'result' => OperationResult::confirmed(
-                        $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
-                        new ResourceRef($command->surface->panel, ResourceKind::Reaction, $reactionId),
-                        $revision,
-                    ),
-                    'event' => $event,
-                ];
-            },
-        );
+        throw OperationException::revisionConflict(1, 2);
     }
 
     #[Override]
@@ -209,7 +224,7 @@ final readonly class DatabaseReactionService implements ReactionService
     {
         [, $surfaceDef] = $this->assertReactionsEnabled($command->surface);
 
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $digest = PayloadDigest::of('reactions.remove', $command->toDigestPayload());
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'reactions.remove');
         $envelope = new CommandEnvelope(
@@ -218,88 +233,112 @@ final readonly class DatabaseReactionService implements ReactionService
             digest: $digest,
         );
 
-        return $this->envelope->run(
-            envelope: $envelope,
-            surface: $command->surface,
-            action: 'sockit.reactions.remove',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef): void {
-                $this->authorizer->decide(new ActionRequest(
-                    actor: $verifiedActor,
-                    action: 'sockit.reactions.remove',
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $precheck = new class
+            {
+                public ?TargetResolution $target = null;
+            };
+
+            try {
+                return $this->runtime->envelope()->run(
+                    envelope: $envelope,
                     surface: $command->surface,
-                ))->requireAllowed();
+                    action: 'sockit.reactions.remove',
+                    preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
+                        $this->runtime->authorizer()->decide(new ActionRequest(
+                            actor: $verifiedActor,
+                            action: 'sockit.reactions.remove',
+                            surface: $command->surface,
+                        ))->requireAllowed();
 
-                $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef);
-            },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace): array {
-                $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
-                $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target);
+                        $precheck->target = $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef, requireWrite: true);
+                    },
+                    mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $precheck): array {
+                        $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
 
-                $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
-                $reactionsTable = $this->tables->table('reactions', $command->surface->panel);
-                $countsTable = $this->tables->table('reaction_counts', $command->surface->panel);
+                        $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
+                        $reactionsTable = $this->tables->table('reactions', $command->surface->panel);
+                        $countsTable = $this->tables->table('reaction_counts', $command->surface->panel);
 
-                $existing = $connection->table($reactionsTable)
-                    ->where('panel_id', $command->surface->panel->value)
-                    ->where('surface_instance_id', $surfaceInstanceId)
-                    ->where('target_type', $command->target->type)
-                    ->where('target_key', $command->target->value)
-                    ->where('actor_type', $actorRef->type)
-                    ->where('actor_id', $actorRef->id)
-                    ->where('reaction_type', $command->reactionType)
-                    ->first();
+                        $existing = $connection->table($reactionsTable)
+                            ->where('panel_id', $command->surface->panel->value)
+                            ->where('surface_instance_id', $surfaceInstanceId)
+                            ->where('target_type', $command->target->type)
+                            ->where('target_key', $command->target->value)
+                            ->where('actor_type', $actorRef->type)
+                            ->where('actor_id', $actorRef->id)
+                            ->where('reaction_type', $command->reactionType)
+                            ->first();
 
-                if (! is_object($existing)) {
-                    $revision = $this->currentRevision($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType);
+                        if (! is_object($existing)) {
+                            $revision = $this->currentRevision($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType);
 
-                    return [
-                        'result' => OperationResult::confirmed(
-                            $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
-                            new ResourceRef($command->surface->panel, ResourceKind::Reaction, 'none'),
-                            $revision,
-                        ),
-                        'event' => null,
-                    ];
+                            return [
+                                'result' => OperationResult::confirmed(
+                                    $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
+                                    new ResourceRef($command->surface->panel, ResourceKind::Reaction, 'none'),
+                                    $revision,
+                                ),
+                                'event' => null,
+                            ];
+                        }
+
+                        $existingId = SockitRows::str($existing, 'id');
+                        $deleted = $connection->table($reactionsTable)
+                            ->where('id', $existingId)
+                            ->delete();
+
+                        $revision = $deleted > 0
+                            ? $this->adjustCount($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType, -1)
+                            : $this->currentRevision($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType);
+
+                        return [
+                            'result' => OperationResult::confirmed(
+                                $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
+                                new ResourceRef($command->surface->panel, ResourceKind::Reaction, $existingId),
+                                $revision,
+                            ),
+                            'event' => $deleted > 0 ? [
+                                'aggregate_type' => 'reaction_target',
+                                'aggregate_id' => $this->reactionAggregateId($surfaceInstanceId, $command->target, $command->reactionType),
+                                'aggregate_revision' => $revision->value,
+                                'event_type' => 'sockit.reactions.removed',
+                                'payload' => [
+                                    'panel' => $command->surface->panel->value,
+                                    'surface' => $command->surface->toWire(),
+                                    'surface_instance_id' => $surfaceInstanceId,
+                                    'target' => $command->target->toWire(),
+                                    'reaction_type' => $command->reactionType,
+                                ],
+                            ] : null,
+                        ];
+                    },
+                    replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $precheck): void {
+                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
+                    },
+                );
+            } catch (ReactionTargetStaleException) {
+                if ($attempt === 2) {
+                    $rev = $precheck->target instanceof TargetResolution && $precheck->target->privacyRevision instanceof Revision
+                        ? $precheck->target->privacyRevision->value
+                        : 1;
+
+                    throw OperationException::revisionConflict($rev, $rev + 1);
                 }
+            }
+        }
 
-                $existingId = SockitRows::str($existing, 'id');
-                $deleted = $connection->table($reactionsTable)
-                    ->where('id', $existingId)
-                    ->delete();
-
-                $revision = $deleted > 0
-                    ? $this->adjustCount($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType, -1)
-                    : $this->currentRevision($connection, $countsTable, $command->surface->panel->value, $surfaceInstanceId, $command->target, $command->reactionType);
-
-                return [
-                    'result' => OperationResult::confirmed(
-                        $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value),
-                        new ResourceRef($command->surface->panel, ResourceKind::Reaction, $existingId),
-                        $revision,
-                    ),
-                    'event' => $deleted > 0 ? [
-                        'aggregate_type' => 'reaction_target',
-                        'aggregate_id' => $command->target->toWire(),
-                        'aggregate_revision' => $revision->value,
-                        'event_type' => 'sockit.reactions.removed',
-                        'payload' => [
-                            'panel' => $command->surface->panel->value,
-                            'target' => $command->target->toWire(),
-                            'reaction_type' => $command->reactionType,
-                        ],
-                    ] : null,
-                ];
-            },
-        );
+        throw OperationException::revisionConflict(1, 2);
     }
 
     #[Override]
     public function counts(SurfaceRef $surface, HostEntityRef $target): ReactionCountsView
     {
         [, $surfaceDef] = $this->assertReactionsEnabled($surface);
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
 
-        $this->resolveVisibleTarget($actor, $surface, $target, $surfaceDef);
+        $this->resolveVisibleTarget($actor, $surface, $target, $surfaceDef, requireWrite: false);
 
         $connection = $this->tables->connection($surface->panel);
         $surfaceRow = $connection->table($this->tables->table('surface_instances', $surface->panel))
@@ -350,9 +389,42 @@ final readonly class DatabaseReactionService implements ReactionService
         $connection = $this->tables->connection($panel);
         $reactionsTable = $this->tables->table('reactions', $panel);
         $countsTable = $this->tables->table('reaction_counts', $panel);
+        $outboxTable = $this->tables->table('outbox_events', $panel);
 
-        return $connection->transaction(function () use ($connection, $reactionsTable, $countsTable, $panel): int {
-            $connection->table($countsTable)->where('panel_id', $panel->value)->delete();
+        return $connection->transaction(function () use ($connection, $reactionsTable, $countsTable, $outboxTable, $panel): int {
+            $existingQuery = $connection->table($countsTable)->where('panel_id', $panel->value);
+            if ($connection->getDriverName() !== 'sqlite') {
+                $existingQuery->lockForUpdate();
+            }
+
+            /** @var array<string, array{surface_instance_id: string, target_type: string, target_key: string, reaction_type: string, count: int, source_revision: int}> $existingMap */
+            $existingMap = [];
+            foreach ($existingQuery->get() as $existingRow) {
+                $sId = SockitRows::str($existingRow, 'surface_instance_id');
+                $tType = SockitRows::str($existingRow, 'target_type');
+                $tKey = SockitRows::str($existingRow, 'target_key');
+                $rType = SockitRows::str($existingRow, 'reaction_type');
+                $existingMap[$this->bucketKey($sId, $tType, $tKey, $rType)] = [
+                    'surface_instance_id' => $sId,
+                    'target_type' => $tType,
+                    'target_key' => $tKey,
+                    'reaction_type' => $rType,
+                    'count' => SockitRows::int($existingRow, 'count'),
+                    'source_revision' => SockitRows::int($existingRow, 'source_revision', 1),
+                ];
+            }
+
+            /** @var array<string, int> $outboxMax */
+            $outboxMax = [];
+            $outboxRows = $connection->table($outboxTable)
+                ->selectRaw('aggregate_id, MAX(aggregate_revision) as max_rev')
+                ->where('panel_id', $panel->value)
+                ->where('aggregate_type', 'reaction_target')
+                ->groupBy('aggregate_id')
+                ->get();
+            foreach ($outboxRows as $oRow) {
+                $outboxMax[SockitRows::str($oRow, 'aggregate_id')] = SockitRows::int($oRow, 'max_rev', 0);
+            }
 
             $rows = $connection->table($reactionsTable)
                 ->selectRaw('panel_id, surface_instance_id, target_type, target_key, reaction_type, COUNT(*) as agg_count')
@@ -361,17 +433,74 @@ final readonly class DatabaseReactionService implements ReactionService
                 ->get();
 
             $written = 0;
+            $seenBuckets = [];
+
             foreach ($rows as $row) {
-                $connection->table($countsTable)->insert([
-                    'panel_id' => SockitRows::str($row, 'panel_id'),
-                    'surface_instance_id' => SockitRows::str($row, 'surface_instance_id'),
-                    'target_type' => SockitRows::str($row, 'target_type'),
-                    'target_key' => SockitRows::str($row, 'target_key'),
-                    'reaction_type' => SockitRows::str($row, 'reaction_type'),
-                    'count' => SockitRows::int($row, 'agg_count'),
-                    'source_revision' => 1,
-                ]);
+                $sId = SockitRows::str($row, 'surface_instance_id');
+                $tType = SockitRows::str($row, 'target_type');
+                $tKey = SockitRows::str($row, 'target_key');
+                $rType = SockitRows::str($row, 'reaction_type');
+                $aggCount = SockitRows::int($row, 'agg_count');
+                $bucketKey = $this->bucketKey($sId, $tType, $tKey, $rType);
+                $seenBuckets[$bucketKey] = true;
+
+                $aggId = $this->reactionAggregateId($sId, new HostEntityRef($tType, $tKey), $rType);
+                $maxOutboxRev = $outboxMax[$aggId] ?? 0;
+
+                if (isset($existingMap[$bucketKey])) {
+                    $old = $existingMap[$bucketKey];
+                    $baseRev = max($old['source_revision'], $maxOutboxRev);
+                    $nextRev = $old['count'] !== $aggCount ? $baseRev + 1 : $baseRev;
+
+                    $connection->table($countsTable)
+                        ->where('panel_id', $panel->value)
+                        ->where('surface_instance_id', $sId)
+                        ->where('target_type', $tType)
+                        ->where('target_key', $tKey)
+                        ->where('reaction_type', $rType)
+                        ->update([
+                            'count' => $aggCount,
+                            'source_revision' => $nextRev,
+                        ]);
+                } else {
+                    $connection->table($countsTable)->insert([
+                        'panel_id' => $panel->value,
+                        'surface_instance_id' => $sId,
+                        'target_type' => $tType,
+                        'target_key' => $tKey,
+                        'reaction_type' => $rType,
+                        'count' => $aggCount,
+                        'source_revision' => max(1, $maxOutboxRev + 1),
+                    ]);
+                }
+
                 $written++;
+            }
+
+            // Preserve zeroed reaction_counts buckets with monotonic source_revision rather than deleting history.
+            foreach ($existingMap as $bucketKey => $old) {
+                if (isset($seenBuckets[$bucketKey])) {
+                    continue;
+                }
+
+                $aggId = $this->reactionAggregateId(
+                    $old['surface_instance_id'],
+                    new HostEntityRef($old['target_type'], $old['target_key']),
+                    $old['reaction_type'],
+                );
+                $baseRev = max($old['source_revision'], $outboxMax[$aggId] ?? 0);
+                $nextRev = $old['count'] !== 0 ? $baseRev + 1 : $baseRev;
+
+                $connection->table($countsTable)
+                    ->where('panel_id', $panel->value)
+                    ->where('surface_instance_id', $old['surface_instance_id'])
+                    ->where('target_type', $old['target_type'])
+                    ->where('target_key', $old['target_key'])
+                    ->where('reaction_type', $old['reaction_type'])
+                    ->update([
+                        'count' => 0,
+                        'source_revision' => $nextRev,
+                    ]);
             }
 
             return $written;
@@ -400,16 +529,19 @@ final readonly class DatabaseReactionService implements ReactionService
         SurfaceRef $surface,
         HostEntityRef $target,
         SurfaceDefinition $surfaceDef,
+        bool $requireWrite,
     ): TargetResolution {
-        if ($this->surfacePolicy instanceof SurfaceAudiencePolicy) {
-            $admit = $this->surfacePolicy->admit($actor, $surface);
-            if (! $admit->canRead()) {
-                throw OperationException::audienceDenied($admit->reason);
-            }
+        $audienceGate = $this->runtime->audienceGate();
+        $admit = $requireWrite
+            ? $audienceGate->admitForWrite($actor, $surface)
+            : $audienceGate->admitForRead($actor, $surface);
+
+        if ($requireWrite ? ! $admit->canWrite() : ! $admit->canRead()) {
+            throw OperationException::audienceDenied($admit->reason);
         }
 
         $resolution = null;
-        foreach ($this->targetResolvers as $resolver) {
+        foreach ($this->runtime->targetResolvers() as $resolver) {
             if ($resolver->supports($target)) {
                 $resolution = $resolver->resolve($actor, $surface, $target);
 
@@ -435,7 +567,7 @@ final readonly class DatabaseReactionService implements ReactionService
         }
 
         if ($resolution->audience instanceof AudienceSpec) {
-            $verdict = $this->audienceGate->read($actor, new AudienceSubject(
+            $verdict = $audienceGate->read($actor, new AudienceSubject(
                 key: $target->toWire(),
                 spec: $resolution->audience,
                 author: $resolution->owner,
@@ -445,7 +577,7 @@ final readonly class DatabaseReactionService implements ReactionService
                 archiveReaders: $surfaceDef->archiveReaders,
             ));
 
-            if (! $verdict->canRead()) {
+            if ($requireWrite ? ! $verdict->canWrite() : ! $verdict->canRead()) {
                 throw OperationException::audienceDenied($verdict->reason);
             }
         }
@@ -453,32 +585,53 @@ final readonly class DatabaseReactionService implements ReactionService
         return $resolution;
     }
 
-    private function reverifyTargetInsideTx(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target): void
-    {
-        $resolution = null;
-        foreach ($this->targetResolvers as $resolver) {
+    private function reverifyTargetInsideTx(
+        ActorContext $actor,
+        SurfaceRef $surface,
+        HostEntityRef $target,
+        ?TargetResolution $prechecked,
+    ): void {
+        $lockingResolver = null;
+        foreach ($this->runtime->targetResolvers() as $resolver) {
             if ($resolver->supports($target)) {
-                $resolution = $resolver->resolve($actor, $surface, $target);
+                if ($resolver instanceof LocksTargetInTransaction) {
+                    $lockingResolver = $resolver;
+                }
 
                 break;
             }
         }
 
-        $missingReason = $resolution instanceof TargetResolution ? $resolution->reason : null;
-        if (! $resolution instanceof TargetResolution || ! $resolution->exists) {
-            throw match ($missingReason) {
+        // Never invoke external/arbitrary host TargetResolvers while holding DB transaction locks.
+        if (! $lockingResolver instanceof LocksTargetInTransaction) {
+            return;
+        }
+
+        $txResolution = $lockingResolver->resolve($actor, $surface, $target);
+
+        if (! $txResolution->exists) {
+            throw match ($txResolution->reason) {
                 'content.deleted' => OperationException::contentDeleted($target->value),
                 'content.erased' => OperationException::contentErased($target->value),
-                default => OperationException::contentHidden($missingReason ?? 'target.not_found'),
+                default => OperationException::contentHidden($txResolution->reason ?? 'target.not_found'),
             };
         }
 
-        if (! $resolution->visible) {
-            throw match ($resolution->reason) {
+        if (! $txResolution->visible) {
+            throw match ($txResolution->reason) {
                 'content.deleted' => OperationException::contentDeleted($target->value),
                 'content.erased' => OperationException::contentErased($target->value),
-                default => OperationException::contentHidden($resolution->reason ?? 'target.hidden'),
+                default => OperationException::contentHidden($txResolution->reason ?? 'target.hidden'),
             };
+        }
+
+        $preRevision = $prechecked?->privacyRevision?->value;
+        $txRevision = $txResolution->privacyRevision?->value;
+        $preAudience = $prechecked?->audience?->toWire();
+        $txAudience = $txResolution->audience?->toWire();
+
+        if ($preRevision !== $txRevision || $preAudience !== $txAudience) {
+            throw new ReactionTargetStaleException('Target audience or privacy revision changed after pre-transaction authorization.');
         }
     }
 
@@ -518,7 +671,16 @@ final readonly class DatabaseReactionService implements ReactionService
         $row = $query->first();
 
         if (! is_object($row)) {
+            $aggregateId = $this->reactionAggregateId($surfaceInstanceId, $target, $reactionType);
+            $maxOutboxRaw = $connection->table($this->tables->table('outbox_events', new PanelId($panelId)))
+                ->where('panel_id', $panelId)
+                ->where('aggregate_type', 'reaction_target')
+                ->where('aggregate_id', $aggregateId)
+                ->max('aggregate_revision');
+            $maxOutbox = is_int($maxOutboxRaw) || is_string($maxOutboxRaw) ? (int) $maxOutboxRaw : 0;
+            $initialRevision = max(1, $maxOutbox + 1);
             $initialCount = max(0, $delta);
+
             $connection->table($countsTable)->insert([
                 'panel_id' => $panelId,
                 'surface_instance_id' => $surfaceInstanceId,
@@ -526,10 +688,10 @@ final readonly class DatabaseReactionService implements ReactionService
                 'target_key' => $target->value,
                 'reaction_type' => $reactionType,
                 'count' => $initialCount,
-                'source_revision' => 1,
+                'source_revision' => $initialRevision,
             ]);
 
-            return new Revision(1);
+            return new Revision($initialRevision);
         }
 
         $nextCount = max(0, SockitRows::int($row, 'count') + $delta);
@@ -577,5 +739,20 @@ final readonly class DatabaseReactionService implements ReactionService
             ->first();
 
         return is_object($row) ? SockitRows::str($row, 'id') : Ids::uuid7();
+    }
+
+    private function reactionAggregateId(string $surfaceInstanceId, HostEntityRef $target, string $reactionType): string
+    {
+        return hash('sha256', CanonicalJson::encode([
+            'surface_instance_id' => $surfaceInstanceId,
+            'target_type' => $target->type,
+            'target_key' => $target->value,
+            'reaction_type' => $reactionType,
+        ]));
+    }
+
+    private function bucketKey(string $surfaceInstanceId, string $targetType, string $targetKey, string $reactionType): string
+    {
+        return $surfaceInstanceId.'|'.$targetType.'|'.$targetKey.'|'.$reactionType;
     }
 }

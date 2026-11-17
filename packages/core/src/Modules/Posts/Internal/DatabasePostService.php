@@ -9,10 +9,7 @@ use DateTimeZone;
 use Illuminate\Database\Connection;
 use Override;
 use Packman\Attributes\Internal;
-use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Audience\AudienceGate;
-use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
@@ -28,14 +25,14 @@ use SocKit\Modules\Posts\Data\PostView;
 use SocKit\Modules\Posts\Data\PublishPostCommand;
 use SocKit\Modules\Posts\Data\TransitionPostStateCommand;
 use SocKit\Modules\Posts\Enums\ContentState;
-use SocKit\Operations\Contracts\ContentSafetyChecker;
-use SocKit\Operations\Contracts\OperationEnvelopeRunner;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\Exceptions\PanelException;
+use SocKit\Registrars\Internal\SockitRuntime;
+use SocKit\Support\CanonicalJson;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\PayloadDigest;
@@ -50,22 +47,18 @@ use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 
 /**
- * Panel-isolated Posts write and single-post read service enforcing CAS, transactional outbox,
- * safety prescreening, AudienceGate checks, and tombstoned erasure.
+ * Panel-isolated Posts write and single-post read service enforcing ActionAuthorizer,
+ * SurfaceAdmission, AudienceGate, minor-aware privacy defaults, CAS, safety hold outbox
+ * invalidation events, and tombstoned erasure.
  */
 #[Internal]
 final readonly class DatabasePostService implements PostService
 {
-    /** @param list<ContentSafetyChecker> $safetyCheckers */
     public function __construct(
         private SockitTables $tables,
         private PanelDefinitions $panels,
         private SurfaceDefinitions $surfaces,
-        private ActorContexts $actors,
-        private OperationEnvelopeRunner $envelope,
-        private ActionAuthorizer $authorizer,
-        private AudienceGate $audienceGate,
-        private array $safetyCheckers = [],
+        private SockitRuntime $runtime,
     ) {}
 
     #[Override]
@@ -89,8 +82,7 @@ final readonly class DatabasePostService implements PostService
             );
         }
 
-        $actor = $this->actors->current();
-        $audience = $command->audience ?? $this->defaultAudience($actor, $command->surface, $surfaceDef);
+        $actor = $this->runtime->actors()->current();
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'posts.publish');
         $digest = PayloadDigest::of('posts.publish', $command->toDigestPayload());
 
@@ -100,28 +92,31 @@ final readonly class DatabasePostService implements PostService
             digest: $digest,
         );
 
-        $safety = new class($command->asDraft ? ContentState::Draft : ContentState::Published)
+        $state = new class($command->asDraft ? ContentState::Draft : ContentState::Published)
         {
+            public ?AudienceSpec $audience = null;
+
             public function __construct(
                 public ContentState $state,
                 public ?string $reason = null,
             ) {}
         };
 
-        return $this->envelope->run(
+        return $this->runtime->envelope()->run(
             envelope: $envelope,
             surface: $command->surface,
             action: 'sockit.posts.publish',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $audience, $safety): void {
-                $this->authorizer->decide(new ActionRequest(
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $state): void {
+                $this->runtime->authorizer()->decide(new ActionRequest(
                     actor: $verifiedActor,
                     action: 'sockit.posts.publish',
                     surface: $command->surface,
                 ))->requireAllowed();
 
-                $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $audience, $surfaceDef);
+                $state->audience = $command->audience ?? $this->defaultAudience($verifiedActor, $command->surface, $surfaceDef);
+                $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $state->audience, $surfaceDef);
 
-                [$safety->state, $safety->reason] = $this->runSafetyChecks(
+                [$state->state, $state->reason] = $this->runSafetyChecks(
                     actor: $verifiedActor,
                     surface: $command->surface,
                     body: $command->body,
@@ -129,13 +124,14 @@ final readonly class DatabasePostService implements PostService
                     defaultState: $command->asDraft ? ContentState::Draft : ContentState::Published,
                 );
             },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $audience, $safety): array {
+            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $state): array {
                 $authorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
                 $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+                $audience = $state->audience ?? throw OperationException::audienceDenied('audience.unknown');
                 $now = $this->nowIso();
                 $postId = Ids::uuid7();
                 $encodedAudience = json_encode($audience->toWire(), JSON_THROW_ON_ERROR);
-                $publishedAt = $safety->state === ContentState::Published ? $now : null;
+                $publishedAt = $state->state === ContentState::Published ? $now : null;
 
                 $connection->table($this->tables->table('posts', $command->surface->panel))->insert([
                     'id' => $postId,
@@ -144,7 +140,7 @@ final readonly class DatabasePostService implements PostService
                     'surface_incarnation' => $command->surface->incarnation->value,
                     'author_type' => $authorRef->type,
                     'author_id' => $authorRef->id,
-                    'state' => $safety->state->value,
+                    'state' => $state->state->value,
                     'body_format' => $command->bodyFormat,
                     'current_body' => $command->body,
                     'revision' => 1,
@@ -161,23 +157,23 @@ final readonly class DatabasePostService implements PostService
                 $connection->table($this->tables->table('post_revisions', $command->surface->panel))->insert([
                     'post_id' => $postId,
                     'revision' => 1,
-                    'state' => $safety->state->value,
+                    'state' => $state->state->value,
                     'body_format' => $command->bodyFormat,
                     'body' => $command->body,
                     'audience_wire' => $encodedAudience,
                     'actor_type' => $authorRef->type,
                     'actor_id' => $authorRef->id,
-                    'reason_code' => $safety->reason,
+                    'reason_code' => $state->reason,
                     'recorded_at' => $now,
                 ]);
 
                 $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
-                if ($safety->state === ContentState::Held) {
+                if ($state->state === ContentState::Held) {
                     return [
                         'result' => OperationResult::rejected(
                             SockitErrorCode::ContentHeld,
-                            ['post_id' => $postId, 'reason' => $safety->reason ?? 'safety.hold'],
+                            ['post_id' => $postId, 'reason' => $state->reason ?? 'safety.hold'],
                             $receiptId,
                         ),
                         'event' => null,
@@ -188,7 +184,7 @@ final readonly class DatabasePostService implements PostService
 
                 return [
                     'result' => OperationResult::confirmed($receiptId, $resource, new Revision(1)),
-                    'event' => $safety->state === ContentState::Published ? [
+                    'event' => $state->state === ContentState::Published ? [
                         'aggregate_type' => 'post',
                         'aggregate_id' => $postId,
                         'aggregate_revision' => 1,
@@ -201,6 +197,31 @@ final readonly class DatabasePostService implements PostService
                         ],
                     ] : null,
                 ];
+            },
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+                if (! $replay->resource instanceof ResourceRef) {
+                    return;
+                }
+
+                $postsTable = $this->tables->table('posts', $command->surface->panel);
+                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $replay->resource->id);
+                $currentState = ContentState::from(SockitRows::str($row, 'state'));
+
+                if ($currentState === ContentState::Erased) {
+                    throw OperationException::contentErased($replay->resource->id);
+                }
+
+                if ($currentState === ContentState::Deleted) {
+                    throw OperationException::contentDeleted($replay->resource->id);
+                }
+
+                if (! $command->asDraft && $currentState === ContentState::Held) {
+                    throw OperationException::contentHeld('content.held');
+                }
+
+                if (! $command->asDraft && $currentState === ContentState::Hidden) {
+                    throw OperationException::contentHidden('content.hidden');
+                }
             },
         );
     }
@@ -226,7 +247,7 @@ final readonly class DatabasePostService implements PostService
             );
         }
 
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'posts.edit');
         $digest = PayloadDigest::of('posts.edit', $command->toDigestPayload());
 
@@ -237,42 +258,71 @@ final readonly class DatabasePostService implements PostService
             expectedRevision: $command->expectedRevision,
         );
 
-        $safety = new class
+        $precheck = new class
         {
             public ?ContentState $state = null;
 
             public ?string $reason = null;
+
+            public string $effectiveBodyFormat = 'plain';
+
+            public string $effectiveAudienceCanonical = '';
         };
 
-        return $this->envelope->run(
+        return $this->runtime->envelope()->run(
             envelope: $envelope,
             surface: $command->surface,
             action: 'sockit.posts.edit',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $safety): void {
-                $this->authorizer->decide(new ActionRequest(
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
+                $this->runtime->authorizer()->decide(new ActionRequest(
                     actor: $verifiedActor,
                     action: 'sockit.posts.edit',
                     surface: $command->surface,
                     resource: new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
                 ))->requireAllowed();
 
-                if ($command->audience instanceof AudienceSpec) {
-                    $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $command->audience, $surfaceDef);
+                $conn = $this->tables->connection($command->surface->panel);
+                $existing = $conn->table($this->tables->table('posts', $command->surface->panel))
+                    ->where('panel_id', $command->surface->panel->value)
+                    ->where('id', $command->postId)
+                    ->first();
+
+                if (! is_object($existing)) {
+                    throw OperationException::contentHidden('post.not_found');
                 }
+
+                $existingState = ContentState::from(SockitRows::str($existing, 'state'));
+                if ($existingState === ContentState::Deleted) {
+                    throw OperationException::contentDeleted($command->postId);
+                }
+                if ($existingState === ContentState::Erased) {
+                    throw OperationException::contentErased($command->postId);
+                }
+
+                $existingAudienceWire = SockitRows::jsonArray($existing, 'audience_wire');
+                $effectiveAudience = $command->audience instanceof AudienceSpec
+                    ? $command->audience
+                    : AudienceSpec::fromWire($existingAudienceWire);
+                $precheck->effectiveAudienceCanonical = CanonicalJson::encode($effectiveAudience->toWire());
+
+                // Always enforce current surface admission, containment, privacy floor, and audience on edit.
+                $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $effectiveAudience, $surfaceDef);
+
+                $precheck->effectiveBodyFormat = $command->bodyFormat ?? SockitRows::str($existing, 'body_format');
 
                 [$checkedState, $checkedReason] = $this->runSafetyChecks(
                     actor: $verifiedActor,
                     surface: $command->surface,
                     body: $command->body,
-                    bodyFormat: $command->bodyFormat ?? 'plain',
+                    bodyFormat: $precheck->effectiveBodyFormat,
                     defaultState: ContentState::Published,
                 );
                 if ($checkedState === ContentState::Held) {
-                    $safety->state = ContentState::Held;
-                    $safety->reason = $checkedReason;
+                    $precheck->state = ContentState::Held;
+                    $precheck->reason = $checkedReason;
                 }
             },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $safety): array {
+            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $precheck): array {
                 $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
                 $postsTable = $this->tables->table('posts', $command->surface->panel);
                 $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
@@ -299,10 +349,19 @@ final readonly class DatabasePostService implements PostService
                 $nextRevision = $actualRevision + 1;
                 $currentAudienceWire = SockitRows::jsonArray($row, 'audience_wire');
                 $audienceWire = $command->audience instanceof AudienceSpec ? $command->audience->toWire() : $currentAudienceWire;
-                $audienceChanged = $command->audience instanceof AudienceSpec && $audienceWire !== $currentAudienceWire;
-                $nextPrivacyRevision = SockitRows::int($row, 'privacy_revision', 1) + ($audienceChanged ? 1 : 0);
-                $newState = $safety->state ?? $currentState;
                 $bodyFormat = $command->bodyFormat ?? SockitRows::str($row, 'body_format');
+
+                if (
+                    (! $command->audience instanceof AudienceSpec && CanonicalJson::encode($currentAudienceWire) !== $precheck->effectiveAudienceCanonical)
+                    || ($command->bodyFormat === null && $bodyFormat !== $precheck->effectiveBodyFormat)
+                ) {
+                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                }
+
+                $audienceChanged = $command->audience instanceof AudienceSpec
+                    && CanonicalJson::encode($audienceWire) !== CanonicalJson::encode($currentAudienceWire);
+                $nextPrivacyRevision = SockitRows::int($row, 'privacy_revision', 1) + ($audienceChanged ? 1 : 0);
+                $newState = $precheck->state ?? $currentState;
                 $encodedAudience = json_encode($audienceWire, JSON_THROW_ON_ERROR);
                 $now = $this->nowIso();
 
@@ -333,20 +392,35 @@ final readonly class DatabasePostService implements PostService
                     'audience_wire' => $encodedAudience,
                     'actor_type' => $actorRef->type,
                     'actor_id' => $actorRef->id,
-                    'reason_code' => $safety->reason,
+                    'reason_code' => $precheck->reason,
                     'recorded_at' => $now,
                 ]);
 
                 $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
                 if ($newState === ContentState::Held) {
+                    $event = $currentState === ContentState::Published ? [
+                        'aggregate_type' => 'post',
+                        'aggregate_id' => $command->postId,
+                        'aggregate_revision' => $nextRevision,
+                        'event_type' => 'sockit.posts.state_changed',
+                        'payload' => [
+                            'panel' => $command->surface->panel->value,
+                            'post_id' => $command->postId,
+                            'previous_state' => $currentState->value,
+                            'new_state' => ContentState::Held->value,
+                            'revision' => $nextRevision,
+                            'reason_code' => $precheck->reason ?? 'safety.hold',
+                        ],
+                    ] : null;
+
                     return [
                         'result' => OperationResult::rejected(
                             SockitErrorCode::ContentHeld,
-                            ['post_id' => $command->postId, 'reason' => $safety->reason ?? 'safety.hold'],
+                            ['post_id' => $command->postId, 'reason' => $precheck->reason ?? 'safety.hold'],
                             $receiptId,
                         ),
-                        'event' => null,
+                        'event' => $event,
                     ];
                 }
 
@@ -370,6 +444,29 @@ final readonly class DatabasePostService implements PostService
                     ],
                 ];
             },
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+                $postsTable = $this->tables->table('posts', $command->surface->panel);
+                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
+
+                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
+                }
+
+                $currentState = ContentState::from(SockitRows::str($row, 'state'));
+                if ($currentState === ContentState::Erased) {
+                    throw OperationException::contentErased($command->postId);
+                }
+                if ($currentState === ContentState::Deleted) {
+                    throw OperationException::contentDeleted($command->postId);
+                }
+                if ($replay->isSuccess() && $currentState === ContentState::Held) {
+                    throw OperationException::contentHeld('content.held');
+                }
+                if ($replay->isSuccess() && $currentState === ContentState::Hidden) {
+                    throw OperationException::contentHidden('content.hidden');
+                }
+            },
         );
     }
 
@@ -378,7 +475,7 @@ final readonly class DatabasePostService implements PostService
     {
         [, $surfaceDef] = $this->assertPostsEnabled($command->surface);
 
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'posts.transition');
         $digest = PayloadDigest::of('posts.transition', $command->toDigestPayload());
 
@@ -404,17 +501,22 @@ final readonly class DatabasePostService implements PostService
             public ?string $reason = null;
         };
 
-        return $this->envelope->run(
+        return $this->runtime->envelope()->run(
             envelope: $envelope,
             surface: $command->surface,
             action: $action,
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $action, $surfaceDef, $safety): void {
-                $this->authorizer->decide(new ActionRequest(
+                $this->runtime->authorizer()->decide(new ActionRequest(
                     actor: $verifiedActor,
                     action: $action,
                     surface: $command->surface,
                     resource: new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
                 ))->requireAllowed();
+
+                $admission = $this->runtime->audienceGate()->admitForWrite($verifiedActor, $command->surface);
+                if (! $admission->canWrite()) {
+                    throw OperationException::audienceDenied($admission->reason);
+                }
 
                 if ($command->targetState === ContentState::Published) {
                     $existing = $this->tables->connection($command->surface->panel)
@@ -549,13 +651,28 @@ final readonly class DatabasePostService implements PostService
                 $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
                 if ($effectiveTarget === ContentState::Held) {
+                    $heldEvent = $currentState === ContentState::Published ? [
+                        'aggregate_type' => 'post',
+                        'aggregate_id' => $command->postId,
+                        'aggregate_revision' => $nextRevision,
+                        'event_type' => 'sockit.posts.state_changed',
+                        'payload' => [
+                            'panel' => $command->surface->panel->value,
+                            'post_id' => $command->postId,
+                            'previous_state' => $currentState->value,
+                            'new_state' => ContentState::Held->value,
+                            'revision' => $nextRevision,
+                            'reason_code' => $safety->reason ?? 'safety.hold',
+                        ],
+                    ] : null;
+
                     return [
                         'result' => OperationResult::rejected(
                             SockitErrorCode::ContentHeld,
                             ['post_id' => $command->postId, 'reason' => $safety->reason ?? 'safety.hold'],
                             $receiptId,
                         ),
-                        'event' => null,
+                        'event' => $heldEvent,
                     ];
                 }
 
@@ -581,6 +698,33 @@ final readonly class DatabasePostService implements PostService
                     ],
                 ];
             },
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+                $postsTable = $this->tables->table('posts', $command->surface->panel);
+                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
+
+                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
+                }
+
+                $currentState = ContentState::from(SockitRows::str($row, 'state'));
+
+                if ($currentState === ContentState::Erased && $command->targetState !== ContentState::Erased) {
+                    throw OperationException::contentErased($command->postId);
+                }
+
+                if ($currentState === ContentState::Deleted && ! in_array($command->targetState, [ContentState::Deleted, ContentState::Erased], true)) {
+                    throw OperationException::contentDeleted($command->postId);
+                }
+
+                if ($command->targetState === ContentState::Published && $replay->isSuccess() && $currentState !== ContentState::Published) {
+                    if ($currentState === ContentState::Held) {
+                        throw OperationException::contentHeld('content.held');
+                    }
+
+                    throw OperationException::contentHidden('content.'.$currentState->value);
+                }
+            },
         );
     }
 
@@ -588,7 +732,7 @@ final readonly class DatabasePostService implements PostService
     public function get(SurfaceRef $surface, string $postId): PostView
     {
         [, $surfaceDef] = $this->assertPostsEnabled($surface);
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
 
         $connection = $this->tables->connection($surface->panel);
         $row = $connection->table($this->tables->table('posts', $surface->panel))
@@ -632,7 +776,7 @@ final readonly class DatabasePostService implements PostService
                     throw OperationException::contentHidden('content.draft');
                 }
             } else {
-                $modDecision = $this->authorizer->decide(new ActionRequest(
+                $modDecision = $this->runtime->authorizer()->decide(new ActionRequest(
                     actor: $actor,
                     action: 'sockit.posts.view_hidden',
                     surface: $surface,
@@ -648,7 +792,7 @@ final readonly class DatabasePostService implements PostService
         $audience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
         $archived = SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
 
-        $verdict = $this->audienceGate->read($actor, new AudienceSubject(
+        $verdict = $this->runtime->audienceGate()->read($actor, new AudienceSubject(
             key: $postId,
             spec: $audience,
             author: $author,
@@ -698,7 +842,7 @@ final readonly class DatabasePostService implements PostService
 
     private function defaultAudience(ActorContext $actor, SurfaceRef $surface, SurfaceDefinition $surfaceDef): AudienceSpec
     {
-        return match ($surfaceDef->effectiveFloor->defaultScope) {
+        return match ($surfaceDef->effectiveFloor->defaultFor($actor)) {
             Scope::Platform => AudienceSpec::platform(),
             Scope::Public => AudienceSpec::public(),
             Scope::Contour => $surfaceDef->contourLevel !== null
@@ -719,7 +863,7 @@ final readonly class DatabasePostService implements PostService
         AudienceSpec $audience,
         SurfaceDefinition $surfaceDef,
     ): void {
-        $verdict = $this->audienceGate->publish(
+        $verdict = $this->runtime->audienceGate()->publish(
             author: $actor,
             subject: new AudienceSubject(
                 key: 'publish:'.$surface->panel->value,
@@ -737,7 +881,12 @@ final readonly class DatabasePostService implements PostService
             return;
         }
 
-        if (in_array($verdict->reason, ['audience.denied.outside_surface', 'audience.denied.boundary_unproven', 'audience.denied.exceeds_floor'], true)) {
+        if (in_array($verdict->reason, [
+            'audience.denied.scope_not_allowed',
+            'audience.denied.scope_too_wide',
+            'audience.denied.contour_level_unknown',
+            'audience.denied.exceeds_floor',
+        ], true)) {
             throw OperationException::audienceNotContained($verdict->reason);
         }
 
@@ -755,7 +904,7 @@ final readonly class DatabasePostService implements PostService
         $state = $defaultState;
         $reason = null;
 
-        foreach ($this->safetyCheckers as $checker) {
+        foreach ($this->runtime->safetyCheckers() as $checker) {
             $verdict = $checker->assess($actor, $surface, 'post', $body, ['format' => $bodyFormat]);
 
             if ($verdict->decision === 'reject') {

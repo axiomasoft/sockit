@@ -13,13 +13,9 @@ use Packman\Attributes\Internal;
 use Packman\Errors\Laravel\ProblemDefinitions;
 use Packman\Foundation\Contracts\PackageRegistrar;
 use Packman\Plugins\Contracts\Registry\PluginInspector;
-use Packman\Plugins\Internal\Contributions\ExtensionRegistry;
-use RuntimeException;
 use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Contracts\ActorContextResolver;
 use SocKit\Actors\Contracts\TenantResolver;
-use SocKit\Actors\SingleInstallationTenantResolver;
-use SocKit\Audience\AllowAuthenticatedPersonAuthorizer;
 use SocKit\Audience\AudienceEvaluator;
 use SocKit\Audience\AudienceGate;
 use SocKit\Audience\Contracts\ActionAuthorizer;
@@ -28,9 +24,9 @@ use SocKit\Audience\Contracts\ContourResolver;
 use SocKit\Audience\Contracts\GroupMembershipResolver;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Configuration\SockitOptions;
-use SocKit\Console\DiagnoseCommand;
-use SocKit\Console\OutboxRunCommand;
-use SocKit\Console\RebuildReactionsCommand;
+use SocKit\Console\Diagnostics\DiagnoseCommand;
+use SocKit\Console\Operations\OutboxRunCommand;
+use SocKit\Console\Reactions\RebuildReactionsCommand;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Database\StorageCollisionChecker;
 use SocKit\Diagnostics\SockitDoctorCheck;
@@ -44,23 +40,22 @@ use SocKit\Modules\Posts\Internal\DatabaseFeedService;
 use SocKit\Modules\Posts\Internal\DatabasePostService;
 use SocKit\Modules\Reactions\Contracts\ReactionService;
 use SocKit\Modules\Reactions\Internal\DatabaseReactionService;
-use SocKit\Operations\Contracts\ContentSafetyChecker;
 use SocKit\Operations\Contracts\OperationEnvelopeRunner;
-use SocKit\Operations\Contracts\OutboxConsumer;
 use SocKit\Operations\Contracts\OutboxRelay;
+use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Operations\Internal\DatabaseOperationEnvelope;
 use SocKit\Operations\Internal\DatabaseOutboxService;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Internal\SockitPanelRegistry;
 use SocKit\Panels\SockitPanelProvider;
+use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Contracts\SurfaceService;
-use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Surfaces\Internal\DatabaseSurfaceService;
 use SocKit\Surfaces\Internal\SurfaceRegistry;
 
 /**
- * Registers SocKit's runtime services, capability implementations, slot adapters, and Artisan commands.
+ * Registers SocKit's immutable definition registries, fail-closed security SPIs, runtime services, and Artisan commands.
  */
 #[Internal]
 final class SockitCoreRegistrar implements PackageRegistrar
@@ -87,6 +82,8 @@ final class SockitCoreRegistrar implements PackageRegistrar
             panels: $app->make(PanelDefinitions::class),
         ));
 
+        $app->singleton(SockitRuntime::class, static fn (Application $app): SockitRuntime => new SockitRuntime($app));
+
         $this->registerSpiCapabilities($app);
         $this->registerKernelAndModuleServices($app);
 
@@ -99,9 +96,7 @@ final class SockitCoreRegistrar implements PackageRegistrar
         ));
 
         $app->singleton(SockitPanelProvider::class, static fn (Application $app): SockitPanelProvider => new SockitPanelProvider(
-            actors: $app->bound(ActorContextResolver::class) ? $app->make(ActorContextResolver::class) : null,
-            tenants: $app->make(TenantResolver::class),
-            authorizer: $app->make(ActionAuthorizer::class),
+            container: $app,
         ));
 
         ProblemDefinitions::register($app, dirname(__DIR__, 2).'/composer.json', SockitProblemDefinitions::class);
@@ -110,6 +105,26 @@ final class SockitCoreRegistrar implements PackageRegistrar
     #[Override]
     public function boot(Application $app): void
     {
+        if (! $app->bound(GroupMembershipResolver::class)) {
+            $configuredGroupResolver = $app->make(SockitOptions::class)->groupResolver;
+
+            if ($configuredGroupResolver !== null || $this->isPluginActive($app, 'axiomasoft.sockit.groups')) {
+                $app->bind(GroupMembershipResolver::class, static function (Application $app): GroupMembershipResolver {
+                    $configured = $app->make(SockitOptions::class)->groupResolver;
+
+                    if ($configured !== null) {
+                        /** @var GroupMembershipResolver */
+                        return $app->make($configured);
+                    }
+
+                    return new DatabaseGroupMembershipResolver(
+                        tables: $app->make(SockitTables::class),
+                        panels: $app->make(PanelDefinitions::class),
+                    );
+                });
+            }
+        }
+
         if ($app->runningInConsole()) {
             Artisan::starting(static function (Artisan $artisan): void {
                 $artisan->resolveCommands([
@@ -121,33 +136,54 @@ final class SockitCoreRegistrar implements PackageRegistrar
         }
     }
 
+    private function isPluginActive(Application $app, string $pluginId): bool
+    {
+        if (! $app->bound(PluginInspector::class)) {
+            return false;
+        }
+
+        foreach ($app->make(PluginInspector::class)->describe() as $plugin) {
+            if ($plugin->id === $pluginId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function registerSpiCapabilities(Application $app): void
     {
-        $app->singletonIf(TenantResolver::class, static function (Application $app): TenantResolver {
+        $app->bindIf(TenantResolver::class, static function (Application $app): TenantResolver {
             $configured = $app->make(SockitOptions::class)->tenantResolver;
+            if ($configured === null) {
+                throw OperationException::providerUnavailable(TenantResolver::class);
+            }
 
             /** @var TenantResolver */
-            return $app->make($configured ?? SingleInstallationTenantResolver::class);
+            return $app->make($configured);
         });
 
-        $app->singletonIf(ActorContextResolver::class, static function (Application $app): ActorContextResolver {
+        $app->bindIf(ActorContextResolver::class, static function (Application $app): ActorContextResolver {
             $configured = $app->make(SockitOptions::class)->actorResolver;
             if ($configured === null) {
-                throw new RuntimeException('No SocKit ActorContextResolver is configured or bound.');
+                throw OperationException::providerUnavailable(ActorContextResolver::class);
             }
 
             /** @var ActorContextResolver */
             return $app->make($configured);
         });
 
-        $app->singletonIf(ActionAuthorizer::class, static function (Application $app): ActionAuthorizer {
+        $app->bindIf(ActionAuthorizer::class, static function (Application $app): ActionAuthorizer {
             $configured = $app->make(SockitOptions::class)->authorizerResolver;
+            if ($configured === null) {
+                throw OperationException::providerUnavailable(ActionAuthorizer::class);
+            }
 
             /** @var ActionAuthorizer */
-            return $app->make($configured ?? AllowAuthenticatedPersonAuthorizer::class);
+            return $app->make($configured);
         });
 
-        $app->singletonIf(AudienceResolver::class, static function (Application $app): AudienceResolver {
+        $app->bindIf(AudienceResolver::class, static function (Application $app): AudienceResolver {
             $options = $app->make(SockitOptions::class);
             if ($options->audienceResolver !== null) {
                 /** @var AudienceResolver */
@@ -160,12 +196,12 @@ final class SockitCoreRegistrar implements PackageRegistrar
             return new AudienceEvaluator($contour, $groups);
         });
 
-        $app->singletonIf(ActorContexts::class, static fn (Application $app): ActorContexts => new ActorContexts(
+        $app->bindIf(ActorContexts::class, static fn (Application $app): ActorContexts => new ActorContexts(
             resolver: $app->make(ActorContextResolver::class),
             tenants: $app->make(TenantResolver::class),
         ));
 
-        $app->singletonIf(AudienceGate::class, static function (Application $app): AudienceGate {
+        $app->bindIf(AudienceGate::class, static function (Application $app): AudienceGate {
             $options = $app->make(SockitOptions::class);
             $policy = self::resolveOptionalSpi($app, SurfaceAudiencePolicy::class, $options->surfacePolicyResolver);
 
@@ -178,118 +214,58 @@ final class SockitCoreRegistrar implements PackageRegistrar
 
     private function registerKernelAndModuleServices(Application $app): void
     {
-        $app->singleton(DatabaseSurfaceService::class, static fn (Application $app): DatabaseSurfaceService => new DatabaseSurfaceService(
+        $app->bind(DatabaseSurfaceService::class, static fn (Application $app): DatabaseSurfaceService => new DatabaseSurfaceService(
             tables: $app->make(SockitTables::class),
             panels: $app->make(PanelDefinitions::class),
             surfaces: $app->make(SurfaceDefinitions::class),
-            actors: $app->make(ActorContexts::class),
+            runtime: $app->make(SockitRuntime::class),
         ));
         $app->alias(DatabaseSurfaceService::class, SurfaceService::class);
 
-        $app->singleton(DatabaseOperationEnvelope::class, static fn (Application $app): DatabaseOperationEnvelope => new DatabaseOperationEnvelope(
+        $app->bind(DatabaseOperationEnvelope::class, static fn (Application $app): DatabaseOperationEnvelope => new DatabaseOperationEnvelope(
             tables: $app->make(SockitTables::class),
             panels: $app->make(PanelDefinitions::class),
             surfaces: $app->make(SurfaceDefinitions::class),
-            actors: $app->make(ActorContexts::class),
+            runtime: $app->make(SockitRuntime::class),
         ));
         $app->alias(DatabaseOperationEnvelope::class, OperationEnvelopeRunner::class);
 
-        $app->singleton(DatabaseOutboxService::class, static function (Application $app): DatabaseOutboxService {
-            $consumers = [];
-            if ($app->bound(ExtensionRegistry::class)) {
-                /** @var list<OutboxConsumer> $slotConsumers */
-                $slotConsumers = $app->make(ExtensionRegistry::class)->resolve(OutboxConsumer::class);
-                $consumers = $slotConsumers;
-            }
-            foreach ($app->tagged(OutboxConsumer::class) as $tagged) {
-                if ($tagged instanceof OutboxConsumer) {
-                    $consumers[] = $tagged;
-                }
-            }
-
-            return new DatabaseOutboxService(
-                tables: $app->make(SockitTables::class),
-                panels: $app->make(PanelDefinitions::class),
-                consumers: $consumers,
-            );
-        });
+        $app->bind(DatabaseOutboxService::class, static fn (Application $app): DatabaseOutboxService => new DatabaseOutboxService(
+            tables: $app->make(SockitTables::class),
+            panels: $app->make(PanelDefinitions::class),
+            runtime: $app->make(SockitRuntime::class),
+        ));
         $app->alias(DatabaseOutboxService::class, OutboxRelay::class);
 
-        $app->singleton(DatabaseReactionService::class, static function (Application $app): DatabaseReactionService {
-            $options = $app->make(SockitOptions::class);
-            $policy = self::resolveOptionalSpi($app, SurfaceAudiencePolicy::class, $options->surfacePolicyResolver);
-            $resolvers = [];
-            if ($options->targetResolver !== null) {
-                $made = $app->make($options->targetResolver);
-                if ($made instanceof TargetResolver) {
-                    $resolvers[] = $made;
-                }
-            }
-            if ($app->bound(TargetResolver::class)) {
-                $resolvers[] = $app->make(TargetResolver::class);
-            }
-            if ($app->bound(ExtensionRegistry::class)) {
-                foreach ($app->make(ExtensionRegistry::class)->resolve(TargetResolver::class) as $slotResolver) {
-                    $resolvers[] = $slotResolver;
-                }
-            }
-
-            return new DatabaseReactionService(
-                tables: $app->make(SockitTables::class),
-                panels: $app->make(PanelDefinitions::class),
-                surfaces: $app->make(SurfaceDefinitions::class),
-                actors: $app->make(ActorContexts::class),
-                envelope: $app->make(OperationEnvelopeRunner::class),
-                authorizer: $app->make(ActionAuthorizer::class),
-                audienceGate: $app->make(AudienceGate::class),
-                surfacePolicy: $policy,
-                targetResolvers: $resolvers,
-            );
-        });
-        $app->alias(DatabaseReactionService::class, ReactionService::class);
-
-        $app->singleton(DatabasePostService::class, static function (Application $app): DatabasePostService {
-            $checkers = [];
-            if ($app->bound(ContentSafetyChecker::class)) {
-                $checkers[] = $app->make(ContentSafetyChecker::class);
-            }
-            if ($app->bound(ExtensionRegistry::class)) {
-                foreach ($app->make(ExtensionRegistry::class)->resolve(ContentSafetyChecker::class) as $slotChecker) {
-                    $checkers[] = $slotChecker;
-                }
-            }
-
-            return new DatabasePostService(
-                tables: $app->make(SockitTables::class),
-                panels: $app->make(PanelDefinitions::class),
-                surfaces: $app->make(SurfaceDefinitions::class),
-                actors: $app->make(ActorContexts::class),
-                envelope: $app->make(OperationEnvelopeRunner::class),
-                authorizer: $app->make(ActionAuthorizer::class),
-                audienceGate: $app->make(AudienceGate::class),
-                safetyCheckers: $checkers,
-            );
-        });
-        $app->alias(DatabasePostService::class, PostService::class);
-
-        $app->singleton(DatabaseFeedService::class, static fn (Application $app): DatabaseFeedService => new DatabaseFeedService(
+        $app->bind(DatabaseReactionService::class, static fn (Application $app): DatabaseReactionService => new DatabaseReactionService(
             tables: $app->make(SockitTables::class),
             panels: $app->make(PanelDefinitions::class),
             surfaces: $app->make(SurfaceDefinitions::class),
-            actors: $app->make(ActorContexts::class),
-            authorizer: $app->make(ActionAuthorizer::class),
-            audienceGate: $app->make(AudienceGate::class),
+            runtime: $app->make(SockitRuntime::class),
+        ));
+        $app->alias(DatabaseReactionService::class, ReactionService::class);
+
+        $app->bind(DatabasePostService::class, static fn (Application $app): DatabasePostService => new DatabasePostService(
+            tables: $app->make(SockitTables::class),
+            panels: $app->make(PanelDefinitions::class),
+            surfaces: $app->make(SurfaceDefinitions::class),
+            runtime: $app->make(SockitRuntime::class),
+        ));
+        $app->alias(DatabasePostService::class, PostService::class);
+
+        $app->bind(DatabaseFeedService::class, static fn (Application $app): DatabaseFeedService => new DatabaseFeedService(
+            tables: $app->make(SockitTables::class),
+            panels: $app->make(PanelDefinitions::class),
+            surfaces: $app->make(SurfaceDefinitions::class),
+            runtime: $app->make(SockitRuntime::class),
         ));
         $app->alias(DatabaseFeedService::class, FeedService::class);
 
-        $app->singleton(DatabaseGroupService::class, static fn (Application $app): DatabaseGroupService => new DatabaseGroupService(
+        $app->bind(DatabaseGroupService::class, static fn (Application $app): DatabaseGroupService => new DatabaseGroupService(
             tables: $app->make(SockitTables::class),
             panels: $app->make(PanelDefinitions::class),
             surfaces: $app->make(SurfaceDefinitions::class),
-            actors: $app->make(ActorContexts::class),
-            envelope: $app->make(OperationEnvelopeRunner::class),
-            authorizer: $app->make(ActionAuthorizer::class),
-            audienceGate: $app->make(AudienceGate::class),
+            runtime: $app->make(SockitRuntime::class),
         ));
         $app->alias(DatabaseGroupService::class, GroupService::class);
     }

@@ -25,14 +25,13 @@ use Packman\Plugins\Enums\Contributions\SlotKind;
 use Packman\Plugins\Laravel\PluginRegistrar;
 use SocKit\Actors\Contracts\ActorContextResolver;
 use SocKit\Actors\Contracts\TenantResolver;
-use SocKit\Actors\SingleInstallationTenantResolver;
-use SocKit\Audience\AllowAuthenticatedPersonAuthorizer;
 use SocKit\Audience\AudienceEvaluator;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Contracts\AudienceResolver;
 use SocKit\Audience\Contracts\ContourResolver;
 use SocKit\Audience\Contracts\GroupMembershipResolver;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
+use SocKit\Configuration\SockitConfigSection;
 use SocKit\Configuration\SockitOptions;
 use SocKit\Database\SockitSchemaSetProvider;
 use SocKit\Diagnostics\SockitDoctorCheck;
@@ -100,6 +99,13 @@ final class SockitCorePlugin implements ExtensionPlugin, WithCapabilities, WithC
         return SockitOptions::class;
     }
 
+    /** @return class-string<SockitConfigSection> */
+    #[Override]
+    public function configSectionClass(): string
+    {
+        return SockitConfigSection::class;
+    }
+
     #[Override]
     public function tablePrefix(): string
     {
@@ -158,7 +164,7 @@ final class SockitCorePlugin implements ExtensionPlugin, WithCapabilities, WithC
         return [
             TenantResolver::class => [
                 'config' => 'sockit.resolvers.tenant',
-                'default' => SingleInstallationTenantResolver::class,
+                'default' => null,
             ],
             ActorContextResolver::class => [
                 'config' => 'sockit.resolvers.actor',
@@ -166,7 +172,7 @@ final class SockitCorePlugin implements ExtensionPlugin, WithCapabilities, WithC
             ],
             ActionAuthorizer::class => [
                 'config' => 'sockit.resolvers.authorizer',
-                'default' => AllowAuthenticatedPersonAuthorizer::class,
+                'default' => null,
             ],
             AudienceResolver::class => [
                 'config' => 'sockit.resolvers.audience',

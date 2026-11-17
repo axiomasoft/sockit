@@ -89,6 +89,6 @@ abstract class SocKitTestCase extends PackageTestCase
 
     protected function migrateSockitSchema(?string $connection = null): void
     {
-        $this->migrateSchemaScope(SchemaScope::Central, $connection, includeModules: false);
+        $this->migrateSchemaScope(SchemaScope::Central, $connection, includeModules: true);
     }
 }

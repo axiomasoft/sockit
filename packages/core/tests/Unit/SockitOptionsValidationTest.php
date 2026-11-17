@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Packman\Config\Exceptions\InvalidConfiguration;
 use SocKit\Configuration\SockitOptions;
-use SocKit\Testing\FakeActorContextResolver;
+use SocKit\Testing\Fakes\Actors\FakeActorContextResolver;
 
 test('SockitOptions parses closed valid config cleanly and rejects unknown keys or closures', function (): void {
     $valid = SockitOptions::fromArray([
@@ -41,6 +41,11 @@ test('SockitOptions parses closed valid config cleanly and rejects unknown keys 
         ->and($valid->tablePrefix->value())->toBe('sk_');
 
     expect(fn (): SockitOptions => SockitOptions::fromArray(['unknown_root' => true]))->toThrow(InvalidConfiguration::class);
-    expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['settings' => ['posts' => ['bad' => static fn (): bool => true]]]]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['enabled' => ['unknown.module']]]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['enabled' => ['posts', 'sockit.posts']]]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['settings' => ['unknown.module' => ['flag' => true]]]]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['settings' => ['posts' => ['unknown_key' => true]]]]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['settings' => ['posts' => ['max_body_bytes' => -5]]]]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['settings' => ['posts' => ['max_body_bytes' => static fn (): bool => true]]]]))->toThrow(InvalidConfiguration::class);
     expect(fn (): SockitOptions => SockitOptions::fromArray(['resolvers' => ['actor' => 'NonExistent\\Class']]))->toThrow(InvalidConfiguration::class);
 });

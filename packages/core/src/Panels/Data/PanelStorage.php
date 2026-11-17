@@ -65,4 +65,11 @@ final readonly class PanelStorage
 
         return $resolved;
     }
+
+    public function qualifiedTable(string $logical): string
+    {
+        $table = $this->resolveTable($logical);
+
+        return $this->schema !== null ? $this->schema.'.'.$table : $table;
+    }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Panels;
 
+use Illuminate\Contracts\Container\Container;
 use Override;
 use Packman\Attributes\Spi;
 use Packman\Attributes\SpiKind;
@@ -17,6 +18,7 @@ use SocKit\Actors\Contracts\TenantResolver;
 use SocKit\Actors\Exceptions\UnresolvedActorException;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
+use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Surfaces\Data\Incarnation;
@@ -24,7 +26,7 @@ use SocKit\Surfaces\Data\SurfaceKindId;
 use SocKit\Surfaces\Data\SurfaceRef;
 
 /**
- * Headless Packman PanelCatalogue provider exposing SocKit's panel descriptor and admission evaluation.
+ * Headless Packman PanelCatalogue provider exposing SocKit's panel descriptor and fail-closed admission evaluation.
  */
 #[Spi(kind: SpiKind::Call, since: '1.0')]
 final readonly class SockitPanelProvider implements PackmanPanelProvider
@@ -43,6 +45,7 @@ final readonly class SockitPanelProvider implements PackmanPanelProvider
         private ?ActorContextResolver $actors = null,
         private ?TenantResolver $tenants = null,
         private ?ActionAuthorizer $authorizer = null,
+        private ?Container $container = null,
     ) {}
 
     #[Override]
@@ -65,21 +68,25 @@ final readonly class SockitPanelProvider implements PackmanPanelProvider
             return PanelAccess::deny('unauthenticated_actor');
         }
 
-        if (! $this->actors instanceof ActorContextResolver || ! $this->tenants instanceof TenantResolver || ! $this->authorizer instanceof ActionAuthorizer) {
-            return new PanelAccess(
-                view: true,
-                actions: ['view'],
-                reason: null,
-            );
+        try {
+            $actors = $this->resolveActorResolver();
+            $tenants = $this->resolveTenantResolver();
+            $authorizer = $this->resolveAuthorizer();
+        } catch (OperationException) {
+            return PanelAccess::deny('provider_unavailable');
+        }
+
+        if (! $actors instanceof ActorContextResolver || ! $tenants instanceof TenantResolver || ! $authorizer instanceof ActionAuthorizer) {
+            return PanelAccess::deny('provider_unavailable');
         }
 
         try {
-            $actor = $this->actors->current();
+            $actor = $actors->current();
         } catch (UnresolvedActorException) {
             return PanelAccess::deny('unauthenticated_actor');
         }
 
-        if (! $actor->installation->equals($this->tenants->current())) {
+        if (! $actor->installation->equals($tenants->current())) {
             return PanelAccess::deny('installation_mismatch');
         }
 
@@ -98,7 +105,7 @@ final readonly class SockitPanelProvider implements PackmanPanelProvider
                 continue;
             }
 
-            if ($this->authorizer->decide(new ActionRequest($actor, $action, $surface))->isAllowed()) {
+            if ($authorizer->decide(new ActionRequest($actor, $action, $surface))->isAllowed()) {
                 $permitted[] = $action;
             }
         }
@@ -108,5 +115,44 @@ final readonly class SockitPanelProvider implements PackmanPanelProvider
             actions: $permitted,
             reason: null,
         );
+    }
+
+    private function resolveActorResolver(): ?ActorContextResolver
+    {
+        if ($this->actors instanceof ActorContextResolver) {
+            return $this->actors;
+        }
+
+        if ($this->container instanceof Container && $this->container->bound(ActorContextResolver::class)) {
+            return $this->container->make(ActorContextResolver::class);
+        }
+
+        return null;
+    }
+
+    private function resolveTenantResolver(): ?TenantResolver
+    {
+        if ($this->tenants instanceof TenantResolver) {
+            return $this->tenants;
+        }
+
+        if ($this->container instanceof Container && $this->container->bound(TenantResolver::class)) {
+            return $this->container->make(TenantResolver::class);
+        }
+
+        return null;
+    }
+
+    private function resolveAuthorizer(): ?ActionAuthorizer
+    {
+        if ($this->authorizer instanceof ActionAuthorizer) {
+            return $this->authorizer;
+        }
+
+        if ($this->container instanceof Container && $this->container->bound(ActionAuthorizer::class)) {
+            return $this->container->make(ActionAuthorizer::class);
+        }
+
+        return null;
     }
 }

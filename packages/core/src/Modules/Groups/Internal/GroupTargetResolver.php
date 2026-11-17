@@ -16,15 +16,16 @@ use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\Revision;
-use SocKit\Surfaces\Contracts\TargetResolver;
+use SocKit\Surfaces\Contracts\LocksTargetInTransaction;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
 /**
- * TargetResolver slot handler contributed by GroupsPlugin for `group:*` targets.
+ * TargetResolver slot handler contributed by GroupsPlugin for `group:*` targets
+ * with same-DB transaction locking.
  */
 #[Internal]
-final readonly class GroupTargetResolver implements TargetResolver
+final readonly class GroupTargetResolver implements LocksTargetInTransaction
 {
     public function __construct(
         private SockitTables $tables,
@@ -47,13 +48,27 @@ final readonly class GroupTargetResolver implements TargetResolver
         $connection = $this->tables->connection($surface->panel);
         $groupsTable = $this->tables->table('groups', $surface->panel);
 
-        $row = $connection->table($groupsTable)
+        $query = $connection->table($groupsTable)
             ->where('panel_id', $surface->panel->value)
-            ->where('id', $target->value)
-            ->first();
+            ->where('id', $target->value);
+
+        if ($connection->transactionLevel() > 0 && $connection->getDriverName() !== 'sqlite') {
+            $query->lockForUpdate();
+        }
+
+        $row = $query->first();
 
         if (! is_object($row)) {
             return TargetResolution::missing($target, 'group.not_found');
+        }
+
+        if (
+            SockitRows::str($row, 'surface_kind') !== $surface->kind->value
+            || SockitRows::str($row, 'surface_host_type') !== $surface->host->type
+            || SockitRows::str($row, 'surface_host_value') !== $surface->host->value
+            || SockitRows::int($row, 'surface_incarnation', 1) !== $surface->incarnation->value
+        ) {
+            return TargetResolution::missing($target, 'group.wrong_surface');
         }
 
         if (SockitRows::str($row, 'state') !== 'active') {

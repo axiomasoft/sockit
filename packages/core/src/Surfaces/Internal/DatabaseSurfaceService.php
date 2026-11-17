@@ -10,13 +10,15 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
 use Override;
 use Packman\Attributes\Internal;
-use SocKit\Actors\ActorContexts;
+use SocKit\Actors\Data\ActorContext;
+use SocKit\Audience\Data\ActionRequest;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Data\PanelId;
+use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\HostEntityRef;
@@ -35,8 +37,8 @@ use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 use SocKit\Surfaces\Exceptions\SurfaceException;
 
 /**
- * Panel-isolated runtime surface instance manager supporting idempotent creation,
- * archival, and monotonic incarnation transitions.
+ * Panel-isolated runtime surface instance manager enforcing authorization and surface write admission,
+ * idempotent creation with absent-row race recovery, archival, and monotonic incarnation transitions.
  */
 #[Internal]
 final readonly class DatabaseSurfaceService implements SurfaceService
@@ -45,7 +47,7 @@ final readonly class DatabaseSurfaceService implements SurfaceService
         private SockitTables $tables,
         private PanelDefinitions $panels,
         private SurfaceDefinitions $surfaces,
-        private ActorContexts $actors,
+        private SockitRuntime $runtime,
     ) {}
 
     #[Override]
@@ -56,8 +58,9 @@ final readonly class DatabaseSurfaceService implements SurfaceService
         HostEntityRef $host,
         string $integration = 'sockit.core',
     ): SurfaceInstance {
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $this->assertDefinitionAllowsHost($panel, $kind, $host);
+        $this->authorizeWrite($actor, 'sockit.surface.ensure', new SurfaceRef($panel, $kind, $host, Incarnation::initial()));
 
         $connection = $this->tables->connection($panel);
         $table = $this->tables->table('surface_instances', $panel);
@@ -98,17 +101,39 @@ final readonly class DatabaseSurfaceService implements SurfaceService
 
             $now = $this->nowIso();
             $id = Ids::uuid7();
-            $connection->table($table)->insert([
-                'id' => $id,
-                'panel_id' => $panel->value,
-                'kind' => $kind->value,
-                'host_entity_type' => $host->type,
-                'host_entity_value' => $host->value,
-                'incarnation' => 1,
-                'lifecycle_state' => SurfaceLifecycleState::Active->value,
-                'created_at' => $now,
-                'archived_at' => null,
-            ]);
+
+            try {
+                $connection->transaction(static function () use ($connection, $table, $id, $panel, $kind, $host, $now): void {
+                    $connection->table($table)->insert([
+                        'id' => $id,
+                        'panel_id' => $panel->value,
+                        'kind' => $kind->value,
+                        'host_entity_type' => $host->type,
+                        'host_entity_value' => $host->value,
+                        'incarnation' => 1,
+                        'lifecycle_state' => SurfaceLifecycleState::Active->value,
+                        'created_at' => $now,
+                        'archived_at' => null,
+                    ]);
+                });
+            } catch (QueryException $exception) {
+                $sqlState = $exception->errorInfo[0] ?? null;
+
+                if (! in_array($sqlState, ['23505', '23000'], true)) {
+                    throw $exception;
+                }
+
+                $winnerRow = $query->first();
+
+                if (! is_object($winnerRow)) {
+                    throw $exception;
+                }
+
+                $instance = $this->hydrate($winnerRow);
+                $this->completeReceipt($connection, $receipts, $panel->value, $namespace->toWire(), $commandKey->value, $instance);
+
+                return $instance;
+            }
 
             $instance = new SurfaceInstance(
                 id: $id,
@@ -173,8 +198,9 @@ final readonly class DatabaseSurfaceService implements SurfaceService
     #[Override]
     public function archive(CommandKey $commandKey, SurfaceRef $ref, string $integration = 'sockit.core'): SurfaceInstance
     {
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $this->assertDefinitionAllowsHost($ref->panel, $ref->kind, $ref->host);
+        $this->authorizeWrite($actor, 'sockit.surface.archive', $ref);
 
         $connection = $this->tables->connection($ref->panel);
         $table = $this->tables->table('surface_instances', $ref->panel);
@@ -244,8 +270,9 @@ final readonly class DatabaseSurfaceService implements SurfaceService
         HostEntityRef $host,
         string $integration = 'sockit.core',
     ): SurfaceInstance {
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $this->assertDefinitionAllowsHost($panel, $kind, $host);
+        $this->authorizeWrite($actor, 'sockit.surface.reincarnate', new SurfaceRef($panel, $kind, $host, Incarnation::initial()));
 
         $connection = $this->tables->connection($panel);
         $table = $this->tables->table('surface_instances', $panel);
@@ -263,58 +290,108 @@ final readonly class DatabaseSurfaceService implements SurfaceService
             if ($existingReceipt !== null && isset($existingReceipt['resource_id']) && is_string($existingReceipt['resource_id'])) {
                 $replayed = $connection->table($table)->where('id', $existingReceipt['resource_id'])->first();
                 if (is_object($replayed)) {
-                    return $this->hydrate($replayed);
+                    $replayedInstance = $this->hydrate($replayed);
+                    $latestRow = $connection->table($table)
+                        ->where('panel_id', $panel->value)
+                        ->where('kind', $kind->value)
+                        ->where('host_entity_type', $host->type)
+                        ->where('host_entity_value', $host->value)
+                        ->orderByDesc('incarnation')
+                        ->first();
+
+                    if (is_object($latestRow) && SockitRows::int($latestRow, 'incarnation') !== $replayedInstance->incarnation->value) {
+                        throw SurfaceException::incarnationMismatch(SockitRows::int($latestRow, 'incarnation'), $replayedInstance->incarnation->value);
+                    }
+
+                    if ($replayedInstance->isArchived()) {
+                        throw SurfaceException::archived($panel->value.'/'.$kind->value);
+                    }
+
+                    return $replayedInstance;
                 }
             }
 
-            $latestQuery = $connection->table($table)
-                ->where('panel_id', $panel->value)
-                ->where('kind', $kind->value)
-                ->where('host_entity_type', $host->type)
-                ->where('host_entity_value', $host->value)
-                ->orderByDesc('incarnation');
+            $created = null;
+            for ($attempt = 0; $attempt < 3; $attempt++) {
+                try {
+                    $created = $connection->transaction(function () use ($connection, $table, $panel, $kind, $host): SurfaceInstance {
+                        $latestQuery = $connection->table($table)
+                            ->where('panel_id', $panel->value)
+                            ->where('kind', $kind->value)
+                            ->where('host_entity_type', $host->type)
+                            ->where('host_entity_value', $host->value)
+                            ->orderByDesc('incarnation');
 
-            if ($connection->getDriverName() !== 'sqlite') {
-                $latestQuery->lockForUpdate();
+                        if ($connection->getDriverName() !== 'sqlite') {
+                            $latestQuery->lockForUpdate();
+                        }
+
+                        $latest = $latestQuery->first();
+                        $nextIncarnation = is_object($latest) ? SockitRows::int($latest, 'incarnation') + 1 : 1;
+                        $now = $this->nowIso();
+
+                        if (is_object($latest) && SockitRows::str($latest, 'lifecycle_state') === SurfaceLifecycleState::Active->value) {
+                            $connection->table($table)->where('id', SockitRows::str($latest, 'id'))->update([
+                                'lifecycle_state' => SurfaceLifecycleState::Archived->value,
+                                'archived_at' => $now,
+                            ]);
+                        }
+
+                        $id = Ids::uuid7();
+                        $connection->table($table)->insert([
+                            'id' => $id,
+                            'panel_id' => $panel->value,
+                            'kind' => $kind->value,
+                            'host_entity_type' => $host->type,
+                            'host_entity_value' => $host->value,
+                            'incarnation' => $nextIncarnation,
+                            'lifecycle_state' => SurfaceLifecycleState::Active->value,
+                            'created_at' => $now,
+                            'archived_at' => null,
+                        ]);
+
+                        return new SurfaceInstance(
+                            id: $id,
+                            panel: $panel,
+                            kind: $kind,
+                            host: $host,
+                            incarnation: new Incarnation($nextIncarnation),
+                            lifecycleState: SurfaceLifecycleState::Active,
+                            createdAt: new DateTimeImmutable($now),
+                        );
+                    });
+
+                    break;
+                } catch (QueryException $exception) {
+                    $sqlState = $exception->errorInfo[0] ?? null;
+                    if ($attempt === 2 || ! in_array($sqlState, ['23505', '23000'], true)) {
+                        throw $exception;
+                    }
+                }
             }
 
-            $latest = $latestQuery->first();
-            $nextIncarnation = is_object($latest) ? SockitRows::int($latest, 'incarnation') + 1 : 1;
-            $now = $this->nowIso();
-
-            if (is_object($latest) && SockitRows::str($latest, 'lifecycle_state') === SurfaceLifecycleState::Active->value) {
-                $connection->table($table)->where('id', SockitRows::str($latest, 'id'))->update([
-                    'lifecycle_state' => SurfaceLifecycleState::Archived->value,
-                    'archived_at' => $now,
-                ]);
+            if (! $created instanceof SurfaceInstance) {
+                throw SurfaceException::invalidDefinition('SURFACE_RACE', 'Unable to advance surface incarnation under contention.');
             }
 
-            $id = Ids::uuid7();
-            $connection->table($table)->insert([
-                'id' => $id,
-                'panel_id' => $panel->value,
-                'kind' => $kind->value,
-                'host_entity_type' => $host->type,
-                'host_entity_value' => $host->value,
-                'incarnation' => $nextIncarnation,
-                'lifecycle_state' => SurfaceLifecycleState::Active->value,
-                'created_at' => $now,
-                'archived_at' => null,
-            ]);
-
-            $created = new SurfaceInstance(
-                id: $id,
-                panel: $panel,
-                kind: $kind,
-                host: $host,
-                incarnation: new Incarnation($nextIncarnation),
-                lifecycleState: SurfaceLifecycleState::Active,
-                createdAt: new DateTimeImmutable($now),
-            );
             $this->completeReceipt($connection, $receipts, $panel->value, $namespace->toWire(), $commandKey->value, $created);
 
             return $created;
         });
+    }
+
+    private function authorizeWrite(ActorContext $actor, string $action, SurfaceRef $surface): void
+    {
+        $this->runtime->authorizer()->decide(new ActionRequest(
+            actor: $actor,
+            action: $action,
+            surface: $surface,
+        ))->requireAllowed();
+
+        $admission = $this->runtime->audienceGate()->admitForWrite($actor, $surface);
+        if (! $admission->canWrite()) {
+            throw OperationException::audienceDenied($admission->reason);
+        }
     }
 
     private function assertDefinitionAllowsHost(PanelId $panel, SurfaceKindId $kind, HostEntityRef $host): void

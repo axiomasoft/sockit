@@ -22,7 +22,18 @@ use SocKit\Modules\Posts\Contracts\FeedService;
 use SocKit\Modules\Posts\Contracts\PostService;
 use SocKit\Modules\Reactions\Contracts\ReactionService;
 use SocKit\Operations\Contracts\ContentSafetyChecker;
+use SocKit\Operations\Contracts\OperationEnvelopeRunner;
+use SocKit\Operations\Contracts\OutboxRelay;
+use SocKit\Surfaces\Contracts\SurfaceService;
 use SocKit\Surfaces\Contracts\TargetResolver;
+use SocKit\Testing\Fakes\Actors\FakeActorContextResolver;
+use SocKit\Testing\Fakes\Actors\FakeTenantResolver;
+use SocKit\Testing\Fakes\Audience\FakeActionAuthorizer;
+use SocKit\Testing\Fakes\Audience\FakeContourResolver;
+use SocKit\Testing\Fakes\Audience\FakeGroupMembershipResolver;
+use SocKit\Testing\Fakes\Audience\FakeSurfaceAudiencePolicy;
+use SocKit\Testing\Fakes\Operations\FakeContentSafetyChecker;
+use SocKit\Testing\Fakes\Surfaces\FakeTargetResolver;
 
 /**
  * Coordinates in-memory test doubles across container bindings for SocKit feature and unit suites.
@@ -52,7 +63,6 @@ final readonly class SocKitFake
         $container->instance(ContourResolver::class, $fake->contours);
         $container->instance(TargetResolver::class, $fake->targets);
         $container->instance(ContentSafetyChecker::class, $fake->safety);
-        $container->instance(ActorContexts::class, new ActorContexts($fake->actors, $fake->tenants));
 
         $groupsPluginActive = false;
         if (! $forceFakeGroups && $container->bound(PluginInspector::class)) {
@@ -72,12 +82,16 @@ final readonly class SocKitFake
 
         if ($container instanceof IlluminateContainer) {
             foreach ([
+                ActorContexts::class,
                 AudienceResolver::class,
                 AudienceGate::class,
                 ReactionService::class,
                 PostService::class,
                 FeedService::class,
                 GroupService::class,
+                SurfaceService::class,
+                OperationEnvelopeRunner::class,
+                OutboxRelay::class,
             ] as $abstract) {
                 $container->forgetInstance($abstract);
             }

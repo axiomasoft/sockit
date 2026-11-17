@@ -13,7 +13,7 @@ use SocKit\Panels\Data\PanelDefinition;
 use SocKit\Panels\Data\PanelId;
 
 /**
- * Resolves panel-isolated database connections and physical table names.
+ * Resolves panel-isolated database connections and physical table names (including SQL schema qualification).
  */
 #[Internal]
 final readonly class SockitTables
@@ -46,7 +46,13 @@ final readonly class SockitTables
     public function table(string $logical, ?PanelId $panelId = null): string
     {
         if ($panelId instanceof PanelId && $this->panels->isFrozen() && $this->panels->has($panelId)) {
-            return $this->panels->get($panelId)->storage->resolveTable($logical);
+            $storage = $this->panels->get($panelId)->storage;
+
+            if ($storage->schema !== null && $this->connection($panelId)->getDriverName() !== 'sqlite') {
+                return $storage->qualifiedTable($logical);
+            }
+
+            return $storage->resolveTable($logical);
         }
 
         return $this->options->tablePrefix->table($logical);

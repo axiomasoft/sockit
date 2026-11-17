@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SocKit\Testing;
+namespace SocKit\Testing\Fakes\Surfaces;
 
 use Override;
 use Packman\Attributes\Api;

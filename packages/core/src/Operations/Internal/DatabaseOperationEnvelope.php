@@ -13,7 +13,6 @@ use JsonException;
 use Override;
 use Packman\Attributes\Internal;
 use RuntimeException;
-use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
@@ -24,7 +23,9 @@ use SocKit\Operations\Enums\OperationOutcome;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Exceptions\PanelException;
+use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Support\Data\PayloadDigest;
+use SocKit\Support\Data\ResourceRef;
 use SocKit\Support\Ids;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Data\SurfaceRef;
@@ -32,8 +33,9 @@ use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 use SocKit\Surfaces\Exceptions\SurfaceException;
 
 /**
- * Authoritative P2 operation envelope implementing actor resolution, pre-transaction guards,
- * PostgreSQL savepoint-safe receipt claim, surface incarnation verification, and atomic outbox insert.
+ * Authoritative P2 operation envelope implementing fresh actor resolution, pre-transaction guards,
+ * PostgreSQL savepoint-safe receipt claim, surface incarnation verification, replay lifecycle guards,
+ * and atomic outbox insert (including safety-held visibility invalidations).
  */
 #[Internal]
 final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunner
@@ -42,12 +44,13 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
         private SockitTables $tables,
         private PanelDefinitions $panels,
         private SurfaceDefinitions $surfaces,
-        private ActorContexts $actors,
+        private SockitRuntime $runtime,
     ) {}
 
     /**
      * @param  Closure(ActorContext): void  $preTransactionChecks
      * @param  Closure(ActorContext, Connection): array{result: OperationResult, event?: array{aggregate_type: string, aggregate_id: string, aggregate_revision: int, event_type: string, payload: array<string, mixed>}|null}  $mutation
+     * @param  (Closure(ActorContext, Connection, OperationResult): void)|null  $replayChecks
      */
     #[Override]
     public function run(
@@ -56,8 +59,9 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
         string $action,
         Closure $preTransactionChecks,
         Closure $mutation,
+        ?Closure $replayChecks = null,
     ): OperationResult {
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
 
         if (! $envelope->namespace->installation->equals($actor->installation)) {
             throw PanelException::bindingMismatch(
@@ -99,10 +103,19 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
             $surface,
             $actor,
             $mutation,
+            $replayChecks,
         ): OperationResult {
             $receiptId = $this->claimReceiptOrReplay($connection, $receiptsTable, $envelope, $surface, $replay);
 
             if ($replay instanceof OperationResult) {
+                $this->lockAndVerifySurface($connection, $surfacesTable, $surface);
+
+                if ($replayChecks instanceof Closure) {
+                    $replayChecks($actor, $connection, $replay);
+                } elseif ($replay->resource instanceof ResourceRef) {
+                    $this->assertNotTombstoned($connection, $surface, $replay->resource);
+                }
+
                 return $replay;
             }
 
@@ -128,7 +141,7 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
 
             $event = $outcome['event'] ?? null;
 
-            if ($result->outcome === OperationOutcome::Confirmed && $event !== null) {
+            if ($event !== null) {
                 $digest = PayloadDigest::of($event['event_type'], $event['payload'])->value;
                 $connection->table($outboxTable)->insert([
                     'id' => Ids::uuid7(),
@@ -146,12 +159,34 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
                     'lease_owner' => null,
                     'lease_until' => null,
                     'delivered_at' => null,
+                    'projection_lease_owner' => null,
+                    'projection_lease_until' => null,
+                    'projection_replayed_at' => null,
                     'last_problem_code' => null,
                 ]);
             }
 
             return $result;
         });
+    }
+
+    private function assertNotTombstoned(Connection $connection, SurfaceRef $surface, ResourceRef $resource): void
+    {
+        $tombstone = $connection->table($this->tables->table('resource_tombstones', $surface->panel))
+            ->where('panel_id', $surface->panel->value)
+            ->where('resource_kind', $resource->kind->value)
+            ->where('resource_id', $resource->id)
+            ->first();
+
+        if (! is_object($tombstone)) {
+            return;
+        }
+
+        if (SockitRows::optStr($tombstone, 'erased_at') !== null) {
+            throw OperationException::contentErased($resource->id);
+        }
+
+        throw OperationException::contentDeleted($resource->id);
     }
 
     private function claimReceiptOrReplay(

@@ -10,10 +10,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
 use Override;
 use Packman\Attributes\Internal;
-use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Audience\AudienceGate;
-use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
@@ -29,13 +26,13 @@ use SocKit\Modules\Groups\Data\RemoveGroupMemberCommand;
 use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupMemberStatus;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
-use SocKit\Operations\Contracts\OperationEnvelopeRunner;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\Exceptions\PanelException;
+use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\HostEntityRef;
@@ -47,11 +44,13 @@ use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Support\Ids;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Data\Incarnation;
-use SocKit\Surfaces\Data\SurfaceDefinition;
+use SocKit\Surfaces\Data\SurfaceKindId;
 use SocKit\Surfaces\Data\SurfaceRef;
+use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 
 /**
- * Panel-isolated Groups command and query service operating via {@see OperationEnvelopeRunner}.
+ * Panel-isolated Groups command and query service operating via {@see OperationEnvelopeRunner}
+ * and enforcing ActionAuthorizer, SurfaceAdmission, and fail-closed surface-scoped reads.
  */
 #[Internal]
 final readonly class DatabaseGroupService implements GroupService
@@ -60,10 +59,7 @@ final readonly class DatabaseGroupService implements GroupService
         private SockitTables $tables,
         private PanelDefinitions $panels,
         private SurfaceDefinitions $surfaces,
-        private ActorContexts $actors,
-        private OperationEnvelopeRunner $envelope,
-        private ActionAuthorizer $authorizer,
-        private AudienceGate $audienceGate,
+        private SockitRuntime $runtime,
     ) {}
 
     #[Override]
@@ -83,7 +79,7 @@ final readonly class DatabaseGroupService implements GroupService
             throw InvalidPayloadException::invalid('Secret groups are disabled on this panel.', [], '/visibility');
         }
 
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.create');
         $digest = PayloadDigest::of('groups.create', $command->toDigestPayload());
 
@@ -93,16 +89,12 @@ final readonly class DatabaseGroupService implements GroupService
             digest: $digest,
         );
 
-        return $this->envelope->run(
+        return $this->runtime->envelope()->run(
             envelope: $envelope,
             surface: $command->surface,
             action: 'sockit.groups.create',
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
-                $this->authorizer->decide(new ActionRequest(
-                    actor: $verifiedActor,
-                    action: 'sockit.groups.create',
-                    surface: $command->surface,
-                ))->requireAllowed();
+                $this->authorizeWrite($verifiedActor, 'sockit.groups.create', $command->surface);
             },
             mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace): array {
                 $creator = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
@@ -116,6 +108,10 @@ final readonly class DatabaseGroupService implements GroupService
                         $connection->table($groupsTable)->insert([
                             'id' => $groupId,
                             'panel_id' => $command->surface->panel->value,
+                            'surface_kind' => $command->surface->kind->value,
+                            'surface_host_type' => $command->surface->host->type,
+                            'surface_host_value' => $command->surface->host->value,
+                            'surface_incarnation' => $command->surface->incarnation->value,
                             'slug' => $command->slug,
                             'title' => $command->title,
                             'visibility' => $command->visibility->value,
@@ -167,6 +163,16 @@ final readonly class DatabaseGroupService implements GroupService
                     ],
                 ];
             },
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+                if (! $replay->resource instanceof ResourceRef) {
+                    return;
+                }
+
+                $groupRow = $this->lockGroup($connection, $this->tables->table('groups', $command->surface->panel), $command->surface->panel->value, $replay->resource->id);
+                if (SockitRows::str($groupRow, 'state') !== 'active') {
+                    throw OperationException::contentHidden('group.inactive');
+                }
+            },
         );
     }
 
@@ -175,7 +181,7 @@ final readonly class DatabaseGroupService implements GroupService
     {
         $this->assertGroupsEnabled($command->surface);
 
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.add_member');
         $digest = PayloadDigest::of('groups.add_member', $command->toDigestPayload());
 
@@ -186,23 +192,27 @@ final readonly class DatabaseGroupService implements GroupService
             expectedRevision: $command->expectedRevision,
         );
 
-        return $this->envelope->run(
+        return $this->runtime->envelope()->run(
             envelope: $envelope,
             surface: $command->surface,
             action: 'sockit.groups.manage',
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
-                $this->authorizer->decide(new ActionRequest(
-                    actor: $verifiedActor,
-                    action: 'sockit.groups.manage',
-                    surface: $command->surface,
-                    resource: new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
-                ))->requireAllowed();
+                $this->authorizeWrite(
+                    $verifiedActor,
+                    'sockit.groups.manage',
+                    $command->surface,
+                    new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                );
             },
             mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace): array {
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
                 $membersTable = $this->tables->table('group_members', $command->surface->panel);
 
                 $groupRow = $this->lockGroup($connection, $groupsTable, $command->surface->panel->value, $command->groupId);
+                if (SockitRows::str($groupRow, 'state') !== 'active') {
+                    throw OperationException::contentHidden('group.inactive');
+                }
+
                 $actualRevision = SockitRows::int($groupRow, 'revision');
 
                 if ($actualRevision !== $command->expectedRevision->value) {
@@ -268,6 +278,12 @@ final readonly class DatabaseGroupService implements GroupService
                     ],
                 ];
             },
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+                $groupRow = $this->lockGroup($connection, $this->tables->table('groups', $command->surface->panel), $command->surface->panel->value, $command->groupId);
+                if (SockitRows::str($groupRow, 'state') !== 'active') {
+                    throw OperationException::contentHidden('group.inactive');
+                }
+            },
         );
     }
 
@@ -276,7 +292,7 @@ final readonly class DatabaseGroupService implements GroupService
     {
         $this->assertGroupsEnabled($command->surface);
 
-        $actor = $this->actors->current();
+        $actor = $this->runtime->actors()->current();
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.remove_member');
         $digest = PayloadDigest::of('groups.remove_member', $command->toDigestPayload());
 
@@ -287,23 +303,27 @@ final readonly class DatabaseGroupService implements GroupService
             expectedRevision: $command->expectedRevision,
         );
 
-        return $this->envelope->run(
+        return $this->runtime->envelope()->run(
             envelope: $envelope,
             surface: $command->surface,
             action: 'sockit.groups.manage',
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
-                $this->authorizer->decide(new ActionRequest(
-                    actor: $verifiedActor,
-                    action: 'sockit.groups.manage',
-                    surface: $command->surface,
-                    resource: new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
-                ))->requireAllowed();
+                $this->authorizeWrite(
+                    $verifiedActor,
+                    'sockit.groups.manage',
+                    $command->surface,
+                    new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                );
             },
             mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace): array {
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
                 $membersTable = $this->tables->table('group_members', $command->surface->panel);
 
                 $groupRow = $this->lockGroup($connection, $groupsTable, $command->surface->panel->value, $command->groupId);
+                if (SockitRows::str($groupRow, 'state') !== 'active') {
+                    throw OperationException::contentHidden('group.inactive');
+                }
+
                 $actualRevision = SockitRows::int($groupRow, 'revision');
 
                 if ($actualRevision !== $command->expectedRevision->value) {
@@ -349,6 +369,12 @@ final readonly class DatabaseGroupService implements GroupService
                     ],
                 ];
             },
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+                $groupRow = $this->lockGroup($connection, $this->tables->table('groups', $command->surface->panel), $command->surface->panel->value, $command->groupId);
+                if (SockitRows::str($groupRow, 'state') !== 'active') {
+                    throw OperationException::contentHidden('group.inactive');
+                }
+            },
         );
     }
 
@@ -361,8 +387,9 @@ final readonly class DatabaseGroupService implements GroupService
             throw PanelException::bindingMismatch($panel->value, "Panel [{$panel->value}] does not enable module [groups].");
         }
 
-        $viewer = $this->actors->current();
-        $row = $this->tables->connection($panel)
+        $viewer = $this->runtime->actors()->current();
+        $connection = $this->tables->connection($panel);
+        $row = $connection
             ->table($this->tables->table('groups', $panel))
             ->where('panel_id', $panel->value)
             ->where('id', $groupId)
@@ -374,32 +401,47 @@ final readonly class DatabaseGroupService implements GroupService
 
         $visibility = GroupVisibility::from(SockitRows::str($row, 'visibility'));
         $creator = new ActorRef(SockitRows::str($row, 'created_by_type'), SockitRows::str($row, 'created_by_id'));
+        $surfaceKind = new SurfaceKindId(SockitRows::str($row, 'surface_kind'));
 
-        if ($visibility !== GroupVisibility::Public) {
-            $surfacesForPanel = array_values(array_filter(
-                $this->surfaces->all(),
-                static fn (SurfaceDefinition $surface): bool => $surface->panel->equals($panel),
-            ));
+        if (! $this->surfaces->has($panel, $surfaceKind)) {
+            throw OperationException::audienceDenied('audience.unknown');
+        }
 
-            if ($surfacesForPanel !== []) {
-                $firstSurface = new SurfaceRef(
-                    panel: $panel,
-                    kind: $surfacesForPanel[0]->kind,
-                    host: new HostEntityRef($surfacesForPanel[0]->hostType, $groupId),
-                    incarnation: Incarnation::initial(),
-                );
-                $verdict = $this->audienceGate->read($viewer, new AudienceSubject(
-                    key: $groupId,
-                    spec: AudienceSpec::group(new GroupRef($groupId)),
-                    author: $creator,
-                    surface: $firstSurface,
-                    installation: $viewer->installation,
-                ));
+        $surfaceDef = $this->surfaces->get($panel, $surfaceKind);
+        $groupSurface = new SurfaceRef(
+            panel: $panel,
+            kind: $surfaceKind,
+            host: new HostEntityRef(SockitRows::str($row, 'surface_host_type'), SockitRows::str($row, 'surface_host_value')),
+            incarnation: new Incarnation(SockitRows::int($row, 'surface_incarnation', 1)),
+        );
 
-                if (! $verdict->canRead()) {
-                    throw OperationException::audienceDenied($verdict->reason);
-                }
-            }
+        $surfaceInstanceRow = $connection->table($this->tables->table('surface_instances', $panel))
+            ->where('panel_id', $panel->value)
+            ->where('kind', $groupSurface->kind->value)
+            ->where('host_entity_type', $groupSurface->host->type)
+            ->where('host_entity_value', $groupSurface->host->value)
+            ->where('incarnation', $groupSurface->incarnation->value)
+            ->first();
+
+        $surfaceArchived = is_object($surfaceInstanceRow)
+            && SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+
+        $spec = $visibility === GroupVisibility::Public
+            ? AudienceSpec::platform()
+            : AudienceSpec::group(new GroupRef($groupId));
+
+        $verdict = $this->runtime->audienceGate()->read($viewer, new AudienceSubject(
+            key: $groupId,
+            spec: $spec,
+            author: $creator,
+            surface: $groupSurface,
+            installation: $viewer->installation,
+            surfaceArchived: $surfaceArchived,
+            archiveReaders: $surfaceDef->archiveReaders,
+        ));
+
+        if (! $verdict->canRead()) {
+            throw OperationException::audienceDenied($verdict->reason);
         }
 
         return new GroupView(
@@ -414,6 +456,25 @@ final readonly class DatabaseGroupService implements GroupService
             createdAt: SockitRows::date($row, 'created_at'),
             updatedAt: SockitRows::date($row, 'updated_at'),
         );
+    }
+
+    private function authorizeWrite(
+        ActorContext $actor,
+        string $action,
+        SurfaceRef $surface,
+        ?ResourceRef $resource = null,
+    ): void {
+        $this->runtime->authorizer()->decide(new ActionRequest(
+            actor: $actor,
+            action: $action,
+            surface: $surface,
+            resource: $resource,
+        ))->requireAllowed();
+
+        $admission = $this->runtime->audienceGate()->admitForWrite($actor, $surface);
+        if (! $admission->canWrite()) {
+            throw OperationException::audienceDenied($admission->reason);
+        }
     }
 
     private function assertGroupsEnabled(SurfaceRef $surface): GroupsOptions

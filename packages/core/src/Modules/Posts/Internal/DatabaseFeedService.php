@@ -9,9 +9,6 @@ use DateTimeZone;
 use Illuminate\Database\Query\Builder;
 use Override;
 use Packman\Attributes\Internal;
-use SocKit\Actors\ActorContexts;
-use SocKit\Audience\AudienceGate;
-use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
@@ -26,6 +23,7 @@ use SocKit\Modules\Posts\Data\PostView;
 use SocKit\Modules\Posts\Enums\ContentState;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Exceptions\PanelException;
+use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\Revision;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
@@ -41,9 +39,7 @@ final readonly class DatabaseFeedService implements FeedService
         private SockitTables $tables,
         private PanelDefinitions $panels,
         private SurfaceDefinitions $surfaces,
-        private ActorContexts $actors,
-        private ActionAuthorizer $authorizer,
-        private AudienceGate $audienceGate,
+        private SockitRuntime $runtime,
     ) {}
 
     #[Override]
@@ -63,8 +59,8 @@ final readonly class DatabaseFeedService implements FeedService
         $options = PostsOptions::fromSettings($panelDef->settingsFor('posts'));
         $limit = min($query->limit, $options->maxPageLimit);
 
-        $viewer = $this->actors->current();
-        $this->authorizer->decide(new ActionRequest(
+        $viewer = $this->runtime->actors()->current();
+        $this->runtime->authorizer()->decide(new ActionRequest(
             actor: $viewer,
             action: 'sockit.posts.feed',
             surface: $query->surface,
@@ -90,6 +86,7 @@ final readonly class DatabaseFeedService implements FeedService
         $batchSize = max($limit * 2, 20);
         $accepted = [];
         $hasMoreRaw = false;
+        $audienceGate = $this->runtime->audienceGate();
 
         while (count($accepted) < $limit) {
             $qb = $connection->table($postsTable)
@@ -146,7 +143,7 @@ final readonly class DatabaseFeedService implements FeedService
                 );
             }
 
-            $verdicts = $this->audienceGate->readMany($viewer, $subjects);
+            $verdicts = $audienceGate->readMany($viewer, $subjects);
             $lastSeenRow = null;
 
             foreach ($slice as $index => $row) {

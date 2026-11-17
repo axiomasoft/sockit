@@ -15,16 +15,16 @@ use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\Revision;
-use SocKit\Surfaces\Contracts\TargetResolver;
+use SocKit\Surfaces\Contracts\LocksTargetInTransaction;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
 /**
  * TargetResolver slot handler contributed by PostsPlugin so Reactions (and host extensions)
- * resolve `post:*` targets through the slot boundary with row locking inside transactions.
+ * resolve `post:*` targets through the slot boundary with same-DB row locking inside transactions.
  */
 #[Internal]
-final readonly class PostTargetResolver implements TargetResolver
+final readonly class PostTargetResolver implements LocksTargetInTransaction
 {
     public function __construct(
         private SockitTables $tables,

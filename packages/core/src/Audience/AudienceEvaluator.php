@@ -11,6 +11,7 @@ use SocKit\Actors\Enums\ActorKind;
 use SocKit\Audience\Contracts\AudienceResolver;
 use SocKit\Audience\Contracts\ContourResolver;
 use SocKit\Audience\Contracts\GroupMembershipResolver;
+use SocKit\Audience\Contracts\PanelGroupMembershipResolver;
 use SocKit\Audience\Contracts\ResolvesAudienceInBatch;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
@@ -20,6 +21,7 @@ use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Enums\ContourMembership;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Enums\VerdictDecision;
+use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
 use Throwable;
@@ -30,6 +32,17 @@ use Throwable;
 #[Api(since: '1.0')]
 final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudienceInBatch
 {
+    /** @var list<string> */
+    private const array PROVEN_EXCLUDE_DENIALS = [
+        'audience.denied.anonymous',
+        'audience.denied.other_installation',
+        'audience.denied.not_addressed',
+        'audience.denied.not_in_group',
+        'audience.denied.not_in_contour',
+        'audience.denied.archived',
+        'audience.denied.excluded',
+    ];
+
     public function __construct(
         private ?ContourResolver $contours = null,
         private ?GroupMembershipResolver $groups = null,
@@ -42,7 +55,7 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             return AudienceVerdict::deny('audience.denied.other_installation');
         }
 
-        return $this->evaluateReadSpec($viewer, $subject->spec, $subject->archiveReaders);
+        return $this->evaluateReadSpec($viewer, $subject->spec, $subject->archiveReaders, $subject->surface->panel);
     }
 
     /**
@@ -77,16 +90,16 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             return AudienceVerdict::deny('audience.denied.other_installation');
         }
 
-        return $this->evaluatePublishSpec($author, $subject->spec, $floor);
+        return $this->evaluatePublishSpec($author, $subject->spec, $floor, $subject->surface->panel);
     }
 
-    private function evaluateReadSpec(ActorContext $viewer, AudienceSpec $spec, bool $archiveReaders): AudienceVerdict
+    private function evaluateReadSpec(ActorContext $viewer, AudienceSpec $spec, bool $archiveReaders, PanelId $panel): AudienceVerdict
     {
         if ($spec->operator === 'all_of') {
             $combined = AudienceVerdict::allow('audience.allowed.all_of');
 
             foreach ($spec->children as $child) {
-                $verdict = $this->evaluateReadSpec($viewer, $child, $archiveReaders);
+                $verdict = $this->evaluateReadSpec($viewer, $child, $archiveReaders, $panel);
 
                 if (! $verdict->canRead()) {
                     return $verdict;
@@ -100,36 +113,48 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
 
         if ($spec->operator === 'any_of') {
             $firstReadOnly = null;
+            $firstIndeterminate = null;
             $firstDeny = null;
 
             foreach ($spec->children as $child) {
-                $verdict = $this->evaluateReadSpec($viewer, $child, $archiveReaders);
+                $verdict = $this->evaluateReadSpec($viewer, $child, $archiveReaders, $panel);
 
                 if ($verdict->decision === VerdictDecision::Allow) {
                     return $verdict;
                 }
 
-                if ($verdict->decision === VerdictDecision::AllowReadOnly && ! $firstReadOnly instanceof AudienceVerdict) {
-                    $firstReadOnly = $verdict;
-                } elseif (! $firstDeny instanceof AudienceVerdict) {
-                    $firstDeny = $verdict;
+                if ($verdict->decision === VerdictDecision::AllowReadOnly) {
+                    $firstReadOnly ??= $verdict;
+
+                    continue;
+                }
+
+                if (in_array($verdict->reason, ['audience.resolver_error', 'audience.unknown'], true)) {
+                    $firstIndeterminate ??= $verdict;
+                } else {
+                    $firstDeny ??= $verdict;
                 }
             }
 
-            return $firstReadOnly ?? $firstDeny ?? AudienceVerdict::deny('audience.unknown');
+            return $firstReadOnly ?? $firstIndeterminate ?? $firstDeny ?? AudienceVerdict::deny('audience.unknown');
         }
 
         if ($spec->operator === 'exclude') {
-            $include = $this->evaluateReadSpec($viewer, $spec->children[0], $archiveReaders);
+            $include = $this->evaluateReadSpec($viewer, $spec->children[0], $archiveReaders, $panel);
 
             if (! $include->canRead()) {
                 return $include;
             }
 
-            $excluded = $this->evaluateReadSpec($viewer, $spec->children[1], $archiveReaders);
+            $excluded = $this->evaluateReadSpec($viewer, $spec->children[1], $archiveReaders, $panel);
 
             if ($excluded->canRead()) {
                 return AudienceVerdict::deny('audience.denied.excluded');
+            }
+
+            // Fail closed unless the exclusion check proved non-membership without resolver errors or missing SPIs.
+            if (! in_array($excluded->reason, self::PROVEN_EXCLUDE_DENIALS, true)) {
+                return $excluded;
             }
 
             return $include;
@@ -141,7 +166,7 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
                 ? AudienceVerdict::deny('audience.denied.anonymous')
                 : AudienceVerdict::allow('audience.allowed.platform'),
             Scope::Direct => $this->evaluateDirectRead($viewer, $spec->actors),
-            Scope::Group => $this->evaluateGroupRead($viewer, $spec),
+            Scope::Group => $this->evaluateGroupRead($viewer, $spec, $panel),
             Scope::Contour => $this->evaluateContourRead($viewer, $spec, $archiveReaders),
             default => AudienceVerdict::deny('audience.unknown'),
         };
@@ -163,7 +188,7 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
         return AudienceVerdict::deny('audience.denied.not_addressed');
     }
 
-    private function evaluateGroupRead(ActorContext $viewer, AudienceSpec $spec): AudienceVerdict
+    private function evaluateGroupRead(ActorContext $viewer, AudienceSpec $spec, PanelId $panel): AudienceVerdict
     {
         if ($viewer->kind === ActorKind::Anonymous) {
             return AudienceVerdict::deny('audience.denied.anonymous');
@@ -174,7 +199,9 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
         }
 
         try {
-            $isMember = $this->groups->isMember($viewer, $spec->group);
+            $isMember = $this->groups instanceof PanelGroupMembershipResolver
+                ? $this->groups->isMemberInPanel($viewer, $panel, $spec->group)
+                : $this->groups->isMember($viewer, $spec->group);
         } catch (Throwable) {
             return AudienceVerdict::deny('audience.resolver_error');
         }
@@ -210,13 +237,13 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
         };
     }
 
-    private function evaluatePublishSpec(ActorContext $author, AudienceSpec $spec, PrivacyFloor $floor): AudienceVerdict
+    private function evaluatePublishSpec(ActorContext $author, AudienceSpec $spec, PrivacyFloor $floor, PanelId $panel): AudienceVerdict
     {
-        if ($spec->operator === 'all_of') {
-            $combined = AudienceVerdict::allow('audience.allowed.all_of');
+        if ($spec->operator === 'all_of' || $spec->operator === 'any_of') {
+            $combined = AudienceVerdict::allow('audience.allowed.'.$spec->operator);
 
             foreach ($spec->children as $child) {
-                $verdict = $this->evaluatePublishSpec($author, $child, $floor);
+                $verdict = $this->evaluatePublishSpec($author, $child, $floor, $panel);
 
                 if (! $verdict->canWrite()) {
                     return $verdict;
@@ -228,25 +255,8 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             return $combined;
         }
 
-        if ($spec->operator === 'any_of') {
-            $firstAllow = null;
-            $firstDeny = null;
-
-            foreach ($spec->children as $child) {
-                $verdict = $this->evaluatePublishSpec($author, $child, $floor);
-
-                if ($verdict->canWrite() && ! $firstAllow instanceof AudienceVerdict) {
-                    $firstAllow = $verdict;
-                } elseif (! $verdict->canWrite() && ! $firstDeny instanceof AudienceVerdict) {
-                    $firstDeny = $verdict;
-                }
-            }
-
-            return $firstAllow ?? $firstDeny ?? AudienceVerdict::deny('audience.unknown');
-        }
-
         if ($spec->operator === 'exclude') {
-            return $this->evaluatePublishSpec($author, $spec->children[0], $floor);
+            return $this->evaluatePublishSpec($author, $spec->children[0], $floor, $panel);
         }
 
         if (! $spec->scope instanceof Scope) {
@@ -265,19 +275,21 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             Scope::Public => AudienceVerdict::allow('audience.allowed.public'),
             Scope::Platform => AudienceVerdict::allow('audience.allowed.platform'),
             Scope::Direct => AudienceVerdict::allow('audience.allowed.direct'),
-            Scope::Group => $this->evaluateGroupPublish($author, $spec),
+            Scope::Group => $this->evaluateGroupPublish($author, $spec, $panel),
             Scope::Contour => $this->evaluateContourPublish($author, $spec, $floor),
         };
     }
 
-    private function evaluateGroupPublish(ActorContext $author, AudienceSpec $spec): AudienceVerdict
+    private function evaluateGroupPublish(ActorContext $author, AudienceSpec $spec, PanelId $panel): AudienceVerdict
     {
         if (! $this->groups instanceof GroupMembershipResolver || ! $spec->group instanceof GroupRef) {
             return AudienceVerdict::deny('audience.unknown');
         }
 
         try {
-            $isMember = $this->groups->isMember($author, $spec->group);
+            $isMember = $this->groups instanceof PanelGroupMembershipResolver
+                ? $this->groups->isMemberInPanel($author, $panel, $spec->group)
+                : $this->groups->isMember($author, $spec->group);
         } catch (Throwable) {
             return AudienceVerdict::deny('audience.resolver_error');
         }

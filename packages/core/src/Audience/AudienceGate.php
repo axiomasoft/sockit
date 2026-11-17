@@ -10,16 +10,19 @@ use SocKit\Actors\Enums\ActorKind;
 use SocKit\Audience\Contracts\AudienceResolver;
 use SocKit\Audience\Contracts\ResolvesAudienceInBatch;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
+use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\PrivacyFloor;
+use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Enums\VerdictDecision;
 use SocKit\Support\Exceptions\InvalidPayloadException;
+use SocKit\Surfaces\Data\SurfaceRef;
 use Throwable;
 
 /**
  * Mandatory fail-closed audience gate enforcing installation, panel/surface admission,
- * containment, archival downgrade, and error isolation around any {@see AudienceResolver}.
+ * containment, privacy floors, archival downgrade, and error isolation around any {@see AudienceResolver}.
  */
 #[Api(since: '1.0')]
 final readonly class AudienceGate
@@ -28,6 +31,26 @@ final readonly class AudienceGate
         private AudienceResolver $resolver,
         private ?SurfaceAudiencePolicy $surfacePolicy = null,
     ) {}
+
+    public function admitForRead(ActorContext $actor, SurfaceRef $surface): AudienceVerdict
+    {
+        return $this->callAdmit($actor, $surface);
+    }
+
+    public function admitForWrite(ActorContext $actor, SurfaceRef $surface): AudienceVerdict
+    {
+        if ($actor->kind === ActorKind::Anonymous) {
+            return AudienceVerdict::deny('audience.denied.anonymous');
+        }
+
+        $admission = $this->callAdmit($actor, $surface);
+
+        if ($admission->decision === VerdictDecision::AllowReadOnly) {
+            return AudienceVerdict::deny('audience.denied.read_only');
+        }
+
+        return $admission;
+    }
 
     public function read(ActorContext $viewer, AudienceSubject $subject): AudienceVerdict
     {
@@ -173,21 +196,73 @@ final readonly class AudienceGate
             return AudienceVerdict::deny('audience.denied.outside_surface');
         }
 
+        $floorDenial = $this->enforcePublishFloor($author, $subject->spec, $floor);
+        if ($floorDenial instanceof AudienceVerdict) {
+            return $floorDenial;
+        }
+
         try {
-            return $this->resolver->decidePublish($author, $subject, $floor);
+            $decision = $this->resolver->decidePublish($author, $subject, $floor);
         } catch (Throwable) {
             return AudienceVerdict::deny('audience.resolver_error');
         }
+
+        if ($decision->decision === VerdictDecision::AllowReadOnly) {
+            return AudienceVerdict::deny('audience.denied.read_only');
+        }
+
+        return $decision;
+    }
+
+    private function enforcePublishFloor(ActorContext $author, AudienceSpec $spec, PrivacyFloor $floor): ?AudienceVerdict
+    {
+        if ($spec->operator === 'all_of' || $spec->operator === 'any_of') {
+            foreach ($spec->children as $child) {
+                $denial = $this->enforcePublishFloor($author, $child, $floor);
+                if ($denial instanceof AudienceVerdict) {
+                    return $denial;
+                }
+            }
+
+            return null;
+        }
+
+        if ($spec->operator === 'exclude') {
+            return $this->enforcePublishFloor($author, $spec->children[0], $floor);
+        }
+
+        if (! $spec->scope instanceof Scope) {
+            return AudienceVerdict::deny('audience.unknown');
+        }
+
+        if (! $floor->allowsScope($spec->scope)) {
+            return AudienceVerdict::deny('audience.denied.scope_not_allowed');
+        }
+
+        if ($spec->scope->isWiderThan($floor->maxFor($author))) {
+            return AudienceVerdict::deny('audience.denied.scope_too_wide');
+        }
+
+        if ($spec->scope === Scope::Contour && ($spec->contourLevel === null || ! $floor->allowsContourLevel($spec->contourLevel))) {
+            return AudienceVerdict::deny('audience.denied.contour_level_unknown');
+        }
+
+        return null;
     }
 
     private function admitSurface(ActorContext $actor, AudienceSubject $subject): AudienceVerdict
+    {
+        return $this->callAdmit($actor, $subject->surface);
+    }
+
+    private function callAdmit(ActorContext $actor, SurfaceRef $surface): AudienceVerdict
     {
         if (! $this->surfacePolicy instanceof SurfaceAudiencePolicy) {
             return AudienceVerdict::deny('audience.unknown');
         }
 
         try {
-            return $this->surfacePolicy->admit($actor, $subject->surface);
+            return $this->surfacePolicy->admit($actor, $surface);
         } catch (Throwable) {
             return AudienceVerdict::deny('audience.resolver_error');
         }

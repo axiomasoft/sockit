@@ -13,9 +13,20 @@ if [[ -z "$bin" || ! -x "$bin" ]]; then
 fi
 
 shim="$root/build/php84/bin"
-mkdir -p "$shim"
-ln -sf "$bin" "$shim/php"
-export PATH="$shim:$PATH"
+resolved_bin="$(readlink -f "$bin" 2>/dev/null || printf '%s' "$bin")"
+resolved_shim="$(readlink -f "$shim/php" 2>/dev/null || true)"
+
+if [[ -x "$shim/php" && "$resolved_shim" == "$resolved_bin" ]]; then
+    export PATH="$shim:$PATH"
+else
+    if [[ ! -w "$root" ]] || { [[ -e "$root/build" ]] && [[ ! -w "$root/build" ]]; }; then
+        shim="${TMPDIR:-/tmp}/packman-php84-shim-$(id -u)/bin"
+    fi
+
+    mkdir -p "$shim"
+    ln -sf "$bin" "$shim/php"
+    export PATH="$shim:$PATH"
+fi
 
 if [[ "${1:-}" == "--check" ]]; then
     version="$(php -r 'echo PHP_VERSION;')"

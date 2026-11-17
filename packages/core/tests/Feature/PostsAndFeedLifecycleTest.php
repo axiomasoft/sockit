@@ -33,7 +33,7 @@ use SocKit\Support\Data\Revision;
 use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\SurfaceKindId;
 use SocKit\Surfaces\Data\SurfaceRef;
-use SocKit\Testing\SpyOutboxConsumer;
+use SocKit\Testing\Fakes\Operations\SpyOutboxConsumer;
 use SocKit\Testkit\SocKitTestCase;
 
 final class PostsAndFeedLifecycleTest extends SocKitTestCase

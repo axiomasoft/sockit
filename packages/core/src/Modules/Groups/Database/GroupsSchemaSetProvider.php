@@ -30,7 +30,7 @@ final readonly class GroupsSchemaSetProvider implements SchemaSetProvider
                 path: dirname(__DIR__, 4).'/database/migrations/groups',
                 version: 1,
                 drivers: ['pgsql', 'sqlite'],
-                lifecycle: SchemaLifecycle::Platform,
+                lifecycle: SchemaLifecycle::Module,
                 requires: ['axiomasoft/sockit'],
             ),
         ];

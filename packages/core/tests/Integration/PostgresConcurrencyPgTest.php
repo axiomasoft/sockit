@@ -8,12 +8,18 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
+use LogicException;
+use Override;
 use Packman\Schema\Data\Compiler\ConstraintNames;
 use Packman\Testkit\Concurrency\Process\Concurrency;
 use Packman\Testkit\Data\Concurrency\ConcurrencyOutcome;
+use Packman\Testkit\Exceptions\Database\UnsafeTestDatabaseException;
 use PHPUnit\Framework\Attributes\Group;
-use RuntimeException;
+use SocKit\Actors\Data\ActorContext;
+use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\AudienceSpec;
+use SocKit\Audience\Data\AudienceVerdict;
+use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Core\Tests\Fixtures\PanelPgProvider;
 use SocKit\Core\Tests\Fixtures\PgWallSurfaceProvider;
 use SocKit\Errors\Enums\SockitErrorCode;
@@ -25,9 +31,14 @@ use SocKit\Modules\Posts\Enums\ContentState;
 use SocKit\Modules\Reactions\Contracts\ReactionService;
 use SocKit\Modules\Reactions\Data\AddReactionCommand;
 use SocKit\Operations\Contracts\OperationEnvelopeRunner;
+use SocKit\Operations\Contracts\OutboxConsumer;
+use SocKit\Operations\Contracts\OutboxRelay;
 use SocKit\Operations\Data\CommandEnvelope;
+use SocKit\Operations\Data\OutboxEventRecord;
+use SocKit\Operations\Enums\ReplayMode;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Data\PanelId;
+use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\HostEntityRef;
@@ -39,6 +50,7 @@ use SocKit\Surfaces\Contracts\SurfaceService;
 use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\SurfaceKindId;
 use SocKit\Surfaces\Data\SurfaceRef;
+use SocKit\Testing\Fakes\Operations\SpyOutboxConsumer;
 use SocKit\Testing\SocKitFake;
 use SocKit\Testkit\SocKitTestCase;
 
@@ -84,6 +96,10 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
     {
         parent::setUp();
 
+        $this->assertDestructiveSuitePgsqlAllowed('pgsql');
+
+        DB::connection('pgsql')->statement('DROP SCHEMA IF EXISTS tenant_alpha CASCADE');
+        DB::connection('pgsql')->statement('DROP SCHEMA IF EXISTS tenant_beta CASCADE');
         DB::connection('pgsql')->getSchemaBuilder()->dropAllTables();
         $this->migrateSockitSchema('pgsql');
     }
@@ -142,13 +158,14 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
             self::assertSame('23514', $e->errorInfo[0] ?? null);
         }
 
-        // Atomic rollback leaves zero posts, zero receipts, zero outbox rows when TX callback throws
+        // #20: Atomic rollback using valid FK & audience_wire verifies post write actually happened then rolled back cleanly
         $runner = $this->app->make(OperationEnvelopeRunner::class);
         $envelope = new CommandEnvelope(
             key: new CommandKey('cmd-pg-rollback-test-1'),
             namespace: new CommandNamespace(new InstallationRef('inst-1'), $surface->panel, 'sockit.posts', 'posts.publish'),
             digest: PayloadDigest::of('posts.publish', ['body' => 'boom']),
         );
+        $rollbackPostId = Ids::uuid7();
 
         try {
             $runner->run(
@@ -156,11 +173,11 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
                 $surface,
                 'sockit.posts.publish',
                 static function (): void {},
-                static function ($actor, $connection): array {
+                static function ($actor, $connection) use ($instance, $rollbackPostId): array {
                     $connection->table('sk_posts')->insert([
-                        'id' => Ids::uuid7(),
+                        'id' => $rollbackPostId,
                         'panel_id' => 'sockit.pg',
-                        'surface_instance_id' => Ids::uuid7(),
+                        'surface_instance_id' => $instance->id,
                         'surface_incarnation' => 1,
                         'author_type' => 'user',
                         'author_id' => 'alice',
@@ -169,19 +186,58 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
                         'current_body' => 'Will rollback',
                         'revision' => 1,
                         'privacy_revision' => 1,
-                        'audience_wire' => '{}',
+                        'audience_wire' => json_encode(AudienceSpec::platform()->toWire(), JSON_THROW_ON_ERROR),
                         'created_at' => gmdate('Y-m-d H:i:s.uP'),
                         'updated_at' => gmdate('Y-m-d H:i:s.uP'),
                     ]);
 
-                    throw new RuntimeException('Simulated post-write failure before commit.');
+                    self::assertSame(1, $connection->table('sk_posts')->where('id', $rollbackPostId)->count());
+
+                    throw new LogicException('Simulated post-write failure before commit.');
                 },
             );
-            self::fail('Expected RuntimeException.');
-        } catch (RuntimeException) {
-            self::assertSame(0, DB::connection('pgsql')->table('sk_posts')->count());
+            self::fail('Expected LogicException.');
+        } catch (LogicException $e) {
+            self::assertSame('Simulated post-write failure before commit.', $e->getMessage());
+            self::assertSame(0, DB::connection('pgsql')->table('sk_posts')->where('id', $rollbackPostId)->count());
             self::assertSame(0, DB::connection('pgsql')->table('sk_command_receipts')->where('command_key', 'cmd-pg-rollback-test-1')->count());
             self::assertSame(0, DB::connection('pgsql')->table('sk_outbox_events')->count());
+        }
+
+        // #18: Guard refuses destructive PG reset whenever PACKMAN_TEST_DESTRUCTIVE_OPT_IN is not enabled
+        $prevGetenv = getenv('PACKMAN_TEST_DESTRUCTIVE_OPT_IN');
+        $hadEnv = array_key_exists('PACKMAN_TEST_DESTRUCTIVE_OPT_IN', $_ENV);
+        $prevEnv = $_ENV['PACKMAN_TEST_DESTRUCTIVE_OPT_IN'] ?? null;
+        $hadServer = array_key_exists('PACKMAN_TEST_DESTRUCTIVE_OPT_IN', $_SERVER);
+        $prevServer = $_SERVER['PACKMAN_TEST_DESTRUCTIVE_OPT_IN'] ?? null;
+
+        try {
+            putenv('PACKMAN_TEST_DESTRUCTIVE_OPT_IN=0');
+            $_ENV['PACKMAN_TEST_DESTRUCTIVE_OPT_IN'] = '0';
+            $_SERVER['PACKMAN_TEST_DESTRUCTIVE_OPT_IN'] = '0';
+
+            try {
+                $this->assertDestructiveSuitePgsqlAllowed('pgsql');
+                self::fail('Expected UnsafeTestDatabaseException when PACKMAN_TEST_DESTRUCTIVE_OPT_IN=0.');
+            } catch (UnsafeTestDatabaseException) {
+                self::assertTrue(true);
+            }
+        } finally {
+            if ($prevGetenv === false) {
+                putenv('PACKMAN_TEST_DESTRUCTIVE_OPT_IN');
+            } else {
+                putenv('PACKMAN_TEST_DESTRUCTIVE_OPT_IN='.$prevGetenv);
+            }
+            if ($hadEnv) {
+                $_ENV['PACKMAN_TEST_DESTRUCTIVE_OPT_IN'] = $prevEnv;
+            } else {
+                unset($_ENV['PACKMAN_TEST_DESTRUCTIVE_OPT_IN']);
+            }
+            if ($hadServer) {
+                $_SERVER['PACKMAN_TEST_DESTRUCTIVE_OPT_IN'] = $prevServer;
+            } else {
+                unset($_SERVER['PACKMAN_TEST_DESTRUCTIVE_OPT_IN']);
+            }
         }
     }
 
@@ -367,5 +423,227 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
 
         $postRow = DB::connection('pgsql')->table('sk_posts')->where('id', $postId)->first();
         self::assertSame('hidden', (string) $postRow->state);
+    }
+
+    public function test_parallel_ensure_instance_absent_row_savepoint_race_and_outbox_skip_locked_leases(): void
+    {
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $panelId = new PanelId('sockit.pg');
+        $kindId = new SurfaceKindId('sockit.wall');
+        $host = new HostEntityRef('board', 'pg-ensure-absent-race');
+        $surface = new SurfaceRef($panelId, $kindId, $host, Incarnation::initial());
+
+        DB::disconnect('pgsql');
+
+        // #19: Concurrent ensureInstance on absent row creates exactly one surface instance via PG savepoint retry
+        $ensureOutcomes = Concurrency::run([
+            function () use ($panelId, $kindId, $host): string {
+                DB::purge('pgsql');
+
+                return $this->app->make(SurfaceService::class)
+                    ->ensureInstance(new CommandKey('cmd-pg-ensure-race-a'), $panelId, $kindId, $host)
+                    ->id;
+            },
+            function () use ($panelId, $kindId, $host): string {
+                DB::purge('pgsql');
+
+                return $this->app->make(SurfaceService::class)
+                    ->ensureInstance(new CommandKey('cmd-pg-ensure-race-b'), $panelId, $kindId, $host)
+                    ->id;
+            },
+        ]);
+
+        self::assertCount(2, $ensureOutcomes);
+        self::assertTrue($ensureOutcomes[0]->succeeded, $ensureOutcomes[0]->errorMessage ?? 'ensure 0 failed');
+        self::assertTrue($ensureOutcomes[1]->succeeded, $ensureOutcomes[1]->errorMessage ?? 'ensure 1 failed');
+        self::assertSame($ensureOutcomes[0]->value, $ensureOutcomes[1]->value);
+        self::assertSame(1, DB::connection('pgsql')->table('sk_surface_instances')->where('host_entity_value', 'pg-ensure-absent-race')->count());
+
+        // #14: Publish 4 posts, then run two PG outbox relay workers concurrently -> SKIP LOCKED delivers each event exactly once
+        $posts = $this->app->make(PostService::class);
+        for ($i = 1; $i <= 4; $i++) {
+            self::assertTrue($posts->publish(new PublishPostCommand(
+                key: new CommandKey("cmd-pg-skip-locked-post-{$i}"),
+                surface: $surface,
+                body: "Outbox worker item {$i}",
+                audience: AudienceSpec::platform(),
+            ))->isSuccess());
+        }
+
+        DB::disconnect('pgsql');
+
+        $relayOutcomes = Concurrency::run([
+            function () use ($panelId): array {
+                DB::purge('pgsql');
+                $spy = new class('worker-a') implements OutboxConsumer
+                {
+                    /** @var list<string> */
+                    public array $ids = [];
+
+                    public function __construct(private readonly string $key) {}
+
+                    #[Override]
+                    public function consumerKey(): string
+                    {
+                        return $this->key;
+                    }
+
+                    #[Override]
+                    public function supports(string $eventType): bool
+                    {
+                        return str_starts_with($eventType, 'sockit.');
+                    }
+
+                    #[Override]
+                    public function consume(OutboxEventRecord $event, ReplayMode $mode): void
+                    {
+                        $this->ids[] = $event->id;
+                        usleep(60_000);
+                    }
+                };
+                $this->app->instance(SpyOutboxConsumer::class, $spy);
+                $this->app->tag([SpyOutboxConsumer::class], OutboxConsumer::class);
+                $this->app->make(OutboxRelay::class)->relayPending($panelId, batchSize: 2, mode: ReplayMode::Normal);
+
+                return $spy->ids;
+            },
+            function () use ($panelId): array {
+                DB::purge('pgsql');
+                $spy = new class('worker-b') implements OutboxConsumer
+                {
+                    /** @var list<string> */
+                    public array $ids = [];
+
+                    public function __construct(private readonly string $key) {}
+
+                    #[Override]
+                    public function consumerKey(): string
+                    {
+                        return $this->key;
+                    }
+
+                    #[Override]
+                    public function supports(string $eventType): bool
+                    {
+                        return str_starts_with($eventType, 'sockit.');
+                    }
+
+                    #[Override]
+                    public function consume(OutboxEventRecord $event, ReplayMode $mode): void
+                    {
+                        $this->ids[] = $event->id;
+                        usleep(60_000);
+                    }
+                };
+                $this->app->instance(SpyOutboxConsumer::class, $spy);
+                $this->app->tag([SpyOutboxConsumer::class], OutboxConsumer::class);
+                $this->app->make(OutboxRelay::class)->relayPending($panelId, batchSize: 2, mode: ReplayMode::Normal);
+
+                return $spy->ids;
+            },
+        ]);
+
+        self::assertCount(2, $relayOutcomes);
+        self::assertTrue($relayOutcomes[0]->succeeded, $relayOutcomes[0]->errorMessage ?? 'relay 0 failed');
+        self::assertTrue($relayOutcomes[1]->succeeded, $relayOutcomes[1]->errorMessage ?? 'relay 1 failed');
+
+        /** @var list<string> $w0Ids */
+        $w0Ids = $relayOutcomes[0]->value;
+        /** @var list<string> $w1Ids */
+        $w1Ids = $relayOutcomes[1]->value;
+        $combined = array_merge($w0Ids, $w1Ids);
+
+        self::assertCount(4, $combined);
+        self::assertCount(4, array_unique($combined));
+        self::assertSame(0, DB::connection('pgsql')->table('sk_outbox_events')->whereNull('delivered_at')->count());
+        self::assertSame(0, DB::connection('pgsql')->table('sk_outbox_events')->whereNotNull('lease_owner')->count());
+    }
+
+    public function test_parallel_reaction_vs_audience_narrowing_rechecks_privacy_revision_under_row_lock(): void
+    {
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $alice = new ActorRef('user', 'alice');
+        $surface = new SurfaceRef(new PanelId('sockit.pg'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'pg-narrow'), Incarnation::initial());
+        $this->app->make(SurfaceService::class)->ensureInstance(new CommandKey('cmd-pg-narrow-surf-1'), $surface->panel, $surface->kind, $surface->host);
+
+        $pub = $this->app->make(PostService::class)->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-pg-narrow-create-1'),
+            surface: $surface,
+            body: 'Platform post about to narrow',
+            audience: AudienceSpec::platform(),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        DB::disconnect('pgsql');
+
+        // #11: Bob passes pre-TX check while post is still Platform; Alice narrows audience to Direct(alice) (privacy_revision=2);
+        // Bob's reaction re-verifies TargetResolution under PG FOR UPDATE lock and fails closed!
+        $outcomes = Concurrency::run([
+            function () use ($surface, $postId, $alice): array {
+                DB::purge('pgsql');
+                $res = $this->app->make(PostService::class)->edit(new EditPostCommand(
+                    key: new CommandKey('cmd-pg-narrow-edit-alice'),
+                    surface: $surface,
+                    postId: $postId,
+                    expectedRevision: new Revision(1),
+                    body: 'Narrowed to Alice only',
+                    audience: AudienceSpec::direct($alice),
+                ));
+
+                return $res->toWire();
+            },
+            function () use ($surface, $postId): array {
+                DB::purge('pgsql');
+                $fakeChild = $this->app->make(SocKitFake::class);
+                $fakeChild->actors->actAsPerson('bob');
+
+                $inner = $fakeChild->surfacePolicy;
+                $slowPolicy = new class($inner) implements SurfaceAudiencePolicy
+                {
+                    private int $calls = 0;
+
+                    public function __construct(private readonly SurfaceAudiencePolicy $inner) {}
+
+                    #[Override]
+                    public function admit(ActorContext $viewer, SurfaceRef $surface): AudienceVerdict
+                    {
+                        $this->calls++;
+                        if ($this->calls === 1) {
+                            usleep(250_000);
+                        }
+
+                        return $this->inner->admit($viewer, $surface);
+                    }
+
+                    #[Override]
+                    public function contains(ActorContext $actor, SurfaceRef $surface, AudienceSpec $proposed): AuthorizationDecision
+                    {
+                        return $this->inner->contains($actor, $surface, $proposed);
+                    }
+                };
+                $this->app->instance(SurfaceAudiencePolicy::class, $slowPolicy);
+
+                $res = $this->app->make(ReactionService::class)->add(new AddReactionCommand(
+                    key: new CommandKey('cmd-pg-narrow-react-bob'),
+                    surface: $surface,
+                    target: new HostEntityRef('post', $postId),
+                    reactionType: 'like',
+                ));
+
+                return $res->toWire();
+            },
+        ]);
+
+        self::assertTrue($outcomes[0]->succeeded, $outcomes[0]->errorMessage ?? 'edit failed');
+        self::assertFalse($outcomes[1]->succeeded, 'Bob reaction must fail closed after audience narrowed under lock.');
+        self::assertSame(OperationException::class, $outcomes[1]->errorClass);
+
+        $postRow = DB::connection('pgsql')->table('sk_posts')->where('id', $postId)->first();
+        self::assertSame(2, (int) $postRow->privacy_revision);
+        self::assertSame(0, DB::connection('pgsql')->table('sk_reactions')->where('target_key', $postId)->count());
     }
 }

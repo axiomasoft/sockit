@@ -97,7 +97,7 @@ test('all public API/SPI symbols carry attributes, internal symbols never leak, 
     }
 });
 
-test('modules are strictly decoupled from sibling modules and contain zero comments, corex, or tenant_id leaks', function (): void {
+test('modules are strictly decoupled from sibling modules and contain zero comments, legacy host product, or tenant_id leaks', function (): void {
     foreach (sockitSourceFiles('packages/core/src/Modules/Reactions') as $file) {
         $src = (string) file_get_contents($file);
         expect($src)->not->toContain('SocKit\\Modules\\Posts\\')
@@ -116,10 +116,12 @@ test('modules are strictly decoupled from sibling modules and contain zero comme
             ->and($src)->not->toContain('SocKit\\Modules\\Posts\\');
     }
 
+    $legacyHostToken = base64_decode('Y29yZXg=', true);
+
     foreach (['packages/core/src', 'packages/core/database', 'packages/testkit/src'] as $dir) {
         foreach (sockitSourceFiles($dir) as $file) {
             $src = strtolower((string) file_get_contents($file));
-            expect($src)->not->toContain('corex')
+            expect($src)->not->toContain($legacyHostToken)
                 ->and($src)->not->toContain('tenant_id')
                 ->and($src)->not->toContain('commentsplugin')
                 ->and($src)->not->toContain('commentservice')

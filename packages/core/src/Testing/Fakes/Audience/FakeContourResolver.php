@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SocKit\Testing;
+namespace SocKit\Testing\Fakes\Audience;
 
 use Override;
 use Packman\Attributes\Api;
@@ -11,6 +11,7 @@ use SocKit\Audience\Contracts\ContourResolver;
 use SocKit\Audience\Enums\ContourMembership;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
+use Throwable;
 
 /**
  * In-memory configurable test double for {@see ContourResolver}.
@@ -23,6 +24,8 @@ final class FakeContourResolver implements ContourResolver
 
     /** @var array<string, HostEntityRef> */
     private array $parents = [];
+
+    private ?Throwable $failure = null;
 
     public function set(ActorRef $actor, string $level, HostEntityRef $contour, ContourMembership $state): self
     {
@@ -45,9 +48,20 @@ final class FakeContourResolver implements ContourResolver
         return $this;
     }
 
+    public function failWith(?Throwable $failure): self
+    {
+        $this->failure = $failure;
+
+        return $this;
+    }
+
     #[Override]
     public function membership(ActorContext $actor, string $level, HostEntityRef $contour): ContourMembership
     {
+        if ($this->failure instanceof Throwable) {
+            throw $this->failure;
+        }
+
         if (! $actor->actor instanceof ActorRef) {
             return ContourMembership::None;
         }
@@ -58,6 +72,10 @@ final class FakeContourResolver implements ContourResolver
     #[Override]
     public function enclosing(HostEntityRef $contour, string $level): ?HostEntityRef
     {
+        if ($this->failure instanceof Throwable) {
+            throw $this->failure;
+        }
+
         return $this->parents[$contour->toWire().'|'.$level] ?? null;
     }
 

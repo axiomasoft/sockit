@@ -21,6 +21,9 @@ use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Exceptions\InvalidPrivacyFloorException;
+use SocKit\Configuration\Internal\ModuleSettingsMerger;
+use SocKit\Configuration\Internal\SockitModules;
+use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Panels\PanelProvider;
 use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Surfaces\SurfaceProvider;
@@ -216,6 +219,7 @@ final readonly class SockitOptions implements OptionsFactory
         $validator->rejectUnknownKeys($raw, ['enabled', 'settings'], $path);
 
         $enabled = [];
+        $seenEnabledCanonical = [];
         $rawEnabled = $raw['enabled'] ?? [];
 
         if (! is_array($rawEnabled) || ! array_is_list($rawEnabled)) {
@@ -228,6 +232,20 @@ final readonly class SockitOptions implements OptionsFactory
                     continue;
                 }
 
+                if (! SockitModules::isKnown($moduleId)) {
+                    $validator->add($path.'.enabled.'.$index, "unknown SocKit module [{$moduleId}]");
+
+                    continue;
+                }
+
+                $canonicalEnabled = SockitModules::normalize($moduleId);
+                if (isset($seenEnabledCanonical[$canonicalEnabled])) {
+                    $validator->add($path.'.enabled.'.$index, "duplicate enabled entry for module [{$canonicalEnabled}]");
+
+                    continue;
+                }
+
+                $seenEnabledCanonical[$canonicalEnabled] = true;
                 $enabled[] = $moduleId;
             }
         }
@@ -237,13 +255,26 @@ final readonly class SockitOptions implements OptionsFactory
 
         if (! is_array($rawSettings)) {
             $validator->add($path.'.settings', 'must be an associative map of module ID => settings array');
+        } elseif ($rawSettings !== [] && array_is_list($rawSettings)) {
+            $validator->add($path.'.settings', 'must be an associative map keyed by module identifier');
         } else {
+            $validator->rejectUnknownKeys($rawSettings, SockitModules::allKnownModuleKeys(), $path.'.settings');
+            $seenCanonical = [];
+
             foreach ($rawSettings as $moduleId => $moduleMap) {
-                if (! is_string($moduleId) || $moduleId === '') {
-                    $validator->add($path.'.settings', 'module setting keys must be non-empty strings');
+                if (! is_string($moduleId) || ! SockitModules::isKnown($moduleId)) {
+                    continue;
+                }
+
+                $canonical = SockitModules::normalize($moduleId);
+
+                if (isset($seenCanonical[$canonical])) {
+                    $validator->add($path.'.settings.'.$moduleId, "duplicate settings entry for module [{$canonical}]");
 
                     continue;
                 }
+
+                $seenCanonical[$canonical] = true;
 
                 if (! is_array($moduleMap)) {
                     $validator->add($path.'.settings.'.$moduleId, 'must be an array');
@@ -251,16 +282,35 @@ final readonly class SockitOptions implements OptionsFactory
                     continue;
                 }
 
-                $validatedMap = [];
-                foreach ($moduleMap as $key => $val) {
-                    if (! is_string($key) || $key === '') {
-                        $validator->add($path.'.settings.'.$moduleId, 'setting keys must be non-empty strings');
+                if ($moduleMap !== [] && array_is_list($moduleMap)) {
+                    $validator->add($path.'.settings.'.$moduleId, 'must be an associative map of setting keys');
 
+                    continue;
+                }
+
+                $schema = SockitModules::settingsSchema($canonical);
+                if (! $schema instanceof ModuleSettingsSchema) {
+                    if ($moduleMap !== []) {
+                        $validator->rejectUnknownKeys($moduleMap, [], $path.'.settings.'.$moduleId);
+                    }
+
+                    continue;
+                }
+
+                $defaults = $schema->defaults();
+                $validator->rejectUnknownKeys($moduleMap, array_keys($defaults), $path.'.settings.'.$moduleId);
+
+                $validatedMap = [];
+                $hasInvalidValue = false;
+
+                foreach ($moduleMap as $key => $val) {
+                    if (! is_string($key) || ! array_key_exists($key, $defaults)) {
                         continue;
                     }
 
                     if (! self::isSerializableConfigValue($val)) {
                         $validator->add($path.'.settings.'.$moduleId.'.'.$key, 'closures and objects are forbidden in configuration');
+                        $hasInvalidValue = true;
 
                         continue;
                     }
@@ -269,7 +319,15 @@ final readonly class SockitOptions implements OptionsFactory
                     $validatedMap[$key] = $val;
                 }
 
-                $settings[$moduleId] = $validatedMap;
+                if (! $hasInvalidValue) {
+                    $merged = ModuleSettingsMerger::mergeMaps($defaults, $validatedMap);
+
+                    foreach ($schema->validate($merged) as $violation) {
+                        $validator->add($path.'.settings.'.$moduleId.'.'.$violation['key'], $violation['rule']);
+                    }
+                }
+
+                $settings[$canonical] = $validatedMap;
             }
         }
 

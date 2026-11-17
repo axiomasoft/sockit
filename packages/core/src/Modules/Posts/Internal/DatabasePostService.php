@@ -14,6 +14,7 @@ use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\GroupRef;
+use SocKit\Audience\Data\TransactionAudienceSnapshot;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
@@ -27,6 +28,7 @@ use SocKit\Modules\Posts\Data\TransitionPostStateCommand;
 use SocKit\Modules\Posts\Enums\ContentState;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationResult;
+use SocKit\Operations\Enums\OperationOutcome;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Data\PanelId;
@@ -34,6 +36,7 @@ use SocKit\Panels\Exceptions\PanelException;
 use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Support\CanonicalJson;
 use SocKit\Support\Data\ActorRef;
+use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\PayloadDigest;
 use SocKit\Support\Data\ResourceRef;
@@ -45,6 +48,7 @@ use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Data\SurfaceDefinition;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Enums\SurfaceLifecycleState;
+use SocKit\Surfaces\Exceptions\SurfaceException;
 
 /**
  * Panel-isolated Posts write and single-post read service enforcing ActionAuthorizer,
@@ -92,153 +96,169 @@ final readonly class DatabasePostService implements PostService
             digest: $digest,
         );
 
-        $state = new class($command->asDraft ? ContentState::Draft : ContentState::Published)
-        {
-            public ?AudienceSpec $audience = null;
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $state = new class($command->asDraft ? ContentState::Draft : ContentState::Published)
+            {
+                public ?AudienceSpec $audience = null;
 
-            public function __construct(
-                public ContentState $state,
-                public ?string $reason = null,
-            ) {}
-        };
+                public ?TransactionAudienceSnapshot $audienceSnapshot = null;
 
-        return $this->runtime->envelope()->run(
-            envelope: $envelope,
-            surface: $command->surface,
-            action: 'sockit.posts.publish',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $state): void {
-                $state->audience = $command->audience ?? $this->defaultAudience($verifiedActor, $command->surface, $surfaceDef);
-                $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $state->audience, $surfaceDef);
+                /**
+                 * @var array{
+                 *     postId: string,
+                 *     audienceVerified: bool,
+                 *     privacyRevision: int,
+                 *     audience: AudienceSpec,
+                 *     audienceCanonical: string,
+                 *     audienceShifted: bool,
+                 *     surfaceArchived: bool,
+                 *     snapshot: ?TransactionAudienceSnapshot,
+                 * }|null
+                 */
+                public ?array $replayPreflight = null;
 
-                [$state->state, $state->reason] = $this->runSafetyChecks(
-                    actor: $verifiedActor,
+                public function __construct(
+                    public ContentState $state,
+                    public ?string $reason = null,
+                ) {}
+            };
+
+            try {
+                return $this->runtime->envelope()->run(
+                    envelope: $envelope,
                     surface: $command->surface,
-                    body: $command->body,
-                    bodyFormat: $command->bodyFormat,
-                    defaultState: $command->asDraft ? ContentState::Draft : ContentState::Published,
-                );
-            },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $state): array {
-                $authorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
-                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
-                $audience = $state->audience ?? throw OperationException::audienceDenied('audience.unknown');
-                $now = $this->nowIso();
-                $postId = Ids::uuid7();
-                $encodedAudience = json_encode($audience->toWire(), JSON_THROW_ON_ERROR);
-                $publishedAt = $state->state === ContentState::Published ? $now : null;
+                    action: 'sockit.posts.publish',
+                    preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $namespace, $digest, $surfaceDef, $state): void {
+                        $state->audience = $command->audience ?? $this->defaultAudience($verifiedActor, $command->surface, $surfaceDef);
 
-                $connection->table($this->tables->table('posts', $command->surface->panel))->insert([
-                    'id' => $postId,
-                    'panel_id' => $command->surface->panel->value,
-                    'surface_instance_id' => SockitRows::str($surfaceRow, 'id'),
-                    'surface_incarnation' => $command->surface->incarnation->value,
-                    'author_type' => $authorRef->type,
-                    'author_id' => $authorRef->id,
-                    'state' => $state->state->value,
-                    'body_format' => $command->bodyFormat,
-                    'current_body' => $command->body,
-                    'revision' => 1,
-                    'privacy_revision' => 1,
-                    'audience_wire' => $encodedAudience,
-                    'published_at' => $publishedAt,
-                    'hidden_at' => null,
-                    'deleted_at' => null,
-                    'erased_at' => null,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
+                        if (! $command->asDraft) {
+                            $state->replayPreflight = $this->prepareReplayPreflight(
+                                actor: $verifiedActor,
+                                surface: $command->surface,
+                                namespace: $namespace,
+                                key: $command->key,
+                                digest: $digest,
+                                baselineAudience: $state->audience,
+                                surfaceDef: $surfaceDef,
+                                requirePublishedState: true,
+                            );
 
-                $connection->table($this->tables->table('post_revisions', $command->surface->panel))->insert([
-                    'post_id' => $postId,
-                    'revision' => 1,
-                    'state' => $state->state->value,
-                    'body_format' => $command->bodyFormat,
-                    'body' => $command->body,
-                    'audience_wire' => $encodedAudience,
-                    'actor_type' => $authorRef->type,
-                    'actor_id' => $authorRef->id,
-                    'reason_code' => $state->reason,
-                    'recorded_at' => $now,
-                ]);
+                            if ($state->replayPreflight !== null) {
+                                return;
+                            }
+                        }
 
-                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+                        $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $state->audience, $surfaceDef);
+                        $state->audienceSnapshot = $this->samplePostTransactionSnapshot($verifiedActor, $command->surface, $state->audience, $surfaceDef->archiveReaders);
 
-                if ($state->state === ContentState::Held) {
-                    return [
-                        'result' => OperationResult::rejected(
-                            SockitErrorCode::ContentHeld,
-                            ['post_id' => $postId, 'reason' => $state->reason ?? 'safety.hold'],
-                            $receiptId,
-                        ),
-                        'event' => null,
-                    ];
-                }
+                        [$state->state, $state->reason] = $this->runSafetyChecks(
+                            actor: $verifiedActor,
+                            surface: $command->surface,
+                            body: $command->body,
+                            bodyFormat: $command->bodyFormat,
+                            defaultState: $command->asDraft ? ContentState::Draft : ContentState::Published,
+                        );
+                    },
+                    mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $state): array {
+                        $authorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                        $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+                        $audience = $state->audience ?? throw OperationException::audienceDenied('audience.unknown');
+                        $this->reverifyPublishGroupsInsideTx($verifiedActor, $command->surface, $audience, $state->audienceSnapshot);
 
-                $resource = new ResourceRef($command->surface->panel, ResourceKind::Post, $postId);
+                        $now = $this->nowIso();
+                        $postId = Ids::uuid7();
+                        $encodedAudience = json_encode($audience->toWire(), JSON_THROW_ON_ERROR);
+                        $publishedAt = $state->state === ContentState::Published ? $now : null;
 
-                return [
-                    'result' => OperationResult::confirmed($receiptId, $resource, new Revision(1)),
-                    'event' => $state->state === ContentState::Published ? [
-                        'aggregate_type' => 'post',
-                        'aggregate_id' => $postId,
-                        'aggregate_revision' => 1,
-                        'event_type' => 'sockit.posts.published',
-                        'payload' => [
-                            'panel' => $command->surface->panel->value,
-                            'post_id' => $postId,
+                        $connection->table($this->tables->table('posts', $command->surface->panel))->insert([
+                            'id' => $postId,
+                            'panel_id' => $command->surface->panel->value,
+                            'surface_instance_id' => SockitRows::str($surfaceRow, 'id'),
+                            'surface_incarnation' => $command->surface->incarnation->value,
+                            'author_type' => $authorRef->type,
+                            'author_id' => $authorRef->id,
+                            'state' => $state->state->value,
+                            'body_format' => $command->bodyFormat,
+                            'current_body' => $command->body,
                             'revision' => 1,
                             'privacy_revision' => 1,
-                        ],
-                    ] : null,
-                ];
-            },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $surfaceDef, $state): void {
-                if (! $replay->resource instanceof ResourceRef) {
-                    return;
+                            'audience_wire' => $encodedAudience,
+                            'published_at' => $publishedAt,
+                            'hidden_at' => null,
+                            'deleted_at' => null,
+                            'erased_at' => null,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ]);
+
+                        $connection->table($this->tables->table('post_revisions', $command->surface->panel))->insert([
+                            'post_id' => $postId,
+                            'revision' => 1,
+                            'state' => $state->state->value,
+                            'body_format' => $command->bodyFormat,
+                            'body' => $command->body,
+                            'audience_wire' => $encodedAudience,
+                            'actor_type' => $authorRef->type,
+                            'actor_id' => $authorRef->id,
+                            'reason_code' => $state->reason,
+                            'recorded_at' => $now,
+                        ]);
+
+                        $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                        if ($state->state === ContentState::Held) {
+                            return [
+                                'result' => OperationResult::rejected(
+                                    SockitErrorCode::ContentHeld,
+                                    ['post_id' => $postId, 'reason' => $state->reason ?? 'safety.hold'],
+                                    $receiptId,
+                                ),
+                                'event' => null,
+                            ];
+                        }
+
+                        $resource = new ResourceRef($command->surface->panel, ResourceKind::Post, $postId);
+
+                        return [
+                            'result' => OperationResult::confirmed($receiptId, $resource, new Revision(1)),
+                            'event' => $state->state === ContentState::Published ? [
+                                'aggregate_type' => 'post',
+                                'aggregate_id' => $postId,
+                                'aggregate_revision' => 1,
+                                'event_type' => 'sockit.posts.published',
+                                'payload' => [
+                                    'panel' => $command->surface->panel->value,
+                                    'post_id' => $postId,
+                                    'revision' => 1,
+                                    'privacy_revision' => 1,
+                                ],
+                            ] : null,
+                        ];
+                    },
+                    replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $state): void {
+                        if (! $replay->resource instanceof ResourceRef) {
+                            return;
+                        }
+
+                        $this->verifyLockedPostReplay(
+                            actor: $verifiedActor,
+                            connection: $connection,
+                            surface: $command->surface,
+                            postId: $replay->resource->id,
+                            replay: $replay,
+                            replayPreflight: $command->asDraft ? null : $state->replayPreflight,
+                            enforceAudience: ! $command->asDraft && $replay->isSuccess(),
+                        );
+                    },
+                );
+            } catch (PostReplayPreflightStaleException) {
+                if ($attempt === 2) {
+                    throw OperationException::revisionConflict(1, 2);
                 }
+            }
+        }
 
-                $postsTable = $this->tables->table('posts', $command->surface->panel);
-                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
-                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $replay->resource->id);
-
-                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
-                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$replay->resource->id}] does not belong to target surface.");
-                }
-
-                $currentState = ContentState::from(SockitRows::str($row, 'state'));
-
-                if ($currentState === ContentState::Erased) {
-                    throw OperationException::contentErased($replay->resource->id);
-                }
-
-                if ($currentState === ContentState::Deleted) {
-                    throw OperationException::contentDeleted($replay->resource->id);
-                }
-
-                if (! $command->asDraft && $currentState === ContentState::Held) {
-                    throw OperationException::contentHeld('content.held');
-                }
-
-                if (! $command->asDraft && $currentState === ContentState::Hidden) {
-                    throw OperationException::contentHidden('content.hidden');
-                }
-
-                if (! $command->asDraft && $replay->isSuccess()) {
-                    $currentAudience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
-                    $expectedAudience = $state->audience ?? $this->defaultAudience($verifiedActor, $command->surface, $surfaceDef);
-                    $this->verifyStoredPostAudienceForReplay(
-                        actor: $verifiedActor,
-                        surface: $command->surface,
-                        postId: $replay->resource->id,
-                        postRow: $row,
-                        surfaceRow: $surfaceRow,
-                        currentAudience: $currentAudience,
-                        baselineAudience: $expectedAudience,
-                        surfaceDef: $surfaceDef,
-                    );
-                }
-            },
-        );
+        throw OperationException::revisionConflict(1, 2);
     }
 
     #[Override]
@@ -273,231 +293,253 @@ final readonly class DatabasePostService implements PostService
             expectedRevision: $command->expectedRevision,
         );
 
-        $precheck = new class
-        {
-            public ?ContentState $state = null;
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $precheck = new class
+            {
+                public ?ContentState $state = null;
 
-            public ?string $reason = null;
+                public ?string $reason = null;
 
-            public string $effectiveBodyFormat = 'plain';
+                public string $effectiveBodyFormat = 'plain';
 
-            public string $effectiveAudienceCanonical = '';
-        };
+                public string $effectiveAudienceCanonical = '';
 
-        return $this->runtime->envelope()->run(
-            envelope: $envelope,
-            surface: $command->surface,
-            action: 'sockit.posts.edit',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
-                $this->runtime->authorizer()->decide(new ActionRequest(
-                    actor: $verifiedActor,
+                public ?AudienceSpec $effectiveAudience = null;
+
+                public ?TransactionAudienceSnapshot $audienceSnapshot = null;
+
+                /**
+                 * @var array{
+                 *     postId: string,
+                 *     audienceVerified: bool,
+                 *     privacyRevision: int,
+                 *     audience: AudienceSpec,
+                 *     audienceCanonical: string,
+                 *     audienceShifted: bool,
+                 *     surfaceArchived: bool,
+                 *     snapshot: ?TransactionAudienceSnapshot,
+                 * }|null
+                 */
+                public ?array $replayPreflight = null;
+            };
+
+            try {
+                return $this->runtime->envelope()->run(
+                    envelope: $envelope,
+                    surface: $command->surface,
                     action: 'sockit.posts.edit',
-                    surface: $command->surface,
-                    resource: new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
-                ))->requireAllowed();
+                    preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $namespace, $digest, $surfaceDef, $precheck): void {
+                        $this->runtime->authorizer()->decide(new ActionRequest(
+                            actor: $verifiedActor,
+                            action: 'sockit.posts.edit',
+                            surface: $command->surface,
+                            resource: new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
+                        ))->requireAllowed();
 
-                $conn = $this->tables->connection($command->surface->panel);
-                $existing = $conn->table($this->tables->table('posts', $command->surface->panel))
-                    ->where('panel_id', $command->surface->panel->value)
-                    ->where('id', $command->postId)
-                    ->first();
+                        $precheck->replayPreflight = $this->prepareReplayPreflight(
+                            actor: $verifiedActor,
+                            surface: $command->surface,
+                            namespace: $namespace,
+                            key: $command->key,
+                            digest: $digest,
+                            baselineAudience: $command->audience,
+                            surfaceDef: $surfaceDef,
+                            requirePublishedState: false,
+                        );
 
-                if (! is_object($existing)) {
-                    throw OperationException::contentHidden('post.not_found');
-                }
+                        if ($precheck->replayPreflight !== null) {
+                            return;
+                        }
 
-                $existingState = ContentState::from(SockitRows::str($existing, 'state'));
-                if ($existingState === ContentState::Deleted) {
-                    throw OperationException::contentDeleted($command->postId);
-                }
-                if ($existingState === ContentState::Erased) {
-                    throw OperationException::contentErased($command->postId);
-                }
+                        $conn = $this->tables->connection($command->surface->panel);
+                        $existing = $conn->table($this->tables->table('posts', $command->surface->panel))
+                            ->where('panel_id', $command->surface->panel->value)
+                            ->where('id', $command->postId)
+                            ->first();
 
-                $existingAudienceWire = SockitRows::jsonArray($existing, 'audience_wire');
-                $effectiveAudience = $command->audience instanceof AudienceSpec
-                    ? $command->audience
-                    : AudienceSpec::fromWire($existingAudienceWire);
-                $precheck->effectiveAudienceCanonical = CanonicalJson::encode($effectiveAudience->toWire());
+                        if (! is_object($existing)) {
+                            throw OperationException::contentHidden('post.not_found');
+                        }
 
-                // Always enforce current surface admission, containment, privacy floor, and audience on edit.
-                $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $effectiveAudience, $surfaceDef);
+                        $existingState = ContentState::from(SockitRows::str($existing, 'state'));
+                        if ($existingState === ContentState::Deleted) {
+                            throw OperationException::contentDeleted($command->postId);
+                        }
+                        if ($existingState === ContentState::Erased) {
+                            throw OperationException::contentErased($command->postId);
+                        }
 
-                $precheck->effectiveBodyFormat = $command->bodyFormat ?? SockitRows::str($existing, 'body_format');
+                        $existingAudienceWire = SockitRows::jsonArray($existing, 'audience_wire');
+                        $effectiveAudience = $command->audience instanceof AudienceSpec
+                            ? $command->audience
+                            : AudienceSpec::fromWire($existingAudienceWire);
+                        $precheck->effectiveAudience = $effectiveAudience;
+                        $precheck->effectiveAudienceCanonical = CanonicalJson::encode($effectiveAudience->toWire());
 
-                [$checkedState, $checkedReason] = $this->runSafetyChecks(
-                    actor: $verifiedActor,
-                    surface: $command->surface,
-                    body: $command->body,
-                    bodyFormat: $precheck->effectiveBodyFormat,
-                    defaultState: ContentState::Published,
+                        // Always enforce current surface admission, containment, privacy floor, and audience on edit.
+                        $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $effectiveAudience, $surfaceDef);
+                        $precheck->audienceSnapshot = $this->samplePostTransactionSnapshot($verifiedActor, $command->surface, $effectiveAudience, $surfaceDef->archiveReaders);
+
+                        $precheck->effectiveBodyFormat = $command->bodyFormat ?? SockitRows::str($existing, 'body_format');
+
+                        [$checkedState, $checkedReason] = $this->runSafetyChecks(
+                            actor: $verifiedActor,
+                            surface: $command->surface,
+                            body: $command->body,
+                            bodyFormat: $precheck->effectiveBodyFormat,
+                            defaultState: ContentState::Published,
+                        );
+                        if ($checkedState === ContentState::Held) {
+                            $precheck->state = ContentState::Held;
+                            $precheck->reason = $checkedReason;
+                        }
+                    },
+                    mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $precheck): array {
+                        $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                        $postsTable = $this->tables->table('posts', $command->surface->panel);
+                        $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+
+                        if ($precheck->effectiveAudience instanceof AudienceSpec) {
+                            $this->reverifyPublishGroupsInsideTx($verifiedActor, $command->surface, $precheck->effectiveAudience, $precheck->audienceSnapshot);
+                        }
+
+                        $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
+
+                        if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+                            throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
+                        }
+
+                        $currentState = ContentState::from(SockitRows::str($row, 'state'));
+                        if ($currentState === ContentState::Deleted) {
+                            throw OperationException::contentDeleted($command->postId);
+                        }
+                        if ($currentState === ContentState::Erased) {
+                            throw OperationException::contentErased($command->postId);
+                        }
+
+                        $actualRevision = SockitRows::int($row, 'revision');
+                        if ($actualRevision !== $command->expectedRevision->value) {
+                            throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                        }
+
+                        $nextRevision = $actualRevision + 1;
+                        $currentAudienceWire = SockitRows::jsonArray($row, 'audience_wire');
+                        $audienceWire = $command->audience instanceof AudienceSpec ? $command->audience->toWire() : $currentAudienceWire;
+                        $bodyFormat = $command->bodyFormat ?? SockitRows::str($row, 'body_format');
+
+                        if (
+                            (! $command->audience instanceof AudienceSpec && CanonicalJson::encode($currentAudienceWire) !== $precheck->effectiveAudienceCanonical)
+                            || ($command->bodyFormat === null && $bodyFormat !== $precheck->effectiveBodyFormat)
+                        ) {
+                            throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                        }
+
+                        $audienceChanged = $command->audience instanceof AudienceSpec
+                            && CanonicalJson::encode($audienceWire) !== CanonicalJson::encode($currentAudienceWire);
+                        $nextPrivacyRevision = SockitRows::int($row, 'privacy_revision', 1) + ($audienceChanged ? 1 : 0);
+                        $newState = $precheck->state ?? $currentState;
+                        $encodedAudience = json_encode($audienceWire, JSON_THROW_ON_ERROR);
+                        $now = $this->nowIso();
+
+                        $affected = $connection->table($postsTable)
+                            ->where('id', $command->postId)
+                            ->where('panel_id', $command->surface->panel->value)
+                            ->where('revision', $command->expectedRevision->value)
+                            ->update([
+                                'state' => $newState->value,
+                                'body_format' => $bodyFormat,
+                                'current_body' => $command->body,
+                                'revision' => $nextRevision,
+                                'privacy_revision' => $nextPrivacyRevision,
+                                'audience_wire' => $encodedAudience,
+                                'updated_at' => $now,
+                            ]);
+
+                        if ($affected === 0) {
+                            throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                        }
+
+                        $connection->table($this->tables->table('post_revisions', $command->surface->panel))->insert([
+                            'post_id' => $command->postId,
+                            'revision' => $nextRevision,
+                            'state' => $newState->value,
+                            'body_format' => $bodyFormat,
+                            'body' => $command->body,
+                            'audience_wire' => $encodedAudience,
+                            'actor_type' => $actorRef->type,
+                            'actor_id' => $actorRef->id,
+                            'reason_code' => $precheck->reason,
+                            'recorded_at' => $now,
+                        ]);
+
+                        $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                        if ($newState === ContentState::Held) {
+                            $event = $currentState === ContentState::Published ? [
+                                'aggregate_type' => 'post',
+                                'aggregate_id' => $command->postId,
+                                'aggregate_revision' => $nextRevision,
+                                'event_type' => 'sockit.posts.state_changed',
+                                'payload' => [
+                                    'panel' => $command->surface->panel->value,
+                                    'post_id' => $command->postId,
+                                    'previous_state' => $currentState->value,
+                                    'new_state' => ContentState::Held->value,
+                                    'revision' => $nextRevision,
+                                    'reason_code' => $precheck->reason ?? 'safety.hold',
+                                ],
+                            ] : null;
+
+                            return [
+                                'result' => OperationResult::rejected(
+                                    SockitErrorCode::ContentHeld,
+                                    ['post_id' => $command->postId, 'reason' => $precheck->reason ?? 'safety.hold'],
+                                    $receiptId,
+                                ),
+                                'event' => $event,
+                            ];
+                        }
+
+                        return [
+                            'result' => OperationResult::confirmed(
+                                $receiptId,
+                                new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
+                                new Revision($nextRevision),
+                            ),
+                            'event' => [
+                                'aggregate_type' => 'post',
+                                'aggregate_id' => $command->postId,
+                                'aggregate_revision' => $nextRevision,
+                                'event_type' => 'sockit.posts.edited',
+                                'payload' => [
+                                    'panel' => $command->surface->panel->value,
+                                    'post_id' => $command->postId,
+                                    'revision' => $nextRevision,
+                                    'privacy_revision' => $nextPrivacyRevision,
+                                ],
+                            ],
+                        ];
+                    },
+                    replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $precheck): void {
+                        $this->verifyLockedPostReplay(
+                            actor: $verifiedActor,
+                            connection: $connection,
+                            surface: $command->surface,
+                            postId: $command->postId,
+                            replay: $replay,
+                            replayPreflight: $precheck->replayPreflight,
+                            enforceAudience: $replay->isSuccess(),
+                        );
+                    },
                 );
-                if ($checkedState === ContentState::Held) {
-                    $precheck->state = ContentState::Held;
-                    $precheck->reason = $checkedReason;
+            } catch (PostReplayPreflightStaleException) {
+                if ($attempt === 2) {
+                    throw OperationException::revisionConflict($command->expectedRevision->value, $command->expectedRevision->value + 1);
                 }
-            },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $precheck): array {
-                $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
-                $postsTable = $this->tables->table('posts', $command->surface->panel);
-                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+            }
+        }
 
-                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
-
-                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
-                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
-                }
-
-                $currentState = ContentState::from(SockitRows::str($row, 'state'));
-                if ($currentState === ContentState::Deleted) {
-                    throw OperationException::contentDeleted($command->postId);
-                }
-                if ($currentState === ContentState::Erased) {
-                    throw OperationException::contentErased($command->postId);
-                }
-
-                $actualRevision = SockitRows::int($row, 'revision');
-                if ($actualRevision !== $command->expectedRevision->value) {
-                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
-                }
-
-                $nextRevision = $actualRevision + 1;
-                $currentAudienceWire = SockitRows::jsonArray($row, 'audience_wire');
-                $audienceWire = $command->audience instanceof AudienceSpec ? $command->audience->toWire() : $currentAudienceWire;
-                $bodyFormat = $command->bodyFormat ?? SockitRows::str($row, 'body_format');
-
-                if (
-                    (! $command->audience instanceof AudienceSpec && CanonicalJson::encode($currentAudienceWire) !== $precheck->effectiveAudienceCanonical)
-                    || ($command->bodyFormat === null && $bodyFormat !== $precheck->effectiveBodyFormat)
-                ) {
-                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
-                }
-
-                $audienceChanged = $command->audience instanceof AudienceSpec
-                    && CanonicalJson::encode($audienceWire) !== CanonicalJson::encode($currentAudienceWire);
-                $nextPrivacyRevision = SockitRows::int($row, 'privacy_revision', 1) + ($audienceChanged ? 1 : 0);
-                $newState = $precheck->state ?? $currentState;
-                $encodedAudience = json_encode($audienceWire, JSON_THROW_ON_ERROR);
-                $now = $this->nowIso();
-
-                $affected = $connection->table($postsTable)
-                    ->where('id', $command->postId)
-                    ->where('panel_id', $command->surface->panel->value)
-                    ->where('revision', $command->expectedRevision->value)
-                    ->update([
-                        'state' => $newState->value,
-                        'body_format' => $bodyFormat,
-                        'current_body' => $command->body,
-                        'revision' => $nextRevision,
-                        'privacy_revision' => $nextPrivacyRevision,
-                        'audience_wire' => $encodedAudience,
-                        'updated_at' => $now,
-                    ]);
-
-                if ($affected === 0) {
-                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
-                }
-
-                $connection->table($this->tables->table('post_revisions', $command->surface->panel))->insert([
-                    'post_id' => $command->postId,
-                    'revision' => $nextRevision,
-                    'state' => $newState->value,
-                    'body_format' => $bodyFormat,
-                    'body' => $command->body,
-                    'audience_wire' => $encodedAudience,
-                    'actor_type' => $actorRef->type,
-                    'actor_id' => $actorRef->id,
-                    'reason_code' => $precheck->reason,
-                    'recorded_at' => $now,
-                ]);
-
-                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
-
-                if ($newState === ContentState::Held) {
-                    $event = $currentState === ContentState::Published ? [
-                        'aggregate_type' => 'post',
-                        'aggregate_id' => $command->postId,
-                        'aggregate_revision' => $nextRevision,
-                        'event_type' => 'sockit.posts.state_changed',
-                        'payload' => [
-                            'panel' => $command->surface->panel->value,
-                            'post_id' => $command->postId,
-                            'previous_state' => $currentState->value,
-                            'new_state' => ContentState::Held->value,
-                            'revision' => $nextRevision,
-                            'reason_code' => $precheck->reason ?? 'safety.hold',
-                        ],
-                    ] : null;
-
-                    return [
-                        'result' => OperationResult::rejected(
-                            SockitErrorCode::ContentHeld,
-                            ['post_id' => $command->postId, 'reason' => $precheck->reason ?? 'safety.hold'],
-                            $receiptId,
-                        ),
-                        'event' => $event,
-                    ];
-                }
-
-                return [
-                    'result' => OperationResult::confirmed(
-                        $receiptId,
-                        new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
-                        new Revision($nextRevision),
-                    ),
-                    'event' => [
-                        'aggregate_type' => 'post',
-                        'aggregate_id' => $command->postId,
-                        'aggregate_revision' => $nextRevision,
-                        'event_type' => 'sockit.posts.edited',
-                        'payload' => [
-                            'panel' => $command->surface->panel->value,
-                            'post_id' => $command->postId,
-                            'revision' => $nextRevision,
-                            'privacy_revision' => $nextPrivacyRevision,
-                        ],
-                    ],
-                ];
-            },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $surfaceDef): void {
-                $postsTable = $this->tables->table('posts', $command->surface->panel);
-                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
-                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
-
-                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
-                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
-                }
-
-                $currentState = ContentState::from(SockitRows::str($row, 'state'));
-                if ($currentState === ContentState::Erased) {
-                    throw OperationException::contentErased($command->postId);
-                }
-                if ($currentState === ContentState::Deleted) {
-                    throw OperationException::contentDeleted($command->postId);
-                }
-                if ($replay->isSuccess() && $currentState === ContentState::Held) {
-                    throw OperationException::contentHeld('content.held');
-                }
-                if ($replay->isSuccess() && $currentState === ContentState::Hidden) {
-                    throw OperationException::contentHidden('content.hidden');
-                }
-
-                if ($replay->isSuccess()) {
-                    $currentAudience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
-                    $this->verifyStoredPostAudienceForReplay(
-                        actor: $verifiedActor,
-                        surface: $command->surface,
-                        postId: $command->postId,
-                        postRow: $row,
-                        surfaceRow: $surfaceRow,
-                        currentAudience: $currentAudience,
-                        baselineAudience: $command->audience,
-                        surfaceDef: $surfaceDef,
-                        replayResultRevision: $replay->revision?->value,
-                    );
-                }
-            },
-        );
+        throw OperationException::revisionConflict($command->expectedRevision->value, $command->expectedRevision->value + 1);
     }
 
     #[Override]
@@ -524,248 +566,306 @@ final readonly class DatabasePostService implements PostService
             default => 'sockit.posts.edit',
         };
 
-        $safety = new class
-        {
-            public ?ContentState $override = null;
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $safety = new class
+            {
+                public ?ContentState $override = null;
 
-            public ?string $reason = null;
-        };
+                public ?string $reason = null;
 
-        return $this->runtime->envelope()->run(
-            envelope: $envelope,
-            surface: $command->surface,
-            action: $action,
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $action, $surfaceDef, $safety): void {
-                $this->runtime->authorizer()->decide(new ActionRequest(
-                    actor: $verifiedActor,
-                    action: $action,
+                public ?AudienceSpec $audience = null;
+
+                public ?string $audienceCanonical = null;
+
+                public ?TransactionAudienceSnapshot $audienceSnapshot = null;
+
+                /**
+                 * @var array{
+                 *     postId: string,
+                 *     audienceVerified: bool,
+                 *     privacyRevision: int,
+                 *     audience: AudienceSpec,
+                 *     audienceCanonical: string,
+                 *     audienceShifted: bool,
+                 *     surfaceArchived: bool,
+                 *     snapshot: ?TransactionAudienceSnapshot,
+                 * }|null
+                 */
+                public ?array $replayPreflight = null;
+            };
+
+            try {
+                return $this->runtime->envelope()->run(
+                    envelope: $envelope,
                     surface: $command->surface,
-                    resource: new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
-                ))->requireAllowed();
+                    action: $action,
+                    preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $namespace, $digest, $action, $surfaceDef, $safety): void {
+                        $this->runtime->authorizer()->decide(new ActionRequest(
+                            actor: $verifiedActor,
+                            action: $action,
+                            surface: $command->surface,
+                            resource: new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
+                        ))->requireAllowed();
 
-                if ($command->targetState === ContentState::Published) {
-                    $existing = $this->tables->connection($command->surface->panel)
-                        ->table($this->tables->table('posts', $command->surface->panel))
-                        ->where('panel_id', $command->surface->panel->value)
-                        ->where('id', $command->postId)
-                        ->first();
-
-                    if (is_object($existing)) {
-                        $this->assertAudienceAllowedToPublish(
-                            $verifiedActor,
-                            $command->surface,
-                            AudienceSpec::fromWire(SockitRows::jsonArray($existing, 'audience_wire')),
-                            $surfaceDef,
-                        );
-
-                        $existingBody = SockitRows::optStr($existing, 'current_body');
-                        if ($existingBody !== null) {
-                            [$checkedState, $checkedReason] = $this->runSafetyChecks(
+                        if ($command->targetState === ContentState::Published) {
+                            $safety->replayPreflight = $this->prepareReplayPreflight(
                                 actor: $verifiedActor,
                                 surface: $command->surface,
-                                body: $existingBody,
-                                bodyFormat: SockitRows::str($existing, 'body_format', 'plain'),
-                                defaultState: ContentState::Published,
+                                namespace: $namespace,
+                                key: $command->key,
+                                digest: $digest,
+                                baselineAudience: null,
+                                surfaceDef: $surfaceDef,
+                                requirePublishedState: true,
                             );
-                            if ($checkedState === ContentState::Held) {
-                                $safety->override = ContentState::Held;
-                                $safety->reason = $checkedReason;
+
+                            if ($safety->replayPreflight !== null) {
+                                return;
+                            }
+
+                            $existing = $this->tables->connection($command->surface->panel)
+                                ->table($this->tables->table('posts', $command->surface->panel))
+                                ->where('panel_id', $command->surface->panel->value)
+                                ->where('id', $command->postId)
+                                ->first();
+
+                            if (is_object($existing)) {
+                                $existingAudience = AudienceSpec::fromWire(SockitRows::jsonArray($existing, 'audience_wire'));
+                                $safety->audience = $existingAudience;
+                                $safety->audienceCanonical = CanonicalJson::encode($existingAudience->toWire());
+
+                                $this->assertAudienceAllowedToPublish(
+                                    $verifiedActor,
+                                    $command->surface,
+                                    $existingAudience,
+                                    $surfaceDef,
+                                );
+                                $safety->audienceSnapshot = $this->samplePostTransactionSnapshot(
+                                    $verifiedActor,
+                                    $command->surface,
+                                    $existingAudience,
+                                    $surfaceDef->archiveReaders,
+                                );
+
+                                $existingBody = SockitRows::optStr($existing, 'current_body');
+                                if ($existingBody !== null) {
+                                    [$checkedState, $checkedReason] = $this->runSafetyChecks(
+                                        actor: $verifiedActor,
+                                        surface: $command->surface,
+                                        body: $existingBody,
+                                        bodyFormat: SockitRows::str($existing, 'body_format', 'plain'),
+                                        defaultState: ContentState::Published,
+                                    );
+                                    if ($checkedState === ContentState::Held) {
+                                        $safety->override = ContentState::Held;
+                                        $safety->reason = $checkedReason;
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-            },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $safety): array {
-                $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
-                $postsTable = $this->tables->table('posts', $command->surface->panel);
-                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+                    },
+                    mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $safety): array {
+                        $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                        $postsTable = $this->tables->table('posts', $command->surface->panel);
+                        $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
 
-                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
-
-                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
-                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
-                }
-
-                $currentState = ContentState::from(SockitRows::str($row, 'state'));
-                if ($currentState === ContentState::Erased) {
-                    throw OperationException::contentErased($command->postId);
-                }
-
-                if ($currentState === ContentState::Deleted && ! in_array($command->targetState, [ContentState::Deleted, ContentState::Erased], true)) {
-                    throw OperationException::contentDeleted($command->postId);
-                }
-
-                if (! $currentState->canTransitionTo($command->targetState)) {
-                    throw InvalidPayloadException::invalid(
-                        "Cannot transition post from [{$currentState->value}] to [{$command->targetState->value}].",
-                        ['from' => $currentState->value, 'to' => $command->targetState->value],
-                    );
-                }
-
-                $actualRevision = SockitRows::int($row, 'revision');
-                if ($actualRevision !== $command->expectedRevision->value) {
-                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
-                }
-
-                $nextRevision = $actualRevision + 1;
-                $now = $this->nowIso();
-                $effectiveTarget = $safety->override ?? $command->targetState;
-
-                $update = [
-                    'state' => $effectiveTarget->value,
-                    'revision' => $nextRevision,
-                    'updated_at' => $now,
-                ];
-
-                if ($effectiveTarget === ContentState::Published) {
-                    $update['published_at'] = SockitRows::optStr($row, 'published_at') ?? $now;
-                    $update['hidden_at'] = null;
-                } elseif ($effectiveTarget === ContentState::Hidden) {
-                    $update['hidden_at'] = $now;
-                } elseif ($effectiveTarget === ContentState::Deleted) {
-                    $update['deleted_at'] = $now;
-                } elseif ($effectiveTarget === ContentState::Erased) {
-                    $update['current_body'] = null;
-                    $update['erased_at'] = $now;
-                }
-
-                $affected = $connection->table($postsTable)
-                    ->where('id', $command->postId)
-                    ->where('panel_id', $command->surface->panel->value)
-                    ->where('revision', $command->expectedRevision->value)
-                    ->update($update);
-
-                if ($affected === 0) {
-                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
-                }
-
-                $revisionsTable = $this->tables->table('post_revisions', $command->surface->panel);
-                $revisionBody = $effectiveTarget === ContentState::Erased ? null : SockitRows::optStr($row, 'current_body');
-
-                if ($effectiveTarget === ContentState::Erased) {
-                    $connection->table($revisionsTable)
-                        ->where('post_id', $command->postId)
-                        ->update(['body' => null]);
-                }
-
-                $connection->table($revisionsTable)->insert([
-                    'post_id' => $command->postId,
-                    'revision' => $nextRevision,
-                    'state' => $effectiveTarget->value,
-                    'body_format' => SockitRows::str($row, 'body_format'),
-                    'body' => $revisionBody,
-                    'audience_wire' => SockitRows::str($row, 'audience_wire'),
-                    'actor_type' => $actorRef->type,
-                    'actor_id' => $actorRef->id,
-                    'reason_code' => $safety->reason ?? $command->reasonCode,
-                    'recorded_at' => $now,
-                ]);
-
-                if (in_array($effectiveTarget, [ContentState::Deleted, ContentState::Erased], true)) {
-                    $this->upsertTombstone(
-                        connection: $connection,
-                        panelId: $command->surface->panel->value,
-                        postId: $command->postId,
-                        revision: $nextRevision,
-                        incarnation: SockitRows::int($row, 'surface_incarnation', 1),
-                        deletedAt: SockitRows::optStr($row, 'deleted_at') ?? $now,
-                        erasedAt: $effectiveTarget === ContentState::Erased ? $now : null,
-                    );
-                }
-
-                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
-
-                if ($effectiveTarget === ContentState::Held) {
-                    $heldEvent = $currentState === ContentState::Published ? [
-                        'aggregate_type' => 'post',
-                        'aggregate_id' => $command->postId,
-                        'aggregate_revision' => $nextRevision,
-                        'event_type' => 'sockit.posts.state_changed',
-                        'payload' => [
-                            'panel' => $command->surface->panel->value,
-                            'post_id' => $command->postId,
-                            'previous_state' => $currentState->value,
-                            'new_state' => ContentState::Held->value,
-                            'revision' => $nextRevision,
-                            'reason_code' => $safety->reason ?? 'safety.hold',
-                        ],
-                    ] : null;
-
-                    return [
-                        'result' => OperationResult::rejected(
-                            SockitErrorCode::ContentHeld,
-                            ['post_id' => $command->postId, 'reason' => $safety->reason ?? 'safety.hold'],
-                            $receiptId,
-                        ),
-                        'event' => $heldEvent,
-                    ];
-                }
-
-                return [
-                    'result' => OperationResult::confirmed(
-                        $receiptId,
-                        new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
-                        new Revision($nextRevision),
-                    ),
-                    'event' => [
-                        'aggregate_type' => 'post',
-                        'aggregate_id' => $command->postId,
-                        'aggregate_revision' => $nextRevision,
-                        'event_type' => 'sockit.posts.state_changed',
-                        'payload' => [
-                            'panel' => $command->surface->panel->value,
-                            'post_id' => $command->postId,
-                            'previous_state' => $currentState->value,
-                            'new_state' => $effectiveTarget->value,
-                            'revision' => $nextRevision,
-                            'reason_code' => $command->reasonCode,
-                        ],
-                    ],
-                ];
-            },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $surfaceDef): void {
-                $postsTable = $this->tables->table('posts', $command->surface->panel);
-                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
-                $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
-
-                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
-                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
-                }
-
-                $currentState = ContentState::from(SockitRows::str($row, 'state'));
-
-                if ($currentState === ContentState::Erased && $command->targetState !== ContentState::Erased) {
-                    throw OperationException::contentErased($command->postId);
-                }
-
-                if ($currentState === ContentState::Deleted && ! in_array($command->targetState, [ContentState::Deleted, ContentState::Erased], true)) {
-                    throw OperationException::contentDeleted($command->postId);
-                }
-
-                if ($command->targetState === ContentState::Published && $replay->isSuccess()) {
-                    if ($currentState !== ContentState::Published) {
-                        if ($currentState === ContentState::Held) {
-                            throw OperationException::contentHeld('content.held');
+                        if ($command->targetState === ContentState::Published && $safety->audience instanceof AudienceSpec) {
+                            $this->reverifyPublishGroupsInsideTx($verifiedActor, $command->surface, $safety->audience, $safety->audienceSnapshot);
                         }
 
-                        throw OperationException::contentHidden('content.'.$currentState->value);
-                    }
+                        $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
 
-                    $currentAudience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
-                    $this->verifyStoredPostAudienceForReplay(
-                        actor: $verifiedActor,
-                        surface: $command->surface,
-                        postId: $command->postId,
-                        postRow: $row,
-                        surfaceRow: $surfaceRow,
-                        currentAudience: $currentAudience,
-                        baselineAudience: null,
-                        surfaceDef: $surfaceDef,
-                        replayResultRevision: $replay->revision?->value,
-                    );
+                        if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+                            throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
+                        }
+
+                        $currentState = ContentState::from(SockitRows::str($row, 'state'));
+                        if ($currentState === ContentState::Erased) {
+                            throw OperationException::contentErased($command->postId);
+                        }
+
+                        if ($currentState === ContentState::Deleted && ! in_array($command->targetState, [ContentState::Deleted, ContentState::Erased], true)) {
+                            throw OperationException::contentDeleted($command->postId);
+                        }
+
+                        if (! $currentState->canTransitionTo($command->targetState)) {
+                            throw InvalidPayloadException::invalid(
+                                "Cannot transition post from [{$currentState->value}] to [{$command->targetState->value}].",
+                                ['from' => $currentState->value, 'to' => $command->targetState->value],
+                            );
+                        }
+
+                        $actualRevision = SockitRows::int($row, 'revision');
+                        if ($actualRevision !== $command->expectedRevision->value) {
+                            throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                        }
+
+                        if ($command->targetState === ContentState::Published) {
+                            $lockedAudienceCanonical = CanonicalJson::encode(AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'))->toWire());
+                            if ($safety->audienceCanonical !== $lockedAudienceCanonical) {
+                                throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                            }
+                        }
+
+                        $nextRevision = $actualRevision + 1;
+                        $now = $this->nowIso();
+                        $effectiveTarget = $safety->override ?? $command->targetState;
+
+                        $update = [
+                            'state' => $effectiveTarget->value,
+                            'revision' => $nextRevision,
+                            'updated_at' => $now,
+                        ];
+
+                        if ($effectiveTarget === ContentState::Published) {
+                            $update['published_at'] = SockitRows::optStr($row, 'published_at') ?? $now;
+                            $update['hidden_at'] = null;
+                        } elseif ($effectiveTarget === ContentState::Hidden) {
+                            $update['hidden_at'] = $now;
+                        } elseif ($effectiveTarget === ContentState::Deleted) {
+                            $update['deleted_at'] = $now;
+                        } elseif ($effectiveTarget === ContentState::Erased) {
+                            $update['current_body'] = null;
+                            $update['erased_at'] = $now;
+                        }
+
+                        $affected = $connection->table($postsTable)
+                            ->where('id', $command->postId)
+                            ->where('panel_id', $command->surface->panel->value)
+                            ->where('revision', $command->expectedRevision->value)
+                            ->update($update);
+
+                        if ($affected === 0) {
+                            throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                        }
+
+                        $revisionsTable = $this->tables->table('post_revisions', $command->surface->panel);
+                        $revisionBody = $effectiveTarget === ContentState::Erased ? null : SockitRows::optStr($row, 'current_body');
+
+                        if ($effectiveTarget === ContentState::Erased) {
+                            $connection->table($revisionsTable)
+                                ->where('post_id', $command->postId)
+                                ->update(['body' => null]);
+                        }
+
+                        $connection->table($revisionsTable)->insert([
+                            'post_id' => $command->postId,
+                            'revision' => $nextRevision,
+                            'state' => $effectiveTarget->value,
+                            'body_format' => SockitRows::str($row, 'body_format'),
+                            'body' => $revisionBody,
+                            'audience_wire' => SockitRows::str($row, 'audience_wire'),
+                            'actor_type' => $actorRef->type,
+                            'actor_id' => $actorRef->id,
+                            'reason_code' => $safety->reason ?? $command->reasonCode,
+                            'recorded_at' => $now,
+                        ]);
+
+                        if (in_array($effectiveTarget, [ContentState::Deleted, ContentState::Erased], true)) {
+                            $this->upsertTombstone(
+                                connection: $connection,
+                                panelId: $command->surface->panel->value,
+                                postId: $command->postId,
+                                revision: $nextRevision,
+                                incarnation: SockitRows::int($row, 'surface_incarnation', 1),
+                                deletedAt: SockitRows::optStr($row, 'deleted_at') ?? $now,
+                                erasedAt: $effectiveTarget === ContentState::Erased ? $now : null,
+                            );
+                        }
+
+                        $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                        if ($effectiveTarget === ContentState::Held) {
+                            $heldEvent = $currentState === ContentState::Published ? [
+                                'aggregate_type' => 'post',
+                                'aggregate_id' => $command->postId,
+                                'aggregate_revision' => $nextRevision,
+                                'event_type' => 'sockit.posts.state_changed',
+                                'payload' => [
+                                    'panel' => $command->surface->panel->value,
+                                    'post_id' => $command->postId,
+                                    'previous_state' => $currentState->value,
+                                    'new_state' => ContentState::Held->value,
+                                    'revision' => $nextRevision,
+                                    'reason_code' => $safety->reason ?? 'safety.hold',
+                                ],
+                            ] : null;
+
+                            return [
+                                'result' => OperationResult::rejected(
+                                    SockitErrorCode::ContentHeld,
+                                    ['post_id' => $command->postId, 'reason' => $safety->reason ?? 'safety.hold'],
+                                    $receiptId,
+                                ),
+                                'event' => $heldEvent,
+                            ];
+                        }
+
+                        return [
+                            'result' => OperationResult::confirmed(
+                                $receiptId,
+                                new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
+                                new Revision($nextRevision),
+                            ),
+                            'event' => [
+                                'aggregate_type' => 'post',
+                                'aggregate_id' => $command->postId,
+                                'aggregate_revision' => $nextRevision,
+                                'event_type' => 'sockit.posts.state_changed',
+                                'payload' => [
+                                    'panel' => $command->surface->panel->value,
+                                    'post_id' => $command->postId,
+                                    'previous_state' => $currentState->value,
+                                    'new_state' => $effectiveTarget->value,
+                                    'revision' => $nextRevision,
+                                    'reason_code' => $command->reasonCode,
+                                ],
+                            ],
+                        ];
+                    },
+                    replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $safety): void {
+                        if ($command->targetState !== ContentState::Published || ! $replay->isSuccess()) {
+                            $postsTable = $this->tables->table('posts', $command->surface->panel);
+                            $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
+                            $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
+
+                            if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+                                throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$command->postId}] does not belong to target surface.");
+                            }
+
+                            $currentState = ContentState::from(SockitRows::str($row, 'state'));
+
+                            if ($currentState === ContentState::Erased && $command->targetState !== ContentState::Erased) {
+                                throw OperationException::contentErased($command->postId);
+                            }
+
+                            if ($currentState === ContentState::Deleted && ! in_array($command->targetState, [ContentState::Deleted, ContentState::Erased], true)) {
+                                throw OperationException::contentDeleted($command->postId);
+                            }
+
+                            return;
+                        }
+
+                        $this->verifyLockedPostReplay(
+                            actor: $verifiedActor,
+                            connection: $connection,
+                            surface: $command->surface,
+                            postId: $command->postId,
+                            replay: $replay,
+                            replayPreflight: $safety->replayPreflight,
+                            enforceAudience: true,
+                            requirePublishedState: true,
+                        );
+                    },
+                );
+            } catch (PostReplayPreflightStaleException) {
+                if ($attempt === 2) {
+                    throw OperationException::revisionConflict($command->expectedRevision->value, $command->expectedRevision->value + 1);
                 }
-            },
-        );
+            }
+        }
+
+        throw OperationException::revisionConflict($command->expectedRevision->value, $command->expectedRevision->value + 1);
     }
 
     #[Override]
@@ -794,6 +894,10 @@ final readonly class DatabasePostService implements PostService
 
         if (! is_object($surfaceRow) || SockitRows::str($surfaceRow, 'id') !== SockitRows::str($row, 'surface_instance_id')) {
             throw OperationException::contentHidden('post.wrong_surface');
+        }
+
+        if (SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
+            throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
         }
 
         $state = ContentState::from(SockitRows::str($row, 'state'));
@@ -933,39 +1037,268 @@ final readonly class DatabasePostService implements PostService
         throw OperationException::audienceDenied($verdict->reason);
     }
 
-    private function verifyStoredPostAudienceForReplay(
+    private function samplePostTransactionSnapshot(
         ActorContext $actor,
         SurfaceRef $surface,
-        string $postId,
-        object $postRow,
-        object $surfaceRow,
-        AudienceSpec $currentAudience,
-        ?AudienceSpec $baselineAudience,
-        SurfaceDefinition $surfaceDef,
-        ?int $replayResultRevision = null,
+        AudienceSpec $audience,
+        bool $archiveReaders,
+    ): ?TransactionAudienceSnapshot {
+        if ($audience->referencedGroups() === []) {
+            return null;
+        }
+
+        return $this->runtime->audienceGate()->sampleTransactionSnapshot($actor, $audience, $surface->panel, $archiveReaders);
+    }
+
+    private function reverifyPublishGroupsInsideTx(
+        ActorContext $actor,
+        SurfaceRef $surface,
+        AudienceSpec $audience,
+        ?TransactionAudienceSnapshot $snapshot,
     ): void {
-        $this->assertAudienceAllowedToPublish($actor, $surface, $currentAudience, $surfaceDef);
-
-        $audienceShifted = $baselineAudience instanceof AudienceSpec
-            ? CanonicalJson::encode($currentAudience->toWire()) !== CanonicalJson::encode($baselineAudience->toWire())
-            : ($replayResultRevision !== null && SockitRows::int($postRow, 'revision', 1) > $replayResultRevision);
-
-        if (! $audienceShifted) {
+        if ($audience->referencedGroups() === []) {
             return;
         }
 
-        $verdict = $this->runtime->audienceGate()->read($actor, new AudienceSubject(
-            key: $postId,
-            spec: $currentAudience,
-            author: new ActorRef(SockitRows::str($postRow, 'author_type'), SockitRows::str($postRow, 'author_id')),
-            surface: $surface,
-            installation: $actor->installation,
-            surfaceArchived: SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value,
-            archiveReaders: $surfaceDef->archiveReaders,
-        ));
+        $verdict = $this->runtime->audienceGate()->reverifyLockedGroupsInTransaction(
+            actor: $actor,
+            spec: $audience,
+            panel: $surface->panel,
+            snapshot: $snapshot,
+            forPublish: true,
+        );
 
-        if (! $verdict->canRead()) {
+        if (! $verdict->canWrite()) {
             throw OperationException::audienceDenied($verdict->reason);
+        }
+    }
+
+    /**
+     * Peeks an actor-owned confirmed receipt outside SQL transactions and performs all external
+     * audience SPI checks before any row locks are acquired.
+     *
+     * @return array{
+     *     postId: string,
+     *     audienceVerified: bool,
+     *     privacyRevision: int,
+     *     audience: AudienceSpec,
+     *     audienceCanonical: string,
+     *     audienceShifted: bool,
+     *     surfaceArchived: bool,
+     *     snapshot: ?TransactionAudienceSnapshot,
+     * }|null
+     */
+    private function prepareReplayPreflight(
+        ActorContext $actor,
+        SurfaceRef $surface,
+        CommandNamespace $namespace,
+        CommandKey $key,
+        PayloadDigest $digest,
+        ?AudienceSpec $baselineAudience,
+        SurfaceDefinition $surfaceDef,
+        bool $requirePublishedState,
+    ): ?array {
+        $connection = $this->tables->connection($surface->panel);
+        $receiptRow = $connection->table($this->tables->table('command_receipts', $surface->panel))
+            ->where('panel_id', $surface->panel->value)
+            ->where('command_namespace', $namespace->toWire())
+            ->where('command_key', $key->value)
+            ->first();
+
+        if (! is_object($receiptRow)) {
+            return null;
+        }
+
+        if (
+            SockitRows::str($receiptRow, 'actor_kind') !== $actor->kind->value
+            || SockitRows::optStr($receiptRow, 'actor_type') !== $actor->actor?->type
+            || SockitRows::optStr($receiptRow, 'actor_id') !== $actor->actor?->id
+            || SockitRows::optStr($receiptRow, 'on_behalf_of_type') !== $actor->onBehalfOf?->type
+            || SockitRows::optStr($receiptRow, 'on_behalf_of_id') !== $actor->onBehalfOf?->id
+            || ! hash_equals(SockitRows::str($receiptRow, 'payload_digest'), $digest->value)
+            || SockitRows::str($receiptRow, 'status') !== OperationOutcome::Confirmed->value
+        ) {
+            return null;
+        }
+
+        $postId = SockitRows::optStr($receiptRow, 'resource_id');
+        if ($postId === null) {
+            return null;
+        }
+
+        $postRow = $connection->table($this->tables->table('posts', $surface->panel))
+            ->where('panel_id', $surface->panel->value)
+            ->where('id', $postId)
+            ->first();
+
+        $surfaceRow = $connection->table($this->tables->table('surface_instances', $surface->panel))
+            ->where('panel_id', $surface->panel->value)
+            ->where('kind', $surface->kind->value)
+            ->where('host_entity_type', $surface->host->type)
+            ->where('host_entity_value', $surface->host->value)
+            ->where('incarnation', $surface->incarnation->value)
+            ->first();
+
+        if (! is_object($postRow) || ! is_object($surfaceRow)) {
+            return null;
+        }
+
+        if (SockitRows::str($postRow, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+            return null;
+        }
+
+        $currentAudience = AudienceSpec::fromWire(SockitRows::jsonArray($postRow, 'audience_wire'));
+        $currentState = ContentState::from(SockitRows::str($postRow, 'state'));
+        $receiptRevision = SockitRows::int($receiptRow, 'applied_revision', 1);
+        $audienceShifted = $baselineAudience instanceof AudienceSpec
+            ? CanonicalJson::encode($currentAudience->toWire()) !== CanonicalJson::encode($baselineAudience->toWire())
+            : SockitRows::int($postRow, 'revision', 1) > $receiptRevision;
+        $surfaceArchived = SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+
+        $stateBlocksReplayBeforeAudience = in_array($currentState, [
+            ContentState::Erased,
+            ContentState::Deleted,
+            ContentState::Held,
+            ContentState::Hidden,
+        ], true) || ($requirePublishedState && $currentState !== ContentState::Published);
+
+        if ($stateBlocksReplayBeforeAudience) {
+            return [
+                'postId' => $postId,
+                'audienceVerified' => false,
+                'privacyRevision' => SockitRows::int($postRow, 'privacy_revision', 1),
+                'audience' => $currentAudience,
+                'audienceCanonical' => CanonicalJson::encode($currentAudience->toWire()),
+                'audienceShifted' => $audienceShifted,
+                'surfaceArchived' => $surfaceArchived,
+                'snapshot' => null,
+            ];
+        }
+
+        $this->assertAudienceAllowedToPublish($actor, $surface, $currentAudience, $surfaceDef);
+
+        if ($audienceShifted) {
+            $verdict = $this->runtime->audienceGate()->read($actor, new AudienceSubject(
+                key: $postId,
+                spec: $currentAudience,
+                author: new ActorRef(SockitRows::str($postRow, 'author_type'), SockitRows::str($postRow, 'author_id')),
+                surface: $surface,
+                installation: $actor->installation,
+                surfaceArchived: $surfaceArchived,
+                archiveReaders: $surfaceDef->archiveReaders,
+            ));
+
+            if (! $verdict->canRead()) {
+                throw OperationException::audienceDenied($verdict->reason);
+            }
+        }
+
+        return [
+            'postId' => $postId,
+            'audienceVerified' => true,
+            'privacyRevision' => SockitRows::int($postRow, 'privacy_revision', 1),
+            'audience' => $currentAudience,
+            'audienceCanonical' => CanonicalJson::encode($currentAudience->toWire()),
+            'audienceShifted' => $audienceShifted,
+            'surfaceArchived' => $surfaceArchived,
+            'snapshot' => $this->samplePostTransactionSnapshot($actor, $surface, $currentAudience, $surfaceDef->archiveReaders),
+        ];
+    }
+
+    /**
+     * Verifies post replay invariants strictly locally under SQL row locks without calling external SPIs.
+     *
+     * @param  array{
+     *     postId: string,
+     *     audienceVerified: bool,
+     *     privacyRevision: int,
+     *     audience: AudienceSpec,
+     *     audienceCanonical: string,
+     *     audienceShifted: bool,
+     *     surfaceArchived: bool,
+     *     snapshot: ?TransactionAudienceSnapshot,
+     * }|null  $replayPreflight
+     */
+    private function verifyLockedPostReplay(
+        ActorContext $actor,
+        Connection $connection,
+        SurfaceRef $surface,
+        string $postId,
+        OperationResult $replay,
+        ?array $replayPreflight,
+        bool $enforceAudience,
+        bool $requirePublishedState = false,
+    ): void {
+        if ($enforceAudience && ($replayPreflight === null || $replayPreflight['postId'] !== $postId)) {
+            throw new PostReplayPreflightStaleException('Post receipt appeared concurrently before replay preflight.');
+        }
+
+        if ($enforceAudience && $replayPreflight['audienceVerified'] && $replayPreflight['audience']->referencedGroups() !== []) {
+            $this->reverifyPublishGroupsInsideTx($actor, $surface, $replayPreflight['audience'], $replayPreflight['snapshot']);
+
+            if ($replayPreflight['audienceShifted']) {
+                $readVerdict = $this->runtime->audienceGate()->reverifyLockedGroupsInTransaction(
+                    actor: $actor,
+                    spec: $replayPreflight['audience'],
+                    panel: $surface->panel,
+                    snapshot: $replayPreflight['snapshot'],
+                    forPublish: false,
+                );
+
+                if (! $readVerdict->canRead()) {
+                    throw OperationException::audienceDenied($readVerdict->reason);
+                }
+            }
+        }
+
+        $postsTable = $this->tables->table('posts', $surface->panel);
+        $surfaceRow = $this->findSurfaceRow($connection, $surface);
+        $row = $this->lockPostRow($connection, $postsTable, $surface->panel->value, $postId);
+
+        if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+            throw PanelException::bindingMismatch($surface->panel->value, "Post [{$postId}] does not belong to target surface.");
+        }
+
+        $currentState = ContentState::from(SockitRows::str($row, 'state'));
+
+        if ($currentState === ContentState::Erased) {
+            throw OperationException::contentErased($postId);
+        }
+
+        if ($currentState === ContentState::Deleted) {
+            throw OperationException::contentDeleted($postId);
+        }
+
+        if ($enforceAudience && $currentState === ContentState::Held) {
+            throw OperationException::contentHeld('content.held');
+        }
+
+        if ($enforceAudience && $currentState === ContentState::Hidden) {
+            throw OperationException::contentHidden('content.hidden');
+        }
+
+        if ($enforceAudience && $requirePublishedState && $currentState !== ContentState::Published) {
+            throw OperationException::contentHidden('content.'.$currentState->value);
+        }
+
+        if (! $enforceAudience || ! $replay->isSuccess()) {
+            return;
+        }
+
+        if (! $replayPreflight['audienceVerified']) {
+            throw new PostReplayPreflightStaleException('Post state changed after replay preflight.');
+        }
+
+        $lockedPrivacyRevision = SockitRows::int($row, 'privacy_revision', 1);
+        $lockedAudienceCanonical = CanonicalJson::encode(AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'))->toWire());
+        $lockedSurfaceArchived = SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+
+        if (
+            $lockedPrivacyRevision !== $replayPreflight['privacyRevision']
+            || $lockedAudienceCanonical !== $replayPreflight['audienceCanonical']
+            || $lockedSurfaceArchived !== $replayPreflight['surfaceArchived']
+        ) {
+            throw new PostReplayPreflightStaleException('Post audience, privacy revision, or surface state changed after replay preflight.');
         }
     }
 

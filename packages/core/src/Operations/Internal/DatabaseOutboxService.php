@@ -127,19 +127,23 @@ final readonly class DatabaseOutboxService implements OutboxRelay
 
         foreach ($claimed as $item) {
             $record = $item['record'];
-            $deliveredConsumers = $item['deliveredConsumers'];
-            $modeAcked = $deliveredConsumers[$modeKey] ?? [];
+            $modeAcked = $item['deliveredConsumers'][$modeKey] ?? [];
+            $newlyAcked = [];
 
             if ($record->eventSchemaVersion !== 1) {
-                $this->releaseLeaseWithProblem(
+                $this->finalizeClaimedRecord(
                     $connection,
                     $table,
                     $record->id,
+                    $modeKey,
                     $ownerColumn,
                     $untilColumn,
                     $leaseOwner,
+                    $newlyAcked,
+                    null,
+                    null,
                     $isProjectionOnly ? null : 'outbox.unsupported_schema_version',
-                    $deliveredConsumers,
+                    false,
                 );
 
                 continue;
@@ -147,15 +151,19 @@ final readonly class DatabaseOutboxService implements OutboxRelay
 
             $expectedDigest = PayloadDigest::of($record->eventType, $record->payload)->value;
             if (! hash_equals($expectedDigest, $record->payloadDigest)) {
-                $this->releaseLeaseWithProblem(
+                $this->finalizeClaimedRecord(
                     $connection,
                     $table,
                     $record->id,
+                    $modeKey,
                     $ownerColumn,
                     $untilColumn,
                     $leaseOwner,
+                    $newlyAcked,
+                    null,
+                    null,
                     $isProjectionOnly ? null : 'outbox.digest_mismatch',
-                    $deliveredConsumers,
+                    false,
                 );
 
                 continue;
@@ -167,15 +175,19 @@ final readonly class DatabaseOutboxService implements OutboxRelay
             ));
 
             if ($supporting === []) {
-                $this->releaseLeaseWithProblem(
+                $this->finalizeClaimedRecord(
                     $connection,
                     $table,
                     $record->id,
+                    $modeKey,
                     $ownerColumn,
                     $untilColumn,
                     $leaseOwner,
+                    $newlyAcked,
+                    null,
+                    null,
                     $isProjectionOnly ? null : 'outbox.no_supporting_consumer',
-                    $deliveredConsumers,
+                    false,
                 );
 
                 continue;
@@ -192,79 +204,135 @@ final readonly class DatabaseOutboxService implements OutboxRelay
 
                 try {
                     $consumer->consume($record, $mode);
-                    $modeAcked[$consumerKey] = $this->nowIso();
-                    $deliveredConsumers[$modeKey] = $modeAcked;
+                    $ackAt = $this->nowIso();
+                    $modeAcked[$consumerKey] = $ackAt;
+                    $newlyAcked[$consumerKey] = $ackAt;
                 } catch (Throwable $exception) {
                     $failedException = $exception;
+
+                    break;
                 }
             }
+
             $allDelivered = array_all($supporting, fn ($consumer): bool => isset($modeAcked[$consumer->consumerKey()]));
 
             if ($failedException instanceof Throwable || ! $allDelivered) {
-                $this->releaseLeaseWithProblem(
+                $this->finalizeClaimedRecord(
                     $connection,
                     $table,
                     $record->id,
+                    $modeKey,
                     $ownerColumn,
                     $untilColumn,
                     $leaseOwner,
+                    $newlyAcked,
+                    null,
+                    null,
                     ! $isProjectionOnly && $failedException instanceof Throwable ? substr($failedException::class, 0, 96) : null,
-                    $deliveredConsumers,
+                    false,
                 );
 
                 continue;
             }
 
-            $doneAt = $this->nowIso();
-            $successUpdate = [
-                $doneColumn => $doneAt,
-                $ownerColumn => null,
-                $untilColumn => null,
-                'delivered_consumers' => $this->encodeDeliveredConsumers($deliveredConsumers),
-            ];
+            $updated = $this->finalizeClaimedRecord(
+                $connection,
+                $table,
+                $record->id,
+                $modeKey,
+                $ownerColumn,
+                $untilColumn,
+                $leaseOwner,
+                $newlyAcked,
+                $doneColumn,
+                $this->nowIso(),
+                null,
+                ! $isProjectionOnly,
+            );
 
-            if (! $isProjectionOnly) {
-                $successUpdate['last_problem_code'] = null;
+            if ($updated) {
+                $deliveredCount++;
             }
-
-            $connection->table($table)
-                ->where('id', $record->id)
-                ->where($ownerColumn, $leaseOwner)
-                ->update($successUpdate);
-
-            $deliveredCount++;
         }
 
         return $deliveredCount;
     }
 
     /**
-     * @param  array<string, array<string, string>>  $deliveredConsumers
+     * Atomically merges newly acknowledged consumers for this mode into the latest
+     * `delivered_consumers` JSON state while releasing the mode lease.
+     *
+     * @param  array<string, string>  $newlyAcked
      */
-    private function releaseLeaseWithProblem(
+    private function finalizeClaimedRecord(
         Connection $connection,
         string $table,
         string $recordId,
+        string $modeKey,
         string $ownerColumn,
         string $untilColumn,
         string $leaseOwner,
+        array $newlyAcked,
+        ?string $doneColumn,
+        ?string $doneAt,
         ?string $problemCode,
-        array $deliveredConsumers,
-    ): void {
-        $update = [
-            $ownerColumn => null,
-            $untilColumn => null,
-            'delivered_consumers' => $this->encodeDeliveredConsumers($deliveredConsumers),
-        ];
+        bool $clearProblemCode,
+    ): bool {
+        return $connection->transaction(function () use (
+            $connection,
+            $table,
+            $recordId,
+            $modeKey,
+            $ownerColumn,
+            $untilColumn,
+            $leaseOwner,
+            $newlyAcked,
+            $doneColumn,
+            $doneAt,
+            $problemCode,
+            $clearProblemCode,
+        ): bool {
+            $query = $connection->table($table)
+                ->where('id', $recordId)
+                ->where($ownerColumn, $leaseOwner);
 
-        if ($problemCode !== null) {
-            $update['last_problem_code'] = $problemCode;
-        }
+            if ($connection->getDriverName() !== 'sqlite') {
+                $query->lockForUpdate();
+            }
 
-        $connection->table($table)
-            ->where('id', $recordId)
-            ->where($ownerColumn, $leaseOwner)
-            ->update($update);
+            $fresh = $query->first();
+            if (! is_object($fresh)) {
+                return false;
+            }
+
+            $mergedConsumers = $this->decodeDeliveredConsumers($fresh);
+            if ($newlyAcked !== []) {
+                $mergedConsumers[$modeKey] = array_merge($mergedConsumers[$modeKey] ?? [], $newlyAcked);
+            }
+
+            $update = [
+                $ownerColumn => null,
+                $untilColumn => null,
+                'delivered_consumers' => $this->encodeDeliveredConsumers($mergedConsumers),
+            ];
+
+            if ($doneColumn !== null && $doneAt !== null) {
+                $update[$doneColumn] = $doneAt;
+            }
+
+            if ($problemCode !== null) {
+                $update['last_problem_code'] = $problemCode;
+            } elseif ($clearProblemCode) {
+                $update['last_problem_code'] = null;
+            }
+
+            $connection->table($table)
+                ->where('id', $recordId)
+                ->where($ownerColumn, $leaseOwner)
+                ->update($update);
+
+            return true;
+        });
     }
 
     private function hydrate(object $row, bool $incrementAttempts): OutboxEventRecord

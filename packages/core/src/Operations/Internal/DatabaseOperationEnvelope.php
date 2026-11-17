@@ -192,7 +192,7 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
 
             if ($replay instanceof OperationResult) {
                 if ($verifyActiveSurface) {
-                    $this->lockAndVerifySurface($connection, $surfacesTable, $surface);
+                    $this->lockAndVerifySurface($connection, $surfacesTable, $outboxTable, $surface);
                 }
 
                 if ($replayChecks instanceof Closure) {
@@ -205,7 +205,7 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
             }
 
             if ($verifyActiveSurface) {
-                $this->lockAndVerifySurface($connection, $surfacesTable, $surface);
+                $this->lockAndVerifySurface($connection, $surfacesTable, $outboxTable, $surface);
             }
 
             $outcome = $mutation($actor, $connection);
@@ -229,29 +229,7 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
             $event = $outcome['event'] ?? null;
 
             if ($event !== null) {
-                $digest = PayloadDigest::of($event['event_type'], $event['payload'])->value;
-                $connection->table($outboxTable)->insert([
-                    'id' => Ids::uuid7(),
-                    'panel_id' => $surface->panel->value,
-                    'aggregate_type' => $event['aggregate_type'],
-                    'aggregate_id' => $event['aggregate_id'],
-                    'aggregate_revision' => $event['aggregate_revision'],
-                    'event_type' => $event['event_type'],
-                    'event_schema_version' => 1,
-                    'payload_digest' => $digest,
-                    'payload' => $this->encodeJson($event['payload']),
-                    'occurred_at' => $completedAt,
-                    'available_at' => $completedAt,
-                    'attempts' => 0,
-                    'lease_owner' => null,
-                    'lease_until' => null,
-                    'delivered_at' => null,
-                    'delivered_consumers' => null,
-                    'projection_lease_owner' => null,
-                    'projection_lease_until' => null,
-                    'projection_replayed_at' => null,
-                    'last_problem_code' => null,
-                ]);
+                $this->insertOutboxEvent($connection, $outboxTable, $surface->panel->value, $event, $completedAt);
             }
 
             return $result;
@@ -372,8 +350,12 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
         throw OperationException::idempotencyConflict(hash('sha256', $envelope->key->value));
     }
 
-    private function lockAndVerifySurface(Connection $connection, string $surfacesTable, SurfaceRef $surface): void
-    {
+    private function lockAndVerifySurface(
+        Connection $connection,
+        string $surfacesTable,
+        string $outboxTable,
+        SurfaceRef $surface,
+    ): void {
         $query = $connection->table($surfacesTable)
             ->where('panel_id', $surface->panel->value)
             ->where('kind', $surface->kind->value)
@@ -393,9 +375,12 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
             }
 
             try {
-                $connection->transaction(function () use ($connection, $surfacesTable, $surface): void {
+                $connection->transaction(function () use ($connection, $surfacesTable, $outboxTable, $surface): void {
+                    $surfaceId = Ids::uuid7();
+                    $createdAt = $this->nowIso();
+
                     $connection->table($surfacesTable)->insert([
-                        'id' => Ids::uuid7(),
+                        'id' => $surfaceId,
                         'panel_id' => $surface->panel->value,
                         'kind' => $surface->kind->value,
                         'host_entity_type' => $surface->host->type,
@@ -403,10 +388,23 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
                         'incarnation' => 1,
                         'lifecycle_state' => SurfaceLifecycleState::Active->value,
                         'revision' => 1,
-                        'created_at' => $this->nowIso(),
+                        'created_at' => $createdAt,
                         'archived_at' => null,
                         'deleted_at' => null,
                     ]);
+
+                    $this->insertOutboxEvent($connection, $outboxTable, $surface->panel->value, [
+                        'aggregate_type' => 'surface_instance',
+                        'aggregate_id' => $surfaceId,
+                        'aggregate_revision' => 1,
+                        'event_type' => 'sockit.surfaces.created',
+                        'payload' => [
+                            'panel' => $surface->panel->value,
+                            'surface_id' => $surfaceId,
+                            'surface' => $surface->toWire(),
+                            'incarnation' => 1,
+                        ],
+                    ], $createdAt);
                 });
 
                 return;
@@ -440,6 +438,41 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
         if ($activeIncarnation !== $surface->incarnation->value) {
             throw SurfaceException::incarnationMismatch($activeIncarnation, $surface->incarnation->value);
         }
+    }
+
+    /**
+     * @param  array{aggregate_type: string, aggregate_id: string, aggregate_revision: int, event_type: string, payload: array<string, mixed>}  $event
+     */
+    private function insertOutboxEvent(
+        Connection $connection,
+        string $outboxTable,
+        string $panelId,
+        array $event,
+        string $occurredAt,
+    ): void {
+        $digest = PayloadDigest::of($event['event_type'], $event['payload'])->value;
+        $connection->table($outboxTable)->insert([
+            'id' => Ids::uuid7(),
+            'panel_id' => $panelId,
+            'aggregate_type' => $event['aggregate_type'],
+            'aggregate_id' => $event['aggregate_id'],
+            'aggregate_revision' => $event['aggregate_revision'],
+            'event_type' => $event['event_type'],
+            'event_schema_version' => 1,
+            'payload_digest' => $digest,
+            'payload' => $this->encodeJson($event['payload']),
+            'occurred_at' => $occurredAt,
+            'available_at' => $occurredAt,
+            'attempts' => 0,
+            'lease_owner' => null,
+            'lease_until' => null,
+            'delivered_at' => null,
+            'delivered_consumers' => null,
+            'projection_lease_owner' => null,
+            'projection_lease_until' => null,
+            'projection_replayed_at' => null,
+            'last_problem_code' => null,
+        ]);
     }
 
     /** @param array<array-key, mixed> $payload */

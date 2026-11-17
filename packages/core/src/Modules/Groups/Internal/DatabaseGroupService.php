@@ -19,6 +19,7 @@ use SocKit\Audience\Data\GroupRef;
 use SocKit\Audience\Exceptions\AuthorizationDeniedException;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
+use SocKit\Errors\Enums\SockitErrorCode;
 use SocKit\Modules\Groups\Configuration\GroupsOptions;
 use SocKit\Modules\Groups\Contracts\GroupService;
 use SocKit\Modules\Groups\Contracts\MembershipConsent;
@@ -205,6 +206,10 @@ final readonly class DatabaseGroupService implements GroupService
                 $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
             },
             mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use ($command, $namespace): array {
+                if (SockitRows::str($groupRow, 'join_policy') === $command->joinPolicy->value) {
+                    return $this->noChangeResult($connection, $namespace, $command->key, $command->surface->panel, $command->groupId);
+                }
+
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
                 $actualRevision = SockitRows::int($groupRow, 'revision');
                 $nextRevision = $actualRevision + 1;
@@ -280,38 +285,48 @@ final readonly class DatabaseGroupService implements GroupService
                     ->first();
 
                 if (! is_object($previewGroup)) {
-                    throw OperationException::contentHidden('group.not_found');
+                    return;
+                }
+
+                $existingMember = $connection->table($this->tables->table('group_members', $command->surface->panel))
+                    ->where('group_id', $command->groupId)
+                    ->where('actor_type', $subject->type)
+                    ->where('actor_id', $subject->id)
+                    ->first();
+
+                $previewStatus = is_object($existingMember) ? SockitRows::str($existingMember, 'status') : null;
+                if ($previewStatus === GroupMemberStatus::Active->value) {
+                    return;
                 }
 
                 $previewPolicy = GroupJoinPolicy::from(SockitRows::str($previewGroup, 'join_policy'));
 
-                if ($previewPolicy === GroupJoinPolicy::Closed) {
-                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
-                }
-
-                if ($previewPolicy === GroupJoinPolicy::Auto || $previewPolicy === GroupJoinPolicy::Invite) {
-                    $role = GroupMemberRole::Member;
-
-                    if ($previewPolicy === GroupJoinPolicy::Invite) {
-                        $existingMember = $connection->table($this->tables->table('group_members', $command->surface->panel))
-                            ->where('group_id', $command->groupId)
-                            ->where('actor_type', $subject->type)
-                            ->where('actor_id', $subject->id)
-                            ->first();
-
-                        if (! is_object($existingMember) || SockitRows::str($existingMember, 'status') !== GroupMemberStatus::Invited->value) {
-                            throw AuthorizationDeniedException::denied('groups.invite_required');
-                        }
-
-                        $role = GroupMemberRole::from(SockitRows::str($existingMember, 'role'));
-                    }
-
+                if ($previewPolicy === GroupJoinPolicy::Auto && ! in_array($previewStatus, [
+                    GroupMemberStatus::Pending->value,
+                    GroupMemberStatus::Invited->value,
+                    GroupMemberStatus::Banned->value,
+                ], true)) {
                     $activation = new MembershipActivation(
                         panel: $command->surface->panel,
                         surface: $command->surface,
                         groupId: $command->groupId,
                         subject: $subject,
-                        role: $role,
+                        role: GroupMemberRole::Member,
+                        transition: 'join',
+                    );
+                    $consentDecision = $consent->assess($activation);
+                    $consentDecision->decision->requireAllowed();
+                } elseif (
+                    is_object($existingMember)
+                    && $previewPolicy === GroupJoinPolicy::Invite
+                    && $previewStatus === GroupMemberStatus::Invited->value
+                ) {
+                    $activation = new MembershipActivation(
+                        panel: $command->surface->panel,
+                        surface: $command->surface,
+                        groupId: $command->groupId,
+                        subject: $subject,
+                        role: GroupMemberRole::from(SockitRows::str($existingMember, 'role')),
                         transition: 'join',
                     );
                     $consentDecision = $consent->assess($activation);
@@ -330,15 +345,6 @@ final readonly class DatabaseGroupService implements GroupService
                 $membersTable = $this->tables->table('group_members', $command->surface->panel);
 
                 $policy = GroupJoinPolicy::from(SockitRows::str($groupRow, 'join_policy'));
-                if ($policy === GroupJoinPolicy::Closed) {
-                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
-                }
-
-                $actualRevision = SockitRows::int($groupRow, 'revision');
-                $membershipGen = SockitRows::int($groupRow, 'membership_generation', 1);
-                $nextRevision = $actualRevision + 1;
-                $now = $this->nowIso();
-
                 $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $subject);
                 $existingStatus = is_object($existingMember) ? SockitRows::str($existingMember, 'status') : null;
 
@@ -346,11 +352,29 @@ final readonly class DatabaseGroupService implements GroupService
                     throw AuthorizationDeniedException::denied('groups.member_banned');
                 }
 
-                if ($existingStatus === GroupMemberStatus::Active->value) {
-                    throw AuthorizationDeniedException::denied('groups.already_member');
+                if ($policy === GroupJoinPolicy::Closed) {
+                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
                 }
 
+                if ($existingStatus === GroupMemberStatus::Active->value) {
+                    return $this->noChangeResult($connection, $namespace, $command->key, $command->surface->panel, $command->groupId);
+                }
+
+                $actualRevision = SockitRows::int($groupRow, 'revision');
+                $membershipGen = SockitRows::int($groupRow, 'membership_generation', 1);
+                $nextRevision = $actualRevision + 1;
+                $nextGeneration = $membershipGen + 1;
+                $now = $this->nowIso();
+
                 if ($policy === GroupJoinPolicy::Approval) {
+                    if ($existingStatus === GroupMemberStatus::Pending->value) {
+                        return $this->noChangeResult($connection, $namespace, $command->key, $command->surface->panel, $command->groupId);
+                    }
+
+                    if ($existingStatus === GroupMemberStatus::Invited->value) {
+                        throw AuthorizationDeniedException::denied('groups.obsolete_state_must_leave');
+                    }
+
                     $this->upsertMemberRow($connection, $membersTable, $command->groupId, $subject, is_object($existingMember), [
                         'role' => GroupMemberRole::Member->value,
                         'status' => GroupMemberStatus::Pending->value,
@@ -363,7 +387,11 @@ final readonly class DatabaseGroupService implements GroupService
                         ->where('id', $command->groupId)
                         ->where('panel_id', $command->surface->panel->value)
                         ->where('revision', $command->expectedRevision->value)
-                        ->update(['revision' => $nextRevision, 'updated_at' => $now]);
+                        ->update([
+                            'revision' => $nextRevision,
+                            'membership_generation' => $nextGeneration,
+                            'updated_at' => $now,
+                        ]);
 
                     $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
@@ -382,6 +410,7 @@ final readonly class DatabaseGroupService implements GroupService
                                 'panel' => $command->surface->panel->value,
                                 'group_id' => $command->groupId,
                                 'member' => $subject->toWire(),
+                                'membership_generation' => $nextGeneration,
                             ],
                         ],
                     ];
@@ -389,7 +418,18 @@ final readonly class DatabaseGroupService implements GroupService
 
                 $effectiveRole = GroupMemberRole::Member;
 
+                if ($policy === GroupJoinPolicy::Auto && in_array($existingStatus, [
+                    GroupMemberStatus::Pending->value,
+                    GroupMemberStatus::Invited->value,
+                ], true)) {
+                    throw AuthorizationDeniedException::denied('groups.obsolete_state_must_leave');
+                }
+
                 if ($policy === GroupJoinPolicy::Invite) {
+                    if ($existingStatus === GroupMemberStatus::Pending->value) {
+                        throw AuthorizationDeniedException::denied('groups.obsolete_state_must_leave');
+                    }
+
                     if (! is_object($existingMember) || $existingStatus !== GroupMemberStatus::Invited->value) {
                         throw AuthorizationDeniedException::denied('groups.invite_required');
                     }
@@ -411,7 +451,6 @@ final readonly class DatabaseGroupService implements GroupService
                     'updated_at' => $now,
                 ]);
 
-                $nextGeneration = $membershipGen + 1;
                 $connection->table($groupsTable)
                     ->where('id', $command->groupId)
                     ->where('panel_id', $command->surface->panel->value)
@@ -482,6 +521,17 @@ final readonly class DatabaseGroupService implements GroupService
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $activation, &$consent, &$consentDecision): void {
                 $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
                 $consent = $this->runtime->membershipConsent();
+                $existingMember = $this->tables->connection($command->surface->panel)
+                    ->table($this->tables->table('group_members', $command->surface->panel))
+                    ->where('group_id', $command->groupId)
+                    ->where('actor_type', $command->member->type)
+                    ->where('actor_id', $command->member->id)
+                    ->first();
+
+                if (is_object($existingMember) && SockitRows::str($existingMember, 'status') === GroupMemberStatus::Active->value) {
+                    return;
+                }
+
                 $consentDecision = $consent->assess($activation);
                 $consentDecision->decision->requireAllowed();
             },
@@ -492,8 +542,13 @@ final readonly class DatabaseGroupService implements GroupService
                 &$consent,
                 &$consentDecision,
             ): array {
-                if (SockitRows::str($groupRow, 'join_policy') === GroupJoinPolicy::Closed->value) {
+                $policy = GroupJoinPolicy::from(SockitRows::str($groupRow, 'join_policy'));
+                if ($policy === GroupJoinPolicy::Closed) {
                     throw AuthorizationDeniedException::denied('groups.join_policy_closed');
+                }
+
+                if ($policy !== GroupJoinPolicy::Approval) {
+                    throw AuthorizationDeniedException::denied('groups.approval_policy_required');
                 }
 
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
@@ -585,8 +640,13 @@ final readonly class DatabaseGroupService implements GroupService
                 $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
             },
             mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use ($command, $namespace): array {
-                if (SockitRows::str($groupRow, 'join_policy') === GroupJoinPolicy::Closed->value) {
+                $policy = GroupJoinPolicy::from(SockitRows::str($groupRow, 'join_policy'));
+                if ($policy === GroupJoinPolicy::Closed) {
                     throw AuthorizationDeniedException::denied('groups.join_policy_closed');
+                }
+
+                if ($policy !== GroupJoinPolicy::Invite) {
+                    throw AuthorizationDeniedException::denied('groups.invite_policy_required');
                 }
 
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
@@ -603,8 +663,21 @@ final readonly class DatabaseGroupService implements GroupService
                     throw AuthorizationDeniedException::denied('groups.already_member');
                 }
 
+                if ($existingStatus === GroupMemberStatus::Pending->value) {
+                    throw AuthorizationDeniedException::denied('groups.obsolete_state_must_leave');
+                }
+
+                if (
+                    is_object($existingMember)
+                    && $existingStatus === GroupMemberStatus::Invited->value
+                    && SockitRows::str($existingMember, 'role') === $command->role->value
+                ) {
+                    return $this->noChangeResult($connection, $namespace, $command->key, $command->surface->panel, $command->groupId);
+                }
+
                 $actualRevision = SockitRows::int($groupRow, 'revision');
                 $nextRevision = $actualRevision + 1;
+                $nextGeneration = SockitRows::int($groupRow, 'membership_generation', 1) + 1;
                 $now = $this->nowIso();
 
                 $this->upsertMemberRow($connection, $membersTable, $command->groupId, $command->member, is_object($existingMember), [
@@ -619,7 +692,11 @@ final readonly class DatabaseGroupService implements GroupService
                     ->where('id', $command->groupId)
                     ->where('panel_id', $command->surface->panel->value)
                     ->where('revision', $command->expectedRevision->value)
-                    ->update(['revision' => $nextRevision, 'updated_at' => $now]);
+                    ->update([
+                        'revision' => $nextRevision,
+                        'membership_generation' => $nextGeneration,
+                        'updated_at' => $now,
+                    ]);
 
                 $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
@@ -639,6 +716,7 @@ final readonly class DatabaseGroupService implements GroupService
                             'group_id' => $command->groupId,
                             'member' => $command->member->toWire(),
                             'role' => $command->role->value,
+                            'membership_generation' => $nextGeneration,
                         ],
                     ],
                 ];
@@ -680,6 +758,21 @@ final readonly class DatabaseGroupService implements GroupService
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $activation, &$consent, &$consentDecision): void {
                 $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
                 $consent = $this->runtime->membershipConsent();
+                $existingMember = $this->tables->connection($command->surface->panel)
+                    ->table($this->tables->table('group_members', $command->surface->panel))
+                    ->where('group_id', $command->groupId)
+                    ->where('actor_type', $command->member->type)
+                    ->where('actor_id', $command->member->id)
+                    ->first();
+
+                if (
+                    is_object($existingMember)
+                    && SockitRows::str($existingMember, 'status') === GroupMemberStatus::Active->value
+                    && SockitRows::str($existingMember, 'role') === $command->role->value
+                ) {
+                    return;
+                }
+
                 $consentDecision = $consent->assess($activation);
                 $consentDecision->decision->requireAllowed();
             },
@@ -701,6 +794,14 @@ final readonly class DatabaseGroupService implements GroupService
 
                 if (is_object($existingMember) && SockitRows::str($existingMember, 'status') === GroupMemberStatus::Banned->value) {
                     throw AuthorizationDeniedException::denied('groups.member_banned');
+                }
+
+                if (
+                    is_object($existingMember)
+                    && SockitRows::str($existingMember, 'status') === GroupMemberStatus::Active->value
+                    && SockitRows::str($existingMember, 'role') === $command->role->value
+                ) {
+                    return $this->noChangeResult($connection, $namespace, $command->key, $command->surface->panel, $command->groupId);
                 }
 
                 if (! $consent instanceof MembershipConsent || ! $consentDecision instanceof ConsentDecision) {
@@ -786,18 +887,21 @@ final readonly class DatabaseGroupService implements GroupService
                 $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $subject);
                 $existingStatus = is_object($existingMember) ? SockitRows::str($existingMember, 'status') : null;
 
+                if ($existingStatus === GroupMemberStatus::Banned->value) {
+                    throw AuthorizationDeniedException::denied('groups.member_banned');
+                }
+
                 if (! in_array($existingStatus, [
                     GroupMemberStatus::Active->value,
                     GroupMemberStatus::Pending->value,
                     GroupMemberStatus::Invited->value,
                 ], true)) {
-                    throw AuthorizationDeniedException::denied('groups.not_a_member');
+                    return $this->noChangeResult($connection, $namespace, $command->key, $command->surface->panel, $command->groupId);
                 }
 
                 $actualRevision = SockitRows::int($groupRow, 'revision');
                 $nextRevision = $actualRevision + 1;
-                $membershipGen = SockitRows::int($groupRow, 'membership_generation', 1);
-                $nextGeneration = $existingStatus === GroupMemberStatus::Active->value ? $membershipGen + 1 : $membershipGen;
+                $nextGeneration = SockitRows::int($groupRow, 'membership_generation', 1) + 1;
                 $now = $this->nowIso();
 
                 $connection->table($membersTable)
@@ -868,12 +972,23 @@ final readonly class DatabaseGroupService implements GroupService
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
                 $membersTable = $this->tables->table('group_members', $command->surface->panel);
                 $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $command->member);
+                $existingStatus = is_object($existingMember) ? SockitRows::str($existingMember, 'status') : null;
+
+                if ($existingStatus === GroupMemberStatus::Banned->value) {
+                    throw AuthorizationDeniedException::denied('groups.member_banned');
+                }
+
+                if (! in_array($existingStatus, [
+                    GroupMemberStatus::Active->value,
+                    GroupMemberStatus::Pending->value,
+                    GroupMemberStatus::Invited->value,
+                ], true)) {
+                    return $this->noChangeResult($connection, $namespace, $command->key, $command->surface->panel, $command->groupId);
+                }
 
                 $actualRevision = SockitRows::int($groupRow, 'revision');
                 $nextRevision = $actualRevision + 1;
-                $membershipGen = SockitRows::int($groupRow, 'membership_generation', 1);
-                $wasActive = is_object($existingMember) && SockitRows::str($existingMember, 'status') === GroupMemberStatus::Active->value;
-                $nextGeneration = $wasActive ? $membershipGen + 1 : $membershipGen;
+                $nextGeneration = SockitRows::int($groupRow, 'membership_generation', 1) + 1;
                 $now = $this->nowIso();
 
                 $connection->table($membersTable)
@@ -1165,6 +1280,21 @@ final readonly class DatabaseGroupService implements GroupService
             'actor_id' => $member->id,
             ...$columns,
         ]);
+    }
+
+    /** @return array{result: OperationResult, event: null} */
+    private function noChangeResult(Connection $connection, CommandNamespace $namespace, CommandKey $key, PanelId $panel, string $groupId): array
+    {
+        $receiptId = $this->findReceiptId($connection, $panel, $namespace->toWire(), $key->value);
+
+        return [
+            'result' => OperationResult::rejected(
+                SockitErrorCode::RevisionConflict,
+                ['group_id' => $groupId, 'reason' => 'groups.no_change'],
+                $receiptId,
+            ),
+            'event' => null,
+        ];
     }
 
     private function findReceiptId(Connection $connection, PanelId $panel, string $namespace, string $commandKey): string

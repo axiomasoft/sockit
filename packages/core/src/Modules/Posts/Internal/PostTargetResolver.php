@@ -20,6 +20,7 @@ use SocKit\Support\Data\Revision;
 use SocKit\Surfaces\Contracts\LocksTargetInTransaction;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetResolution;
+use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 
 /**
  * TargetResolver + TargetWriteFence slot handler contributed by PostsPlugin so Reactions
@@ -72,6 +73,10 @@ final readonly class PostTargetResolver implements LocksTargetInTransaction
 
         if (! is_object($surfaceRow) || SockitRows::str($surfaceRow, 'id') !== SockitRows::str($row, 'surface_instance_id')) {
             return TargetResolution::missing($target, 'post.wrong_surface');
+        }
+
+        if (SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
+            return TargetResolution::hidden($target, 'content.deleted');
         }
 
         $state = ContentState::from(SockitRows::str($row, 'state'));

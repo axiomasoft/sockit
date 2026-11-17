@@ -312,12 +312,12 @@ final class PostsAndFeedLifecycleTest extends SocKitTestCase
         $spy->failNext();
         $relay = $this->app->make(OutboxRelay::class);
         $firstRun = $relay->relayPending(new PanelId('sockit.alpha'), 10, ReplayMode::Normal);
-        self::assertSame(3, $firstRun);
+        self::assertSame(4, $firstRun);
 
         // Second run retries the failed 1st event cleanly
         $secondRun = $relay->relayPending(new PanelId('sockit.alpha'), 10, ReplayMode::Normal);
         self::assertSame(1, $secondRun);
-        self::assertCount(4, $spy->recorded());
+        self::assertCount(5, $spy->recorded());
         self::assertSame(ReplayMode::Normal, $spy->recorded()[0]['mode']);
 
         // Rebuild reactions console command runs cleanly with zero notifications

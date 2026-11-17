@@ -263,10 +263,22 @@ final readonly class DatabaseFeedService implements FeedService
                         ->where('id', $postId)
                         ->first();
 
+                    $confirmSurface = $connection->table($surfacesTable)
+                        ->where('panel_id', $query->surface->panel->value)
+                        ->where('id', $surfaceInstanceId)
+                        ->first();
+
+                    $confirmArchived = is_object($confirmSurface)
+                        && SockitRows::str($confirmSurface, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+
                     if (
                         ! is_object($confirm)
                         || SockitRows::str($confirm, 'state') !== ContentState::Published->value
                         || SockitRows::int($confirm, 'privacy_revision', 1) !== $freshPrivacyRevision
+                        || ! is_object($confirmSurface)
+                        || SockitRows::str($confirmSurface, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value
+                        || ($confirmArchived && ! $surfaceDef->archiveReaders)
+                        || $confirmArchived !== $latestSurfaceArchived
                     ) {
                         continue;
                     }

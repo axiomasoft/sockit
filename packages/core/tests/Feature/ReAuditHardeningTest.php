@@ -8,18 +8,25 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Container\Container;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Override;
 use Packman\Context\Data\ScopeRef;
 use Packman\Panels\Data\Panel\PanelContext;
 use Packman\Panels\Data\Panel\PanelReference;
+use RuntimeException;
 use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Contracts\ActorContextResolver;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Audience\Contracts\AudienceResolver;
+use SocKit\Audience\Contracts\GroupMembershipResolver;
+use SocKit\Audience\Contracts\LocksGroupMembershipInTransaction;
+use SocKit\Audience\Contracts\ResolvesAudienceInBatch;
+use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\AudienceVerdict;
+use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Audience\Data\GroupRef;
 use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Exceptions\AuthorizationDeniedException;
@@ -47,6 +54,7 @@ use SocKit\Modules\Posts\Data\EditPostCommand;
 use SocKit\Modules\Posts\Data\FeedCursor;
 use SocKit\Modules\Posts\Data\GetFeedQuery;
 use SocKit\Modules\Posts\Data\PublishPostCommand;
+use SocKit\Modules\Posts\Data\TransitionPostStateCommand;
 use SocKit\Modules\Posts\Enums\ContentState;
 use SocKit\Modules\Reactions\Contracts\ReactionService;
 use SocKit\Modules\Reactions\Data\AddReactionCommand;
@@ -56,6 +64,8 @@ use SocKit\Operations\Contracts\OutboxRelay;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Data\OutboxEventRecord;
+use SocKit\Operations\Data\SafetyVerdict;
+use SocKit\Operations\Enums\OperationOutcome;
 use SocKit\Operations\Enums\ReplayMode;
 use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Data\PanelId;
@@ -516,22 +526,52 @@ final class ReAuditHardeningTest extends SocKitTestCase
         $this->app->tag(['test.outbox.nonsupport'], OutboxConsumer::class);
         self::assertSame(0, $relay->relayPending($surface->panel, 50, ReplayMode::Normal));
 
-        // Multi-consumer partial failure: consumerA succeeds, consumerB fails -> retry skips consumerA and completes consumerB!
+        // Multi-consumer partial failure: consumerA succeeds, consumerB fails once -> retry skips consumerA and completes consumerB!
         $consumerA = new SpyOutboxConsumer('consumer.a');
-        $consumerB = new SpyOutboxConsumer('consumer.b')->failNext();
+        $consumerB = new class implements OutboxConsumer
+        {
+            private bool $failedPost = false;
+
+            /** @var list<OutboxEventRecord> */
+            public array $delivered = [];
+
+            #[Override]
+            public function consumerKey(): string
+            {
+                return 'consumer.b';
+            }
+
+            #[Override]
+            public function supports(string $eventType): bool
+            {
+                return str_starts_with($eventType, 'sockit.');
+            }
+
+            #[Override]
+            public function consume(OutboxEventRecord $event, ReplayMode $mode): void
+            {
+                if ($event->eventType === 'sockit.posts.published' && ! $this->failedPost) {
+                    $this->failedPost = true;
+
+                    throw new RuntimeException('Simulated partial consumer failure on post event.');
+                }
+
+                $this->delivered[] = $event;
+            }
+        };
         $this->app->instance('test.outbox.a', $consumerA);
         $this->app->instance('test.outbox.b', $consumerB);
         $this->app->tag(['test.outbox.a', 'test.outbox.b'], OutboxConsumer::class);
 
-        self::assertSame(0, $relay->relayPending($surface->panel, 50, ReplayMode::Normal));
+        self::assertSame(1, $relay->relayPending($surface->panel, 50, ReplayMode::Normal));
         $afterPartial = DB::table('sk_outbox_events')->where('event_type', 'sockit.posts.published')->first();
         self::assertNull($afterPartial->delivered_at);
 
         // Retry: consumerA must NOT be re-invoked for already-ACKed event; consumerB now succeeds and completes delivery!
         $delivered = $relay->relayPending($surface->panel, 50, ReplayMode::Normal);
-        self::assertGreaterThanOrEqual(1, $delivered);
+        self::assertSame(1, $delivered);
         $postEventsForA = array_filter($consumerA->recorded(), static fn (array $e): bool => $e['event']->eventType === 'sockit.posts.published');
-        $postEventsForB = array_filter($consumerB->recorded(), static fn (array $e): bool => $e['event']->eventType === 'sockit.posts.published');
+        $postEventsForB = array_filter($consumerB->delivered, static fn (OutboxEventRecord $e): bool => $e->eventType === 'sockit.posts.published');
         self::assertCount(1, $postEventsForA);
         self::assertCount(1, $postEventsForB);
         self::assertNotNull(DB::table('sk_outbox_events')->where('event_type', 'sockit.posts.published')->first()->delivered_at);
@@ -654,7 +694,7 @@ final class ReAuditHardeningTest extends SocKitTestCase
         $fake->actors->actAsPerson('bob');
         $view = $groups->get($surface->panel, $groupId);
         self::assertSame(GroupJoinPolicy::Approval, $view->joinPolicy);
-        self::assertSame(2, $view->membershipGeneration);
+        self::assertSame(3, $view->membershipGeneration);
 
         // Switch policy to Invite -> Invite Carol -> uninvited Alice denied -> Carol recheck failure blocks activation -> Carol join succeeds!
         $fake->actors->actAsPerson('alice');
@@ -845,6 +885,732 @@ final class ReAuditHardeningTest extends SocKitTestCase
             @unlink($tmpDir.'/bin/php84');
             @rmdir($tmpDir.'/bin');
             @rmdir($tmpDir);
+        }
+    }
+
+    public function test_deleted_surface_refuses_single_post_get_and_reaction_counts(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'del-surf-reads'), Incarnation::initial());
+        $surfaces = $this->app->make(SurfaceService::class);
+        $posts = $this->app->make(PostService::class);
+        $reactions = $this->app->make(ReactionService::class);
+
+        $createdSurf = $surfaces->create(new CommandKey('cmd-delsurf-create-1'), $surface);
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-delsurf-post-1'),
+            surface: $surface,
+            body: 'Visible before surface delete',
+            audience: AudienceSpec::platform(),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        $reactions->add(new AddReactionCommand(
+            key: new CommandKey('cmd-delsurf-react-1'),
+            surface: $surface,
+            target: new HostEntityRef('post', $postId),
+            reactionType: 'like',
+        ));
+
+        self::assertSame('Visible before surface delete', $posts->get($surface, $postId)->body);
+        self::assertSame(1, $reactions->counts($surface, new HostEntityRef('post', $postId))->total);
+
+        $surfaces->delete(new CommandKey('cmd-delsurf-del-1'), $surface, $createdSurf->revision);
+
+        try {
+            $posts->get($surface, $postId);
+            self::fail('Deleted surface must block PostService::get().');
+        } catch (SurfaceException $e) {
+            self::assertSame(SockitErrorCode::ContentDeleted, $e->problem());
+        }
+
+        try {
+            $reactions->counts($surface, new HostEntityRef('post', $postId));
+            self::fail('Deleted surface must block ReactionService::counts().');
+        } catch (SurfaceException $e) {
+            self::assertSame(SockitErrorCode::ContentDeleted, $e->problem());
+        }
+
+        self::assertCount(0, $this->app->make(FeedService::class)->feed(new GetFeedQuery($surface))->items);
+    }
+
+    public function test_feed_second_audience_evaluation_refuses_concurrently_deleted_surface(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'feed-del-race'), Incarnation::initial());
+        $posts = $this->app->make(PostService::class);
+
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-feeddel-pub-1'),
+            surface: $surface,
+            body: 'SECRET_DELETED_SURFACE_BODY',
+            audience: AudienceSpec::platform(),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        $innerResolver = $this->app->make(AudienceResolver::class);
+        $probe = new class
+        {
+            public bool $triggeredSecondEval = false;
+        };
+
+        $racyResolver = new readonly class($innerResolver, $postId, $surface, $probe) implements AudienceResolver, ResolvesAudienceInBatch
+        {
+            public function __construct(
+                private AudienceResolver $inner,
+                private string $postId,
+                private SurfaceRef $surface,
+                private object $probe,
+            ) {}
+
+            #[Override]
+            public function decideRead(ActorContext $viewer, AudienceSubject $subject): AudienceVerdict
+            {
+                $this->probe->triggeredSecondEval = true;
+                $verdict = $this->inner->decideRead($viewer, $subject);
+
+                // Delete surface right after the second audience evaluation approves it
+                DB::table('sk_surface_instances')
+                    ->where('panel_id', $this->surface->panel->value)
+                    ->where('host_entity_value', $this->surface->host->value)
+                    ->update([
+                        'lifecycle_state' => 'deleted',
+                        'deleted_at' => gmdate('Y-m-d H:i:s.uP'),
+                        'revision' => 2,
+                    ]);
+
+                return $verdict;
+            }
+
+            /**
+             * @param  list<AudienceSubject>  $subjects
+             * @return array<string, AudienceVerdict>
+             */
+            #[Override]
+            public function decideReadMany(ActorContext $viewer, array $subjects): array
+            {
+                $results = [];
+                foreach ($subjects as $subject) {
+                    $results[$subject->key] = $this->inner->decideRead($viewer, $subject);
+                }
+
+                // Shift privacy revision after batch check to force second decideRead() re-evaluation
+                DB::table('sk_posts')->where('id', $this->postId)->update(['privacy_revision' => 2]);
+
+                return $results;
+            }
+
+            #[Override]
+            public function decidePublish(ActorContext $author, AudienceSubject $subject, PrivacyFloor $floor): AudienceVerdict
+            {
+                return $this->inner->decidePublish($author, $subject, $floor);
+            }
+        };
+        $this->app->instance(AudienceResolver::class, $racyResolver);
+
+        $page = $this->app->make(FeedService::class)->feed(new GetFeedQuery($surface));
+        self::assertTrue($probe->triggeredSecondEval);
+        self::assertCount(0, $page->items);
+    }
+
+    public function test_transactional_group_reverification_preserves_readonly_management_admission_in_any_of(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
+        $fake->actors->actAsPerson('alice');
+
+        $mgmtA = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'mgmt-ro-a'), Incarnation::initial());
+        $mgmtB = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'mgmt-rw-b'), Incarnation::initial());
+        $postSurface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'post-anyof-ro'), Incarnation::initial());
+
+        $groups = $this->app->make(GroupService::class);
+        $posts = $this->app->make(PostService::class);
+        $reactions = $this->app->make(ReactionService::class);
+
+        $groupA = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-ro-group-a-0001'), $mgmtA, 'ro-a', 'RO Group A'))->resource?->id;
+        $groupB = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-ro-group-b-0001'), $mgmtB, 'rw-b', 'RW Group B'))->resource?->id;
+
+        $alice = new ActorRef('user', 'alice');
+        $bob = new ActorRef('user', 'bob');
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-ro-add-alice-a1'), $mgmtA, $groupA, new Revision(1), $alice, GroupMemberRole::Owner));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-ro-add-alice-b1'), $mgmtB, $groupB, new Revision(1), $alice, GroupMemberRole::Owner));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-ro-add-member-a1'), $mgmtA, $groupA, new Revision(2), $bob));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-ro-add-member-b1'), $mgmtB, $groupB, new Revision(2), $bob));
+
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-ro-publish-post-1'),
+            surface: $postSurface,
+            body: 'anyOf groupA (RO) or groupB (RW)',
+            audience: AudienceSpec::anyOf(
+                AudienceSpec::group(new GroupRef($groupA)),
+                AudienceSpec::group(new GroupRef($groupB)),
+            ),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        // Configure Bob's management admission: mgmtA is ReadOnly, mgmtB & postSurface are Read+Write
+        $fake->actors->actAsPerson('bob');
+        $fake->surfacePolicy->admitUsing(static function (ActorContext $actor, SurfaceRef $surface) use ($mgmtA): AudienceVerdict {
+            if ($actor->actor?->id === 'bob' && $surface->host->equals($mgmtA->host)) {
+                return AudienceVerdict::allowReadOnly('mgmt_a.read_only');
+            }
+
+            return AudienceVerdict::allow('surface.writable');
+        });
+
+        // Simulate Bob losing groupB membership right as TX locks referenced groups
+        $innerGroupResolver = $this->app->make(GroupMembershipResolver::class);
+        self::assertInstanceOf(LocksGroupMembershipInTransaction::class, $innerGroupResolver);
+
+        $revokingResolver = new readonly class($innerGroupResolver, $groupB) implements LocksGroupMembershipInTransaction
+        {
+            public function __construct(
+                private LocksGroupMembershipInTransaction $inner,
+                private string $groupB,
+            ) {}
+
+            #[Override]
+            public function isMember(ActorContext $actor, GroupRef $group): bool
+            {
+                return $this->inner->isMember($actor, $group);
+            }
+
+            #[Override]
+            public function isMemberInPanel(ActorContext $actor, PanelId $panel, GroupRef $group): bool
+            {
+                return $this->inner->isMemberInPanel($actor, $panel, $group);
+            }
+
+            #[Override]
+            public function membershipVerdictInPanel(ActorContext $actor, PanelId $panel, GroupRef $group): AudienceVerdict
+            {
+                return $this->inner->membershipVerdictInPanel($actor, $panel, $group);
+            }
+
+            #[Override]
+            public function lockGroupInTransaction(PanelId $panel, GroupRef $group): void
+            {
+                $this->inner->lockGroupInTransaction($panel, $group);
+            }
+
+            #[Override]
+            public function lockGroupsInTransaction(PanelId $panel, array $groups): void
+            {
+                DB::table('sk_group_members')
+                    ->where('group_id', $this->groupB)
+                    ->where('actor_id', 'bob')
+                    ->update(['status' => GroupMemberStatus::Removed->value]);
+
+                $this->inner->lockGroupsInTransaction($panel, $groups);
+            }
+
+            #[Override]
+            public function managementSurfacesInPanel(PanelId $panel, array $groups): array
+            {
+                return $this->inner->managementSurfacesInPanel($panel, $groups);
+            }
+
+            #[Override]
+            public function membershipVerdictInTransaction(
+                ActorContext $actor,
+                PanelId $panel,
+                GroupRef $group,
+                ?array $preSampledSurfaceAdmissions = null,
+            ): AudienceVerdict {
+                return $this->inner->membershipVerdictInTransaction($actor, $panel, $group, $preSampledSurfaceAdmissions);
+            }
+        };
+        $this->app->instance(GroupMembershipResolver::class, $revokingResolver);
+
+        try {
+            $reactions->add(new AddReactionCommand(
+                key: new CommandKey('cmd-ro-react-fail-1'),
+                surface: $postSurface,
+                target: new HostEntityRef('post', $postId),
+                reactionType: 'like',
+            ));
+            self::fail('Read-only groupA alone after groupB revocation must NOT authorize reaction write.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        self::assertSame(0, DB::table('sk_reactions')->count());
+    }
+
+    public function test_group_dependent_post_publish_edit_and_transition_reverify_locked_membership_in_transaction(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
+        $fake->actors->actAsPerson('alice');
+
+        $mgmtSurface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'post-grp-tx-mgmt'), Incarnation::initial());
+        $postSurface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'post-grp-tx-wall'), Incarnation::initial());
+
+        $groups = $this->app->make(GroupService::class);
+        $posts = $this->app->make(PostService::class);
+        $bob = new ActorRef('user', 'bob');
+
+        $groupId = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-pgtx-create-1'), $mgmtSurface, 'grp-tx-write', 'Group TX Write', GroupVisibility::Private, joinPolicy: GroupJoinPolicy::Auto))->resource?->id;
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgtx-add-member-1'), $mgmtSurface, $groupId, new Revision(1), $bob));
+
+        // 1) Publish fails inside TX when safety callback leaves group mid-flight
+        $fake->actors->actAsPerson('bob');
+        $fake->safety->using(function () use ($groups, $mgmtSurface, $groupId): SafetyVerdict {
+            $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-pgtx-leave-1'), $mgmtSurface, $groupId, new Revision(2)));
+
+            return SafetyVerdict::allow();
+        });
+
+        try {
+            $posts->publish(new PublishPostCommand(
+                key: new CommandKey('cmd-pgtx-publish-1'),
+                surface: $postSurface,
+                body: 'Should fail in TX',
+                audience: AudienceSpec::group(new GroupRef($groupId)),
+            ));
+            self::fail('Publish after mid-flight leave() must fail inside TX.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+        self::assertSame(0, DB::table('sk_posts')->count());
+
+        // 2) Re-enroll Bob -> publish succeeds; edit after mid-flight leave() fails inside TX!
+        $fake->safety->allowAll();
+        $fake->actors->actAsPerson('alice');
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgtx-add-member-2'), $mgmtSurface, $groupId, new Revision(3), $bob));
+
+        $fake->actors->actAsPerson('bob');
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-pgtx-publish-ok'),
+            surface: $postSurface,
+            body: 'Published v1',
+            audience: AudienceSpec::group(new GroupRef($groupId)),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        $fake->safety->using(function () use ($groups, $mgmtSurface, $groupId): SafetyVerdict {
+            $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-pgtx-leave-2'), $mgmtSurface, $groupId, new Revision(4)));
+
+            return SafetyVerdict::allow();
+        });
+
+        try {
+            $posts->edit(new EditPostCommand(
+                key: new CommandKey('cmd-pgtx-edit-post-1'),
+                surface: $postSurface,
+                postId: $postId,
+                expectedRevision: new Revision(1),
+                body: 'Edited after leave',
+            ));
+            self::fail('Edit after mid-flight leave() must fail inside TX.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+        self::assertSame('Published v1', (string) DB::table('sk_posts')->where('id', $postId)->first()->current_body);
+
+        // 3) Re-enroll Bob -> publish Draft -> transition(Published) after mid-flight leave() fails inside TX!
+        $fake->safety->allowAll();
+        $fake->actors->actAsPerson('alice');
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgtx-add-member-3'), $mgmtSurface, $groupId, new Revision(5), $bob));
+
+        $fake->actors->actAsPerson('bob');
+        $draft = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-pgtx-draft-1'),
+            surface: $postSurface,
+            body: 'Draft to transition',
+            audience: AudienceSpec::group(new GroupRef($groupId)),
+            asDraft: true,
+        ));
+        $draftId = (string) $draft->resource?->id;
+
+        $fake->safety->using(function () use ($groups, $mgmtSurface, $groupId): SafetyVerdict {
+            $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-pgtx-leave-3'), $mgmtSurface, $groupId, new Revision(6)));
+
+            return SafetyVerdict::allow();
+        });
+
+        try {
+            $posts->transition(new TransitionPostStateCommand(
+                key: new CommandKey('cmd-pgtx-trans-1'),
+                surface: $postSurface,
+                postId: $draftId,
+                expectedRevision: new Revision(1),
+                targetState: ContentState::Published,
+            ));
+            self::fail('Transition(Published) after mid-flight leave() must fail inside TX.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+        self::assertSame(ContentState::Draft->value, (string) DB::table('sk_posts')->where('id', $draftId)->first()->state);
+    }
+
+    public function test_groups_p53_policy_matrix_no_change_generation_and_invite_replay(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'p53-matrix'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $bob = new ActorRef('user', 'bob');
+
+        $fake->actors->actAsPerson('alice');
+        $groupId = (string) $groups->create(new CreateGroupCommand(
+            key: new CommandKey('cmd-mat-create-1'),
+            surface: $surface,
+            slug: 'matrix-group',
+            title: 'Matrix Group',
+            visibility: GroupVisibility::Public,
+            joinPolicy: GroupJoinPolicy::Approval,
+        ))->resource?->id;
+
+        // No-change setJoinPolicy with NEW key rejects with no_change & 0 revision bump!
+        $noOpPolicy = $groups->setJoinPolicy(new SetGroupJoinPolicyCommand(
+            key: new CommandKey('cmd-mat-pol-noop'),
+            surface: $surface,
+            groupId: $groupId,
+            expectedRevision: new Revision(1),
+            joinPolicy: GroupJoinPolicy::Approval,
+        ));
+        self::assertSame(OperationOutcome::Rejected, $noOpPolicy->outcome);
+        self::assertSame(SockitErrorCode::RevisionConflict, $noOpPolicy->problem);
+        self::assertSame('groups.no_change', $noOpPolicy->problemDetail['reason'] ?? null);
+
+        // No-change leave when absent -> rejected no_change
+        $fake->actors->actAsPerson('bob');
+        $noOpLeave = $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-mat-leave-absent'), $surface, $groupId, new Revision(1)));
+        self::assertSame(OperationOutcome::Rejected, $noOpLeave->outcome);
+        self::assertSame('groups.no_change', $noOpLeave->problemDetail['reason'] ?? null);
+
+        // Under Approval: invite() is forbidden; join -> Pending advances revision & membershipGeneration (1 -> 2)
+        $fake->actors->actAsPerson('alice');
+        try {
+            $groups->invite(new InviteGroupMemberCommand(new CommandKey('cmd-mat-inv-badpol'), $surface, $groupId, new Revision(1), $bob));
+            self::fail('invite() under Approval policy must fail.');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.invite_policy_required', $e->detail()['reason'] ?? null);
+        }
+
+        $fake->actors->actAsPerson('bob');
+        $pendingJoin = $groups->join(new JoinGroupCommand(new CommandKey('cmd-mat-join-pend'), $surface, $groupId, new Revision(1)));
+        self::assertTrue($pendingJoin->isSuccess());
+        self::assertSame(2, $pendingJoin->revision?->value);
+        self::assertSame(2, $groups->get($surface->panel, $groupId)->membershipGeneration);
+
+        // Repeating Pending join with a NEW key -> no_change without revision/generation bump
+        $dupPending = $groups->join(new JoinGroupCommand(new CommandKey('cmd-mat-join-pend-dup'), $surface, $groupId, new Revision(2)));
+        self::assertSame(OperationOutcome::Rejected, $dupPending->outcome);
+        self::assertSame('groups.no_change', $dupPending->problemDetail['reason'] ?? null);
+        self::assertSame(2, $groups->get($surface->panel, $groupId)->revision->value);
+        self::assertSame(2, $groups->get($surface->panel, $groupId)->membershipGeneration);
+
+        // Obsolete Pending across policy switch to Invite/Auto blocks join() & invite() until leave() cancels & bumps generation
+        $fake->actors->actAsPerson('alice');
+        $groups->setJoinPolicy(new SetGroupJoinPolicyCommand(new CommandKey('cmd-mat-policy-invite'), $surface, $groupId, new Revision(2), GroupJoinPolicy::Invite));
+        try {
+            $groups->invite(new InviteGroupMemberCommand(new CommandKey('cmd-mat-inv-pend'), $surface, $groupId, new Revision(3), $bob));
+            self::fail('invite() on obsolete Pending state must fail until cancelled.');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.obsolete_state_must_leave', $e->detail()['reason'] ?? null);
+        }
+
+        // Under Invite: approve() is forbidden!
+        try {
+            $groups->approve(new ApproveGroupMemberCommand(new CommandKey('cmd-mat-app-badpol'), $surface, $groupId, new Revision(3), $bob));
+            self::fail('approve() under Invite policy must fail.');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.approval_policy_required', $e->detail()['reason'] ?? null);
+        }
+
+        $fake->actors->actAsPerson('bob');
+        try {
+            $groups->join(new JoinGroupCommand(new CommandKey('cmd-mat-join-obspending'), $surface, $groupId, new Revision(3)));
+            self::fail('join() on obsolete Pending under Invite must require leave() first.');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.obsolete_state_must_leave', $e->detail()['reason'] ?? null);
+        }
+
+        // leave() cancels Pending -> advances revision (3 -> 4) AND membershipGeneration (2 -> 3)!
+        $cancelRes = $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-mat-leave-pend'), $surface, $groupId, new Revision(3)));
+        self::assertTrue($cancelRes->isSuccess());
+        self::assertSame(4, $cancelRes->revision?->value);
+        self::assertSame(3, $groups->get($surface->panel, $groupId)->membershipGeneration);
+
+        // Under Invite: invite Bob -> revision 4 -> 5, generation 3 -> 4; repeated same-role invite -> no_change!
+        $fake->actors->actAsPerson('alice');
+        $invRes = $groups->invite(new InviteGroupMemberCommand(new CommandKey('cmd-mat-invite-ok-1'), $surface, $groupId, new Revision(4), $bob, GroupMemberRole::Moderator));
+        self::assertTrue($invRes->isSuccess());
+        self::assertSame(4, $groups->get($surface->panel, $groupId)->membershipGeneration);
+
+        $invNoOp = $groups->invite(new InviteGroupMemberCommand(new CommandKey('cmd-mat-inv-noop'), $surface, $groupId, new Revision(5), $bob, GroupMemberRole::Moderator));
+        self::assertSame(OperationOutcome::Rejected, $invNoOp->outcome);
+        self::assertSame('groups.no_change', $invNoOp->problemDetail['reason'] ?? null);
+
+        // Bob accepts invite with joinKey -> Active, rev 6, gen 5; replaying SAME joinKey succeeds idempotently!
+        $fake->actors->actAsPerson('bob');
+        $acceptCmd = new JoinGroupCommand(new CommandKey('cmd-mat-accept-inv'), $surface, $groupId, new Revision(5));
+        $accepted = $groups->join($acceptCmd);
+        self::assertTrue($accepted->isSuccess());
+        self::assertSame(6, $accepted->revision?->value);
+        self::assertSame(5, $groups->get($surface->panel, $groupId)->membershipGeneration);
+
+        $replayedAccept = $groups->join($acceptCmd);
+        self::assertTrue($replayedAccept->isSuccess());
+        self::assertSame($accepted->receiptId, $replayedAccept->receiptId);
+        self::assertSame(6, $replayedAccept->revision?->value);
+
+        // Joining again when already Active with NEW key -> no_change!
+        $alreadyActiveNoOp = $groups->join(new JoinGroupCommand(new CommandKey('cmd-mat-join-active-noop'), $surface, $groupId, new Revision(6)));
+        self::assertSame(OperationOutcome::Rejected, $alreadyActiveNoOp->outcome);
+        self::assertSame('groups.no_change', $alreadyActiveNoOp->problemDetail['reason'] ?? null);
+    }
+
+    public function test_feed_cursor_rejects_shifted_published_at_with_valid_signature(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'cursor-ts-1'), Incarnation::initial());
+        $posts = $this->app->make(PostService::class);
+        $feed = $this->app->make(FeedService::class);
+
+        $posts->publish(new PublishPostCommand(new CommandKey('cmd-cursor-ts-post-1'), $surface, 'Post 1', audience: AudienceSpec::platform()));
+        $posts->publish(new PublishPostCommand(new CommandKey('cmd-cursor-ts-post-2'), $surface, 'Post 2', audience: AudienceSpec::platform()));
+
+        $page = $feed->feed(new GetFeedQuery($surface, limit: 1));
+        self::assertNotNull($page->nextCursor);
+
+        $shifted = new FeedCursor(
+            $page->nextCursor->publishedAt->modify('+100 years'),
+            $page->nextCursor->id,
+            $page->nextCursor->token,
+        );
+
+        try {
+            $feed->feed(new GetFeedQuery($surface, limit: 1, cursor: $shifted));
+            self::fail('Shifted publishedAt cursor must be rejected.');
+        } catch (InvalidPayloadException) {
+            self::assertTrue(true);
+        }
+    }
+
+    public function test_group_transaction_lock_orders_canonical_ids_across_uuid_and_slug_aliases(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'canon-lock-order'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+
+        $idA = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-canon-lock-grp-1'), $surface, 'z-alias', 'Z Alias'))->resource?->id;
+        $idB = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-canon-lock-grp-2'), $surface, 'a-alias', 'A Alias'))->resource?->id;
+
+        $expectedOrder = [$idA, $idB];
+        sort($expectedOrder, SORT_STRING);
+
+        $resolver = $this->app->make(GroupMembershipResolver::class);
+        self::assertInstanceOf(LocksGroupMembershipInTransaction::class, $resolver);
+        $capturedOrders = [];
+
+        DB::listen(static function (QueryExecuted $query) use (&$capturedOrders): void {
+            if (str_contains($query->sql, 'sk_groups') && str_contains(strtolower($query->sql), 'order by')) {
+                $capturedOrders[] = $query->bindings;
+            }
+        });
+
+        DB::transaction(static function () use ($resolver, $surface, $idA, $idB): void {
+            $resolver->lockGroupsInTransaction($surface->panel, [new GroupRef($idB), new GroupRef($idA)]);
+            $resolver->lockGroupsInTransaction($surface->panel, [new GroupRef('a-alias'), new GroupRef('z-alias')]);
+        });
+
+        self::assertCount(2, $capturedOrders);
+        self::assertSame([$surface->panel->value, $expectedOrder[0], $expectedOrder[1]], $capturedOrders[0]);
+        self::assertSame($capturedOrders[0], $capturedOrders[1]);
+    }
+
+    public function test_outbox_normal_and_projection_modes_preserve_each_others_delivered_consumers(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'outbox-ack-merge'), Incarnation::initial());
+        $surfaces = $this->app->make(SurfaceService::class);
+        $posts = $this->app->make(PostService::class);
+        $relay = $this->app->make(OutboxRelay::class);
+
+        $surfaces->create(new CommandKey('cmd-ackmerge-surf-1'), $surface);
+
+        // Drain initial surface creation before setting up overlapping Normal + ProjectionOnly test
+        $drainConsumer = new SpyOutboxConsumer('drain');
+        $this->app->instance('test.ack.drain', $drainConsumer);
+        $this->app->tag(['test.ack.drain'], OutboxConsumer::class);
+        $relay->relayPending($surface->panel, 50, ReplayMode::Normal);
+        $relay->relayPending($surface->panel, 50, ReplayMode::ProjectionOnly);
+
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-ackmerge-pub-1'),
+            surface: $surface,
+            body: 'Merge ACK test',
+            audience: AudienceSpec::platform(),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        $overlapConsumer = new class($relay, $surface->panel) implements OutboxConsumer
+        {
+            public int $normalCalls = 0;
+
+            public int $projectionCalls = 0;
+
+            public function __construct(
+                private readonly OutboxRelay $relay,
+                private readonly PanelId $panel,
+            ) {}
+
+            #[Override]
+            public function consumerKey(): string
+            {
+                return 'ack.overlap';
+            }
+
+            #[Override]
+            public function supports(string $eventType): bool
+            {
+                return $eventType === 'sockit.posts.published';
+            }
+
+            #[Override]
+            public function consume(OutboxEventRecord $event, ReplayMode $mode): void
+            {
+                if ($mode === ReplayMode::Normal) {
+                    $this->normalCalls++;
+                    // Trigger ProjectionOnly completion AFTER Normal already captured its initial claim snapshot!
+                    $this->relay->relayPending($this->panel, 50, ReplayMode::ProjectionOnly);
+                } else {
+                    $this->projectionCalls++;
+                }
+            }
+        };
+        $this->app->instance('test.ack.overlap', $overlapConsumer);
+        $this->app->tag(['test.ack.overlap'], OutboxConsumer::class);
+
+        self::assertSame(1, $relay->relayPending($surface->panel, 50, ReplayMode::Normal));
+
+        $row = DB::table('sk_outbox_events')->where('aggregate_id', $postId)->first();
+        $delivered = json_decode((string) $row->delivered_consumers, true, 16, JSON_THROW_ON_ERROR);
+        self::assertArrayHasKey('normal', $delivered);
+        self::assertArrayHasKey('projection', $delivered);
+        self::assertArrayHasKey('ack.overlap', $delivered['normal']);
+        self::assertArrayHasKey('ack.overlap', $delivered['projection']);
+
+        // Re-running ProjectionOnly must NOT re-invoke the already-ACKed projection consumer!
+        self::assertSame(0, $relay->relayPending($surface->panel, 50, ReplayMode::ProjectionOnly));
+        self::assertSame(1, $overlapConsumer->normalCalls);
+        self::assertSame(1, $overlapConsumer->projectionCalls);
+    }
+
+    public function test_implicit_surface_creation_emits_surfaces_created_outbox_event(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'implicit-surf-evt'), Incarnation::initial());
+        $this->app->make(GroupService::class)->create(new CreateGroupCommand(
+            key: new CommandKey('cmd-impsurf-grp-1'),
+            surface: $surface,
+            slug: 'implicit-grp',
+            title: 'Implicit Surface Group',
+        ));
+
+        $surfRow = DB::table('sk_surface_instances')->where('host_entity_value', 'implicit-surf-evt')->first();
+        self::assertNotNull($surfRow);
+
+        $eventRow = DB::table('sk_outbox_events')
+            ->where('event_type', 'sockit.surfaces.created')
+            ->where('aggregate_id', $surfRow->id)
+            ->first();
+        self::assertNotNull($eventRow);
+        self::assertSame('surface_instance', (string) $eventRow->aggregate_type);
+        self::assertSame(1, (int) $eventRow->aggregate_revision);
+    }
+
+    public function test_post_receipt_replays_make_zero_external_policy_spi_calls_under_sql_locks(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
+        $fake->actors->actAsPerson('alice');
+
+        $innerPolicy = $fake->surfacePolicy;
+        $policySpy = new class($innerPolicy) implements SurfaceAudiencePolicy
+        {
+            /** @var list<int> */
+            public array $txLevelsOnAdmit = [];
+
+            /** @var list<int> */
+            public array $txLevelsOnContains = [];
+
+            public function __construct(private readonly SurfaceAudiencePolicy $inner) {}
+
+            #[Override]
+            public function admit(ActorContext $viewer, SurfaceRef $surface): AudienceVerdict
+            {
+                $this->txLevelsOnAdmit[] = DB::connection()->transactionLevel();
+
+                return $this->inner->admit($viewer, $surface);
+            }
+
+            #[Override]
+            public function contains(ActorContext $author, SurfaceRef $surface, AudienceSpec $spec): AuthorizationDecision
+            {
+                $this->txLevelsOnContains[] = DB::connection()->transactionLevel();
+
+                return $this->inner->contains($author, $surface, $spec);
+            }
+        };
+        $this->app->instance(SurfaceAudiencePolicy::class, $policySpy);
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'replay-no-spi-tx'), Incarnation::initial());
+        $posts = $this->app->make(PostService::class);
+
+        $pubCmd = new PublishPostCommand(new CommandKey('cmd-replay-nospi-pub-1'), $surface, 'Initial v1', audience: AudienceSpec::platform());
+        $pubRes = $posts->publish($pubCmd);
+        $postId = (string) $pubRes->resource?->id;
+
+        $editCmd = new EditPostCommand(new CommandKey('cmd-replay-nospi-edit-1'), $surface, $postId, new Revision(1), 'Edited v2');
+        $editRes = $posts->edit($editCmd);
+
+        $hideCmd = new TransitionPostStateCommand(new CommandKey('cmd-replay-nospi-hide-1'), $surface, $postId, new Revision(2), ContentState::Hidden);
+        $posts->transition($hideCmd);
+
+        $repubCmd = new TransitionPostStateCommand(new CommandKey('cmd-replay-nospi-repub-1'), $surface, $postId, new Revision(3), ContentState::Published);
+        $repubRes = $posts->transition($repubCmd);
+
+        $policySpy->txLevelsOnAdmit = [];
+        $policySpy->txLevelsOnContains = [];
+
+        self::assertSame($pubRes->revision?->value, $posts->publish($pubCmd)->revision?->value);
+        self::assertSame($editRes->revision?->value, $posts->edit($editCmd)->revision?->value);
+        self::assertSame($repubRes->revision?->value, $posts->transition($repubCmd)->revision?->value);
+
+        self::assertNotEmpty($policySpy->txLevelsOnAdmit);
+        self::assertNotEmpty($policySpy->txLevelsOnContains);
+        foreach ($policySpy->txLevelsOnAdmit as $level) {
+            self::assertSame(0, $level, 'SurfaceAudiencePolicy::admit() must NEVER run under SQL transaction locks.');
+        }
+        foreach ($policySpy->txLevelsOnContains as $level) {
+            self::assertSame(0, $level, 'SurfaceAudiencePolicy::contains() must NEVER run under SQL transaction locks.');
         }
     }
 }

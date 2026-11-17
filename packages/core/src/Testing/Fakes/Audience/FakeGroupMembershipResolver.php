@@ -13,6 +13,7 @@ use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\GroupRef;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\ActorRef;
+use SocKit\Surfaces\Data\SurfaceRef;
 use Throwable;
 
 /**
@@ -115,9 +116,14 @@ final class FakeGroupMembershipResolver implements LocksGroupMembershipInTransac
             : AudienceVerdict::deny('audience.denied.not_in_group');
     }
 
+    /** @param array<string, AudienceVerdict>|null $preSampledSurfaceAdmissions */
     #[Override]
-    public function membershipVerdictInTransaction(ActorContext $actor, PanelId $panel, GroupRef $group): AudienceVerdict
-    {
+    public function membershipVerdictInTransaction(
+        ActorContext $actor,
+        PanelId $panel,
+        GroupRef $group,
+        ?array $preSampledSurfaceAdmissions = null,
+    ): AudienceVerdict {
         return $this->membershipVerdictInPanel($actor, $panel, $group);
     }
 
@@ -127,5 +133,24 @@ final class FakeGroupMembershipResolver implements LocksGroupMembershipInTransac
         if ($this->onLockCallback instanceof Closure) {
             ($this->onLockCallback)($panel, $group);
         }
+    }
+
+    /** @param list<GroupRef> $groups */
+    #[Override]
+    public function lockGroupsInTransaction(PanelId $panel, array $groups): void
+    {
+        foreach ($groups as $group) {
+            $this->lockGroupInTransaction($panel, $group);
+        }
+    }
+
+    /**
+     * @param  list<GroupRef>  $groups
+     * @return array<string, SurfaceRef>
+     */
+    #[Override]
+    public function managementSurfacesInPanel(PanelId $panel, array $groups): array
+    {
+        return [];
     }
 }

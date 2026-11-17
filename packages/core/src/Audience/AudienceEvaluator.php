@@ -26,6 +26,7 @@ use SocKit\Audience\Enums\VerdictDecision;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
+use SocKit\Surfaces\Data\SurfaceRef;
 use Throwable;
 
 /**
@@ -337,16 +338,34 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
     }
 
     /**
-     * Lock all referenced groups in canonical order inside the current DB transaction and
+     * Resolve bound management surface descriptors for all referenced groups without acquiring row locks.
+     *
+     * @return array<string, SurfaceRef> Keyed by canonical surface wire encoding
+     */
+    public function managementSurfacesForGroups(PanelId $panel, AudienceSpec $spec): array
+    {
+        $groups = $spec->referencedGroups();
+        if ($groups === [] || ! $this->groups instanceof LocksGroupMembershipInTransaction) {
+            return [];
+        }
+
+        return $this->groups->managementSurfacesInPanel($panel, $groups);
+    }
+
+    /**
+     * Lock all referenced groups in canonical primary-key order inside the current DB transaction and
      * re-evaluate group-coupled audience locally without external SPI calls.
      *
      * @param  array<string, AudienceVerdict>  $preSampledContours
+     * @param  array<string, AudienceVerdict>|null  $preSampledSurfaceAdmissions
      */
     public function lockAndVerifyGroupsInTransaction(
         ActorContext $viewer,
         AudienceSpec $spec,
         PanelId $panel,
         array $preSampledContours = [],
+        ?array $preSampledSurfaceAdmissions = null,
+        bool $forPublish = false,
     ): AudienceVerdict {
         $groups = $spec->referencedGroups();
 
@@ -359,14 +378,19 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
         }
 
         try {
-            foreach ($groups as $groupRef) {
-                $this->groups->lockGroupInTransaction($panel, $groupRef);
-            }
+            $this->groups->lockGroupsInTransaction($panel, $groups);
         } catch (Throwable) {
             return AudienceVerdict::deny('audience.resolver_error');
         }
 
-        return $this->evaluateLocalReadSpecInTransaction($viewer, $spec, $panel, $preSampledContours);
+        return $this->evaluateLocalSpecInTransaction(
+            viewer: $viewer,
+            spec: $spec,
+            panel: $panel,
+            preSampledContours: $preSampledContours,
+            preSampledSurfaceAdmissions: $preSampledSurfaceAdmissions,
+            forPublish: $forPublish,
+        );
     }
 
     /** @param array<string, AudienceVerdict> $samples */
@@ -384,72 +408,98 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
         }
     }
 
-    /** @param array<string, AudienceVerdict> $preSampledContours */
-    private function evaluateLocalReadSpecInTransaction(
+    /**
+     * @param  array<string, AudienceVerdict>  $preSampledContours
+     * @param  array<string, AudienceVerdict>|null  $preSampledSurfaceAdmissions
+     */
+    private function evaluateLocalSpecInTransaction(
         ActorContext $viewer,
         AudienceSpec $spec,
         PanelId $panel,
         array $preSampledContours,
+        ?array $preSampledSurfaceAdmissions,
+        bool $forPublish,
     ): AudienceVerdict {
-        if ($spec->operator === 'all_of') {
-            $combined = AudienceVerdict::allow('audience.allowed.all_of');
+        if ($forPublish) {
+            if ($spec->operator === 'all_of' || $spec->operator === 'any_of') {
+                $combined = AudienceVerdict::allow('audience.allowed.'.$spec->operator);
 
-            foreach ($spec->children as $child) {
-                $verdict = $this->evaluateLocalReadSpecInTransaction($viewer, $child, $panel, $preSampledContours);
-                if (! $verdict->canRead()) {
-                    return $verdict;
+                foreach ($spec->children as $child) {
+                    $verdict = $this->evaluateLocalSpecInTransaction($viewer, $child, $panel, $preSampledContours, $preSampledSurfaceAdmissions, true);
+                    if (! $verdict->canWrite()) {
+                        return $verdict;
+                    }
+
+                    $combined = $combined->intersect($verdict);
                 }
 
-                $combined = $combined->intersect($verdict);
+                return $combined;
             }
 
-            return $combined;
-        }
+            if ($spec->operator === 'exclude') {
+                return $this->evaluateLocalSpecInTransaction($viewer, $spec->children[0], $panel, $preSampledContours, $preSampledSurfaceAdmissions, true);
+            }
+        } else {
+            if ($spec->operator === 'all_of') {
+                $combined = AudienceVerdict::allow('audience.allowed.all_of');
 
-        if ($spec->operator === 'any_of') {
-            $firstReadOnly = null;
-            $firstIndeterminate = null;
-            $firstDeny = null;
+                foreach ($spec->children as $child) {
+                    $verdict = $this->evaluateLocalSpecInTransaction($viewer, $child, $panel, $preSampledContours, $preSampledSurfaceAdmissions, false);
+                    if (! $verdict->canRead()) {
+                        return $verdict;
+                    }
 
-            foreach ($spec->children as $child) {
-                $verdict = $this->evaluateLocalReadSpecInTransaction($viewer, $child, $panel, $preSampledContours);
-
-                if ($verdict->decision === VerdictDecision::Allow) {
-                    return $verdict;
+                    $combined = $combined->intersect($verdict);
                 }
 
-                if ($verdict->decision === VerdictDecision::AllowReadOnly) {
-                    $firstReadOnly ??= $verdict;
-
-                    continue;
-                }
-
-                if (in_array($verdict->reason, ['audience.resolver_error', 'audience.unknown'], true)) {
-                    $firstIndeterminate ??= $verdict;
-                } else {
-                    $firstDeny ??= $verdict;
-                }
+                return $combined;
             }
 
-            return $firstReadOnly ?? $firstIndeterminate ?? $firstDeny ?? AudienceVerdict::deny('audience.unknown');
-        }
+            if ($spec->operator === 'any_of') {
+                $firstReadOnly = null;
+                $firstIndeterminate = null;
+                $firstDeny = null;
 
-        if ($spec->operator === 'exclude') {
-            $include = $this->evaluateLocalReadSpecInTransaction($viewer, $spec->children[0], $panel, $preSampledContours);
-            if (! $include->canRead()) {
+                foreach ($spec->children as $child) {
+                    $verdict = $this->evaluateLocalSpecInTransaction($viewer, $child, $panel, $preSampledContours, $preSampledSurfaceAdmissions, false);
+
+                    if ($verdict->decision === VerdictDecision::Allow) {
+                        return $verdict;
+                    }
+
+                    if ($verdict->decision === VerdictDecision::AllowReadOnly) {
+                        $firstReadOnly ??= $verdict;
+
+                        continue;
+                    }
+
+                    if (in_array($verdict->reason, ['audience.resolver_error', 'audience.unknown'], true)) {
+                        $firstIndeterminate ??= $verdict;
+                    } else {
+                        $firstDeny ??= $verdict;
+                    }
+                }
+
+                return $firstReadOnly ?? $firstIndeterminate ?? $firstDeny ?? AudienceVerdict::deny('audience.unknown');
+            }
+
+            if ($spec->operator === 'exclude') {
+                $include = $this->evaluateLocalSpecInTransaction($viewer, $spec->children[0], $panel, $preSampledContours, $preSampledSurfaceAdmissions, false);
+                if (! $include->canRead()) {
+                    return $include;
+                }
+
+                $excluded = $this->evaluateLocalSpecInTransaction($viewer, $spec->children[1], $panel, $preSampledContours, $preSampledSurfaceAdmissions, false);
+                if ($excluded->canRead()) {
+                    return AudienceVerdict::deny('audience.denied.excluded');
+                }
+
+                if (! in_array($excluded->reason, self::PROVEN_EXCLUDE_DENIALS, true)) {
+                    return $excluded;
+                }
+
                 return $include;
             }
-
-            $excluded = $this->evaluateLocalReadSpecInTransaction($viewer, $spec->children[1], $panel, $preSampledContours);
-            if ($excluded->canRead()) {
-                return AudienceVerdict::deny('audience.denied.excluded');
-            }
-
-            if (! in_array($excluded->reason, self::PROVEN_EXCLUDE_DENIALS, true)) {
-                return $excluded;
-            }
-
-            return $include;
         }
 
         return match ($spec->scope) {
@@ -457,15 +507,22 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             Scope::Platform => $viewer->kind === ActorKind::Anonymous
                 ? AudienceVerdict::deny('audience.denied.anonymous')
                 : AudienceVerdict::allow('audience.allowed.platform'),
-            Scope::Direct => $this->evaluateDirectRead($viewer, $spec->actors),
-            Scope::Group => $this->evaluateLockedGroupRead($viewer, $spec, $panel),
+            Scope::Direct => $forPublish
+                ? ($viewer->kind === ActorKind::Anonymous ? AudienceVerdict::deny('audience.denied.anonymous') : AudienceVerdict::allow('audience.allowed.direct'))
+                : $this->evaluateDirectRead($viewer, $spec->actors),
+            Scope::Group => $this->evaluateLockedGroup($viewer, $spec, $panel, $preSampledSurfaceAdmissions),
             Scope::Contour => $this->lookupSampledContour($spec, $preSampledContours),
             default => AudienceVerdict::deny('audience.unknown'),
         };
     }
 
-    private function evaluateLockedGroupRead(ActorContext $viewer, AudienceSpec $spec, PanelId $panel): AudienceVerdict
-    {
+    /** @param array<string, AudienceVerdict>|null $preSampledSurfaceAdmissions */
+    private function evaluateLockedGroup(
+        ActorContext $viewer,
+        AudienceSpec $spec,
+        PanelId $panel,
+        ?array $preSampledSurfaceAdmissions,
+    ): AudienceVerdict {
         if ($viewer->kind === ActorKind::Anonymous) {
             return AudienceVerdict::deny('audience.denied.anonymous');
         }
@@ -475,7 +532,7 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
         }
 
         try {
-            return $this->groups->membershipVerdictInTransaction($viewer, $panel, $spec->group);
+            return $this->groups->membershipVerdictInTransaction($viewer, $panel, $spec->group, $preSampledSurfaceAdmissions);
         } catch (Throwable) {
             return AudienceVerdict::deny('audience.resolver_error');
         }

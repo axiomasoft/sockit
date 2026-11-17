@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Modules\Groups\Internal;
 
 use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Builder;
 use Override;
 use Packman\Attributes\Internal;
 use Ramsey\Uuid\Uuid;
@@ -13,6 +14,7 @@ use SocKit\Actors\Enums\ActorKind;
 use SocKit\Audience\Contracts\LocksGroupMembershipInTransaction;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\GroupRef;
+use SocKit\Audience\Data\TransactionAudienceSnapshot;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Modules\Groups\Enums\GroupMemberStatus;
@@ -63,17 +65,36 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
 
     /**
      * Local in-transaction membership & management-surface check avoiding remote SPI RPC calls while holding DB locks.
+     *
+     * @param  array<string, AudienceVerdict>|null  $preSampledSurfaceAdmissions
      */
     #[Override]
-    public function membershipVerdictInTransaction(ActorContext $actor, PanelId $panel, GroupRef $group): AudienceVerdict
-    {
-        return $this->evaluate($actor, $panel, $group, callSurfacePolicy: false);
+    public function membershipVerdictInTransaction(
+        ActorContext $actor,
+        PanelId $panel,
+        GroupRef $group,
+        ?array $preSampledSurfaceAdmissions = null,
+    ): AudienceVerdict {
+        return $this->evaluate(
+            actor: $actor,
+            panel: $panel,
+            group: $group,
+            callSurfacePolicy: false,
+            preSampledSurfaceAdmissions: $preSampledSurfaceAdmissions,
+        );
     }
 
     #[Override]
     public function lockGroupInTransaction(PanelId $panel, GroupRef $group): void
     {
-        if (! $this->panels->isFrozen() || ! $this->panels->has($panel)) {
+        $this->lockGroupsInTransaction($panel, [$group]);
+    }
+
+    /** @param list<GroupRef> $groups */
+    #[Override]
+    public function lockGroupsInTransaction(PanelId $panel, array $groups): void
+    {
+        if (! $this->panels->isFrozen() || ! $this->panels->has($panel) || $groups === []) {
             return;
         }
 
@@ -84,24 +105,87 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
         $connection = $this->tables->connection($panel);
         $groupsTable = $this->tables->table('groups', $panel);
 
-        $query = $connection->table($groupsTable)
-            ->where('panel_id', $panel->value);
-
-        if (Uuid::isValid($group->value)) {
-            $query->where('id', $group->value);
-        } else {
-            $query->where('slug', $group->value);
+        $rows = $this->findGroupRows($connection, $panel, $groups, ['id']);
+        $canonicalIds = [];
+        foreach ($rows as $row) {
+            $canonicalIds[] = SockitRows::str($row, 'id');
         }
+
+        $canonicalIds = array_values(array_unique($canonicalIds));
+        if ($canonicalIds === []) {
+            return;
+        }
+
+        sort($canonicalIds, SORT_STRING);
+
+        $query = $connection->table($groupsTable)
+            ->where('panel_id', $panel->value)
+            ->whereIn('id', $canonicalIds)
+            ->orderBy('id');
 
         if ($connection->getDriverName() !== 'sqlite') {
             $query->lockForUpdate();
         }
 
-        $query->first();
+        $query->get();
     }
 
-    private function evaluate(ActorContext $actor, PanelId $panel, GroupRef $group, bool $callSurfacePolicy): AudienceVerdict
+    /**
+     * @param  list<GroupRef>  $groups
+     * @return array<string, SurfaceRef>
+     */
+    #[Override]
+    public function managementSurfacesInPanel(PanelId $panel, array $groups): array
     {
+        if (! $this->panels->isFrozen() || ! $this->panels->has($panel) || $groups === []) {
+            return [];
+        }
+
+        if (! $this->panels->get($panel)->hasModule('groups')) {
+            return [];
+        }
+
+        $connection = $this->tables->connection($panel);
+        $rows = $this->findGroupRows(
+            $connection,
+            $panel,
+            $groups,
+            ['surface_kind', 'surface_host_type', 'surface_host_value', 'surface_incarnation'],
+        );
+
+        $surfaces = [];
+        foreach ($rows as $row) {
+            $kind = new SurfaceKindId(SockitRows::str($row, 'surface_kind'));
+            if (! $this->surfaces->has($panel, $kind)) {
+                continue;
+            }
+
+            $surface = new SurfaceRef(
+                panel: $panel,
+                kind: $kind,
+                host: new HostEntityRef(
+                    SockitRows::str($row, 'surface_host_type'),
+                    SockitRows::str($row, 'surface_host_value'),
+                ),
+                incarnation: new Incarnation(SockitRows::int($row, 'surface_incarnation', 1)),
+            );
+
+            $surfaces[TransactionAudienceSnapshot::surfaceKey($surface)] = $surface;
+        }
+
+        return $surfaces;
+    }
+
+    /**
+     * @param  array<string, AudienceVerdict>|null  $preSampledSurfaceAdmissions
+     */
+    private function evaluate(
+        ActorContext $actor,
+        PanelId $panel,
+        GroupRef $group,
+        bool $callSurfacePolicy,
+        ?array $preSampledSurfaceAdmissions = null,
+    ): AudienceVerdict {
         if ($actor->kind === ActorKind::Anonymous || ! $actor->actor instanceof ActorRef) {
             return AudienceVerdict::deny('audience.denied.anonymous');
         }
@@ -142,7 +226,48 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
             return AudienceVerdict::deny('audience.denied.not_in_group');
         }
 
-        return $this->verifyManagementSurface($connection, $panel, $groupRow, $actor, $callSurfacePolicy);
+        return $this->verifyManagementSurface($connection, $panel, $groupRow, $actor, $callSurfacePolicy, $preSampledSurfaceAdmissions);
+    }
+
+    /**
+     * @param  list<GroupRef>  $groups
+     * @param  list<string>  $columns
+     * @return list<object>
+     */
+    private function findGroupRows(Connection $connection, PanelId $panel, array $groups, array $columns): array
+    {
+        $uuids = [];
+        $slugs = [];
+
+        foreach ($groups as $ref) {
+            if (Uuid::isValid($ref->value)) {
+                $uuids[] = $ref->value;
+            } else {
+                $slugs[] = $ref->value;
+            }
+        }
+
+        $uuids = array_values(array_unique($uuids));
+        $slugs = array_values(array_unique($slugs));
+
+        if ($uuids === [] && $slugs === []) {
+            return [];
+        }
+
+        return array_values($connection->table($this->tables->table('groups', $panel))
+            ->select($columns)
+            ->where('panel_id', $panel->value)
+            ->where(static function (Builder $query) use ($uuids, $slugs): void {
+                if ($uuids !== [] && $slugs !== []) {
+                    $query->whereIn('id', $uuids)->orWhereIn('slug', $slugs);
+                } elseif ($uuids !== []) {
+                    $query->whereIn('id', $uuids);
+                } else {
+                    $query->whereIn('slug', $slugs);
+                }
+            })
+            ->get()
+            ->all());
     }
 
     private function findGroupRow(Connection $connection, PanelId $panel, GroupRef $group): ?object
@@ -161,12 +286,16 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
         return is_object($row) ? $row : null;
     }
 
+    /**
+     * @param  array<string, AudienceVerdict>|null  $preSampledSurfaceAdmissions
+     */
     private function verifyManagementSurface(
         Connection $connection,
         PanelId $panel,
         object $groupRow,
         ActorContext $actor,
         bool $callSurfacePolicy,
+        ?array $preSampledSurfaceAdmissions = null,
     ): AudienceVerdict {
         $kindStr = SockitRows::str($groupRow, 'surface_kind');
         $kind = new SurfaceKindId($kindStr);
@@ -213,7 +342,16 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
                 return $admit;
             }
         } else {
-            $admit = AudienceVerdict::allow('audience.allowed.group');
+            $surfaceKey = TransactionAudienceSnapshot::surfaceKey($mgmtSurface);
+            if ($preSampledSurfaceAdmissions === null || ! array_key_exists($surfaceKey, $preSampledSurfaceAdmissions)) {
+                return AudienceVerdict::deny('audience.unknown');
+            }
+
+            $admit = $preSampledSurfaceAdmissions[$surfaceKey];
+
+            if (! $admit->canRead()) {
+                return $admit;
+            }
         }
 
         if ($state === SurfaceLifecycleState::Archived->value) {

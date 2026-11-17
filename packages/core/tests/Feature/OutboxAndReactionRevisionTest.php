@@ -143,19 +143,30 @@ final class OutboxAndReactionRevisionTest extends SocKitTestCase
         $postId = (string) $pub->resource?->id;
 
         $eventRow = DB::table('sk_outbox_events')->where('aggregate_id', $postId)->first();
+        $surfaceEventRow = DB::table('sk_outbox_events')->where('event_type', 'sockit.surfaces.created')->first();
         self::assertNotNull($eventRow);
+        self::assertNotNull($surfaceEventRow);
         self::assertNull($eventRow->delivered_at);
         self::assertNull($eventRow->projection_replayed_at);
         self::assertNull($eventRow->lease_owner);
 
         // #14: Active lease held by another worker blocks claim until expired
         $future = new DateTimeImmutable('+5 minutes', new DateTimeZone('UTC'))->format('Y-m-d H:i:s.uP');
-        DB::table('sk_outbox_events')->where('id', $eventRow->id)->update([
+        DB::table('sk_outbox_events')->whereIn('id', [$eventRow->id, $surfaceEventRow->id])->update([
             'lease_owner' => 'worker-other',
             'lease_until' => $future,
         ]);
         self::assertSame(0, $relay->relayPending($panelId));
         self::assertCount(0, $spy->recorded());
+
+        // Retire surface event out of this test's post-lease focus after verifying lease contention
+        $nowStr = new DateTimeImmutable('now', new DateTimeZone('UTC'))->format('Y-m-d H:i:s.uP');
+        DB::table('sk_outbox_events')->where('id', $surfaceEventRow->id)->update([
+            'lease_owner' => null,
+            'lease_until' => null,
+            'delivered_at' => $nowStr,
+            'projection_replayed_at' => $nowStr,
+        ]);
 
         // Expire lease -> claim succeeds cleanly, unless consumer fails (then lease is released and attempts incremented)
         $past = new DateTimeImmutable('-5 minutes', new DateTimeZone('UTC'))->format('Y-m-d H:i:s.uP');

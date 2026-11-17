@@ -145,6 +145,7 @@ final readonly class FeedCursor
 
         if (
             $decoded['id'] !== $this->id
+            || $decoded['published_at'] !== $this->publishedAt->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:s.uP')
             || $decoded['panel'] !== $surface->panel->value
             || CanonicalJson::encode($decoded['surface']) !== CanonicalJson::encode($surface->toWire())
             || $decoded['installation'] !== $viewer->installation->id

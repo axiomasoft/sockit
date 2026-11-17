@@ -895,9 +895,56 @@
                             "optional": true,
                             "default": "[]",
                             "flags": 0
+                        },
+                        {
+                            "name": "preSampledSurfaceAdmissions",
+                            "type": "?array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        },
+                        {
+                            "name": "forPublish",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "false",
+                            "flags": 0
                         }
                     ],
                     "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                },
+                "managementSurfacesForGroups": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "spec",
+                            "type": "SocKit\\Audience\\Data\\AudienceSpec",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "array",
                     "doc": []
                 },
                 "sampleContours": {
@@ -1181,6 +1228,24 @@
                             "optional": true,
                             "default": "[]",
                             "flags": 0
+                        },
+                        {
+                            "name": "snapshot",
+                            "type": "?SocKit\\Audience\\Data\\TransactionAudienceSnapshot",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        },
+                        {
+                            "name": "forPublish",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "false",
+                            "flags": 0
                         }
                     ],
                     "return": "SocKit\\Audience\\Data\\AudienceVerdict",
@@ -1222,6 +1287,53 @@
                         }
                     ],
                     "return": "array",
+                    "doc": []
+                },
+                "sampleTransactionSnapshot": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "spec",
+                            "type": "SocKit\\Audience\\Data\\AudienceSpec",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "archiveReaders",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "false",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\TransactionAudienceSnapshot",
                     "doc": []
                 }
             },
@@ -1591,6 +1703,64 @@
                     "return": "void",
                     "doc": []
                 },
+                "lockGroupsInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groups",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "void",
+                    "doc": []
+                },
+                "managementSurfacesInPanel": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groups",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "array",
+                    "doc": []
+                },
                 "membershipVerdictInTransaction": {
                     "visibility": "public",
                     "static": false,
@@ -1623,6 +1793,15 @@
                             "variadic": false,
                             "optional": false,
                             "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "preSampledSurfaceAdmissions",
+                            "type": "?array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
                             "flags": 0
                         }
                     ],
@@ -2943,6 +3122,73 @@
                     "final": false
                 }
             ],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Audience\\Data\\TransactionAudienceSnapshot": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "contours",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "[]",
+                            "flags": 1
+                        },
+                        {
+                            "name": "surfaceAdmissions",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "[]",
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "surfaceKey": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "string",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
             "enum_backing": null,
             "enum_cases": []
         },
@@ -15504,6 +15750,64 @@
                     "return": "void",
                     "doc": []
                 },
+                "lockGroupsInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groups",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "void",
+                    "doc": []
+                },
+                "managementSurfacesInPanel": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groups",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "array",
+                    "doc": []
+                },
                 "membershipVerdictInPanel": {
                     "visibility": "public",
                     "static": false,
@@ -15574,6 +15878,15 @@
                             "variadic": false,
                             "optional": false,
                             "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "preSampledSurfaceAdmissions",
+                            "type": "?array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
                             "flags": 0
                         }
                     ],

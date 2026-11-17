@@ -11,7 +11,7 @@ use Packman\Attributes\Internal;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
-use SocKit\Audience\Data\AudienceVerdict;
+use SocKit\Audience\Data\TransactionAudienceSnapshot;
 use SocKit\Audience\Exceptions\AuthorizationDeniedException;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
@@ -42,6 +42,8 @@ use SocKit\Surfaces\Contracts\TargetWriteFence;
 use SocKit\Surfaces\Data\SurfaceDefinition;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetResolution;
+use SocKit\Surfaces\Enums\SurfaceLifecycleState;
+use SocKit\Surfaces\Exceptions\SurfaceException;
 
 /**
  * Panel-isolated Reactions service executing through {@see OperationEnvelopeRunner},
@@ -86,8 +88,7 @@ final readonly class DatabaseReactionService implements ReactionService
             {
                 public ?TargetResolution $target = null;
 
-                /** @var array<string, AudienceVerdict> */
-                public array $contourSamples = [];
+                public ?TransactionAudienceSnapshot $audienceSnapshot = null;
             };
 
             try {
@@ -97,7 +98,7 @@ final readonly class DatabaseReactionService implements ReactionService
                     action: 'sockit.reactions.add',
                     preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
                         $precheck->target = $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef, requireWrite: true);
-                        $precheck->contourSamples = $this->sampleContoursIfNeeded($verifiedActor, $precheck->target, $surfaceDef->archiveReaders);
+                        $precheck->audienceSnapshot = $this->sampleTransactionSnapshotIfNeeded($verifiedActor, $command->surface, $precheck->target, $surfaceDef->archiveReaders);
                     },
                     mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $options, $namespace, $precheck): array {
                         $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
@@ -107,7 +108,7 @@ final readonly class DatabaseReactionService implements ReactionService
                             surface: $command->surface,
                             target: $command->target,
                             prechecked: $precheck->target,
-                            precheckedContours: $precheck->contourSamples,
+                            snapshot: $precheck->audienceSnapshot,
                         );
 
                         $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
@@ -213,7 +214,7 @@ final readonly class DatabaseReactionService implements ReactionService
                             surface: $command->surface,
                             target: $command->target,
                             prechecked: $precheck->target,
-                            precheckedContours: $precheck->contourSamples,
+                            snapshot: $precheck->audienceSnapshot,
                         );
                     },
                 );
@@ -250,8 +251,7 @@ final readonly class DatabaseReactionService implements ReactionService
             {
                 public ?TargetResolution $target = null;
 
-                /** @var array<string, AudienceVerdict> */
-                public array $contourSamples = [];
+                public ?TransactionAudienceSnapshot $audienceSnapshot = null;
             };
 
             try {
@@ -261,7 +261,7 @@ final readonly class DatabaseReactionService implements ReactionService
                     action: 'sockit.reactions.remove',
                     preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
                         $precheck->target = $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef, requireWrite: true);
-                        $precheck->contourSamples = $this->sampleContoursIfNeeded($verifiedActor, $precheck->target, $surfaceDef->archiveReaders);
+                        $precheck->audienceSnapshot = $this->sampleTransactionSnapshotIfNeeded($verifiedActor, $command->surface, $precheck->target, $surfaceDef->archiveReaders);
                     },
                     mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $precheck): array {
                         $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
@@ -270,7 +270,7 @@ final readonly class DatabaseReactionService implements ReactionService
                             surface: $command->surface,
                             target: $command->target,
                             prechecked: $precheck->target,
-                            precheckedContours: $precheck->contourSamples,
+                            snapshot: $precheck->audienceSnapshot,
                         );
 
                         $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
@@ -336,7 +336,7 @@ final readonly class DatabaseReactionService implements ReactionService
                             surface: $command->surface,
                             target: $command->target,
                             prechecked: $precheck->target,
-                            precheckedContours: $precheck->contourSamples,
+                            snapshot: $precheck->audienceSnapshot,
                         );
                     },
                 );
@@ -359,11 +359,14 @@ final readonly class DatabaseReactionService implements ReactionService
     {
         [, $surfaceDef] = $this->assertReactionsEnabled($surface);
         $actor = $this->runtime->actors()->current();
-
-        $this->resolveVisibleTarget($actor, $surface, $target, $surfaceDef, requireWrite: false);
+        $admit = $this->runtime->audienceGate()->admitForRead($actor, $surface);
+        if (! $admit->canRead()) {
+            throw OperationException::audienceDenied($admit->reason);
+        }
 
         $connection = $this->tables->connection($surface->panel);
-        $surfaceRow = $connection->table($this->tables->table('surface_instances', $surface->panel))
+        $surfacesTable = $this->tables->table('surface_instances', $surface->panel);
+        $loadSurfaceRow = static fn (): ?object => $connection->table($surfacesTable)
             ->where('panel_id', $surface->panel->value)
             ->where('kind', $surface->kind->value)
             ->where('host_entity_type', $surface->host->type)
@@ -371,8 +374,32 @@ final readonly class DatabaseReactionService implements ReactionService
             ->where('incarnation', $surface->incarnation->value)
             ->first();
 
+        $surfaceRow = $loadSurfaceRow();
+        if (is_object($surfaceRow) && SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
+            throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
+        }
+
+        $surfaceArchived = is_object($surfaceRow)
+            && SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+
+        if ($surfaceArchived && ! $surfaceDef->archiveReaders) {
+            throw OperationException::audienceDenied('audience.denied.surface_archived');
+        }
+
+        $this->resolveVisibleTarget($actor, $surface, $target, $surfaceDef, requireWrite: false, surfaceArchived: $surfaceArchived);
+
+        $surfaceRow = $loadSurfaceRow();
         if (! is_object($surfaceRow)) {
             return new ReactionCountsView($surface, $target, [], 0, new Revision(1));
+        }
+
+        $freshState = SockitRows::str($surfaceRow, 'lifecycle_state');
+        if ($freshState === SurfaceLifecycleState::Deleted->value) {
+            throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
+        }
+
+        if ($freshState === SurfaceLifecycleState::Archived->value && ! $surfaceDef->archiveReaders) {
+            throw OperationException::audienceDenied('audience.denied.surface_archived');
         }
 
         $rows = $connection->table($this->tables->table('reaction_counts', $surface->panel))
@@ -573,6 +600,7 @@ final readonly class DatabaseReactionService implements ReactionService
         HostEntityRef $target,
         SurfaceDefinition $surfaceDef,
         bool $requireWrite,
+        bool $surfaceArchived = false,
     ): TargetResolution {
         $audienceGate = $this->runtime->audienceGate();
         $admit = $requireWrite
@@ -623,7 +651,7 @@ final readonly class DatabaseReactionService implements ReactionService
                 author: $resolution->owner,
                 surface: $surface,
                 installation: $actor->installation,
-                surfaceArchived: false,
+                surfaceArchived: $surfaceArchived,
                 archiveReaders: $surfaceDef->archiveReaders,
             ));
 
@@ -635,27 +663,29 @@ final readonly class DatabaseReactionService implements ReactionService
         return $resolution;
     }
 
-    /** @return array<string, AudienceVerdict> */
-    private function sampleContoursIfNeeded(ActorContext $actor, ?TargetResolution $resolution, bool $archiveReaders): array
-    {
+    private function sampleTransactionSnapshotIfNeeded(
+        ActorContext $actor,
+        SurfaceRef $surface,
+        ?TargetResolution $resolution,
+        bool $archiveReaders,
+    ): ?TransactionAudienceSnapshot {
         if (! $resolution instanceof TargetResolution || ! $resolution->audience instanceof AudienceSpec) {
-            return [];
+            return null;
         }
 
         if ($resolution->audience->referencedGroups() === []) {
-            return [];
+            return null;
         }
 
-        return $this->runtime->audienceGate()->sampleContours($actor, $resolution->audience, $archiveReaders);
+        return $this->runtime->audienceGate()->sampleTransactionSnapshot($actor, $resolution->audience, $surface->panel, $archiveReaders);
     }
 
-    /** @param array<string, AudienceVerdict> $precheckedContours */
     private function reverifyTargetInsideTx(
         ActorContext $actor,
         SurfaceRef $surface,
         HostEntityRef $target,
         ?TargetResolution $prechecked,
-        array $precheckedContours = [],
+        ?TransactionAudienceSnapshot $snapshot = null,
     ): void {
         $resolver = $this->findSupportingResolver($target);
 
@@ -668,7 +698,7 @@ final readonly class DatabaseReactionService implements ReactionService
                 actor: $actor,
                 spec: $prechecked->audience,
                 panel: $surface->panel,
-                preSampledContours: $precheckedContours,
+                snapshot: $snapshot,
             );
 
             if (! $groupVerdict->canWrite()) {

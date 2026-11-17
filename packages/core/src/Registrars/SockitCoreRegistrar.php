@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Registrars;
 
 use Illuminate\Console\Application as Artisan;
+use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\DatabaseManager;
@@ -32,6 +33,7 @@ use SocKit\Database\StorageCollisionChecker;
 use SocKit\Diagnostics\SockitDoctorCheck;
 use SocKit\Errors\SockitProblemDefinitions;
 use SocKit\Modules\Groups\Contracts\GroupService;
+use SocKit\Modules\Groups\Contracts\MembershipConsent;
 use SocKit\Modules\Groups\Internal\DatabaseGroupMembershipResolver;
 use SocKit\Modules\Groups\Internal\DatabaseGroupService;
 use SocKit\Modules\Posts\Contracts\FeedService;
@@ -76,18 +78,20 @@ final class SockitCoreRegistrar implements PackageRegistrar
         $app->singleton(SurfaceRegistry::class);
         $app->alias(SurfaceRegistry::class, SurfaceDefinitions::class);
 
-        $app->singleton(SockitTables::class, static fn (Application $app): SockitTables => new SockitTables(
+        $app->bind(SockitTables::class, static fn (Application $app): SockitTables => new SockitTables(
             db: $app->make(DatabaseManager::class),
             options: $app->make(SockitOptions::class),
             panels: $app->make(PanelDefinitions::class),
         ));
 
-        $app->singleton(SockitRuntime::class, static fn (Application $app): SockitRuntime => new SockitRuntime($app));
+        $app->bind(SockitRuntime::class, static fn (Application $app): SockitRuntime => new SockitRuntime(
+            $app === IlluminateContainer::getInstance() ? null : $app,
+        ));
 
         $this->registerSpiCapabilities($app);
         $this->registerKernelAndModuleServices($app);
 
-        $app->singleton(SockitDoctorCheck::class, static fn (Application $app): SockitDoctorCheck => new SockitDoctorCheck(
+        $app->bind(SockitDoctorCheck::class, static fn (Application $app): SockitDoctorCheck => new SockitDoctorCheck(
             config: $app->make(Repository::class),
             db: $app->make(DatabaseManager::class),
             panels: $app->make(PanelDefinitions::class),
@@ -95,8 +99,8 @@ final class SockitCoreRegistrar implements PackageRegistrar
             collisions: $app->make(StorageCollisionChecker::class),
         ));
 
-        $app->singleton(SockitPanelProvider::class, static fn (Application $app): SockitPanelProvider => new SockitPanelProvider(
-            container: $app,
+        $app->bind(SockitPanelProvider::class, static fn (Application $app): SockitPanelProvider => new SockitPanelProvider(
+            container: $app === IlluminateContainer::getInstance() ? null : $app,
         ));
 
         ProblemDefinitions::register($app, dirname(__DIR__, 2).'/composer.json', SockitProblemDefinitions::class);
@@ -120,6 +124,8 @@ final class SockitCoreRegistrar implements PackageRegistrar
                     return new DatabaseGroupMembershipResolver(
                         tables: $app->make(SockitTables::class),
                         panels: $app->make(PanelDefinitions::class),
+                        surfaces: $app->make(SurfaceDefinitions::class),
+                        runtime: $app->make(SockitRuntime::class),
                     );
                 });
             }
@@ -180,6 +186,16 @@ final class SockitCoreRegistrar implements PackageRegistrar
             }
 
             /** @var ActionAuthorizer */
+            return $app->make($configured);
+        });
+
+        $app->bindIf(MembershipConsent::class, static function (Application $app): MembershipConsent {
+            $configured = $app->make(SockitOptions::class)->consentResolver;
+            if ($configured === null) {
+                throw OperationException::providerUnavailable(MembershipConsent::class);
+            }
+
+            /** @var MembershipConsent */
             return $app->make($configured);
         });
 
@@ -313,6 +329,8 @@ final class SockitCoreRegistrar implements PackageRegistrar
                     return new DatabaseGroupMembershipResolver(
                         tables: $app->make(SockitTables::class),
                         panels: $app->make(PanelDefinitions::class),
+                        surfaces: $app->make(SurfaceDefinitions::class),
+                        runtime: $app->make(SockitRuntime::class),
                     );
                 }
             }

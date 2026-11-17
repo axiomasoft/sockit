@@ -19,6 +19,7 @@ test('SockitOptions parses closed valid config cleanly and rejects unknown keys 
             'audience' => null,
             'authorizer' => null,
             'groups' => null,
+            'consent' => null,
             'surface_policy' => null,
             'targets' => null,
         ],
@@ -33,11 +34,12 @@ test('SockitOptions parses closed valid config cleanly and rejects unknown keys 
             ],
         ],
         'storage' => ['connection' => 'sqlite', 'table_prefix' => 'sk_'],
-        'operations' => ['receipt_ttl_seconds' => 3600, 'outbox_batch_size' => 50],
+        'operations' => ['receipt_ttl_seconds' => 3600, 'outbox_batch_size' => 50, 'cursor_ttl_seconds' => 1800],
     ]);
 
     expect($valid->enabledModules)->toBe(['posts', 'reactions'])
         ->and($valid->actorResolver)->toBe(FakeActorContextResolver::class)
+        ->and($valid->cursorTtlSeconds)->toBe(1800)
         ->and($valid->tablePrefix->value())->toBe('sk_');
 
     expect(fn (): SockitOptions => SockitOptions::fromArray(['unknown_root' => true]))->toThrow(InvalidConfiguration::class);
@@ -48,4 +50,6 @@ test('SockitOptions parses closed valid config cleanly and rejects unknown keys 
     expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['settings' => ['posts' => ['max_body_bytes' => -5]]]]))->toThrow(InvalidConfiguration::class);
     expect(fn (): SockitOptions => SockitOptions::fromArray(['modules' => ['settings' => ['posts' => ['max_body_bytes' => static fn (): bool => true]]]]))->toThrow(InvalidConfiguration::class);
     expect(fn (): SockitOptions => SockitOptions::fromArray(['resolvers' => ['actor' => 'NonExistent\\Class']]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['resolvers' => ['consent' => 'NonExistent\\Class']]))->toThrow(InvalidConfiguration::class);
+    expect(fn (): SockitOptions => SockitOptions::fromArray(['operations' => ['cursor_ttl_seconds' => 10]]))->toThrow(InvalidConfiguration::class);
 });

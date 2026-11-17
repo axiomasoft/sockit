@@ -23,6 +23,7 @@ use SocKit\Plugins\SockitCorePlugin;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\HostEntityRef;
+use SocKit\Support\Data\Revision;
 use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\SurfaceKindId;
 use SocKit\Surfaces\Data\SurfaceRef;
@@ -103,7 +104,7 @@ final class PluginsAndModulesTest extends SocKitTestCase
 
         $fake = $this->installFakeSocKit();
         $target = new HostEntityRef('article', 'art-42');
-        $fake->targets->register($target, new ActorRef('user', '1'), AudienceSpec::platform());
+        $fake->targets->withLocalWriteFence()->register($target, new ActorRef('user', '1'), AudienceSpec::platform(), new Revision(1));
 
         $surface = new SurfaceRef(
             panel: new PanelId('sockit.l0'),

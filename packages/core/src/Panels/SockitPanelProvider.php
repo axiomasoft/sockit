@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Panels;
 
+use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Container\Container;
 use Override;
 use Packman\Attributes\Spi;
@@ -123,11 +124,11 @@ final readonly class SockitPanelProvider implements PackmanPanelProvider
             return $this->actors;
         }
 
-        if ($this->container instanceof Container && $this->container->bound(ActorContextResolver::class)) {
-            return $this->container->make(ActorContextResolver::class);
-        }
+        $container = $this->container ?? IlluminateContainer::getInstance();
 
-        return null;
+        return $container->bound(ActorContextResolver::class)
+            ? $container->make(ActorContextResolver::class)
+            : null;
     }
 
     private function resolveTenantResolver(): ?TenantResolver
@@ -136,11 +137,11 @@ final readonly class SockitPanelProvider implements PackmanPanelProvider
             return $this->tenants;
         }
 
-        if ($this->container instanceof Container && $this->container->bound(TenantResolver::class)) {
-            return $this->container->make(TenantResolver::class);
-        }
+        $container = $this->container ?? IlluminateContainer::getInstance();
 
-        return null;
+        return $container->bound(TenantResolver::class)
+            ? $container->make(TenantResolver::class)
+            : null;
     }
 
     private function resolveAuthorizer(): ?ActionAuthorizer
@@ -149,10 +150,10 @@ final readonly class SockitPanelProvider implements PackmanPanelProvider
             return $this->authorizer;
         }
 
-        if ($this->container instanceof Container && $this->container->bound(ActionAuthorizer::class)) {
-            return $this->container->make(ActionAuthorizer::class);
-        }
+        $container = $this->container ?? IlluminateContainer::getInstance();
 
-        return null;
+        return $container->bound(ActionAuthorizer::class)
+            ? $container->make(ActionAuthorizer::class)
+            : null;
     }
 }

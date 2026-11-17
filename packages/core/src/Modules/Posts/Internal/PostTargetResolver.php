@@ -8,10 +8,12 @@ use Override;
 use Packman\Attributes\Internal;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Audience\Data\AudienceSpec;
+use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Modules\Posts\Enums\ContentState;
 use SocKit\Panels\Contracts\PanelDefinitions;
+use SocKit\Support\CanonicalJson;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\Revision;
@@ -20,8 +22,8 @@ use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
 /**
- * TargetResolver slot handler contributed by PostsPlugin so Reactions (and host extensions)
- * resolve `post:*` targets through the slot boundary with same-DB row locking inside transactions.
+ * TargetResolver + TargetWriteFence slot handler contributed by PostsPlugin so Reactions
+ * resolve `post:*` targets and verify privacy revision fences under same-DB row locks.
  */
 #[Internal]
 final readonly class PostTargetResolver implements LocksTargetInTransaction
@@ -92,5 +94,36 @@ final readonly class PostTargetResolver implements LocksTargetInTransaction
             audience: AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire')),
             privacyRevision: new Revision(SockitRows::int($row, 'privacy_revision', 1)),
         );
+    }
+
+    #[Override]
+    public function recheck(
+        ActorContext $actor,
+        SurfaceRef $surface,
+        HostEntityRef $target,
+        TargetResolution $prechecked,
+    ): AuthorizationDecision {
+        if (! $prechecked->privacyRevision instanceof Revision) {
+            return AuthorizationDecision::unknown('reaction.target_fence_required');
+        }
+
+        $current = $this->resolve($actor, $surface, $target);
+
+        if (! $current->isAccessible()) {
+            return AuthorizationDecision::deny($current->reason ?? 'target.hidden');
+        }
+
+        if (! $current->privacyRevision instanceof Revision) {
+            return AuthorizationDecision::unknown('reaction.target_fence_required');
+        }
+
+        $preAudience = $prechecked->audience instanceof AudienceSpec ? CanonicalJson::encode($prechecked->audience->toWire()) : null;
+        $curAudience = $current->audience instanceof AudienceSpec ? CanonicalJson::encode($current->audience->toWire()) : null;
+
+        if ($current->privacyRevision->value !== $prechecked->privacyRevision->value || $preAudience !== $curAudience) {
+            return AuthorizationDecision::deny('target.privacy_revision_stale');
+        }
+
+        return AuthorizationDecision::allow('target.fence_verified');
     }
 }

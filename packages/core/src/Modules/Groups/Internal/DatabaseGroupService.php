@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Modules\Groups\Internal;
 
+use Closure;
 use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Database\Connection;
@@ -15,14 +16,24 @@ use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\GroupRef;
+use SocKit\Audience\Exceptions\AuthorizationDeniedException;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Modules\Groups\Configuration\GroupsOptions;
 use SocKit\Modules\Groups\Contracts\GroupService;
+use SocKit\Modules\Groups\Contracts\MembershipConsent;
 use SocKit\Modules\Groups\Data\AddGroupMemberCommand;
+use SocKit\Modules\Groups\Data\ApproveGroupMemberCommand;
+use SocKit\Modules\Groups\Data\ConsentDecision;
 use SocKit\Modules\Groups\Data\CreateGroupCommand;
 use SocKit\Modules\Groups\Data\GroupView;
+use SocKit\Modules\Groups\Data\InviteGroupMemberCommand;
+use SocKit\Modules\Groups\Data\JoinGroupCommand;
+use SocKit\Modules\Groups\Data\LeaveGroupCommand;
+use SocKit\Modules\Groups\Data\MembershipActivation;
 use SocKit\Modules\Groups\Data\RemoveGroupMemberCommand;
+use SocKit\Modules\Groups\Data\SetGroupJoinPolicyCommand;
+use SocKit\Modules\Groups\Enums\GroupJoinPolicy;
 use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupMemberStatus;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
@@ -34,6 +45,7 @@ use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\Exceptions\PanelException;
 use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Support\Data\ActorRef;
+use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\PayloadDigest;
@@ -49,8 +61,9 @@ use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 
 /**
- * Panel-isolated Groups command and query service operating via {@see OperationEnvelopeRunner}
- * and enforcing ActionAuthorizer, SurfaceAdmission, and fail-closed surface-scoped reads.
+ * Panel-isolated Groups command and query service operating via {@see OperationEnvelopeRunner},
+ * enforcing management-surface binding on locks, no implicit creator enrollment, join policy workflows,
+ * host MembershipConsent verification before/under lock, and fail-closed surface-scoped reads.
  */
 #[Internal]
 final readonly class DatabaseGroupService implements GroupService
@@ -93,13 +106,10 @@ final readonly class DatabaseGroupService implements GroupService
             envelope: $envelope,
             surface: $command->surface,
             action: 'sockit.groups.create',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
-                $this->authorizeWrite($verifiedActor, 'sockit.groups.create', $command->surface);
-            },
+            preTransactionChecks: static function (ActorContext $verifiedActor): void {},
             mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace): array {
                 $creator = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
-                $membersTable = $this->tables->table('group_members', $command->surface->panel);
                 $now = $this->nowIso();
                 $groupId = Ids::uuid7();
 
@@ -115,8 +125,10 @@ final readonly class DatabaseGroupService implements GroupService
                             'slug' => $command->slug,
                             'title' => $command->title,
                             'visibility' => $command->visibility->value,
+                            'join_policy' => $command->joinPolicy->value,
                             'state' => 'active',
                             'revision' => 1,
+                            'membership_generation' => 1,
                             'created_by_type' => $creator->type,
                             'created_by_id' => $creator->id,
                             'created_at' => $now,
@@ -131,16 +143,6 @@ final readonly class DatabaseGroupService implements GroupService
 
                     throw $exception;
                 }
-
-                $connection->table($membersTable)->insert([
-                    'group_id' => $groupId,
-                    'actor_type' => $creator->type,
-                    'actor_id' => $creator->id,
-                    'role' => GroupMemberRole::Owner->value,
-                    'status' => GroupMemberStatus::Active->value,
-                    'joined_at' => $now,
-                    'updated_at' => $now,
-                ]);
 
                 $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
@@ -159,6 +161,7 @@ final readonly class DatabaseGroupService implements GroupService
                             'panel' => $command->surface->panel->value,
                             'group_id' => $groupId,
                             'slug' => $command->slug,
+                            'join_policy' => $command->joinPolicy->value,
                         ],
                     ],
                 ];
@@ -168,10 +171,477 @@ final readonly class DatabaseGroupService implements GroupService
                     return;
                 }
 
-                $groupRow = $this->lockGroup($connection, $this->tables->table('groups', $command->surface->panel), $command->surface->panel->value, $replay->resource->id);
+                $groupRow = $this->lockGroup(
+                    $connection,
+                    $this->tables->table('groups', $command->surface->panel),
+                    $command->surface,
+                    $replay->resource->id,
+                );
                 if (SockitRows::str($groupRow, 'state') !== 'active') {
                     throw OperationException::contentHidden('group.inactive');
                 }
+            },
+        );
+    }
+
+    #[Override]
+    public function setJoinPolicy(SetGroupJoinPolicyCommand $command): OperationResult
+    {
+        $this->assertGroupsEnabled($command->surface);
+
+        $actor = $this->runtime->actors()->current();
+        $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.set_join_policy');
+        $digest = PayloadDigest::of('groups.set_join_policy', $command->toDigestPayload());
+
+        return $this->runGroupMutation(
+            key: $command->key,
+            namespace: $namespace,
+            digest: $digest,
+            surface: $command->surface,
+            groupId: $command->groupId,
+            expectedRevision: $command->expectedRevision,
+            action: 'sockit.groups.manage',
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
+                $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
+            },
+            mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use ($command, $namespace): array {
+                $groupsTable = $this->tables->table('groups', $command->surface->panel);
+                $actualRevision = SockitRows::int($groupRow, 'revision');
+                $nextRevision = $actualRevision + 1;
+                $now = $this->nowIso();
+
+                $connection->table($groupsTable)
+                    ->where('id', $command->groupId)
+                    ->where('panel_id', $command->surface->panel->value)
+                    ->where('revision', $command->expectedRevision->value)
+                    ->update([
+                        'join_policy' => $command->joinPolicy->value,
+                        'revision' => $nextRevision,
+                        'updated_at' => $now,
+                    ]);
+
+                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                return [
+                    'result' => OperationResult::confirmed(
+                        $receiptId,
+                        new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                        new Revision($nextRevision),
+                    ),
+                    'event' => [
+                        'aggregate_type' => 'group',
+                        'aggregate_id' => $command->groupId,
+                        'aggregate_revision' => $nextRevision,
+                        'event_type' => 'sockit.groups.join_policy_updated',
+                        'payload' => [
+                            'panel' => $command->surface->panel->value,
+                            'group_id' => $command->groupId,
+                            'join_policy' => $command->joinPolicy->value,
+                        ],
+                    ],
+                ];
+            },
+        );
+    }
+
+    #[Override]
+    public function join(JoinGroupCommand $command): OperationResult
+    {
+        $this->assertGroupsEnabled($command->surface);
+
+        $actor = $this->runtime->actors()->current();
+        $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.join');
+        $digest = PayloadDigest::of('groups.join', $command->toDigestPayload());
+
+        /** @var ?MembershipConsent $consent */
+        $consent = null;
+        /** @var ?MembershipActivation $activation */
+        $activation = null;
+        /** @var ?ConsentDecision $consentDecision */
+        $consentDecision = null;
+
+        return $this->runGroupMutation(
+            key: $command->key,
+            namespace: $namespace,
+            digest: $digest,
+            surface: $command->surface,
+            groupId: $command->groupId,
+            expectedRevision: $command->expectedRevision,
+            action: 'sockit.groups.join',
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, &$consent, &$activation, &$consentDecision): void {
+                $subject = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                $this->authorizeGroupResource($verifiedActor, 'sockit.groups.join', $command->surface, $command->groupId);
+
+                $consent = $this->runtime->membershipConsent();
+                $connection = $this->tables->connection($command->surface->panel);
+                $previewGroup = $connection->table($this->tables->table('groups', $command->surface->panel))
+                    ->where('panel_id', $command->surface->panel->value)
+                    ->where('id', $command->groupId)
+                    ->first();
+
+                if (! is_object($previewGroup)) {
+                    throw OperationException::contentHidden('group.not_found');
+                }
+
+                $previewPolicy = GroupJoinPolicy::from(SockitRows::str($previewGroup, 'join_policy'));
+
+                if ($previewPolicy === GroupJoinPolicy::Closed) {
+                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
+                }
+
+                if ($previewPolicy === GroupJoinPolicy::Auto || $previewPolicy === GroupJoinPolicy::Invite) {
+                    $role = GroupMemberRole::Member;
+
+                    if ($previewPolicy === GroupJoinPolicy::Invite) {
+                        $existingMember = $connection->table($this->tables->table('group_members', $command->surface->panel))
+                            ->where('group_id', $command->groupId)
+                            ->where('actor_type', $subject->type)
+                            ->where('actor_id', $subject->id)
+                            ->first();
+
+                        if (! is_object($existingMember) || SockitRows::str($existingMember, 'status') !== GroupMemberStatus::Invited->value) {
+                            throw AuthorizationDeniedException::denied('groups.invite_required');
+                        }
+
+                        $role = GroupMemberRole::from(SockitRows::str($existingMember, 'role'));
+                    }
+
+                    $activation = new MembershipActivation(
+                        panel: $command->surface->panel,
+                        surface: $command->surface,
+                        groupId: $command->groupId,
+                        subject: $subject,
+                        role: $role,
+                        transition: 'join',
+                    );
+                    $consentDecision = $consent->assess($activation);
+                    $consentDecision->decision->requireAllowed();
+                }
+            },
+            mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use (
+                $command,
+                $namespace,
+                &$consent,
+                &$activation,
+                &$consentDecision,
+            ): array {
+                $subject = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                $groupsTable = $this->tables->table('groups', $command->surface->panel);
+                $membersTable = $this->tables->table('group_members', $command->surface->panel);
+
+                $policy = GroupJoinPolicy::from(SockitRows::str($groupRow, 'join_policy'));
+                if ($policy === GroupJoinPolicy::Closed) {
+                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
+                }
+
+                $actualRevision = SockitRows::int($groupRow, 'revision');
+                $membershipGen = SockitRows::int($groupRow, 'membership_generation', 1);
+                $nextRevision = $actualRevision + 1;
+                $now = $this->nowIso();
+
+                $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $subject);
+                $existingStatus = is_object($existingMember) ? SockitRows::str($existingMember, 'status') : null;
+
+                if ($existingStatus === GroupMemberStatus::Banned->value) {
+                    throw AuthorizationDeniedException::denied('groups.member_banned');
+                }
+
+                if ($existingStatus === GroupMemberStatus::Active->value) {
+                    throw AuthorizationDeniedException::denied('groups.already_member');
+                }
+
+                if ($policy === GroupJoinPolicy::Approval) {
+                    $this->upsertMemberRow($connection, $membersTable, $command->groupId, $subject, is_object($existingMember), [
+                        'role' => GroupMemberRole::Member->value,
+                        'status' => GroupMemberStatus::Pending->value,
+                        'consent_generation' => null,
+                        'joined_at' => null,
+                        'updated_at' => $now,
+                    ]);
+
+                    $connection->table($groupsTable)
+                        ->where('id', $command->groupId)
+                        ->where('panel_id', $command->surface->panel->value)
+                        ->where('revision', $command->expectedRevision->value)
+                        ->update(['revision' => $nextRevision, 'updated_at' => $now]);
+
+                    $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                    return [
+                        'result' => OperationResult::confirmed(
+                            $receiptId,
+                            new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                            new Revision($nextRevision),
+                        ),
+                        'event' => [
+                            'aggregate_type' => 'group',
+                            'aggregate_id' => $command->groupId,
+                            'aggregate_revision' => $nextRevision,
+                            'event_type' => 'sockit.groups.join_requested',
+                            'payload' => [
+                                'panel' => $command->surface->panel->value,
+                                'group_id' => $command->groupId,
+                                'member' => $subject->toWire(),
+                            ],
+                        ],
+                    ];
+                }
+
+                $effectiveRole = GroupMemberRole::Member;
+
+                if ($policy === GroupJoinPolicy::Invite) {
+                    if (! is_object($existingMember) || $existingStatus !== GroupMemberStatus::Invited->value) {
+                        throw AuthorizationDeniedException::denied('groups.invite_required');
+                    }
+
+                    $effectiveRole = GroupMemberRole::from(SockitRows::str($existingMember, 'role'));
+                }
+
+                if (! $consent instanceof MembershipConsent || ! $activation instanceof MembershipActivation || ! $consentDecision instanceof ConsentDecision || $activation->role !== $effectiveRole) {
+                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
+                }
+
+                $consent->recheck($activation, $consentDecision)->requireAllowed();
+
+                $this->upsertMemberRow($connection, $membersTable, $command->groupId, $subject, is_object($existingMember), [
+                    'role' => $effectiveRole->value,
+                    'status' => GroupMemberStatus::Active->value,
+                    'consent_generation' => $consentDecision->generation,
+                    'joined_at' => $now,
+                    'updated_at' => $now,
+                ]);
+
+                $nextGeneration = $membershipGen + 1;
+                $connection->table($groupsTable)
+                    ->where('id', $command->groupId)
+                    ->where('panel_id', $command->surface->panel->value)
+                    ->where('revision', $command->expectedRevision->value)
+                    ->update([
+                        'revision' => $nextRevision,
+                        'membership_generation' => $nextGeneration,
+                        'updated_at' => $now,
+                    ]);
+
+                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                return [
+                    'result' => OperationResult::confirmed(
+                        $receiptId,
+                        new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                        new Revision($nextRevision),
+                    ),
+                    'event' => [
+                        'aggregate_type' => 'group',
+                        'aggregate_id' => $command->groupId,
+                        'aggregate_revision' => $nextRevision,
+                        'event_type' => 'sockit.groups.member_joined',
+                        'payload' => [
+                            'panel' => $command->surface->panel->value,
+                            'group_id' => $command->groupId,
+                            'member' => $subject->toWire(),
+                            'role' => $effectiveRole->value,
+                            'membership_generation' => $nextGeneration,
+                        ],
+                    ],
+                ];
+            },
+        );
+    }
+
+    #[Override]
+    public function approve(ApproveGroupMemberCommand $command): OperationResult
+    {
+        $this->assertGroupsEnabled($command->surface);
+
+        $actor = $this->runtime->actors()->current();
+        $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.approve');
+        $digest = PayloadDigest::of('groups.approve', $command->toDigestPayload());
+
+        $activation = new MembershipActivation(
+            panel: $command->surface->panel,
+            surface: $command->surface,
+            groupId: $command->groupId,
+            subject: $command->member,
+            role: $command->role,
+            transition: 'approve',
+        );
+
+        /** @var ?MembershipConsent $consent */
+        $consent = null;
+        /** @var ?ConsentDecision $consentDecision */
+        $consentDecision = null;
+
+        return $this->runGroupMutation(
+            key: $command->key,
+            namespace: $namespace,
+            digest: $digest,
+            surface: $command->surface,
+            groupId: $command->groupId,
+            expectedRevision: $command->expectedRevision,
+            action: 'sockit.groups.manage',
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $activation, &$consent, &$consentDecision): void {
+                $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
+                $consent = $this->runtime->membershipConsent();
+                $consentDecision = $consent->assess($activation);
+                $consentDecision->decision->requireAllowed();
+            },
+            mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use (
+                $command,
+                $namespace,
+                $activation,
+                &$consent,
+                &$consentDecision,
+            ): array {
+                if (SockitRows::str($groupRow, 'join_policy') === GroupJoinPolicy::Closed->value) {
+                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
+                }
+
+                $groupsTable = $this->tables->table('groups', $command->surface->panel);
+                $membersTable = $this->tables->table('group_members', $command->surface->panel);
+
+                $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $command->member);
+
+                if (! is_object($existingMember) || SockitRows::str($existingMember, 'status') !== GroupMemberStatus::Pending->value) {
+                    throw AuthorizationDeniedException::denied('groups.not_pending');
+                }
+
+                if (! $consent instanceof MembershipConsent || ! $consentDecision instanceof ConsentDecision) {
+                    throw OperationException::providerUnavailable(MembershipConsent::class);
+                }
+
+                $consent->recheck($activation, $consentDecision)->requireAllowed();
+
+                $actualRevision = SockitRows::int($groupRow, 'revision');
+                $nextRevision = $actualRevision + 1;
+                $nextGeneration = SockitRows::int($groupRow, 'membership_generation', 1) + 1;
+                $now = $this->nowIso();
+
+                $connection->table($membersTable)
+                    ->where('group_id', $command->groupId)
+                    ->where('actor_type', $command->member->type)
+                    ->where('actor_id', $command->member->id)
+                    ->update([
+                        'role' => $command->role->value,
+                        'status' => GroupMemberStatus::Active->value,
+                        'consent_generation' => $consentDecision->generation,
+                        'joined_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+
+                $connection->table($groupsTable)
+                    ->where('id', $command->groupId)
+                    ->where('panel_id', $command->surface->panel->value)
+                    ->where('revision', $command->expectedRevision->value)
+                    ->update([
+                        'revision' => $nextRevision,
+                        'membership_generation' => $nextGeneration,
+                        'updated_at' => $now,
+                    ]);
+
+                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                return [
+                    'result' => OperationResult::confirmed(
+                        $receiptId,
+                        new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                        new Revision($nextRevision),
+                    ),
+                    'event' => [
+                        'aggregate_type' => 'group',
+                        'aggregate_id' => $command->groupId,
+                        'aggregate_revision' => $nextRevision,
+                        'event_type' => 'sockit.groups.member_approved',
+                        'payload' => [
+                            'panel' => $command->surface->panel->value,
+                            'group_id' => $command->groupId,
+                            'member' => $command->member->toWire(),
+                            'role' => $command->role->value,
+                            'membership_generation' => $nextGeneration,
+                        ],
+                    ],
+                ];
+            },
+        );
+    }
+
+    #[Override]
+    public function invite(InviteGroupMemberCommand $command): OperationResult
+    {
+        $this->assertGroupsEnabled($command->surface);
+
+        $actor = $this->runtime->actors()->current();
+        $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.invite');
+        $digest = PayloadDigest::of('groups.invite', $command->toDigestPayload());
+
+        return $this->runGroupMutation(
+            key: $command->key,
+            namespace: $namespace,
+            digest: $digest,
+            surface: $command->surface,
+            groupId: $command->groupId,
+            expectedRevision: $command->expectedRevision,
+            action: 'sockit.groups.manage',
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
+                $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
+            },
+            mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use ($command, $namespace): array {
+                if (SockitRows::str($groupRow, 'join_policy') === GroupJoinPolicy::Closed->value) {
+                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
+                }
+
+                $groupsTable = $this->tables->table('groups', $command->surface->panel);
+                $membersTable = $this->tables->table('group_members', $command->surface->panel);
+
+                $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $command->member);
+                $existingStatus = is_object($existingMember) ? SockitRows::str($existingMember, 'status') : null;
+
+                if ($existingStatus === GroupMemberStatus::Banned->value) {
+                    throw AuthorizationDeniedException::denied('groups.member_banned');
+                }
+
+                if ($existingStatus === GroupMemberStatus::Active->value) {
+                    throw AuthorizationDeniedException::denied('groups.already_member');
+                }
+
+                $actualRevision = SockitRows::int($groupRow, 'revision');
+                $nextRevision = $actualRevision + 1;
+                $now = $this->nowIso();
+
+                $this->upsertMemberRow($connection, $membersTable, $command->groupId, $command->member, is_object($existingMember), [
+                    'role' => $command->role->value,
+                    'status' => GroupMemberStatus::Invited->value,
+                    'consent_generation' => null,
+                    'joined_at' => null,
+                    'updated_at' => $now,
+                ]);
+
+                $connection->table($groupsTable)
+                    ->where('id', $command->groupId)
+                    ->where('panel_id', $command->surface->panel->value)
+                    ->where('revision', $command->expectedRevision->value)
+                    ->update(['revision' => $nextRevision, 'updated_at' => $now]);
+
+                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                return [
+                    'result' => OperationResult::confirmed(
+                        $receiptId,
+                        new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                        new Revision($nextRevision),
+                    ),
+                    'event' => [
+                        'aggregate_type' => 'group',
+                        'aggregate_id' => $command->groupId,
+                        'aggregate_revision' => $nextRevision,
+                        'event_type' => 'sockit.groups.member_invited',
+                        'payload' => [
+                            'panel' => $command->surface->panel->value,
+                            'group_id' => $command->groupId,
+                            'member' => $command->member->toWire(),
+                            'role' => $command->role->value,
+                        ],
+                    ],
+                ];
             },
         );
     }
@@ -185,76 +655,82 @@ final readonly class DatabaseGroupService implements GroupService
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.add_member');
         $digest = PayloadDigest::of('groups.add_member', $command->toDigestPayload());
 
-        $envelope = new CommandEnvelope(
+        $activation = new MembershipActivation(
+            panel: $command->surface->panel,
+            surface: $command->surface,
+            groupId: $command->groupId,
+            subject: $command->member,
+            role: $command->role,
+            transition: 'add_member',
+        );
+
+        /** @var ?MembershipConsent $consent */
+        $consent = null;
+        /** @var ?ConsentDecision $consentDecision */
+        $consentDecision = null;
+
+        return $this->runGroupMutation(
             key: $command->key,
             namespace: $namespace,
             digest: $digest,
-            expectedRevision: $command->expectedRevision,
-        );
-
-        return $this->runtime->envelope()->run(
-            envelope: $envelope,
             surface: $command->surface,
+            groupId: $command->groupId,
+            expectedRevision: $command->expectedRevision,
             action: 'sockit.groups.manage',
-            preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
-                $this->authorizeWrite(
-                    $verifiedActor,
-                    'sockit.groups.manage',
-                    $command->surface,
-                    new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
-                );
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $activation, &$consent, &$consentDecision): void {
+                $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
+                $consent = $this->runtime->membershipConsent();
+                $consentDecision = $consent->assess($activation);
+                $consentDecision->decision->requireAllowed();
             },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace): array {
+            mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use (
+                $command,
+                $namespace,
+                $activation,
+                &$consent,
+                &$consentDecision,
+            ): array {
+                if (SockitRows::str($groupRow, 'join_policy') === GroupJoinPolicy::Closed->value) {
+                    throw AuthorizationDeniedException::denied('groups.join_policy_closed');
+                }
+
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
                 $membersTable = $this->tables->table('group_members', $command->surface->panel);
 
-                $groupRow = $this->lockGroup($connection, $groupsTable, $command->surface->panel->value, $command->groupId);
-                if (SockitRows::str($groupRow, 'state') !== 'active') {
-                    throw OperationException::contentHidden('group.inactive');
+                $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $command->member);
+
+                if (is_object($existingMember) && SockitRows::str($existingMember, 'status') === GroupMemberStatus::Banned->value) {
+                    throw AuthorizationDeniedException::denied('groups.member_banned');
                 }
+
+                if (! $consent instanceof MembershipConsent || ! $consentDecision instanceof ConsentDecision) {
+                    throw OperationException::providerUnavailable(MembershipConsent::class);
+                }
+
+                $consent->recheck($activation, $consentDecision)->requireAllowed();
 
                 $actualRevision = SockitRows::int($groupRow, 'revision');
-
-                if ($actualRevision !== $command->expectedRevision->value) {
-                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
-                }
-
-                $now = $this->nowIso();
                 $nextRevision = $actualRevision + 1;
+                $nextGeneration = SockitRows::int($groupRow, 'membership_generation', 1) + 1;
+                $now = $this->nowIso();
 
-                $existingMember = $connection->table($membersTable)
-                    ->where('group_id', $command->groupId)
-                    ->where('actor_type', $command->member->type)
-                    ->where('actor_id', $command->member->id)
-                    ->first();
-
-                if (is_object($existingMember)) {
-                    $connection->table($membersTable)
-                        ->where('group_id', $command->groupId)
-                        ->where('actor_type', $command->member->type)
-                        ->where('actor_id', $command->member->id)
-                        ->update([
-                            'role' => $command->role->value,
-                            'status' => GroupMemberStatus::Active->value,
-                            'updated_at' => $now,
-                        ]);
-                } else {
-                    $connection->table($membersTable)->insert([
-                        'group_id' => $command->groupId,
-                        'actor_type' => $command->member->type,
-                        'actor_id' => $command->member->id,
-                        'role' => $command->role->value,
-                        'status' => GroupMemberStatus::Active->value,
-                        'joined_at' => $now,
-                        'updated_at' => $now,
-                    ]);
-                }
+                $this->upsertMemberRow($connection, $membersTable, $command->groupId, $command->member, is_object($existingMember), [
+                    'role' => $command->role->value,
+                    'status' => GroupMemberStatus::Active->value,
+                    'consent_generation' => $consentDecision->generation,
+                    'joined_at' => $now,
+                    'updated_at' => $now,
+                ]);
 
                 $connection->table($groupsTable)
                     ->where('id', $command->groupId)
                     ->where('panel_id', $command->surface->panel->value)
                     ->where('revision', $command->expectedRevision->value)
-                    ->update(['revision' => $nextRevision, 'updated_at' => $now]);
+                    ->update([
+                        'revision' => $nextRevision,
+                        'membership_generation' => $nextGeneration,
+                        'updated_at' => $now,
+                    ]);
 
                 $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
@@ -274,15 +750,96 @@ final readonly class DatabaseGroupService implements GroupService
                             'group_id' => $command->groupId,
                             'member' => $command->member->toWire(),
                             'role' => $command->role->value,
+                            'membership_generation' => $nextGeneration,
                         ],
                     ],
                 ];
             },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
-                $groupRow = $this->lockGroup($connection, $this->tables->table('groups', $command->surface->panel), $command->surface->panel->value, $command->groupId);
-                if (SockitRows::str($groupRow, 'state') !== 'active') {
-                    throw OperationException::contentHidden('group.inactive');
+        );
+    }
+
+    #[Override]
+    public function leave(LeaveGroupCommand $command): OperationResult
+    {
+        $this->assertGroupsEnabled($command->surface);
+
+        $actor = $this->runtime->actors()->current();
+        $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.leave');
+        $digest = PayloadDigest::of('groups.leave', $command->toDigestPayload());
+
+        return $this->runGroupMutation(
+            key: $command->key,
+            namespace: $namespace,
+            digest: $digest,
+            surface: $command->surface,
+            groupId: $command->groupId,
+            expectedRevision: $command->expectedRevision,
+            action: 'sockit.groups.leave',
+            preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
+                $this->authorizeGroupResource($verifiedActor, 'sockit.groups.leave', $command->surface, $command->groupId);
+            },
+            mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use ($command, $namespace): array {
+                $subject = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
+                $groupsTable = $this->tables->table('groups', $command->surface->panel);
+                $membersTable = $this->tables->table('group_members', $command->surface->panel);
+
+                $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $subject);
+                $existingStatus = is_object($existingMember) ? SockitRows::str($existingMember, 'status') : null;
+
+                if (! in_array($existingStatus, [
+                    GroupMemberStatus::Active->value,
+                    GroupMemberStatus::Pending->value,
+                    GroupMemberStatus::Invited->value,
+                ], true)) {
+                    throw AuthorizationDeniedException::denied('groups.not_a_member');
                 }
+
+                $actualRevision = SockitRows::int($groupRow, 'revision');
+                $nextRevision = $actualRevision + 1;
+                $membershipGen = SockitRows::int($groupRow, 'membership_generation', 1);
+                $nextGeneration = $existingStatus === GroupMemberStatus::Active->value ? $membershipGen + 1 : $membershipGen;
+                $now = $this->nowIso();
+
+                $connection->table($membersTable)
+                    ->where('group_id', $command->groupId)
+                    ->where('actor_type', $subject->type)
+                    ->where('actor_id', $subject->id)
+                    ->update([
+                        'status' => GroupMemberStatus::Left->value,
+                        'updated_at' => $now,
+                    ]);
+
+                $connection->table($groupsTable)
+                    ->where('id', $command->groupId)
+                    ->where('panel_id', $command->surface->panel->value)
+                    ->where('revision', $command->expectedRevision->value)
+                    ->update([
+                        'revision' => $nextRevision,
+                        'membership_generation' => $nextGeneration,
+                        'updated_at' => $now,
+                    ]);
+
+                $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
+
+                return [
+                    'result' => OperationResult::confirmed(
+                        $receiptId,
+                        new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
+                        new Revision($nextRevision),
+                    ),
+                    'event' => [
+                        'aggregate_type' => 'group',
+                        'aggregate_id' => $command->groupId,
+                        'aggregate_revision' => $nextRevision,
+                        'event_type' => 'sockit.groups.member_left',
+                        'payload' => [
+                            'panel' => $command->surface->panel->value,
+                            'group_id' => $command->groupId,
+                            'member' => $subject->toWire(),
+                            'membership_generation' => $nextGeneration,
+                        ],
+                    ],
+                ];
             },
         );
     }
@@ -296,42 +853,28 @@ final readonly class DatabaseGroupService implements GroupService
         $namespace = new CommandNamespace($actor->installation, $command->surface->panel, $command->integration, 'groups.remove_member');
         $digest = PayloadDigest::of('groups.remove_member', $command->toDigestPayload());
 
-        $envelope = new CommandEnvelope(
+        return $this->runGroupMutation(
             key: $command->key,
             namespace: $namespace,
             digest: $digest,
-            expectedRevision: $command->expectedRevision,
-        );
-
-        return $this->runtime->envelope()->run(
-            envelope: $envelope,
             surface: $command->surface,
+            groupId: $command->groupId,
+            expectedRevision: $command->expectedRevision,
             action: 'sockit.groups.manage',
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command): void {
-                $this->authorizeWrite(
-                    $verifiedActor,
-                    'sockit.groups.manage',
-                    $command->surface,
-                    new ResourceRef($command->surface->panel, ResourceKind::Group, $command->groupId),
-                );
+                $this->authorizeGroupResource($verifiedActor, 'sockit.groups.manage', $command->surface, $command->groupId);
             },
-            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace): array {
+            mutation: function (ActorContext $verifiedActor, Connection $connection, object $groupRow) use ($command, $namespace): array {
                 $groupsTable = $this->tables->table('groups', $command->surface->panel);
                 $membersTable = $this->tables->table('group_members', $command->surface->panel);
-
-                $groupRow = $this->lockGroup($connection, $groupsTable, $command->surface->panel->value, $command->groupId);
-                if (SockitRows::str($groupRow, 'state') !== 'active') {
-                    throw OperationException::contentHidden('group.inactive');
-                }
+                $existingMember = $this->lockMemberRow($connection, $membersTable, $command->groupId, $command->member);
 
                 $actualRevision = SockitRows::int($groupRow, 'revision');
-
-                if ($actualRevision !== $command->expectedRevision->value) {
-                    throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
-                }
-
-                $now = $this->nowIso();
                 $nextRevision = $actualRevision + 1;
+                $membershipGen = SockitRows::int($groupRow, 'membership_generation', 1);
+                $wasActive = is_object($existingMember) && SockitRows::str($existingMember, 'status') === GroupMemberStatus::Active->value;
+                $nextGeneration = $wasActive ? $membershipGen + 1 : $membershipGen;
+                $now = $this->nowIso();
 
                 $connection->table($membersTable)
                     ->where('group_id', $command->groupId)
@@ -346,7 +889,11 @@ final readonly class DatabaseGroupService implements GroupService
                     ->where('id', $command->groupId)
                     ->where('panel_id', $command->surface->panel->value)
                     ->where('revision', $command->expectedRevision->value)
-                    ->update(['revision' => $nextRevision, 'updated_at' => $now]);
+                    ->update([
+                        'revision' => $nextRevision,
+                        'membership_generation' => $nextGeneration,
+                        'updated_at' => $now,
+                    ]);
 
                 $receiptId = $this->findReceiptId($connection, $command->surface->panel, $namespace->toWire(), $command->key->value);
 
@@ -365,15 +912,10 @@ final readonly class DatabaseGroupService implements GroupService
                             'panel' => $command->surface->panel->value,
                             'group_id' => $command->groupId,
                             'member' => $command->member->toWire(),
+                            'membership_generation' => $nextGeneration,
                         ],
                     ],
                 ];
-            },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
-                $groupRow = $this->lockGroup($connection, $this->tables->table('groups', $command->surface->panel), $command->surface->panel->value, $command->groupId);
-                if (SockitRows::str($groupRow, 'state') !== 'active') {
-                    throw OperationException::contentHidden('group.inactive');
-                }
             },
         );
     }
@@ -420,11 +962,18 @@ final readonly class DatabaseGroupService implements GroupService
             ->where('kind', $groupSurface->kind->value)
             ->where('host_entity_type', $groupSurface->host->type)
             ->where('host_entity_value', $groupSurface->host->value)
-            ->where('incarnation', $groupSurface->incarnation->value)
+            ->orderByDesc('incarnation')
             ->first();
 
-        $surfaceArchived = is_object($surfaceInstanceRow)
-            && SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+        if (
+            ! is_object($surfaceInstanceRow)
+            || SockitRows::int($surfaceInstanceRow, 'incarnation', 1) !== $groupSurface->incarnation->value
+            || SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value
+        ) {
+            throw OperationException::audienceDenied('audience.denied.surface_inactive');
+        }
+
+        $surfaceArchived = SockitRows::str($surfaceInstanceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
 
         $spec = $visibility === GroupVisibility::Public
             ? AudienceSpec::platform()
@@ -455,26 +1004,80 @@ final readonly class DatabaseGroupService implements GroupService
             createdBy: $creator,
             createdAt: SockitRows::date($row, 'created_at'),
             updatedAt: SockitRows::date($row, 'updated_at'),
+            joinPolicy: GroupJoinPolicy::from(SockitRows::str($row, 'join_policy')),
+            membershipGeneration: SockitRows::int($row, 'membership_generation', 1),
         );
     }
 
-    private function authorizeWrite(
+    /**
+     * @param  Closure(ActorContext): void  $preTransactionChecks
+     * @param  Closure(ActorContext, Connection, object): array{result: OperationResult, event?: array{aggregate_type: string, aggregate_id: string, aggregate_revision: int, event_type: string, payload: array<string, mixed>}|null}  $mutation
+     */
+    private function runGroupMutation(
+        CommandKey $key,
+        CommandNamespace $namespace,
+        PayloadDigest $digest,
+        SurfaceRef $surface,
+        string $groupId,
+        Revision $expectedRevision,
+        string $action,
+        Closure $preTransactionChecks,
+        Closure $mutation,
+    ): OperationResult {
+        $envelope = new CommandEnvelope(
+            key: $key,
+            namespace: $namespace,
+            digest: $digest,
+            expectedRevision: $expectedRevision,
+        );
+
+        return $this->runtime->envelope()->run(
+            envelope: $envelope,
+            surface: $surface,
+            action: $action,
+            preTransactionChecks: $preTransactionChecks,
+            mutation: function (ActorContext $verifiedActor, Connection $connection) use ($surface, $groupId, $expectedRevision, $mutation): array {
+                $groupsTable = $this->tables->table('groups', $surface->panel);
+                $groupRow = $this->lockGroup($connection, $groupsTable, $surface, $groupId);
+
+                if (SockitRows::str($groupRow, 'state') !== 'active') {
+                    throw OperationException::contentHidden('group.inactive');
+                }
+
+                $actualRevision = SockitRows::int($groupRow, 'revision');
+                if ($actualRevision !== $expectedRevision->value) {
+                    throw OperationException::revisionConflict($expectedRevision->value, $actualRevision);
+                }
+
+                return $mutation($verifiedActor, $connection, $groupRow);
+            },
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($surface, $groupId): void {
+                $groupRow = $this->lockGroup(
+                    $connection,
+                    $this->tables->table('groups', $surface->panel),
+                    $surface,
+                    $groupId,
+                );
+
+                if (SockitRows::str($groupRow, 'state') !== 'active') {
+                    throw OperationException::contentHidden('group.inactive');
+                }
+            },
+        );
+    }
+
+    private function authorizeGroupResource(
         ActorContext $actor,
         string $action,
         SurfaceRef $surface,
-        ?ResourceRef $resource = null,
+        string $groupId,
     ): void {
         $this->runtime->authorizer()->decide(new ActionRequest(
             actor: $actor,
             action: $action,
             surface: $surface,
-            resource: $resource,
+            resource: new ResourceRef($surface->panel, ResourceKind::Group, $groupId),
         ))->requireAllowed();
-
-        $admission = $this->runtime->audienceGate()->admitForWrite($actor, $surface);
-        if (! $admission->canWrite()) {
-            throw OperationException::audienceDenied($admission->reason);
-        }
     }
 
     private function assertGroupsEnabled(SurfaceRef $surface): GroupsOptions
@@ -493,10 +1096,10 @@ final readonly class DatabaseGroupService implements GroupService
         return GroupsOptions::fromSettings($panelDef->settingsFor('groups'));
     }
 
-    private function lockGroup(Connection $connection, string $groupsTable, string $panelId, string $groupId): object
+    private function lockGroup(Connection $connection, string $groupsTable, SurfaceRef $surface, string $groupId): object
     {
         $query = $connection->table($groupsTable)
-            ->where('panel_id', $panelId)
+            ->where('panel_id', $surface->panel->value)
             ->where('id', $groupId);
 
         if ($connection->getDriverName() !== 'sqlite') {
@@ -509,7 +1112,59 @@ final readonly class DatabaseGroupService implements GroupService
             throw OperationException::contentHidden('group.not_found');
         }
 
+        if (
+            SockitRows::str($row, 'surface_kind') !== $surface->kind->value
+            || SockitRows::str($row, 'surface_host_type') !== $surface->host->type
+            || SockitRows::str($row, 'surface_host_value') !== $surface->host->value
+            || SockitRows::int($row, 'surface_incarnation') !== $surface->incarnation->value
+        ) {
+            throw OperationException::audienceDenied('group.surface_mismatch');
+        }
+
         return $row;
+    }
+
+    private function lockMemberRow(Connection $connection, string $membersTable, string $groupId, ActorRef $member): ?object
+    {
+        $query = $connection->table($membersTable)
+            ->where('group_id', $groupId)
+            ->where('actor_type', $member->type)
+            ->where('actor_id', $member->id);
+
+        if ($connection->getDriverName() !== 'sqlite') {
+            $query->lockForUpdate();
+        }
+
+        $row = $query->first();
+
+        return is_object($row) ? $row : null;
+    }
+
+    /** @param array<string, mixed> $columns */
+    private function upsertMemberRow(
+        Connection $connection,
+        string $membersTable,
+        string $groupId,
+        ActorRef $member,
+        bool $exists,
+        array $columns,
+    ): void {
+        if ($exists) {
+            $connection->table($membersTable)
+                ->where('group_id', $groupId)
+                ->where('actor_type', $member->type)
+                ->where('actor_id', $member->id)
+                ->update($columns);
+
+            return;
+        }
+
+        $connection->table($membersTable)->insert([
+            'group_id' => $groupId,
+            'actor_type' => $member->type,
+            'actor_id' => $member->id,
+            ...$columns,
+        ]);
     }
 
     private function findReceiptId(Connection $connection, PanelId $panel, string $namespace, string $commandKey): string

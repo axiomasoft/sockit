@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace SocKit\Testing\Fakes\Audience;
 
+use Closure;
 use Override;
 use Packman\Attributes\Api;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Audience\Contracts\PanelGroupMembershipResolver;
+use SocKit\Audience\Contracts\LocksGroupMembershipInTransaction;
+use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\GroupRef;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\ActorRef;
 use Throwable;
 
 /**
- * In-memory panel-aware test double for {@see PanelGroupMembershipResolver}.
+ * In-memory panel-aware and transaction-fenced test double for {@see LocksGroupMembershipInTransaction}.
  */
 #[Api(since: '1.0')]
-final class FakeGroupMembershipResolver implements PanelGroupMembershipResolver
+final class FakeGroupMembershipResolver implements LocksGroupMembershipInTransaction
 {
     /** @var array<string, true> */
     private array $members = [];
@@ -26,6 +28,9 @@ final class FakeGroupMembershipResolver implements PanelGroupMembershipResolver
     private array $panelMembers = [];
 
     private ?Throwable $failure = null;
+
+    /** @var (Closure(PanelId, GroupRef): void)|null */
+    private ?Closure $onLockCallback = null;
 
     public function add(ActorRef $actor, GroupRef|string $group): self
     {
@@ -48,12 +53,26 @@ final class FakeGroupMembershipResolver implements PanelGroupMembershipResolver
         $ref = is_string($group) ? new GroupRef($group) : $group;
         unset($this->members[$actor->toWire().'|'.$ref->value]);
 
+        foreach (array_keys($this->panelMembers) as $panelKey) {
+            if (str_ends_with($panelKey, '|'.$actor->toWire().'|'.$ref->value)) {
+                unset($this->panelMembers[$panelKey]);
+            }
+        }
+
         return $this;
     }
 
     public function failWith(?Throwable $failure): self
     {
         $this->failure = $failure;
+
+        return $this;
+    }
+
+    /** @param (Closure(PanelId, GroupRef): void)|null $callback */
+    public function onLock(?Closure $callback): self
+    {
+        $this->onLockCallback = $callback;
 
         return $this;
     }
@@ -86,5 +105,27 @@ final class FakeGroupMembershipResolver implements PanelGroupMembershipResolver
         $panelKey = $panel->value.'|'.$actor->actor->toWire().'|'.$group->value;
 
         return isset($this->panelMembers[$panelKey]) || isset($this->members[$actor->actor->toWire().'|'.$group->value]);
+    }
+
+    #[Override]
+    public function membershipVerdictInPanel(ActorContext $actor, PanelId $panel, GroupRef $group): AudienceVerdict
+    {
+        return $this->isMemberInPanel($actor, $panel, $group)
+            ? AudienceVerdict::allow('audience.allowed.group')
+            : AudienceVerdict::deny('audience.denied.not_in_group');
+    }
+
+    #[Override]
+    public function membershipVerdictInTransaction(ActorContext $actor, PanelId $panel, GroupRef $group): AudienceVerdict
+    {
+        return $this->membershipVerdictInPanel($actor, $panel, $group);
+    }
+
+    #[Override]
+    public function lockGroupInTransaction(PanelId $panel, GroupRef $group): void
+    {
+        if ($this->onLockCallback instanceof Closure) {
+            ($this->onLockCallback)($panel, $group);
+        }
     }
 }

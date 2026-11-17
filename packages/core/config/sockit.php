@@ -19,6 +19,7 @@ return [
         'audience' => null,
         'authorizer' => null,
         'groups' => null,
+        'consent' => null,
         'surface_policy' => null,
         'targets' => null,
     ],
@@ -39,5 +40,6 @@ return [
     'operations' => [
         'receipt_ttl_seconds' => 86400,
         'outbox_batch_size' => 100,
+        'cursor_ttl_seconds' => 3600,
     ],
 ];

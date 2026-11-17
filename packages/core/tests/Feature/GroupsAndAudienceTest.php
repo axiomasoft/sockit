@@ -13,6 +13,7 @@ use SocKit\Modules\Groups\Contracts\GroupService;
 use SocKit\Modules\Groups\Data\AddGroupMemberCommand;
 use SocKit\Modules\Groups\Data\CreateGroupCommand;
 use SocKit\Modules\Groups\Data\RemoveGroupMemberCommand;
+use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
 use SocKit\Modules\Posts\Contracts\FeedService;
 use SocKit\Modules\Posts\Contracts\PostService;
@@ -61,6 +62,7 @@ final class GroupsAndAudienceTest extends SocKitTestCase
         $this->migrateSockitSchema();
         $fake = $this->installFakeSocKit();
         $fake->actors->actAsPerson('alice');
+        $fake->consent->allowAll();
 
         $surface = new SurfaceRef(
             panel: new PanelId('sockit.alpha'),
@@ -84,7 +86,17 @@ final class GroupsAndAudienceTest extends SocKitTestCase
         $groupId = $createRes->resource?->id ?? '';
         self::assertNotSame('', $groupId);
 
-        // Alice (creator/owner) publishes group-scoped post and can read it immediately
+        // Creator Alice is not auto-enrolled on create() (P5.2); enroll Alice explicitly with consent
+        $groups->addMember(new AddGroupMemberCommand(
+            key: new CommandKey('cmd-grp-add-alice-001'),
+            surface: $surface,
+            groupId: $groupId,
+            expectedRevision: new Revision(1),
+            member: new ActorRef('user', 'alice'),
+            role: GroupMemberRole::Owner,
+        ));
+
+        // Alice publishes group-scoped post and can read it immediately
         $postRes = $posts->publish(new PublishPostCommand(
             key: new CommandKey('cmd-grp-post-0000001'),
             surface: $surface,
@@ -110,7 +122,7 @@ final class GroupsAndAudienceTest extends SocKitTestCase
             key: new CommandKey('cmd-grp-add-bob-0001'),
             surface: $surface,
             groupId: $groupId,
-            expectedRevision: new Revision(1),
+            expectedRevision: new Revision(2),
             member: new ActorRef('user', 'bob'),
         ));
 
@@ -124,7 +136,7 @@ final class GroupsAndAudienceTest extends SocKitTestCase
             key: new CommandKey('cmd-grp-rem-bob-0001'),
             surface: $surface,
             groupId: $groupId,
-            expectedRevision: new Revision(2),
+            expectedRevision: new Revision(3),
             member: new ActorRef('user', 'bob'),
         ));
 

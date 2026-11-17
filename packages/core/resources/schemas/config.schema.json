@@ -83,6 +83,10 @@
                 "operations": {
                     "type": "object",
                     "properties": {
+                        "cursor_ttl_seconds": {
+                            "type": "integer",
+                            "default": 3600
+                        },
                         "outbox_batch_size": {
                             "type": "integer",
                             "default": 100
@@ -155,6 +159,13 @@
                             "default": null
                         },
                         "authorizer": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "consent": {
                             "type": [
                                 "string",
                                 "null"

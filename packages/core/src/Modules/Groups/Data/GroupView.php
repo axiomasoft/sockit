@@ -6,6 +6,7 @@ namespace SocKit\Modules\Groups\Data;
 
 use DateTimeImmutable;
 use Packman\Attributes\Api;
+use SocKit\Modules\Groups\Enums\GroupJoinPolicy;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\ActorRef;
@@ -25,5 +26,7 @@ final readonly class GroupView
         public ActorRef $createdBy,
         public DateTimeImmutable $createdAt,
         public DateTimeImmutable $updatedAt,
+        public GroupJoinPolicy $joinPolicy = GroupJoinPolicy::Approval,
+        public int $membershipGeneration = 1,
     ) {}
 }

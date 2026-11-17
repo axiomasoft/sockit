@@ -9,9 +9,10 @@ use Illuminate\Database\QueryException;
 use Override;
 use Packman\Attributes\Internal;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
+use SocKit\Audience\Data\AudienceVerdict;
+use SocKit\Audience\Exceptions\AuthorizationDeniedException;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Modules\Reactions\Configuration\ReactionsOptions;
@@ -35,17 +36,18 @@ use SocKit\Support\Data\Revision;
 use SocKit\Support\Enums\ResourceKind;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Support\Ids;
-use SocKit\Surfaces\Contracts\LocksTargetInTransaction;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
+use SocKit\Surfaces\Contracts\TargetResolver;
+use SocKit\Surfaces\Contracts\TargetWriteFence;
 use SocKit\Surfaces\Data\SurfaceDefinition;
 use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
 /**
  * Panel-isolated Reactions service executing through {@see OperationEnvelopeRunner},
- * rejecting read-only surface admission/observer verdicts on mutations, verifying same-DB
- * target privacy revision & audience under lock without holding locks across remote resolvers,
- * and preserving monotonic surface+target+type outbox identity across rebuilds.
+ * rejecting read-only admission/observer verdicts on mutations, requiring a proven {@see TargetWriteFence}
+ * with privacy revision verification under lock, re-verifying locked group membership locally before target lock,
+ * and serializing count rebuilds with canonical lock ordering.
  */
 #[Internal]
 final readonly class DatabaseReactionService implements ReactionService
@@ -83,6 +85,9 @@ final readonly class DatabaseReactionService implements ReactionService
             $precheck = new class
             {
                 public ?TargetResolution $target = null;
+
+                /** @var array<string, AudienceVerdict> */
+                public array $contourSamples = [];
             };
 
             try {
@@ -91,18 +96,19 @@ final readonly class DatabaseReactionService implements ReactionService
                     surface: $command->surface,
                     action: 'sockit.reactions.add',
                     preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
-                        $this->runtime->authorizer()->decide(new ActionRequest(
-                            actor: $verifiedActor,
-                            action: 'sockit.reactions.add',
-                            surface: $command->surface,
-                        ))->requireAllowed();
-
                         $precheck->target = $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef, requireWrite: true);
+                        $precheck->contourSamples = $this->sampleContoursIfNeeded($verifiedActor, $precheck->target, $surfaceDef->archiveReaders);
                     },
                     mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $options, $namespace, $precheck): array {
                         $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
 
-                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
+                        $this->reverifyTargetInsideTx(
+                            actor: $verifiedActor,
+                            surface: $command->surface,
+                            target: $command->target,
+                            prechecked: $precheck->target,
+                            precheckedContours: $precheck->contourSamples,
+                        );
 
                         $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
                         $reactionsTable = $this->tables->table('reactions', $command->surface->panel);
@@ -202,7 +208,13 @@ final readonly class DatabaseReactionService implements ReactionService
                         ];
                     },
                     replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $precheck): void {
-                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
+                        $this->reverifyTargetInsideTx(
+                            actor: $verifiedActor,
+                            surface: $command->surface,
+                            target: $command->target,
+                            prechecked: $precheck->target,
+                            precheckedContours: $precheck->contourSamples,
+                        );
                     },
                 );
             } catch (ReactionTargetStaleException) {
@@ -237,6 +249,9 @@ final readonly class DatabaseReactionService implements ReactionService
             $precheck = new class
             {
                 public ?TargetResolution $target = null;
+
+                /** @var array<string, AudienceVerdict> */
+                public array $contourSamples = [];
             };
 
             try {
@@ -245,17 +260,18 @@ final readonly class DatabaseReactionService implements ReactionService
                     surface: $command->surface,
                     action: 'sockit.reactions.remove',
                     preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $precheck): void {
-                        $this->runtime->authorizer()->decide(new ActionRequest(
-                            actor: $verifiedActor,
-                            action: 'sockit.reactions.remove',
-                            surface: $command->surface,
-                        ))->requireAllowed();
-
                         $precheck->target = $this->resolveVisibleTarget($verifiedActor, $command->surface, $command->target, $surfaceDef, requireWrite: true);
+                        $precheck->contourSamples = $this->sampleContoursIfNeeded($verifiedActor, $precheck->target, $surfaceDef->archiveReaders);
                     },
                     mutation: function (ActorContext $verifiedActor, Connection $connection) use ($command, $namespace, $precheck): array {
                         $actorRef = $verifiedActor->actor ?? throw OperationException::audienceDenied('actor.anonymous');
-                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
+                        $this->reverifyTargetInsideTx(
+                            actor: $verifiedActor,
+                            surface: $command->surface,
+                            target: $command->target,
+                            prechecked: $precheck->target,
+                            precheckedContours: $precheck->contourSamples,
+                        );
 
                         $surfaceInstanceId = $this->findSurfaceInstanceId($connection, $command->surface);
                         $reactionsTable = $this->tables->table('reactions', $command->surface->panel);
@@ -315,7 +331,13 @@ final readonly class DatabaseReactionService implements ReactionService
                         ];
                     },
                     replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $precheck): void {
-                        $this->reverifyTargetInsideTx($verifiedActor, $command->surface, $command->target, $precheck->target);
+                        $this->reverifyTargetInsideTx(
+                            actor: $verifiedActor,
+                            surface: $command->surface,
+                            target: $command->target,
+                            prechecked: $precheck->target,
+                            precheckedContours: $precheck->contourSamples,
+                        );
                     },
                 );
             } catch (ReactionTargetStaleException) {
@@ -387,12 +409,31 @@ final readonly class DatabaseReactionService implements ReactionService
         }
 
         $connection = $this->tables->connection($panel);
+        $surfacesTable = $this->tables->table('surface_instances', $panel);
         $reactionsTable = $this->tables->table('reactions', $panel);
         $countsTable = $this->tables->table('reaction_counts', $panel);
         $outboxTable = $this->tables->table('outbox_events', $panel);
 
-        return $connection->transaction(function () use ($connection, $reactionsTable, $countsTable, $outboxTable, $panel): int {
-            $existingQuery = $connection->table($countsTable)->where('panel_id', $panel->value);
+        return $connection->transaction(function () use ($connection, $surfacesTable, $reactionsTable, $countsTable, $outboxTable, $panel): int {
+            // Canonical lock order: lock panel surface_instances in deterministic order before reaction_counts
+            // so concurrent first-reaction inserts cannot race rebuildCounts() across empty count buckets.
+            $surfaceLockQuery = $connection->table($surfacesTable)
+                ->select('id')
+                ->where('panel_id', $panel->value)
+                ->orderBy('id');
+
+            if ($connection->getDriverName() !== 'sqlite') {
+                $surfaceLockQuery->lockForUpdate();
+            }
+
+            $surfaceLockQuery->get();
+
+            $existingQuery = $connection->table($countsTable)
+                ->where('panel_id', $panel->value)
+                ->orderBy('surface_instance_id')
+                ->orderBy('target_type')
+                ->orderBy('target_key')
+                ->orderBy('reaction_type');
             if ($connection->getDriverName() !== 'sqlite') {
                 $existingQuery->lockForUpdate();
             }
@@ -463,15 +504,17 @@ final readonly class DatabaseReactionService implements ReactionService
                             'source_revision' => $nextRev,
                         ]);
                 } else {
-                    $connection->table($countsTable)->insert([
-                        'panel_id' => $panel->value,
-                        'surface_instance_id' => $sId,
-                        'target_type' => $tType,
-                        'target_key' => $tKey,
-                        'reaction_type' => $rType,
-                        'count' => $aggCount,
-                        'source_revision' => max(1, $maxOutboxRev + 1),
-                    ]);
+                    $this->upsertRebuiltBucket(
+                        connection: $connection,
+                        countsTable: $countsTable,
+                        panelId: $panel->value,
+                        surfaceInstanceId: $sId,
+                        targetType: $tType,
+                        targetKey: $tKey,
+                        reactionType: $rType,
+                        aggCount: $aggCount,
+                        maxOutboxRev: $maxOutboxRev,
+                    );
                 }
 
                 $written++;
@@ -540,14 +583,17 @@ final readonly class DatabaseReactionService implements ReactionService
             throw OperationException::audienceDenied($admit->reason);
         }
 
-        $resolution = null;
-        foreach ($this->runtime->targetResolvers() as $resolver) {
-            if ($resolver->supports($target)) {
-                $resolution = $resolver->resolve($actor, $surface, $target);
+        $resolver = $this->findSupportingResolver($target);
 
-                break;
+        if ($requireWrite) {
+            if (! $resolver instanceof TargetWriteFence) {
+                throw AuthorizationDeniedException::unknown('reaction.target_fence_required');
             }
         }
+
+        $resolution = $resolver instanceof TargetResolver
+            ? $resolver->resolve($actor, $surface, $target)
+            : null;
 
         $missingReason = $resolution instanceof TargetResolution ? $resolution->reason : null;
         if (! $resolution instanceof TargetResolution || ! $resolution->exists) {
@@ -564,6 +610,10 @@ final readonly class DatabaseReactionService implements ReactionService
                 'content.erased' => OperationException::contentErased($target->value),
                 default => OperationException::contentHidden($resolution->reason ?? 'target.hidden'),
             };
+        }
+
+        if ($requireWrite && ! $resolution->privacyRevision instanceof Revision) {
+            throw AuthorizationDeniedException::unknown('reaction.target_fence_required');
         }
 
         if ($resolution->audience instanceof AudienceSpec) {
@@ -585,54 +635,90 @@ final readonly class DatabaseReactionService implements ReactionService
         return $resolution;
     }
 
+    /** @return array<string, AudienceVerdict> */
+    private function sampleContoursIfNeeded(ActorContext $actor, ?TargetResolution $resolution, bool $archiveReaders): array
+    {
+        if (! $resolution instanceof TargetResolution || ! $resolution->audience instanceof AudienceSpec) {
+            return [];
+        }
+
+        if ($resolution->audience->referencedGroups() === []) {
+            return [];
+        }
+
+        return $this->runtime->audienceGate()->sampleContours($actor, $resolution->audience, $archiveReaders);
+    }
+
+    /** @param array<string, AudienceVerdict> $precheckedContours */
     private function reverifyTargetInsideTx(
         ActorContext $actor,
         SurfaceRef $surface,
         HostEntityRef $target,
         ?TargetResolution $prechecked,
+        array $precheckedContours = [],
     ): void {
-        $lockingResolver = null;
-        foreach ($this->runtime->targetResolvers() as $resolver) {
-            if ($resolver->supports($target)) {
-                if ($resolver instanceof LocksTargetInTransaction) {
-                    $lockingResolver = $resolver;
-                }
+        $resolver = $this->findSupportingResolver($target);
 
-                break;
+        if (! $resolver instanceof TargetWriteFence || ! $prechecked instanceof TargetResolution || ! $prechecked->privacyRevision instanceof Revision) {
+            throw AuthorizationDeniedException::unknown('reaction.target_fence_required');
+        }
+
+        if ($prechecked->audience instanceof AudienceSpec && $prechecked->audience->referencedGroups() !== []) {
+            $groupVerdict = $this->runtime->audienceGate()->reverifyLockedGroupsInTransaction(
+                actor: $actor,
+                spec: $prechecked->audience,
+                panel: $surface->panel,
+                preSampledContours: $precheckedContours,
+            );
+
+            if (! $groupVerdict->canWrite()) {
+                throw OperationException::audienceDenied($groupVerdict->reason);
             }
         }
 
-        // Never invoke external/arbitrary host TargetResolvers while holding DB transaction locks.
-        if (! $lockingResolver instanceof LocksTargetInTransaction) {
+        $decision = $resolver->recheck($actor, $surface, $target, $prechecked);
+
+        if ($decision->isAllowed()) {
             return;
         }
 
-        $txResolution = $lockingResolver->resolve($actor, $surface, $target);
-
-        if (! $txResolution->exists) {
-            throw match ($txResolution->reason) {
-                'content.deleted' => OperationException::contentDeleted($target->value),
-                'content.erased' => OperationException::contentErased($target->value),
-                default => OperationException::contentHidden($txResolution->reason ?? 'target.not_found'),
-            };
-        }
-
-        if (! $txResolution->visible) {
-            throw match ($txResolution->reason) {
-                'content.deleted' => OperationException::contentDeleted($target->value),
-                'content.erased' => OperationException::contentErased($target->value),
-                default => OperationException::contentHidden($txResolution->reason ?? 'target.hidden'),
-            };
-        }
-
-        $preRevision = $prechecked?->privacyRevision?->value;
-        $txRevision = $txResolution->privacyRevision?->value;
-        $preAudience = $prechecked?->audience?->toWire();
-        $txAudience = $txResolution->audience?->toWire();
-
-        if ($preRevision !== $txRevision || $preAudience !== $txAudience) {
+        if ($decision->reason === 'target.privacy_revision_stale') {
             throw new ReactionTargetStaleException('Target audience or privacy revision changed after pre-transaction authorization.');
         }
+
+        if ($decision->isUnknown()) {
+            throw AuthorizationDeniedException::unknown($decision->reason);
+        }
+
+        if ($decision->reason === 'content.deleted') {
+            throw OperationException::contentDeleted($target->value);
+        }
+
+        if ($decision->reason === 'content.erased') {
+            throw OperationException::contentErased($target->value);
+        }
+
+        if (
+            str_starts_with($decision->reason, 'content.')
+            || str_starts_with($decision->reason, 'target.')
+            || str_starts_with($decision->reason, 'post.')
+            || str_starts_with($decision->reason, 'group.')
+        ) {
+            throw OperationException::contentHidden($decision->reason);
+        }
+
+        throw AuthorizationDeniedException::denied($decision->reason);
+    }
+
+    private function findSupportingResolver(HostEntityRef $target): ?TargetResolver
+    {
+        foreach ($this->runtime->targetResolvers() as $resolver) {
+            if ($resolver->supports($target)) {
+                return $resolver;
+            }
+        }
+
+        return null;
     }
 
     private function findSurfaceInstanceId(Connection $connection, SurfaceRef $surface): string
@@ -681,17 +767,31 @@ final readonly class DatabaseReactionService implements ReactionService
             $initialRevision = max(1, $maxOutbox + 1);
             $initialCount = max(0, $delta);
 
-            $connection->table($countsTable)->insert([
-                'panel_id' => $panelId,
-                'surface_instance_id' => $surfaceInstanceId,
-                'target_type' => $target->type,
-                'target_key' => $target->value,
-                'reaction_type' => $reactionType,
-                'count' => $initialCount,
-                'source_revision' => $initialRevision,
-            ]);
+            try {
+                $connection->transaction(static function () use ($connection, $countsTable, $panelId, $surfaceInstanceId, $target, $reactionType, $initialCount, $initialRevision): void {
+                    $connection->table($countsTable)->insert([
+                        'panel_id' => $panelId,
+                        'surface_instance_id' => $surfaceInstanceId,
+                        'target_type' => $target->type,
+                        'target_key' => $target->value,
+                        'reaction_type' => $reactionType,
+                        'count' => $initialCount,
+                        'source_revision' => $initialRevision,
+                    ]);
+                });
 
-            return new Revision($initialRevision);
+                return new Revision($initialRevision);
+            } catch (QueryException $exception) {
+                $sqlState = $exception->errorInfo[0] ?? null;
+                if (! in_array($sqlState, ['23505', '23000'], true)) {
+                    throw $exception;
+                }
+
+                $row = $query->first();
+                if (! is_object($row)) {
+                    throw $exception;
+                }
+            }
         }
 
         $nextCount = max(0, SockitRows::int($row, 'count') + $delta);
@@ -709,6 +809,67 @@ final readonly class DatabaseReactionService implements ReactionService
             ]);
 
         return new Revision($nextRevision);
+    }
+
+    private function upsertRebuiltBucket(
+        Connection $connection,
+        string $countsTable,
+        string $panelId,
+        string $surfaceInstanceId,
+        string $targetType,
+        string $targetKey,
+        string $reactionType,
+        int $aggCount,
+        int $maxOutboxRev,
+    ): void {
+        try {
+            $connection->transaction(static function () use ($connection, $countsTable, $panelId, $surfaceInstanceId, $targetType, $targetKey, $reactionType, $aggCount, $maxOutboxRev): void {
+                $connection->table($countsTable)->insert([
+                    'panel_id' => $panelId,
+                    'surface_instance_id' => $surfaceInstanceId,
+                    'target_type' => $targetType,
+                    'target_key' => $targetKey,
+                    'reaction_type' => $reactionType,
+                    'count' => $aggCount,
+                    'source_revision' => max(1, $maxOutboxRev + 1),
+                ]);
+            });
+        } catch (QueryException $exception) {
+            $sqlState = $exception->errorInfo[0] ?? null;
+            if (! in_array($sqlState, ['23505', '23000'], true)) {
+                throw $exception;
+            }
+
+            $existingQuery = $connection->table($countsTable)
+                ->where('panel_id', $panelId)
+                ->where('surface_instance_id', $surfaceInstanceId)
+                ->where('target_type', $targetType)
+                ->where('target_key', $targetKey)
+                ->where('reaction_type', $reactionType);
+
+            if ($connection->getDriverName() !== 'sqlite') {
+                $existingQuery->lockForUpdate();
+            }
+
+            $existing = $existingQuery->first();
+            if (! is_object($existing)) {
+                throw $exception;
+            }
+
+            $baseRev = max(SockitRows::int($existing, 'source_revision', 1), $maxOutboxRev);
+            $nextRev = SockitRows::int($existing, 'count') !== $aggCount ? $baseRev + 1 : $baseRev;
+
+            $connection->table($countsTable)
+                ->where('panel_id', $panelId)
+                ->where('surface_instance_id', $surfaceInstanceId)
+                ->where('target_type', $targetType)
+                ->where('target_key', $targetKey)
+                ->where('reaction_type', $reactionType)
+                ->update([
+                    'count' => $aggCount,
+                    'source_revision' => $nextRev,
+                ]);
+        }
     }
 
     private function currentRevision(

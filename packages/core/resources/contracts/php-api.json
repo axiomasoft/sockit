@@ -852,6 +852,91 @@
                     ],
                     "return": "array",
                     "doc": []
+                },
+                "lockAndVerifyGroupsInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "viewer",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "spec",
+                            "type": "SocKit\\Audience\\Data\\AudienceSpec",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "preSampledContours",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "[]",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                },
+                "sampleContours": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "viewer",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "spec",
+                            "type": "SocKit\\Audience\\Data\\AudienceSpec",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "archiveReaders",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "false",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "array",
+                    "doc": []
                 }
             },
             "properties": {},
@@ -1048,6 +1133,91 @@
                             "variadic": false,
                             "optional": false,
                             "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "array",
+                    "doc": []
+                },
+                "reverifyLockedGroupsInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "spec",
+                            "type": "SocKit\\Audience\\Data\\AudienceSpec",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "preSampledContours",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "[]",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                },
+                "sampleContours": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "spec",
+                            "type": "SocKit\\Audience\\Data\\AudienceSpec",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "archiveReaders",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "false",
                             "flags": 0
                         }
                     ],
@@ -1271,6 +1441,65 @@
             "enum_cases": [],
             "spi_kind": "implement"
         },
+        "SocKit\\Audience\\Contracts\\EvaluatesPanelGroupMembership": {
+            "kind": "interface",
+            "layer": "spi",
+            "since": "1.0",
+            "final": false,
+            "readonly": false,
+            "abstract": false,
+            "extends": [
+                "SocKit\\Audience\\Contracts\\PanelGroupMembershipResolver"
+            ],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "membershipVerdictInPanel": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": [],
+            "spi_kind": "implement"
+        },
         "SocKit\\Audience\\Contracts\\GroupMembershipResolver": {
             "kind": "interface",
             "layer": "spi",
@@ -1310,6 +1539,94 @@
                         }
                     ],
                     "return": "bool",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": [],
+            "spi_kind": "implement"
+        },
+        "SocKit\\Audience\\Contracts\\LocksGroupMembershipInTransaction": {
+            "kind": "interface",
+            "layer": "spi",
+            "since": "1.0",
+            "final": false,
+            "readonly": false,
+            "abstract": false,
+            "extends": [
+                "SocKit\\Audience\\Contracts\\EvaluatesPanelGroupMembership"
+            ],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "lockGroupInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "void",
+                    "doc": []
+                },
+                "membershipVerdictInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
                     "doc": []
                 }
             },
@@ -1772,6 +2089,16 @@
                     "by_reference": false,
                     "parameters": [],
                     "return": "self",
+                    "doc": []
+                },
+                "referencedGroups": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "array",
                     "doc": []
                 },
                 "toWire": {
@@ -3170,6 +3497,15 @@
                             "flags": 1
                         },
                         {
+                            "name": "consentResolver",
+                            "type": "?string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 1
+                        },
+                        {
                             "name": "surfacePolicyResolver",
                             "type": "?string",
                             "by_reference": false,
@@ -3230,6 +3566,15 @@
                             "variadic": false,
                             "optional": true,
                             "default": "100",
+                            "flags": 1
+                        },
+                        {
+                            "name": "cursorTtlSeconds",
+                            "type": "int",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "3600",
                             "flags": 1
                         }
                     ],
@@ -3359,6 +3704,35 @@
                         }
                     ],
                     "return": "void",
+                    "doc": []
+                },
+                "create": {
+                    "visibility": "protected",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "logical",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "define",
+                            "type": "Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "string",
                     "doc": []
                 },
                 "forEachPanelStorage": {
@@ -4401,6 +4775,26 @@
                     "return": "SocKit\\Operations\\Data\\OperationResult",
                     "doc": []
                 },
+                "approve": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "command",
+                            "type": "SocKit\\Modules\\Groups\\Data\\ApproveGroupMemberCommand",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Operations\\Data\\OperationResult",
+                    "doc": []
+                },
                 "create": {
                     "visibility": "public",
                     "static": false,
@@ -4450,6 +4844,66 @@
                     "return": "SocKit\\Modules\\Groups\\Data\\GroupView",
                     "doc": []
                 },
+                "invite": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "command",
+                            "type": "SocKit\\Modules\\Groups\\Data\\InviteGroupMemberCommand",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Operations\\Data\\OperationResult",
+                    "doc": []
+                },
+                "join": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "command",
+                            "type": "SocKit\\Modules\\Groups\\Data\\JoinGroupCommand",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Operations\\Data\\OperationResult",
+                    "doc": []
+                },
+                "leave": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "command",
+                            "type": "SocKit\\Modules\\Groups\\Data\\LeaveGroupCommand",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Operations\\Data\\OperationResult",
+                    "doc": []
+                },
                 "removeMember": {
                     "visibility": "public",
                     "static": false,
@@ -4469,6 +4923,26 @@
                     ],
                     "return": "SocKit\\Operations\\Data\\OperationResult",
                     "doc": []
+                },
+                "setJoinPolicy": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "command",
+                            "type": "SocKit\\Modules\\Groups\\Data\\SetGroupJoinPolicyCommand",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Operations\\Data\\OperationResult",
+                    "doc": []
                 }
             },
             "properties": {},
@@ -4476,6 +4950,74 @@
             "enum_backing": null,
             "enum_cases": [],
             "spi_kind": "call"
+        },
+        "SocKit\\Modules\\Groups\\Contracts\\MembershipConsent": {
+            "kind": "interface",
+            "layer": "spi",
+            "since": "1.0",
+            "final": false,
+            "readonly": false,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "assess": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "activation",
+                            "type": "SocKit\\Modules\\Groups\\Data\\MembershipActivation",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Modules\\Groups\\Data\\ConsentDecision",
+                    "doc": []
+                },
+                "recheck": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "activation",
+                            "type": "SocKit\\Modules\\Groups\\Data\\MembershipActivation",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "decision",
+                            "type": "SocKit\\Modules\\Groups\\Data\\ConsentDecision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AuthorizationDecision",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": [],
+            "spi_kind": "implement"
         },
         "SocKit\\Modules\\Groups\\Data\\AddGroupMemberCommand": {
             "kind": "class",
@@ -4579,6 +5121,155 @@
             "enum_backing": null,
             "enum_cases": []
         },
+        "SocKit\\Modules\\Groups\\Data\\ApproveGroupMemberCommand": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "member",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "role",
+                            "type": "SocKit\\Modules\\Groups\\Enums\\GroupMemberRole",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "\\SocKit\\Modules\\Groups\\Enums\\GroupMemberRole::Member",
+                            "flags": 1
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.groups'",
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "toDigestPayload": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "array",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Modules\\Groups\\Data\\ConsentDecision": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "decision",
+                            "type": "SocKit\\Audience\\Data\\AuthorizationDecision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "generation",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
         "SocKit\\Modules\\Groups\\Data\\CreateGroupCommand": {
             "kind": "class",
             "layer": "api",
@@ -4650,6 +5341,15 @@
                             "variadic": false,
                             "optional": true,
                             "default": "'sockit.groups'",
+                            "flags": 1
+                        },
+                        {
+                            "name": "joinPolicy",
+                            "type": "SocKit\\Modules\\Groups\\Enums\\GroupJoinPolicy",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "\\SocKit\\Modules\\Groups\\Enums\\GroupJoinPolicy::Approval",
                             "flags": 1
                         }
                     ],
@@ -4787,6 +5487,377 @@
                             "optional": false,
                             "default": null,
                             "flags": 1
+                        },
+                        {
+                            "name": "joinPolicy",
+                            "type": "SocKit\\Modules\\Groups\\Enums\\GroupJoinPolicy",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "\\SocKit\\Modules\\Groups\\Enums\\GroupJoinPolicy::Approval",
+                            "flags": 1
+                        },
+                        {
+                            "name": "membershipGeneration",
+                            "type": "int",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "1",
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Modules\\Groups\\Data\\InviteGroupMemberCommand": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "member",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "role",
+                            "type": "SocKit\\Modules\\Groups\\Enums\\GroupMemberRole",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "\\SocKit\\Modules\\Groups\\Enums\\GroupMemberRole::Member",
+                            "flags": 1
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.groups'",
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "toDigestPayload": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "array",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Modules\\Groups\\Data\\JoinGroupCommand": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.groups'",
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "toDigestPayload": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "array",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Modules\\Groups\\Data\\LeaveGroupCommand": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.groups'",
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "toDigestPayload": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "array",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Modules\\Groups\\Data\\MembershipActivation": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "subject",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "role",
+                            "type": "SocKit\\Modules\\Groups\\Enums\\GroupMemberRole",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "transition",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
                         }
                     ],
                     "return": null,
@@ -4891,6 +5962,99 @@
             "enum_backing": null,
             "enum_cases": []
         },
+        "SocKit\\Modules\\Groups\\Data\\SetGroupJoinPolicyCommand": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": true,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "joinPolicy",
+                            "type": "SocKit\\Modules\\Groups\\Enums\\GroupJoinPolicy",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.groups'",
+                            "flags": 1
+                        }
+                    ],
+                    "return": null,
+                    "doc": []
+                },
+                "toDigestPayload": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "array",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
         "SocKit\\Modules\\Groups\\Database\\GroupsSchemaSetProvider": {
             "kind": "class",
             "layer": "spi",
@@ -4921,6 +6085,40 @@
             "enum_backing": null,
             "enum_cases": [],
             "spi_kind": "call"
+        },
+        "SocKit\\Modules\\Groups\\Enums\\GroupJoinPolicy": {
+            "kind": "enum",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": false,
+            "abstract": false,
+            "extends": [],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {},
+            "properties": {},
+            "constants": [],
+            "enum_backing": "string",
+            "enum_cases": [
+                {
+                    "name": "Auto",
+                    "value": "'auto'"
+                },
+                {
+                    "name": "Approval",
+                    "value": "'approval'"
+                },
+                {
+                    "name": "Invite",
+                    "value": "'invite'"
+                },
+                {
+                    "name": "Closed",
+                    "value": "'closed'"
+                }
+            ]
         },
         "SocKit\\Modules\\Groups\\Enums\\GroupMemberRole": {
             "kind": "enum",
@@ -4971,6 +6169,18 @@
                 {
                     "name": "Active",
                     "value": "'active'"
+                },
+                {
+                    "name": "Pending",
+                    "value": "'pending'"
+                },
+                {
+                    "name": "Invited",
+                    "value": "'invited'"
+                },
+                {
+                    "name": "Left",
+                    "value": "'left'"
                 },
                 {
                     "name": "Removed",
@@ -5811,6 +7021,15 @@
                             "optional": false,
                             "default": null,
                             "flags": 1
+                        },
+                        {
+                            "name": "token",
+                            "type": "?string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 1
                         }
                     ],
                     "return": null,
@@ -5836,6 +7055,71 @@
                     "return": "self",
                     "doc": []
                 },
+                "issue": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "publishedAt",
+                            "type": "DateTimeImmutable",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "id",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "viewer",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "signingKey",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "expiresAt",
+                            "type": "DateTimeImmutable",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
                 "toWire": {
                     "visibility": "public",
                     "static": false,
@@ -5844,6 +7128,53 @@
                     "by_reference": false,
                     "parameters": [],
                     "return": "string",
+                    "doc": []
+                },
+                "verifyForContext": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "viewer",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "signingKey",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "now",
+                            "type": "DateTimeImmutable",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "void",
                     "doc": []
                 }
             },
@@ -8678,6 +10009,26 @@
                     "return": "self",
                     "doc": []
                 },
+                "nestedTransaction": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
                 "providerUnavailable": {
                     "visibility": "public",
                     "static": true,
@@ -11352,7 +12703,7 @@
             "readonly": false,
             "abstract": false,
             "extends": [
-                "SocKit\\Surfaces\\Contracts\\TargetResolver"
+                "SocKit\\Surfaces\\Contracts\\TargetWriteFence"
             ],
             "implements": [],
             "uses": [],
@@ -11499,6 +12850,100 @@
                             "flags": 0
                         },
                         {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.core'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Surfaces\\Data\\SurfaceInstance",
+                    "doc": []
+                },
+                "create": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "commandKey",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "ref",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.core'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Surfaces\\Data\\SurfaceInstance",
+                    "doc": []
+                },
+                "delete": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "commandKey",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "ref",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
                             "name": "integration",
                             "type": "string",
                             "by_reference": false,
@@ -11619,6 +13064,53 @@
                             "variadic": false,
                             "optional": false,
                             "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Surfaces\\Data\\SurfaceInstance",
+                    "doc": []
+                },
+                "resume": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "commandKey",
+                            "type": "SocKit\\Support\\Data\\CommandKey",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "ref",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "expectedRevision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "integration",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'sockit.core'",
                             "flags": 0
                         }
                     ],
@@ -11756,6 +13248,74 @@
                         }
                     ],
                     "return": "bool",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": [],
+            "spi_kind": "implement"
+        },
+        "SocKit\\Surfaces\\Contracts\\TargetWriteFence": {
+            "kind": "interface",
+            "layer": "spi",
+            "since": "1.0",
+            "final": false,
+            "readonly": false,
+            "abstract": false,
+            "extends": [
+                "SocKit\\Surfaces\\Contracts\\TargetResolver"
+            ],
+            "implements": [],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "recheck": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "target",
+                            "type": "SocKit\\Support\\Data\\HostEntityRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "prechecked",
+                            "type": "SocKit\\Surfaces\\Data\\TargetResolution",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AuthorizationDecision",
                     "doc": []
                 }
             },
@@ -12112,12 +13672,40 @@
                             "optional": true,
                             "default": "null",
                             "flags": 1
+                        },
+                        {
+                            "name": "revision",
+                            "type": "SocKit\\Support\\Data\\Revision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "new \\SocKit\\Support\\Data\\Revision(1)",
+                            "flags": 1
+                        },
+                        {
+                            "name": "deletedAt",
+                            "type": "?DateTimeImmutable",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 1
                         }
                     ],
                     "return": null,
                     "doc": []
                 },
                 "isArchived": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "bool",
+                    "doc": []
+                },
+                "isDeleted": {
                     "visibility": "public",
                     "static": false,
                     "final": false,
@@ -12595,6 +14183,10 @@
                 {
                     "name": "Archived",
                     "value": "'archived'"
+                },
+                {
+                    "name": "Deleted",
+                    "value": "'deleted'"
                 }
             ]
         },
@@ -12613,6 +14205,26 @@
             "doc": [],
             "methods": {
                 "archived": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "surface",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "deleted": {
                     "visibility": "public",
                     "static": true,
                     "final": false,
@@ -13704,7 +15316,7 @@
             "abstract": false,
             "extends": [],
             "implements": [
-                "SocKit\\Audience\\Contracts\\PanelGroupMembershipResolver"
+                "SocKit\\Audience\\Contracts\\LocksGroupMembershipInTransaction"
             ],
             "uses": [],
             "doc": [],
@@ -13861,6 +15473,131 @@
                         }
                     ],
                     "return": "bool",
+                    "doc": []
+                },
+                "lockGroupInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "void",
+                    "doc": []
+                },
+                "membershipVerdictInPanel": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                },
+                "membershipVerdictInTransaction": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "panel",
+                            "type": "SocKit\\Panels\\Data\\PanelId",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "group",
+                            "type": "SocKit\\Audience\\Data\\GroupRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AudienceVerdict",
+                    "doc": []
+                },
+                "onLock": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "callback",
+                            "type": "?Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
                     "doc": []
                 },
                 "remove": {
@@ -14083,6 +15820,324 @@
                             "variadic": false,
                             "optional": true,
                             "default": "'surface.boundary_unproven'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                }
+            },
+            "properties": {},
+            "constants": [],
+            "enum_backing": null,
+            "enum_cases": []
+        },
+        "SocKit\\Testing\\Fakes\\Groups\\FakeMembershipConsent": {
+            "kind": "class",
+            "layer": "api",
+            "since": "1.0",
+            "final": true,
+            "readonly": false,
+            "abstract": false,
+            "extends": [],
+            "implements": [
+                "SocKit\\Modules\\Groups\\Contracts\\MembershipConsent"
+            ],
+            "uses": [],
+            "doc": [],
+            "methods": {
+                "allow": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "subject",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "?string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        },
+                        {
+                            "name": "generation",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'gen-1'",
+                            "flags": 0
+                        },
+                        {
+                            "name": "reason",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'consent.allowed'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "allowAll": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "allow",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "true",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "assess": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "activation",
+                            "type": "SocKit\\Modules\\Groups\\Data\\MembershipActivation",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Modules\\Groups\\Data\\ConsentDecision",
+                    "doc": []
+                },
+                "deny": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "subject",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "?string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        },
+                        {
+                            "name": "reason",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'consent.denied'",
+                            "flags": 0
+                        },
+                        {
+                            "name": "generation",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'gen-denied'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "failRecheck": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "subject",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "?string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        },
+                        {
+                            "name": "decision",
+                            "type": "?SocKit\\Audience\\Data\\AuthorizationDecision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "recheck": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "activation",
+                            "type": "SocKit\\Modules\\Groups\\Data\\MembershipActivation",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "decision",
+                            "type": "SocKit\\Modules\\Groups\\Data\\ConsentDecision",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AuthorizationDecision",
+                    "doc": []
+                },
+                "reset": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "self",
+                    "doc": []
+                },
+                "unknown": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "subject",
+                            "type": "SocKit\\Support\\Data\\ActorRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "groupId",
+                            "type": "?string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 0
+                        },
+                        {
+                            "name": "reason",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'consent.unknown'",
+                            "flags": 0
+                        },
+                        {
+                            "name": "generation",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'gen-unknown'",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "usingAssess": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "handler",
+                            "type": "Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
+                "usingRecheck": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "handler",
+                            "type": "Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
                             "flags": 0
                         }
                     ],
@@ -14379,11 +16434,31 @@
             "abstract": false,
             "extends": [],
             "implements": [
-                "SocKit\\Surfaces\\Contracts\\TargetResolver"
+                "SocKit\\Surfaces\\Contracts\\TargetWriteFence"
             ],
             "uses": [],
             "doc": [],
             "methods": {
+                "beforeRecheck": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "callback",
+                            "type": "?Closure",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
+                },
                 "hide": {
                     "visibility": "public",
                     "static": false,
@@ -14411,6 +16486,53 @@
                         }
                     ],
                     "return": "self",
+                    "doc": []
+                },
+                "recheck": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "actor",
+                            "type": "SocKit\\Actors\\Data\\ActorContext",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "target",
+                            "type": "SocKit\\Support\\Data\\HostEntityRef",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "prechecked",
+                            "type": "SocKit\\Surfaces\\Data\\TargetResolution",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Data\\AuthorizationDecision",
                     "doc": []
                 },
                 "register": {
@@ -14546,6 +16668,26 @@
                     ],
                     "return": "bool",
                     "doc": []
+                },
+                "withLocalWriteFence": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "enabled",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "true",
+                            "flags": 0
+                        }
+                    ],
+                    "return": "self",
+                    "doc": []
                 }
             },
             "properties": {},
@@ -14642,6 +16784,15 @@
                             "variadic": false,
                             "optional": true,
                             "default": "new \\SocKit\\Testing\\Fakes\\Operations\\FakeContentSafetyChecker()",
+                            "flags": 1
+                        },
+                        {
+                            "name": "consent",
+                            "type": "SocKit\\Testing\\Fakes\\Groups\\FakeMembershipConsent",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "new \\SocKit\\Testing\\Fakes\\Groups\\FakeMembershipConsent()",
                             "flags": 1
                         }
                     ],

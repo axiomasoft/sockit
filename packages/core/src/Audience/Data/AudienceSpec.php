@@ -314,4 +314,31 @@ final readonly class AudienceSpec
 
         return self::direct(...$actors);
     }
+
+    /**
+     * Collect all distinct group references inside this spec in deterministic sorted order for deadlock-free locking.
+     *
+     * @return list<GroupRef>
+     */
+    public function referencedGroups(): array
+    {
+        /** @var array<string, GroupRef> $collected */
+        $collected = [];
+        $this->collectGroups($this, $collected);
+        ksort($collected);
+
+        return array_values($collected);
+    }
+
+    /** @param array<string, GroupRef> $collected */
+    private function collectGroups(self $node, array &$collected): void
+    {
+        if ($node->scope === Scope::Group && $node->group instanceof GroupRef) {
+            $collected[$node->group->value] = $node->group;
+        }
+
+        foreach ($node->children as $child) {
+            $this->collectGroups($child, $collected);
+        }
+    }
 }

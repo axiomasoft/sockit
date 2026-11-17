@@ -14,6 +14,9 @@ use Override;
 use Packman\Attributes\Internal;
 use RuntimeException;
 use SocKit\Actors\Data\ActorContext;
+use SocKit\Actors\Enums\ActorKind;
+use SocKit\Audience\Data\ActionRequest;
+use SocKit\Audience\Exceptions\AuthorizationDeniedException;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Operations\Contracts\OperationEnvelopeRunner;
@@ -33,9 +36,9 @@ use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 use SocKit\Surfaces\Exceptions\SurfaceException;
 
 /**
- * Authoritative P2 operation envelope implementing fresh actor resolution, pre-transaction guards,
- * PostgreSQL savepoint-safe receipt claim, surface incarnation verification, replay lifecycle guards,
- * and atomic outbox insert (including safety-held visibility invalidations).
+ * Authoritative P2 operation envelope implementing fresh actor resolution, nested-transaction refusal,
+ * mandatory kernel authorization and surface write admission, actor-owned savepoint-safe receipt claim,
+ * surface incarnation verification, replay lifecycle guards, and atomic outbox insert.
  */
 #[Internal]
 final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunner
@@ -60,6 +63,62 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
         Closure $preTransactionChecks,
         Closure $mutation,
         ?Closure $replayChecks = null,
+    ): OperationResult {
+        return $this->execute(
+            envelope: $envelope,
+            surface: $surface,
+            action: $action,
+            preTransactionChecks: $preTransactionChecks,
+            mutation: $mutation,
+            replayChecks: $replayChecks,
+            verifyActiveSurface: true,
+            allowReadOnlySurfaceAdmission: false,
+        );
+    }
+
+    /**
+     * Envelope variant for kernel surface lifecycle transitions where the target row itself
+     * is being created, archived, resumed, or deleted under lock.
+     *
+     * @param  Closure(ActorContext): void  $preTransactionChecks
+     * @param  Closure(ActorContext, Connection): array{result: OperationResult, event?: array{aggregate_type: string, aggregate_id: string, aggregate_revision: int, event_type: string, payload: array<string, mixed>}|null}  $mutation
+     * @param  (Closure(ActorContext, Connection, OperationResult): void)|null  $replayChecks
+     */
+    public function runSurfaceLifecycle(
+        CommandEnvelope $envelope,
+        SurfaceRef $surface,
+        string $action,
+        Closure $preTransactionChecks,
+        Closure $mutation,
+        ?Closure $replayChecks = null,
+        bool $allowReadOnlySurfaceAdmission = false,
+    ): OperationResult {
+        return $this->execute(
+            envelope: $envelope,
+            surface: $surface,
+            action: $action,
+            preTransactionChecks: $preTransactionChecks,
+            mutation: $mutation,
+            replayChecks: $replayChecks,
+            verifyActiveSurface: false,
+            allowReadOnlySurfaceAdmission: $allowReadOnlySurfaceAdmission,
+        );
+    }
+
+    /**
+     * @param  Closure(ActorContext): void  $preTransactionChecks
+     * @param  Closure(ActorContext, Connection): array{result: OperationResult, event?: array{aggregate_type: string, aggregate_id: string, aggregate_revision: int, event_type: string, payload: array<string, mixed>}|null}  $mutation
+     * @param  (Closure(ActorContext, Connection, OperationResult): void)|null  $replayChecks
+     */
+    private function execute(
+        CommandEnvelope $envelope,
+        SurfaceRef $surface,
+        string $action,
+        Closure $preTransactionChecks,
+        Closure $mutation,
+        ?Closure $replayChecks,
+        bool $verifyActiveSurface,
+        bool $allowReadOnlySurfaceAdmission,
     ): OperationResult {
         $actor = $this->runtime->actors()->current();
 
@@ -87,9 +146,32 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
             );
         }
 
+        $connection = $this->tables->connection($surface->panel);
+
+        if ($connection->transactionLevel() > 0) {
+            throw OperationException::nestedTransaction($surface->panel->value);
+        }
+
+        $this->runtime->authorizer()->decide(new ActionRequest($actor, $action, $surface))->requireAllowed();
+
+        if ($allowReadOnlySurfaceAdmission) {
+            if ($actor->kind === ActorKind::Anonymous) {
+                throw OperationException::audienceDenied('audience.denied.anonymous');
+            }
+
+            $admission = $this->runtime->audienceGate()->admitForRead($actor, $surface);
+            if (! $admission->canRead()) {
+                throw OperationException::audienceDenied($admission->reason);
+            }
+        } else {
+            $admission = $this->runtime->audienceGate()->admitForWrite($actor, $surface);
+            if (! $admission->canWrite()) {
+                throw OperationException::audienceDenied($admission->reason);
+            }
+        }
+
         $preTransactionChecks($actor);
 
-        $connection = $this->tables->connection($surface->panel);
         $receiptsTable = $this->tables->table('command_receipts', $surface->panel);
         $surfacesTable = $this->tables->table('surface_instances', $surface->panel);
         $outboxTable = $this->tables->table('outbox_events', $surface->panel);
@@ -104,11 +186,14 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
             $actor,
             $mutation,
             $replayChecks,
+            $verifyActiveSurface,
         ): OperationResult {
-            $receiptId = $this->claimReceiptOrReplay($connection, $receiptsTable, $envelope, $surface, $replay);
+            $receiptId = $this->claimReceiptOrReplay($connection, $receiptsTable, $envelope, $surface, $actor, $replay);
 
             if ($replay instanceof OperationResult) {
-                $this->lockAndVerifySurface($connection, $surfacesTable, $surface);
+                if ($verifyActiveSurface) {
+                    $this->lockAndVerifySurface($connection, $surfacesTable, $surface);
+                }
 
                 if ($replayChecks instanceof Closure) {
                     $replayChecks($actor, $connection, $replay);
@@ -119,7 +204,9 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
                 return $replay;
             }
 
-            $this->lockAndVerifySurface($connection, $surfacesTable, $surface);
+            if ($verifyActiveSurface) {
+                $this->lockAndVerifySurface($connection, $surfacesTable, $surface);
+            }
 
             $outcome = $mutation($actor, $connection);
             $result = $outcome['result'];
@@ -159,6 +246,7 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
                     'lease_owner' => null,
                     'lease_until' => null,
                     'delivered_at' => null,
+                    'delivered_consumers' => null,
                     'projection_lease_owner' => null,
                     'projection_lease_until' => null,
                     'projection_replayed_at' => null,
@@ -194,6 +282,7 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
         string $receiptsTable,
         CommandEnvelope $envelope,
         SurfaceRef $surface,
+        ActorContext $actor,
         ?OperationResult &$replay,
     ): string {
         $replay = null;
@@ -209,6 +298,7 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
                     $receiptId,
                     $surface,
                     $envelope,
+                    $actor,
                     $pendingPayload,
                     $now,
                 ): void {
@@ -219,6 +309,11 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
                         'command_key' => $envelope->key->value,
                         'command_type' => $envelope->namespace->commandType,
                         'payload_digest' => $envelope->digest->value,
+                        'actor_kind' => $actor->kind->value,
+                        'actor_type' => $actor->actor?->type,
+                        'actor_id' => $actor->actor?->id,
+                        'on_behalf_of_type' => $actor->onBehalfOf?->type,
+                        'on_behalf_of_id' => $actor->onBehalfOf?->id,
                         'status' => OperationOutcome::Pending->value,
                         'resource_kind' => null,
                         'resource_id' => null,
@@ -252,6 +347,16 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
 
             if (! is_object($existing)) {
                 continue;
+            }
+
+            if (
+                SockitRows::str($existing, 'actor_kind') !== $actor->kind->value
+                || SockitRows::optStr($existing, 'actor_type') !== $actor->actor?->type
+                || SockitRows::optStr($existing, 'actor_id') !== $actor->actor?->id
+                || SockitRows::optStr($existing, 'on_behalf_of_type') !== $actor->onBehalfOf?->type
+                || SockitRows::optStr($existing, 'on_behalf_of_id') !== $actor->onBehalfOf?->id
+            ) {
+                throw AuthorizationDeniedException::denied('receipt.actor_mismatch');
             }
 
             if (! hash_equals(SockitRows::str($existing, 'payload_digest'), $envelope->digest->value)) {
@@ -297,8 +402,10 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
                         'host_entity_value' => $surface->host->value,
                         'incarnation' => 1,
                         'lifecycle_state' => SurfaceLifecycleState::Active->value,
+                        'revision' => 1,
                         'created_at' => $this->nowIso(),
                         'archived_at' => null,
+                        'deleted_at' => null,
                     ]);
                 });
 
@@ -318,7 +425,13 @@ final readonly class DatabaseOperationEnvelope implements OperationEnvelopeRunne
             }
         }
 
-        if (SockitRows::str($row, 'lifecycle_state') === SurfaceLifecycleState::Archived->value) {
+        $state = SockitRows::str($row, 'lifecycle_state');
+
+        if ($state === SurfaceLifecycleState::Deleted->value) {
+            throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
+        }
+
+        if ($state === SurfaceLifecycleState::Archived->value) {
             throw SurfaceException::archived($surface->panel->value.'/'.$surface->kind->value);
         }
 

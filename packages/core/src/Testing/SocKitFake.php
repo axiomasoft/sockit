@@ -18,6 +18,7 @@ use SocKit\Audience\Contracts\ContourResolver;
 use SocKit\Audience\Contracts\GroupMembershipResolver;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Modules\Groups\Contracts\GroupService;
+use SocKit\Modules\Groups\Contracts\MembershipConsent;
 use SocKit\Modules\Posts\Contracts\FeedService;
 use SocKit\Modules\Posts\Contracts\PostService;
 use SocKit\Modules\Reactions\Contracts\ReactionService;
@@ -32,6 +33,7 @@ use SocKit\Testing\Fakes\Audience\FakeActionAuthorizer;
 use SocKit\Testing\Fakes\Audience\FakeContourResolver;
 use SocKit\Testing\Fakes\Audience\FakeGroupMembershipResolver;
 use SocKit\Testing\Fakes\Audience\FakeSurfaceAudiencePolicy;
+use SocKit\Testing\Fakes\Groups\FakeMembershipConsent;
 use SocKit\Testing\Fakes\Operations\FakeContentSafetyChecker;
 use SocKit\Testing\Fakes\Surfaces\FakeTargetResolver;
 
@@ -50,6 +52,7 @@ final readonly class SocKitFake
         public FakeGroupMembershipResolver $groups = new FakeGroupMembershipResolver,
         public FakeTargetResolver $targets = new FakeTargetResolver,
         public FakeContentSafetyChecker $safety = new FakeContentSafetyChecker,
+        public FakeMembershipConsent $consent = new FakeMembershipConsent,
     ) {}
 
     public static function install(Container $container, bool $forceFakeGroups = false): self
@@ -63,6 +66,7 @@ final readonly class SocKitFake
         $container->instance(ContourResolver::class, $fake->contours);
         $container->instance(TargetResolver::class, $fake->targets);
         $container->instance(ContentSafetyChecker::class, $fake->safety);
+        $container->instance(MembershipConsent::class, $fake->consent);
 
         $groupsPluginActive = false;
         if (! $forceFakeGroups && $container->bound(PluginInspector::class)) {

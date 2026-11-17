@@ -31,6 +31,16 @@ final class SurfaceException extends SocKitException
         );
     }
 
+    public static function deleted(string $surface): self
+    {
+        return new self(
+            SockitErrorCode::ContentDeleted,
+            "Surface [{$surface}] has been deleted.",
+            ['surface' => $surface],
+            '/surface',
+        );
+    }
+
     public static function incarnationMismatch(int $expected, int $actual): self
     {
         return new self(

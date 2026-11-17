@@ -30,6 +30,7 @@
         "packman": {
             "schema-version": 1,
             "package-type": "dev",
+            "stability": "dev",
             "profile": "laravel-package",
             "dev_only": true,
             "owns": [

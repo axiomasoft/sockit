@@ -10,15 +10,15 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 use Override;
+use Packman\Plugins\Contracts\Contributions\Extensions;
 use Packman\Schema\Data\Compiler\ConstraintNames;
+use Packman\Testkit\Concurrency\Postgres\PostgresBarrier;
 use Packman\Testkit\Concurrency\Process\Concurrency;
 use Packman\Testkit\Data\Concurrency\ConcurrencyOutcome;
 use Packman\Testkit\Exceptions\Database\UnsafeTestDatabaseException;
 use PHPUnit\Framework\Attributes\Group;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\AudienceSpec;
-use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Core\Tests\Fixtures\PanelPgProvider;
 use SocKit\Core\Tests\Fixtures\PgWallSurfaceProvider;
@@ -47,9 +47,12 @@ use SocKit\Support\Data\PayloadDigest;
 use SocKit\Support\Data\Revision;
 use SocKit\Support\Ids;
 use SocKit\Surfaces\Contracts\SurfaceService;
+use SocKit\Surfaces\Contracts\TargetResolver;
+use SocKit\Surfaces\Contracts\TargetWriteFence;
 use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\SurfaceKindId;
 use SocKit\Surfaces\Data\SurfaceRef;
+use SocKit\Surfaces\Data\TargetResolution;
 use SocKit\Testing\Fakes\Operations\SpyOutboxConsumer;
 use SocKit\Testing\SocKitFake;
 use SocKit\Testkit\SocKitTestCase;
@@ -201,7 +204,8 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
             self::assertSame('Simulated post-write failure before commit.', $e->getMessage());
             self::assertSame(0, DB::connection('pgsql')->table('sk_posts')->where('id', $rollbackPostId)->count());
             self::assertSame(0, DB::connection('pgsql')->table('sk_command_receipts')->where('command_key', 'cmd-pg-rollback-test-1')->count());
-            self::assertSame(0, DB::connection('pgsql')->table('sk_outbox_events')->count());
+            self::assertSame(0, DB::connection('pgsql')->table('sk_outbox_events')->where('aggregate_type', 'post')->count());
+            self::assertSame(1, DB::connection('pgsql')->table('sk_outbox_events')->where('event_type', 'sockit.surfaces.created')->count());
         }
 
         // #18: Guard refuses destructive PG reset whenever PACKMAN_TEST_DESTRUCTIVE_OPT_IN is not enabled
@@ -291,7 +295,8 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
 
         self::assertSame(1, DB::connection('pgsql')->table('sk_posts')->count());
         self::assertSame(1, DB::connection('pgsql')->table('sk_command_receipts')->where('command_key', $sharedKey->value)->count());
-        self::assertSame(1, DB::connection('pgsql')->table('sk_outbox_events')->count());
+        self::assertSame(1, DB::connection('pgsql')->table('sk_outbox_events')->where('aggregate_type', 'post')->count());
+        self::assertSame(1, DB::connection('pgsql')->table('sk_outbox_events')->where('event_type', 'sockit.surfaces.created')->count());
 
         // Same key with mismatched digest throws IdempotencyConflict
         try {
@@ -505,7 +510,7 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
                 };
                 $this->app->instance(SpyOutboxConsumer::class, $spy);
                 $this->app->tag([SpyOutboxConsumer::class], OutboxConsumer::class);
-                $this->app->make(OutboxRelay::class)->relayPending($panelId, batchSize: 2, mode: ReplayMode::Normal);
+                $this->app->make(OutboxRelay::class)->relayPending($panelId, batchSize: 3, mode: ReplayMode::Normal);
 
                 return $spy->ids;
             },
@@ -539,7 +544,7 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
                 };
                 $this->app->instance(SpyOutboxConsumer::class, $spy);
                 $this->app->tag([SpyOutboxConsumer::class], OutboxConsumer::class);
-                $this->app->make(OutboxRelay::class)->relayPending($panelId, batchSize: 2, mode: ReplayMode::Normal);
+                $this->app->make(OutboxRelay::class)->relayPending($panelId, batchSize: 3, mode: ReplayMode::Normal);
 
                 return $spy->ids;
             },
@@ -555,8 +560,8 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
         $w1Ids = $relayOutcomes[1]->value;
         $combined = array_merge($w0Ids, $w1Ids);
 
-        self::assertCount(4, $combined);
-        self::assertCount(4, array_unique($combined));
+        self::assertCount(5, $combined);
+        self::assertCount(5, array_unique($combined));
         self::assertSame(0, DB::connection('pgsql')->table('sk_outbox_events')->whereNull('delivered_at')->count());
         self::assertSame(0, DB::connection('pgsql')->table('sk_outbox_events')->whereNotNull('lease_owner')->count());
     }
@@ -578,13 +583,22 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
         ));
         $postId = (string) $pub->resource?->id;
 
+        $preBarrierName = 'pg-narrow-pre-'.Ids::uuid7();
+        $commitBarrierName = 'pg-narrow-commit-'.Ids::uuid7();
+        $setupPdo = DB::connection('pgsql')->getPdo();
+        new PostgresBarrier($setupPdo, $preBarrierName, 2)->reset();
+        new PostgresBarrier($setupPdo, $commitBarrierName, 2)->reset();
         DB::disconnect('pgsql');
 
-        // #11: Bob passes pre-TX check while post is still Platform; Alice narrows audience to Direct(alice) (privacy_revision=2);
-        // Bob's reaction re-verifies TargetResolution under PG FOR UPDATE lock and fails closed!
+        // #15: Bob deterministically passes pre-TX check (Platform, privacy_revision=1) and reaches precheck barrier;
+        // Alice edits to Direct(alice) (privacy_revision=2) and hits commit barrier; Bob then enters TX and
+        // fails closed under PG FOR UPDATE lock in TargetWriteFence::recheck()!
         $outcomes = Concurrency::run([
-            function () use ($surface, $postId, $alice): array {
+            function () use ($surface, $postId, $alice, $preBarrierName, $commitBarrierName): array {
                 DB::purge('pgsql');
+                $pdo = DB::connection('pgsql')->getPdo();
+                new PostgresBarrier($pdo, $preBarrierName, 2)->arriveAndWait('alice', 5.0);
+
                 $res = $this->app->make(PostService::class)->edit(new EditPostCommand(
                     key: new CommandKey('cmd-pg-narrow-edit-alice'),
                     surface: $surface,
@@ -594,38 +608,70 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
                     audience: AudienceSpec::direct($alice),
                 ));
 
+                new PostgresBarrier($pdo, $commitBarrierName, 2)->arriveAndWait('alice', 5.0);
+
                 return $res->toWire();
             },
-            function () use ($surface, $postId): array {
+            function () use ($surface, $postId, $preBarrierName, $commitBarrierName): array {
                 DB::purge('pgsql');
                 $fakeChild = $this->app->make(SocKitFake::class);
                 $fakeChild->actors->actAsPerson('bob');
 
-                $inner = $fakeChild->surfacePolicy;
-                $slowPolicy = new class($inner) implements SurfaceAudiencePolicy
-                {
-                    private int $calls = 0;
+                $inner = null;
+                foreach ($this->app->make(Extensions::class)->resolve(TargetResolver::class) as $candidate) {
+                    if ($candidate->supports(new HostEntityRef('post', $postId))) {
+                        $inner = $candidate;
 
-                    public function __construct(private readonly SurfaceAudiencePolicy $inner) {}
+                        break;
+                    }
+                }
+                if (! $inner instanceof TargetWriteFence) {
+                    throw new LogicException('Expected TargetWriteFence for post.');
+                }
+
+                $barrierFence = new class($inner, $preBarrierName, $commitBarrierName) implements TargetWriteFence
+                {
+                    private int $precheckCalls = 0;
+
+                    public function __construct(
+                        private readonly TargetWriteFence $inner,
+                        private readonly string $preBarrierName,
+                        private readonly string $commitBarrierName,
+                    ) {}
 
                     #[Override]
-                    public function admit(ActorContext $viewer, SurfaceRef $surface): AudienceVerdict
+                    public function supports(HostEntityRef $target): bool
                     {
-                        $this->calls++;
-                        if ($this->calls === 1) {
-                            usleep(250_000);
+                        return $this->inner->supports($target);
+                    }
+
+                    #[Override]
+                    public function resolve(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target): TargetResolution
+                    {
+                        $resolution = $this->inner->resolve($actor, $surface, $target);
+                        if (DB::connection('pgsql')->transactionLevel() === 0) {
+                            $this->precheckCalls++;
+                            if ($this->precheckCalls === 1) {
+                                $pdo = DB::connection('pgsql')->getPdo();
+                                new PostgresBarrier($pdo, $this->preBarrierName, 2)->arriveAndWait('bob', 5.0);
+                                new PostgresBarrier($pdo, $this->commitBarrierName, 2)->arriveAndWait('bob', 5.0);
+                            }
                         }
 
-                        return $this->inner->admit($viewer, $surface);
+                        return $resolution;
                     }
 
                     #[Override]
-                    public function contains(ActorContext $actor, SurfaceRef $surface, AudienceSpec $proposed): AuthorizationDecision
-                    {
-                        return $this->inner->contains($actor, $surface, $proposed);
+                    public function recheck(
+                        ActorContext $actor,
+                        SurfaceRef $surface,
+                        HostEntityRef $target,
+                        TargetResolution $prechecked,
+                    ): AuthorizationDecision {
+                        return $this->inner->recheck($actor, $surface, $target, $prechecked);
                     }
                 };
-                $this->app->instance(SurfaceAudiencePolicy::class, $slowPolicy);
+                $this->app->instance(TargetResolver::class, $barrierFence);
 
                 $res = $this->app->make(ReactionService::class)->add(new AddReactionCommand(
                     key: new CommandKey('cmd-pg-narrow-react-bob'),
@@ -645,5 +691,58 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
         $postRow = DB::connection('pgsql')->table('sk_posts')->where('id', $postId)->first();
         self::assertSame(2, (int) $postRow->privacy_revision);
         self::assertSame(0, DB::connection('pgsql')->table('sk_reactions')->where('target_key', $postId)->count());
+    }
+
+    public function test_parallel_reaction_first_insert_and_rebuild_counts_serialize_cleanly_on_postgresql(): void
+    {
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.pg'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'pg-rebuild-race'), Incarnation::initial());
+        $this->app->make(SurfaceService::class)->ensureInstance(new CommandKey('cmd-pg-rebuild-surf-1'), $surface->panel, $surface->kind, $surface->host);
+
+        $pub = $this->app->make(PostService::class)->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-pg-rebuild-post-1'),
+            surface: $surface,
+            body: 'Empty bucket target',
+            audience: AudienceSpec::platform(),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        DB::disconnect('pgsql');
+
+        $outcomes = Concurrency::run([
+            function () use ($surface, $postId): array {
+                DB::purge('pgsql');
+                $fakeChild = $this->app->make(SocKitFake::class);
+                $fakeChild->actors->actAsPerson('bob');
+
+                $res = $this->app->make(ReactionService::class)->add(new AddReactionCommand(
+                    key: new CommandKey('cmd-pg-rebuild-add-1'),
+                    surface: $surface,
+                    target: new HostEntityRef('post', $postId),
+                    reactionType: 'like',
+                ));
+
+                return $res->toWire();
+            },
+            function () use ($surface): int {
+                DB::purge('pgsql');
+                $service = $this->app->make(ReactionService::class);
+                $total = 0;
+                for ($i = 0; $i < 3; $i++) {
+                    $total += $service->rebuildCounts($surface->panel);
+                }
+
+                return $total;
+            },
+        ]);
+
+        self::assertTrue($outcomes[0]->succeeded, $outcomes[0]->errorMessage ?? 'first reaction failed');
+        self::assertTrue($outcomes[1]->succeeded, $outcomes[1]->errorMessage ?? 'rebuildCounts failed');
+
+        $counts = $this->app->make(ReactionService::class)->counts($surface, new HostEntityRef('post', $postId));
+        self::assertSame(['like' => 1], $counts->counts);
+        self::assertSame(1, $counts->total);
     }
 }

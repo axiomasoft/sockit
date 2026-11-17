@@ -24,6 +24,7 @@ use SocKit\Audience\Exceptions\InvalidPrivacyFloorException;
 use SocKit\Configuration\Internal\ModuleSettingsMerger;
 use SocKit\Configuration\Internal\SockitModules;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
+use SocKit\Modules\Groups\Contracts\MembershipConsent;
 use SocKit\Panels\PanelProvider;
 use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Surfaces\SurfaceProvider;
@@ -54,6 +55,7 @@ final readonly class SockitOptions implements OptionsFactory
         'audience',
         'authorizer',
         'groups',
+        'consent',
         'surface_policy',
         'targets',
     ];
@@ -69,6 +71,7 @@ final readonly class SockitOptions implements OptionsFactory
      * @param  ?class-string<AudienceResolver>  $audienceResolver
      * @param  ?class-string<ActionAuthorizer>  $authorizerResolver
      * @param  ?class-string<GroupMembershipResolver>  $groupResolver
+     * @param  ?class-string<MembershipConsent>  $consentResolver
      * @param  ?class-string<SurfaceAudiencePolicy>  $surfacePolicyResolver
      * @param  ?class-string<TargetResolver>  $targetResolver
      */
@@ -84,6 +87,7 @@ final readonly class SockitOptions implements OptionsFactory
         public ?string $audienceResolver = null,
         public ?string $authorizerResolver = null,
         public ?string $groupResolver = null,
+        public ?string $consentResolver = null,
         public ?string $surfacePolicyResolver = null,
         public ?string $targetResolver = null,
         public PrivacyFloor $privacyFloor = new PrivacyFloor(
@@ -98,6 +102,7 @@ final readonly class SockitOptions implements OptionsFactory
         public TablePrefix $tablePrefix = new TablePrefix('sk_'),
         public int $receiptTtlSeconds = 86400,
         public int $outboxBatchSize = 100,
+        public int $cursorTtlSeconds = 3600,
     ) {}
 
     /** @param array<array-key, mixed> $config */
@@ -114,7 +119,7 @@ final readonly class SockitOptions implements OptionsFactory
         $resolvers = self::readResolvers($validator, $path.'.resolvers', $config['resolvers'] ?? []);
         $privacyFloor = self::readPrivacyFloor($validator, $path.'.privacy', $config['privacy'] ?? []);
         [$connection, $tablePrefix] = self::readStorage($validator, $path.'.storage', $config['storage'] ?? []);
-        [$receiptTtlSeconds, $outboxBatchSize] = self::readOperations($validator, $path.'.operations', $config['operations'] ?? []);
+        [$receiptTtlSeconds, $outboxBatchSize, $cursorTtlSeconds] = self::readOperations($validator, $path.'.operations', $config['operations'] ?? []);
 
         $validator->failIfAny();
 
@@ -132,6 +137,8 @@ final readonly class SockitOptions implements OptionsFactory
         $authorizer = $resolvers['authorizer'];
         /** @var ?class-string<GroupMembershipResolver> $groups */
         $groups = $resolvers['groups'];
+        /** @var ?class-string<MembershipConsent> $consent */
+        $consent = $resolvers['consent'];
         /** @var ?class-string<SurfaceAudiencePolicy> $surfacePolicy */
         $surfacePolicy = $resolvers['surface_policy'];
         /** @var ?class-string<TargetResolver> $targets */
@@ -149,6 +156,7 @@ final readonly class SockitOptions implements OptionsFactory
             audienceResolver: $audience,
             authorizerResolver: $authorizer,
             groupResolver: $groups,
+            consentResolver: $consent,
             surfacePolicyResolver: $surfacePolicy,
             targetResolver: $targets,
             privacyFloor: $privacyFloor,
@@ -156,6 +164,7 @@ final readonly class SockitOptions implements OptionsFactory
             tablePrefix: $tablePrefix,
             receiptTtlSeconds: $receiptTtlSeconds,
             outboxBatchSize: $outboxBatchSize,
+            cursorTtlSeconds: $cursorTtlSeconds,
         );
     }
 
@@ -344,6 +353,7 @@ final readonly class SockitOptions implements OptionsFactory
             'audience' => AudienceResolver::class,
             'authorizer' => ActionAuthorizer::class,
             'groups' => GroupMembershipResolver::class,
+            'consent' => MembershipConsent::class,
             'surface_policy' => SurfaceAudiencePolicy::class,
             'targets' => TargetResolver::class,
         ];
@@ -446,16 +456,16 @@ final readonly class SockitOptions implements OptionsFactory
         return [$connection, $prefix];
     }
 
-    /** @return array{0: int, 1: int} */
+    /** @return array{0: int, 1: int, 2: int} */
     private static function readOperations(ConfigurationValidator $validator, string $path, mixed $raw): array
     {
         if (! is_array($raw)) {
             $validator->add($path, 'must be an array');
 
-            return [86400, 100];
+            return [86400, 100, 3600];
         }
 
-        $validator->rejectUnknownKeys($raw, ['receipt_ttl_seconds', 'outbox_batch_size'], $path);
+        $validator->rejectUnknownKeys($raw, ['receipt_ttl_seconds', 'outbox_batch_size', 'cursor_ttl_seconds'], $path);
 
         $ttl = $raw['receipt_ttl_seconds'] ?? 86400;
         if (! is_int($ttl) || $ttl < 60 || $ttl > 31536000) {
@@ -469,7 +479,13 @@ final readonly class SockitOptions implements OptionsFactory
             $batch = 100;
         }
 
-        return [$ttl, $batch];
+        $cursorTtl = $raw['cursor_ttl_seconds'] ?? 3600;
+        if (! is_int($cursorTtl) || $cursorTtl < 60 || $cursorTtl > 86400) {
+            $validator->add($path.'.cursor_ttl_seconds', 'must be an integer between 60 and 86400');
+            $cursorTtl = 3600;
+        }
+
+        return [$ttl, $batch, $cursorTtl];
     }
 
     private static function isSerializableConfigValue(mixed $value): bool

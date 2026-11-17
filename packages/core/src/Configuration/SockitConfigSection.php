@@ -47,6 +47,7 @@ final readonly class SockitConfigSection implements ConfigSection
             'audience' => null,
             'authorizer' => null,
             'groups' => null,
+            'consent' => null,
             'surface_policy' => null,
             'targets' => null,
         ], 'Host SPI resolver class bindings.');
@@ -67,6 +68,7 @@ final readonly class SockitConfigSection implements ConfigSection
         $operations = $config->subtree('operations', [
             'receipt_ttl_seconds' => 86400,
             'outbox_batch_size' => 100,
+            'cursor_ttl_seconds' => 3600,
         ], 'Command envelope and outbox execution limits.');
 
         return new SockitSectionSettings(SockitOptions::fromArray([

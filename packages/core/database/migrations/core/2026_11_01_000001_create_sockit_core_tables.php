@@ -17,15 +17,18 @@ return new class extends SockitMigration
                 $table->string('host_entity_type', 96);
                 $table->string('host_entity_value', 512);
                 $table->unsignedBigInteger('incarnation');
+                $table->unsignedBigInteger('revision')->default(1);
                 $table->string('lifecycle_state', 32);
                 $table->timestampTz('created_at', 6)->useCurrent();
                 $table->timestampTz('archived_at', 6)->nullable();
+                $table->timestampTz('deleted_at', 6)->nullable();
 
                 $this->unique($table, ['panel_id', 'kind', 'host_entity_type', 'host_entity_value', 'incarnation']);
                 $this->index($table, ['panel_id', 'kind', 'lifecycle_state']);
             });
             $this->addCheckIfPostgres($surfaces, 'incarnation_positive', 'incarnation >= 1');
-            $this->addCheckIfPostgres($surfaces, 'lifecycle_state_valid', "lifecycle_state IN ('active', 'archived')");
+            $this->addCheckIfPostgres($surfaces, 'revision_positive', 'revision >= 1');
+            $this->addCheckIfPostgres($surfaces, 'lifecycle_state_valid', "lifecycle_state IN ('active', 'archived', 'deleted')");
 
             $this->create('command_receipts', function (Blueprint $table): void {
                 $this->uuidPrimary($table);
@@ -33,6 +36,11 @@ return new class extends SockitMigration
                 $table->string('command_namespace', 384);
                 $table->string('command_key', 128);
                 $table->string('command_type', 120);
+                $table->string('actor_kind', 32);
+                $table->string('actor_type', 96)->nullable();
+                $table->string('actor_id', 512)->nullable();
+                $table->string('on_behalf_of_type', 96)->nullable();
+                $table->string('on_behalf_of_id', 512)->nullable();
                 $table->string('payload_digest', 72);
                 $table->string('status', 24);
                 $table->string('resource_kind', 64)->nullable();
@@ -61,6 +69,7 @@ return new class extends SockitMigration
                 $table->unsignedInteger('attempts')->default(0);
                 $table->string('lease_owner', 128)->nullable();
                 $table->timestampTz('lease_until', 6)->nullable();
+                $table->jsonb('delivered_consumers')->nullable();
                 $table->timestampTz('delivered_at', 6)->nullable();
                 $table->string('projection_lease_owner', 128)->nullable();
                 $table->timestampTz('projection_lease_until', 6)->nullable();

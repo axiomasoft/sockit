@@ -143,7 +143,7 @@ final class SurfaceAndTwoPanelIsolationTest extends SocKitTestCase
         $postId = $pubRes->resource?->id ?? '';
 
         // Archive blocks writes cleanly
-        $archived = $surfaces->archive(new CommandKey('cmd-surf-arch-000001'), $instance1->ref());
+        $archived = $surfaces->archive(new CommandKey('cmd-surf-arch-000001'), $instance1->ref(), $instance1->revision);
         self::assertTrue($archived->isArchived());
 
         // archiveReaders=true on app.alpha allows reading archived post!

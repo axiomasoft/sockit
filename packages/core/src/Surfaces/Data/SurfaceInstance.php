@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Packman\Attributes\Api;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\HostEntityRef;
+use SocKit\Support\Data\Revision;
 use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 
 /**
@@ -25,6 +26,8 @@ final readonly class SurfaceInstance
         public SurfaceLifecycleState $lifecycleState,
         public DateTimeImmutable $createdAt,
         public ?DateTimeImmutable $archivedAt = null,
+        public Revision $revision = new Revision(1),
+        public ?DateTimeImmutable $deletedAt = null,
     ) {}
 
     public function ref(): SurfaceRef
@@ -35,5 +38,10 @@ final readonly class SurfaceInstance
     public function isArchived(): bool
     {
         return $this->lifecycleState === SurfaceLifecycleState::Archived;
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->lifecycleState === SurfaceLifecycleState::Deleted;
     }
 }

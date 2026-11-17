@@ -78,4 +78,13 @@ final class OperationException extends SocKitException
     {
         return new self(SockitErrorCode::AudienceNotContained, "Audience not contained within surface policy [{$reason}].", ['reason' => $reason]);
     }
+
+    public static function nestedTransaction(string $panel): self
+    {
+        return new self(
+            SockitErrorCode::ConfigurationInvalid,
+            "Refusing to execute operation inside an existing open database transaction for panel [{$panel}].",
+            ['panel' => $panel, 'reason' => 'operations.nested_transaction_forbidden'],
+        );
+    }
 }

@@ -11,4 +11,5 @@ enum SurfaceLifecycleState: string
 {
     case Active = 'active';
     case Archived = 'archived';
+    case Deleted = 'deleted';
 }

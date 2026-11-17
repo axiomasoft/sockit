@@ -19,7 +19,9 @@ use SocKit\Core\Tests\Fixtures\PanelAlphaProvider;
 use SocKit\Core\Tests\Fixtures\PanelBetaProvider;
 use SocKit\Errors\Enums\SockitErrorCode;
 use SocKit\Modules\Groups\Contracts\GroupService;
+use SocKit\Modules\Groups\Data\AddGroupMemberCommand;
 use SocKit\Modules\Groups\Data\CreateGroupCommand;
+use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
 use SocKit\Modules\Posts\Contracts\PostService;
 use SocKit\Modules\Posts\Data\EditPostCommand;
@@ -77,6 +79,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
     {
         $this->migrateSockitSchema();
         $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
 
         $alice = new ActorRef('user', 'alice');
         $team = new HostEntityRef('team', 'eng');
@@ -107,7 +110,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
 
         $fake->surfacePolicy->readOnlyAdmission('surface.read_only');
         try {
-            $surfaces->archive(new CommandKey('cmd-surf-ro-archive-1'), $surface);
+            $surfaces->archive(new CommandKey('cmd-surf-ro-archive-1'), $surface, new Revision(1));
             self::fail('Expected OperationException AudienceDenied on read-only archive.');
         } catch (OperationException $e) {
             self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
@@ -116,7 +119,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
         $fake->surfacePolicy->allowAll();
         $fake->authorizer->deny('sockit.surface.archive', 'no.archive');
         try {
-            $surfaces->archive(new CommandKey('cmd-surf-denied-archive-1'), $surface);
+            $surfaces->archive(new CommandKey('cmd-surf-denied-archive-1'), $surface, new Revision(1));
             self::fail('Expected AuthorizationDeniedException on archive.');
         } catch (AuthorizationDeniedException $e) {
             self::assertSame(SockitErrorCode::AuthorizationDenied, $e->problem());
@@ -241,6 +244,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
     {
         $this->migrateSockitSchema();
         $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
 
         $alphaPanel = new PanelId('sockit.alpha');
         $betaPanel = new PanelId('sockit.beta');
@@ -263,6 +267,14 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
             visibility: GroupVisibility::Private,
         ));
         $alphaGroupId = (string) $alphaGroupRes->resource?->id;
+        $groups->addMember(new AddGroupMemberCommand(
+            key: new CommandKey('cmd-alpha-grp-add-alice'),
+            surface: $alphaSurface,
+            groupId: $alphaGroupId,
+            expectedRevision: new Revision(1),
+            member: new ActorRef('user', 'alice'),
+            role: GroupMemberRole::Owner,
+        ));
 
         $alphaStaffPost = $posts->publish(new PublishPostCommand(
             key: new CommandKey('cmd-alpha-post-001'),
@@ -281,6 +293,14 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
             visibility: GroupVisibility::Private,
         ));
         $betaGroupId = (string) $betaGroupRes->resource?->id;
+        $groups->addMember(new AddGroupMemberCommand(
+            key: new CommandKey('cmd-beta-grp-add-bob'),
+            surface: $betaSurface,
+            groupId: $betaGroupId,
+            expectedRevision: new Revision(1),
+            member: new ActorRef('user', 'bob'),
+            role: GroupMemberRole::Owner,
+        ));
 
         $betaStaffPost = $posts->publish(new PublishPostCommand(
             key: new CommandKey('cmd-beta-post-0001'),
@@ -368,6 +388,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
     {
         $this->migrateSockitSchema();
         $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
 
         $surface = new SurfaceRef(
             panel: new PanelId('sockit.alpha'),
@@ -467,7 +488,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
         $liveCmd = new PublishPostCommand($livePubKey, $surface, 'Live before archive', audience: AudienceSpec::platform());
         self::assertTrue($posts->publish($liveCmd)->isSuccess());
 
-        $surfaces->archive(new CommandKey('cmd-replay-archive-1'), $surface);
+        $surfaces->archive(new CommandKey('cmd-replay-archive-1'), $surface, new Revision(1));
         try {
             $posts->publish($liveCmd);
             self::fail('Replay after surface archive must fail closed.');

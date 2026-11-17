@@ -16,6 +16,7 @@ use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Enums\VerdictDecision;
+use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Surfaces\Data\SurfaceRef;
 use Throwable;
@@ -277,5 +278,41 @@ final readonly class AudienceGate
         }
 
         return $combined;
+    }
+
+    /**
+     * Pre-sample contour memberships outside SQL transactions for group-coupled target lock checks.
+     *
+     * @return array<string, AudienceVerdict>
+     */
+    public function sampleContours(ActorContext $actor, AudienceSpec $spec, bool $archiveReaders = false): array
+    {
+        if ($this->resolver instanceof AudienceEvaluator) {
+            return $this->resolver->sampleContours($actor, $spec, $archiveReaders);
+        }
+
+        return [];
+    }
+
+    /**
+     * Lock referenced groups inside the current SQL transaction and verify local group membership.
+     *
+     * @param  array<string, AudienceVerdict>  $preSampledContours
+     */
+    public function reverifyLockedGroupsInTransaction(
+        ActorContext $actor,
+        AudienceSpec $spec,
+        PanelId $panel,
+        array $preSampledContours = [],
+    ): AudienceVerdict {
+        if ($spec->referencedGroups() === []) {
+            return AudienceVerdict::allow('audience.allowed.no_groups');
+        }
+
+        if (! $this->resolver instanceof AudienceEvaluator) {
+            return AudienceVerdict::deny('audience.unknown');
+        }
+
+        return $this->resolver->lockAndVerifyGroupsInTransaction($actor, $spec, $panel, $preSampledContours);
     }
 }

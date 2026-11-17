@@ -20,6 +20,7 @@ use SocKit\Audience\Data\GroupRef;
 use SocKit\Audience\Exceptions\AuthorizationDeniedException;
 use SocKit\Core\Tests\Fixtures\HostProductionActorResolver;
 use SocKit\Core\Tests\Fixtures\HostProductionContourResolver;
+use SocKit\Core\Tests\Fixtures\HostProductionMembershipConsent;
 use SocKit\Core\Tests\Fixtures\HostProductionSurfacePolicy;
 use SocKit\Core\Tests\Fixtures\PanelPgSchemaAlphaProvider;
 use SocKit\Core\Tests\Fixtures\PanelPgSchemaBetaProvider;
@@ -28,7 +29,9 @@ use SocKit\Core\Tests\Fixtures\PgSchemaBetaSurfaceProvider;
 use SocKit\Diagnostics\SockitDoctorCheck;
 use SocKit\Errors\Enums\SockitErrorCode;
 use SocKit\Modules\Groups\Contracts\GroupService;
+use SocKit\Modules\Groups\Data\AddGroupMemberCommand;
 use SocKit\Modules\Groups\Data\CreateGroupCommand;
+use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
 use SocKit\Modules\Groups\Internal\DatabaseGroupMembershipResolver;
 use SocKit\Modules\Posts\Contracts\PostService;
@@ -71,6 +74,7 @@ final class ProductionWiringAndMultiSchemaPgTest extends SocKitTestCase
         $config->set('sockit.resolvers.actor', HostProductionActorResolver::class);
         $config->set('sockit.resolvers.surface_policy', HostProductionSurfacePolicy::class);
         $config->set('sockit.resolvers.contour', HostProductionContourResolver::class);
+        $config->set('sockit.resolvers.consent', HostProductionMembershipConsent::class);
 
         $app->scoped(HostProductionActorResolver::class);
         $app->scoped(HostProductionContourResolver::class);
@@ -195,6 +199,14 @@ final class ProductionWiringAndMultiSchemaPgTest extends SocKitTestCase
             visibility: GroupVisibility::Private,
         ));
         self::assertTrue($alphaGroup->isSuccess());
+        $groups->addMember(new AddGroupMemberCommand(
+            key: new CommandKey('cmd-pg-prod-add-alice'),
+            surface: $alphaSurface,
+            groupId: (string) $alphaGroup->resource?->id,
+            expectedRevision: new Revision(1),
+            member: new ActorRef('user', 'alice'),
+            role: GroupMemberRole::Owner,
+        ));
 
         $alphaPost = $posts->publish(new PublishPostCommand(
             key: new CommandKey('cmd-pg-prod-post-alpha'),

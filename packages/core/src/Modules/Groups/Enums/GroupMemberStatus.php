@@ -10,6 +10,9 @@ use Packman\Attributes\Api;
 enum GroupMemberStatus: string
 {
     case Active = 'active';
+    case Pending = 'pending';
+    case Invited = 'invited';
+    case Left = 'left';
     case Removed = 'removed';
     case Banned = 'banned';
 }

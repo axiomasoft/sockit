@@ -10,7 +10,9 @@ use SocKit\Actors\Data\ActorContext;
 use SocKit\Actors\Enums\ActorKind;
 use SocKit\Audience\Contracts\AudienceResolver;
 use SocKit\Audience\Contracts\ContourResolver;
+use SocKit\Audience\Contracts\EvaluatesPanelGroupMembership;
 use SocKit\Audience\Contracts\GroupMembershipResolver;
+use SocKit\Audience\Contracts\LocksGroupMembershipInTransaction;
 use SocKit\Audience\Contracts\PanelGroupMembershipResolver;
 use SocKit\Audience\Contracts\ResolvesAudienceInBatch;
 use SocKit\Audience\Data\AudienceSpec;
@@ -198,6 +200,14 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             return AudienceVerdict::deny('audience.unknown');
         }
 
+        if ($this->groups instanceof EvaluatesPanelGroupMembership) {
+            try {
+                return $this->groups->membershipVerdictInPanel($viewer, $panel, $spec->group);
+            } catch (Throwable) {
+                return AudienceVerdict::deny('audience.resolver_error');
+            }
+        }
+
         try {
             $isMember = $this->groups instanceof PanelGroupMembershipResolver
                 ? $this->groups->isMemberInPanel($viewer, $panel, $spec->group)
@@ -286,6 +296,20 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             return AudienceVerdict::deny('audience.unknown');
         }
 
+        if ($this->groups instanceof EvaluatesPanelGroupMembership) {
+            try {
+                $verdict = $this->groups->membershipVerdictInPanel($author, $panel, $spec->group);
+            } catch (Throwable) {
+                return AudienceVerdict::deny('audience.resolver_error');
+            }
+
+            if ($verdict->canWrite()) {
+                return AudienceVerdict::allow('audience.allowed.group');
+            }
+
+            return AudienceVerdict::deny($verdict->decision === VerdictDecision::AllowReadOnly ? 'audience.denied.read_only' : $verdict->reason);
+        }
+
         try {
             $isMember = $this->groups instanceof PanelGroupMembershipResolver
                 ? $this->groups->isMemberInPanel($author, $panel, $spec->group)
@@ -297,6 +321,176 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
         return $isMember
             ? AudienceVerdict::allow('audience.allowed.group')
             : AudienceVerdict::deny('audience.denied.author_outside_audience');
+    }
+
+    /**
+     * Pre-sample external contour leaves outside any database transaction.
+     *
+     * @return array<string, AudienceVerdict>
+     */
+    public function sampleContours(ActorContext $viewer, AudienceSpec $spec, bool $archiveReaders = false): array
+    {
+        $samples = [];
+        $this->collectContourSamples($viewer, $spec, $archiveReaders, $samples);
+
+        return $samples;
+    }
+
+    /**
+     * Lock all referenced groups in canonical order inside the current DB transaction and
+     * re-evaluate group-coupled audience locally without external SPI calls.
+     *
+     * @param  array<string, AudienceVerdict>  $preSampledContours
+     */
+    public function lockAndVerifyGroupsInTransaction(
+        ActorContext $viewer,
+        AudienceSpec $spec,
+        PanelId $panel,
+        array $preSampledContours = [],
+    ): AudienceVerdict {
+        $groups = $spec->referencedGroups();
+
+        if ($groups === []) {
+            return AudienceVerdict::allow('audience.allowed.no_groups');
+        }
+
+        if (! $this->groups instanceof LocksGroupMembershipInTransaction) {
+            return AudienceVerdict::deny('audience.unknown');
+        }
+
+        try {
+            foreach ($groups as $groupRef) {
+                $this->groups->lockGroupInTransaction($panel, $groupRef);
+            }
+        } catch (Throwable) {
+            return AudienceVerdict::deny('audience.resolver_error');
+        }
+
+        return $this->evaluateLocalReadSpecInTransaction($viewer, $spec, $panel, $preSampledContours);
+    }
+
+    /** @param array<string, AudienceVerdict> $samples */
+    private function collectContourSamples(ActorContext $viewer, AudienceSpec $spec, bool $archiveReaders, array &$samples): void
+    {
+        if ($spec->scope === Scope::Contour && $spec->contourLevel !== null && $spec->contour instanceof HostEntityRef) {
+            $key = $spec->contourLevel.'|'.$spec->contour->toWire();
+            $samples[$key] ??= $this->evaluateContourRead($viewer, $spec, $archiveReaders);
+
+            return;
+        }
+
+        foreach ($spec->children as $child) {
+            $this->collectContourSamples($viewer, $child, $archiveReaders, $samples);
+        }
+    }
+
+    /** @param array<string, AudienceVerdict> $preSampledContours */
+    private function evaluateLocalReadSpecInTransaction(
+        ActorContext $viewer,
+        AudienceSpec $spec,
+        PanelId $panel,
+        array $preSampledContours,
+    ): AudienceVerdict {
+        if ($spec->operator === 'all_of') {
+            $combined = AudienceVerdict::allow('audience.allowed.all_of');
+
+            foreach ($spec->children as $child) {
+                $verdict = $this->evaluateLocalReadSpecInTransaction($viewer, $child, $panel, $preSampledContours);
+                if (! $verdict->canRead()) {
+                    return $verdict;
+                }
+
+                $combined = $combined->intersect($verdict);
+            }
+
+            return $combined;
+        }
+
+        if ($spec->operator === 'any_of') {
+            $firstReadOnly = null;
+            $firstIndeterminate = null;
+            $firstDeny = null;
+
+            foreach ($spec->children as $child) {
+                $verdict = $this->evaluateLocalReadSpecInTransaction($viewer, $child, $panel, $preSampledContours);
+
+                if ($verdict->decision === VerdictDecision::Allow) {
+                    return $verdict;
+                }
+
+                if ($verdict->decision === VerdictDecision::AllowReadOnly) {
+                    $firstReadOnly ??= $verdict;
+
+                    continue;
+                }
+
+                if (in_array($verdict->reason, ['audience.resolver_error', 'audience.unknown'], true)) {
+                    $firstIndeterminate ??= $verdict;
+                } else {
+                    $firstDeny ??= $verdict;
+                }
+            }
+
+            return $firstReadOnly ?? $firstIndeterminate ?? $firstDeny ?? AudienceVerdict::deny('audience.unknown');
+        }
+
+        if ($spec->operator === 'exclude') {
+            $include = $this->evaluateLocalReadSpecInTransaction($viewer, $spec->children[0], $panel, $preSampledContours);
+            if (! $include->canRead()) {
+                return $include;
+            }
+
+            $excluded = $this->evaluateLocalReadSpecInTransaction($viewer, $spec->children[1], $panel, $preSampledContours);
+            if ($excluded->canRead()) {
+                return AudienceVerdict::deny('audience.denied.excluded');
+            }
+
+            if (! in_array($excluded->reason, self::PROVEN_EXCLUDE_DENIALS, true)) {
+                return $excluded;
+            }
+
+            return $include;
+        }
+
+        return match ($spec->scope) {
+            Scope::Public => AudienceVerdict::allow('audience.allowed.public'),
+            Scope::Platform => $viewer->kind === ActorKind::Anonymous
+                ? AudienceVerdict::deny('audience.denied.anonymous')
+                : AudienceVerdict::allow('audience.allowed.platform'),
+            Scope::Direct => $this->evaluateDirectRead($viewer, $spec->actors),
+            Scope::Group => $this->evaluateLockedGroupRead($viewer, $spec, $panel),
+            Scope::Contour => $this->lookupSampledContour($spec, $preSampledContours),
+            default => AudienceVerdict::deny('audience.unknown'),
+        };
+    }
+
+    private function evaluateLockedGroupRead(ActorContext $viewer, AudienceSpec $spec, PanelId $panel): AudienceVerdict
+    {
+        if ($viewer->kind === ActorKind::Anonymous) {
+            return AudienceVerdict::deny('audience.denied.anonymous');
+        }
+
+        if (! $this->groups instanceof LocksGroupMembershipInTransaction || ! $spec->group instanceof GroupRef) {
+            return AudienceVerdict::deny('audience.unknown');
+        }
+
+        try {
+            return $this->groups->membershipVerdictInTransaction($viewer, $panel, $spec->group);
+        } catch (Throwable) {
+            return AudienceVerdict::deny('audience.resolver_error');
+        }
+    }
+
+    /** @param array<string, AudienceVerdict> $preSampledContours */
+    private function lookupSampledContour(AudienceSpec $spec, array $preSampledContours): AudienceVerdict
+    {
+        if ($spec->contourLevel === null || ! $spec->contour instanceof HostEntityRef) {
+            return AudienceVerdict::deny('audience.unknown');
+        }
+
+        $key = $spec->contourLevel.'|'.$spec->contour->toWire();
+
+        return $preSampledContours[$key] ?? AudienceVerdict::deny('audience.unknown');
     }
 
     private function evaluateContourPublish(ActorContext $author, AudienceSpec $spec, PrivacyFloor $floor): AudienceVerdict

@@ -21,20 +21,25 @@ use SocKit\Modules\Posts\Data\FeedPageView;
 use SocKit\Modules\Posts\Data\GetFeedQuery;
 use SocKit\Modules\Posts\Data\PostView;
 use SocKit\Modules\Posts\Enums\ContentState;
+use SocKit\Operations\Exceptions\OperationException;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Exceptions\PanelException;
 use SocKit\Registrars\Internal\SockitRuntime;
+use SocKit\Support\CanonicalJson;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\Revision;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Enums\SurfaceLifecycleState;
 
 /**
- * Keyset-paginated surface feed reader filtering every batch through {@see AudienceGate::readMany()}.
+ * Keyset-paginated surface feed reader enforcing signed context-bound cursors, surface admission,
+ * batch audience filtering, and post-evaluation lifecycle/privacy re-verification before materializing bodies.
  */
 #[Internal]
 final readonly class DatabaseFeedService implements FeedService
 {
+    private const int MAX_SCAN_ROUNDS = 10;
+
     public function __construct(
         private SockitTables $tables,
         private PanelDefinitions $panels,
@@ -66,8 +71,23 @@ final readonly class DatabaseFeedService implements FeedService
             surface: $query->surface,
         ))->requireAllowed();
 
+        $audienceGate = $this->runtime->audienceGate();
+        $admission = $audienceGate->admitForRead($viewer, $query->surface);
+        if (! $admission->canRead()) {
+            throw OperationException::audienceDenied($admission->reason);
+        }
+
+        $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        $signingKey = $this->runtime->cursorSigningKey();
+        $cursorTtlSeconds = $this->runtime->cursorTtlSeconds();
+
+        if ($query->cursor instanceof FeedCursor) {
+            $query->cursor->verifyForContext($query->surface, $viewer, $signingKey, $now);
+        }
+
         $connection = $this->tables->connection($query->surface->panel);
-        $surfaceRow = $connection->table($this->tables->table('surface_instances', $query->surface->panel))
+        $surfacesTable = $this->tables->table('surface_instances', $query->surface->panel);
+        $surfaceRow = $connection->table($surfacesTable)
             ->where('panel_id', $query->surface->panel->value)
             ->where('kind', $query->surface->kind->value)
             ->where('host_entity_type', $query->surface->host->type)
@@ -75,21 +95,33 @@ final readonly class DatabaseFeedService implements FeedService
             ->where('incarnation', $query->surface->incarnation->value)
             ->first();
 
-        if (! is_object($surfaceRow)) {
+        if (! is_object($surfaceRow) || SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
             return new FeedPageView([], null, false);
         }
 
         $surfaceArchived = SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+        if ($surfaceArchived && ! $surfaceDef->archiveReaders) {
+            return new FeedPageView([], null, false);
+        }
+
         $surfaceInstanceId = SockitRows::str($surfaceRow, 'id');
         $postsTable = $this->tables->table('posts', $query->surface->panel);
         $cursor = $query->cursor;
         $batchSize = max($limit * 2, 20);
         $accepted = [];
-        $hasMoreRaw = false;
-        $audienceGate = $this->runtime->audienceGate();
+        $hasMore = false;
+        $lastScannedRow = null;
 
-        while (count($accepted) < $limit) {
+        for ($round = 0; $round < self::MAX_SCAN_ROUNDS && count($accepted) < $limit; $round++) {
             $qb = $connection->table($postsTable)
+                ->select([
+                    'id',
+                    'author_type',
+                    'author_id',
+                    'published_at',
+                    'privacy_revision',
+                    'audience_wire',
+                ])
                 ->where('panel_id', $query->surface->panel->value)
                 ->where('surface_instance_id', $surfaceInstanceId)
                 ->where('state', ContentState::Published->value)
@@ -114,24 +146,24 @@ final readonly class DatabaseFeedService implements FeedService
                 ->all();
 
             if ($rows === []) {
-                $hasMoreRaw = false;
+                $hasMore = false;
 
                 break;
             }
 
-            $hasMoreRaw = count($rows) > $batchSize;
+            $batchHasMoreAfter = count($rows) > $batchSize;
             $slice = array_slice($rows, 0, $batchSize);
 
             $subjects = [];
-            $audiences = [];
-            $authors = [];
+            $checkedSpecs = [];
+            $checkedPrivacyRevisions = [];
             foreach ($slice as $row) {
                 $postId = SockitRows::str($row, 'id');
                 $spec = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
                 $author = new ActorRef(SockitRows::str($row, 'author_type'), SockitRows::str($row, 'author_id'));
 
-                $audiences[$postId] = $spec;
-                $authors[$postId] = $author;
+                $checkedSpecs[$postId] = CanonicalJson::encode($spec->toWire());
+                $checkedPrivacyRevisions[$postId] = SockitRows::int($row, 'privacy_revision', 1);
                 $subjects[] = new AudienceSubject(
                     key: $postId,
                     spec: $spec,
@@ -144,58 +176,158 @@ final readonly class DatabaseFeedService implements FeedService
             }
 
             $verdicts = $audienceGate->readMany($viewer, $subjects);
-            $lastSeenRow = null;
 
-            foreach ($slice as $index => $row) {
-                $lastSeenRow = $row;
+            $permittedIds = [];
+            foreach ($slice as $row) {
                 $postId = SockitRows::str($row, 'id');
                 $verdict = $verdicts[$postId] ?? null;
-
                 if ($verdict !== null && $verdict->canRead()) {
-                    $accepted[] = new PostView(
-                        id: $postId,
-                        panel: $query->surface->panel,
-                        surface: $query->surface,
-                        author: $authors[$postId],
-                        state: ContentState::Published,
-                        bodyFormat: SockitRows::str($row, 'body_format'),
-                        body: SockitRows::optStr($row, 'current_body'),
-                        revision: new Revision(SockitRows::int($row, 'revision', 1)),
-                        privacyRevision: new Revision(SockitRows::int($row, 'privacy_revision', 1)),
-                        audience: $audiences[$postId],
-                        publishedAt: SockitRows::date($row, 'published_at'),
-                        createdAt: SockitRows::date($row, 'created_at'),
-                        updatedAt: SockitRows::date($row, 'updated_at'),
-                    );
+                    $permittedIds[] = $postId;
+                }
+            }
 
-                    if (count($accepted) >= $limit) {
-                        $remainingInSlice = count($slice) - 1 - $index;
-                        $hasMoreRaw = $hasMoreRaw || $remainingInSlice > 0;
+            /** @var array<string, object> $currentPosts */
+            $currentPosts = [];
+            $latestSurfaceArchived = $surfaceArchived;
+            $surfaceAlive = true;
 
-                        break;
+            if ($permittedIds !== []) {
+                $latestSurface = $connection->table($surfacesTable)
+                    ->where('id', $surfaceInstanceId)
+                    ->first();
+
+                if (! is_object($latestSurface) || SockitRows::str($latestSurface, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
+                    $surfaceAlive = false;
+                } else {
+                    $latestSurfaceArchived = SockitRows::str($latestSurface, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+                    if ($latestSurfaceArchived && ! $surfaceDef->archiveReaders) {
+                        $surfaceAlive = false;
+                    }
+                }
+
+                if ($surfaceAlive) {
+                    $freshRows = $connection->table($postsTable)
+                        ->where('panel_id', $query->surface->panel->value)
+                        ->where('surface_instance_id', $surfaceInstanceId)
+                        ->whereIn('id', $permittedIds)
+                        ->get();
+
+                    foreach ($freshRows as $fresh) {
+                        $currentPosts[SockitRows::str($fresh, 'id')] = $fresh;
                     }
                 }
             }
 
-            if ($lastSeenRow === null || count($accepted) >= $limit || ! $hasMoreRaw) {
+            $lastSliceIndex = -1;
+            foreach ($slice as $index => $row) {
+                $lastScannedRow = $row;
+                $lastSliceIndex = $index;
+                $postId = SockitRows::str($row, 'id');
+                $verdict = $verdicts[$postId] ?? null;
+
+                if ($verdict === null || ! $verdict->canRead() || ! $surfaceAlive) {
+                    continue;
+                }
+
+                $fresh = $currentPosts[$postId] ?? null;
+                if (! is_object($fresh) || SockitRows::str($fresh, 'state') !== ContentState::Published->value) {
+                    continue;
+                }
+
+                $freshPrivacyRevision = SockitRows::int($fresh, 'privacy_revision', 1);
+                $freshSpec = AudienceSpec::fromWire(SockitRows::jsonArray($fresh, 'audience_wire'));
+                $freshAuthor = new ActorRef(SockitRows::str($fresh, 'author_type'), SockitRows::str($fresh, 'author_id'));
+                $freshCanonicalSpec = CanonicalJson::encode($freshSpec->toWire());
+
+                if (
+                    $freshPrivacyRevision !== $checkedPrivacyRevisions[$postId]
+                    || $freshCanonicalSpec !== $checkedSpecs[$postId]
+                    || $latestSurfaceArchived !== $surfaceArchived
+                ) {
+                    $recheckVerdict = $audienceGate->read($viewer, new AudienceSubject(
+                        key: $postId,
+                        spec: $freshSpec,
+                        author: $freshAuthor,
+                        surface: $query->surface,
+                        installation: $viewer->installation,
+                        surfaceArchived: $latestSurfaceArchived,
+                        archiveReaders: $surfaceDef->archiveReaders,
+                    ));
+
+                    if (! $recheckVerdict->canRead()) {
+                        continue;
+                    }
+
+                    $confirm = $connection->table($postsTable)
+                        ->where('panel_id', $query->surface->panel->value)
+                        ->where('id', $postId)
+                        ->first();
+
+                    if (
+                        ! is_object($confirm)
+                        || SockitRows::str($confirm, 'state') !== ContentState::Published->value
+                        || SockitRows::int($confirm, 'privacy_revision', 1) !== $freshPrivacyRevision
+                    ) {
+                        continue;
+                    }
+
+                    $fresh = $confirm;
+                }
+
+                $accepted[] = new PostView(
+                    id: $postId,
+                    panel: $query->surface->panel,
+                    surface: $query->surface,
+                    author: $freshAuthor,
+                    state: ContentState::Published,
+                    bodyFormat: SockitRows::str($fresh, 'body_format'),
+                    body: SockitRows::optStr($fresh, 'current_body'),
+                    revision: new Revision(SockitRows::int($fresh, 'revision', 1)),
+                    privacyRevision: new Revision($freshPrivacyRevision),
+                    audience: $freshSpec,
+                    publishedAt: SockitRows::date($fresh, 'published_at'),
+                    createdAt: SockitRows::date($fresh, 'created_at'),
+                    updatedAt: SockitRows::date($fresh, 'updated_at'),
+                );
+
+                if (count($accepted) >= $limit) {
+                    break;
+                }
+            }
+
+            $remainingInSlice = count($slice) - 1 - $lastSliceIndex;
+            $hasMore = $batchHasMoreAfter || $remainingInSlice > 0;
+
+            if ($lastScannedRow === null || count($accepted) >= $limit || ! $hasMore) {
                 break;
             }
 
-            $cursor = new FeedCursor(SockitRows::date($lastSeenRow, 'published_at'), SockitRows::str($lastSeenRow, 'id'));
+            $cursor = FeedCursor::issue(
+                publishedAt: SockitRows::date($lastScannedRow, 'published_at'),
+                id: SockitRows::str($lastScannedRow, 'id'),
+                surface: $query->surface,
+                viewer: $viewer,
+                signingKey: $signingKey,
+                expiresAt: $now->modify('+'.$cursorTtlSeconds.' seconds'),
+            );
         }
 
         $nextCursor = null;
-        if ($hasMoreRaw && $accepted !== []) {
-            $lastItem = $accepted[array_key_last($accepted)];
-            if ($lastItem->publishedAt instanceof DateTimeImmutable) {
-                $nextCursor = new FeedCursor($lastItem->publishedAt, $lastItem->id);
-            }
+        if ($hasMore && $lastScannedRow !== null) {
+            $nextCursor = FeedCursor::issue(
+                publishedAt: SockitRows::date($lastScannedRow, 'published_at'),
+                id: SockitRows::str($lastScannedRow, 'id'),
+                surface: $query->surface,
+                viewer: $viewer,
+                signingKey: $signingKey,
+                expiresAt: $now->modify('+'.$cursorTtlSeconds.' seconds'),
+            );
         }
 
         return new FeedPageView(
             items: $accepted,
             nextCursor: $nextCursor,
-            hasMore: $hasMoreRaw && $nextCursor instanceof FeedCursor,
+            hasMore: $hasMore && $nextCursor instanceof FeedCursor,
         );
     }
 }

@@ -107,12 +107,6 @@ final readonly class DatabasePostService implements PostService
             surface: $command->surface,
             action: 'sockit.posts.publish',
             preTransactionChecks: function (ActorContext $verifiedActor) use ($command, $surfaceDef, $state): void {
-                $this->runtime->authorizer()->decide(new ActionRequest(
-                    actor: $verifiedActor,
-                    action: 'sockit.posts.publish',
-                    surface: $command->surface,
-                ))->requireAllowed();
-
                 $state->audience = $command->audience ?? $this->defaultAudience($verifiedActor, $command->surface, $surfaceDef);
                 $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $state->audience, $surfaceDef);
 
@@ -198,13 +192,19 @@ final readonly class DatabasePostService implements PostService
                     ] : null,
                 ];
             },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $surfaceDef, $state): void {
                 if (! $replay->resource instanceof ResourceRef) {
                     return;
                 }
 
                 $postsTable = $this->tables->table('posts', $command->surface->panel);
+                $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
                 $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $replay->resource->id);
+
+                if (SockitRows::str($row, 'surface_instance_id') !== SockitRows::str($surfaceRow, 'id')) {
+                    throw PanelException::bindingMismatch($command->surface->panel->value, "Post [{$replay->resource->id}] does not belong to target surface.");
+                }
+
                 $currentState = ContentState::from(SockitRows::str($row, 'state'));
 
                 if ($currentState === ContentState::Erased) {
@@ -221,6 +221,21 @@ final readonly class DatabasePostService implements PostService
 
                 if (! $command->asDraft && $currentState === ContentState::Hidden) {
                     throw OperationException::contentHidden('content.hidden');
+                }
+
+                if (! $command->asDraft && $replay->isSuccess()) {
+                    $currentAudience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
+                    $expectedAudience = $state->audience ?? $this->defaultAudience($verifiedActor, $command->surface, $surfaceDef);
+                    $this->verifyStoredPostAudienceForReplay(
+                        actor: $verifiedActor,
+                        surface: $command->surface,
+                        postId: $replay->resource->id,
+                        postRow: $row,
+                        surfaceRow: $surfaceRow,
+                        currentAudience: $currentAudience,
+                        baselineAudience: $expectedAudience,
+                        surfaceDef: $surfaceDef,
+                    );
                 }
             },
         );
@@ -444,7 +459,7 @@ final readonly class DatabasePostService implements PostService
                     ],
                 ];
             },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $surfaceDef): void {
                 $postsTable = $this->tables->table('posts', $command->surface->panel);
                 $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
                 $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
@@ -465,6 +480,21 @@ final readonly class DatabasePostService implements PostService
                 }
                 if ($replay->isSuccess() && $currentState === ContentState::Hidden) {
                     throw OperationException::contentHidden('content.hidden');
+                }
+
+                if ($replay->isSuccess()) {
+                    $currentAudience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
+                    $this->verifyStoredPostAudienceForReplay(
+                        actor: $verifiedActor,
+                        surface: $command->surface,
+                        postId: $command->postId,
+                        postRow: $row,
+                        surfaceRow: $surfaceRow,
+                        currentAudience: $currentAudience,
+                        baselineAudience: $command->audience,
+                        surfaceDef: $surfaceDef,
+                        replayResultRevision: $replay->revision?->value,
+                    );
                 }
             },
         );
@@ -512,11 +542,6 @@ final readonly class DatabasePostService implements PostService
                     surface: $command->surface,
                     resource: new ResourceRef($command->surface->panel, ResourceKind::Post, $command->postId),
                 ))->requireAllowed();
-
-                $admission = $this->runtime->audienceGate()->admitForWrite($verifiedActor, $command->surface);
-                if (! $admission->canWrite()) {
-                    throw OperationException::audienceDenied($admission->reason);
-                }
 
                 if ($command->targetState === ContentState::Published) {
                     $existing = $this->tables->connection($command->surface->panel)
@@ -698,7 +723,7 @@ final readonly class DatabasePostService implements PostService
                     ],
                 ];
             },
-            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command): void {
+            replayChecks: function (ActorContext $verifiedActor, Connection $connection, OperationResult $replay) use ($command, $surfaceDef): void {
                 $postsTable = $this->tables->table('posts', $command->surface->panel);
                 $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
                 $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
@@ -717,12 +742,27 @@ final readonly class DatabasePostService implements PostService
                     throw OperationException::contentDeleted($command->postId);
                 }
 
-                if ($command->targetState === ContentState::Published && $replay->isSuccess() && $currentState !== ContentState::Published) {
-                    if ($currentState === ContentState::Held) {
-                        throw OperationException::contentHeld('content.held');
+                if ($command->targetState === ContentState::Published && $replay->isSuccess()) {
+                    if ($currentState !== ContentState::Published) {
+                        if ($currentState === ContentState::Held) {
+                            throw OperationException::contentHeld('content.held');
+                        }
+
+                        throw OperationException::contentHidden('content.'.$currentState->value);
                     }
 
-                    throw OperationException::contentHidden('content.'.$currentState->value);
+                    $currentAudience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
+                    $this->verifyStoredPostAudienceForReplay(
+                        actor: $verifiedActor,
+                        surface: $command->surface,
+                        postId: $command->postId,
+                        postRow: $row,
+                        surfaceRow: $surfaceRow,
+                        currentAudience: $currentAudience,
+                        baselineAudience: null,
+                        surfaceDef: $surfaceDef,
+                        replayResultRevision: $replay->revision?->value,
+                    );
                 }
             },
         );
@@ -891,6 +931,42 @@ final readonly class DatabasePostService implements PostService
         }
 
         throw OperationException::audienceDenied($verdict->reason);
+    }
+
+    private function verifyStoredPostAudienceForReplay(
+        ActorContext $actor,
+        SurfaceRef $surface,
+        string $postId,
+        object $postRow,
+        object $surfaceRow,
+        AudienceSpec $currentAudience,
+        ?AudienceSpec $baselineAudience,
+        SurfaceDefinition $surfaceDef,
+        ?int $replayResultRevision = null,
+    ): void {
+        $this->assertAudienceAllowedToPublish($actor, $surface, $currentAudience, $surfaceDef);
+
+        $audienceShifted = $baselineAudience instanceof AudienceSpec
+            ? CanonicalJson::encode($currentAudience->toWire()) !== CanonicalJson::encode($baselineAudience->toWire())
+            : ($replayResultRevision !== null && SockitRows::int($postRow, 'revision', 1) > $replayResultRevision);
+
+        if (! $audienceShifted) {
+            return;
+        }
+
+        $verdict = $this->runtime->audienceGate()->read($actor, new AudienceSubject(
+            key: $postId,
+            spec: $currentAudience,
+            author: new ActorRef(SockitRows::str($postRow, 'author_type'), SockitRows::str($postRow, 'author_id')),
+            surface: $surface,
+            installation: $actor->installation,
+            surfaceArchived: SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value,
+            archiveReaders: $surfaceDef->archiveReaders,
+        ));
+
+        if (! $verdict->canRead()) {
+            throw OperationException::audienceDenied($verdict->reason);
+        }
     }
 
     /** @return array{0: ContentState, 1: ?string} */

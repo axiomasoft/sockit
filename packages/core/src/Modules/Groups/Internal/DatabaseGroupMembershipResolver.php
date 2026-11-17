@@ -15,12 +15,14 @@ use SocKit\Audience\Contracts\LocksGroupMembershipInTransaction;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\GroupRef;
 use SocKit\Audience\Data\TransactionAudienceSnapshot;
+use SocKit\Audience\Internal\SnapshotsLocalGroupState;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Modules\Groups\Enums\GroupMemberStatus;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Registrars\Internal\SockitRuntime;
+use SocKit\Support\CanonicalJson;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
@@ -35,7 +37,7 @@ use SocKit\Surfaces\Enums\SurfaceLifecycleState;
  * strictly within the target panel isolation boundary.
  */
 #[Internal]
-final readonly class DatabaseGroupMembershipResolver implements LocksGroupMembershipInTransaction
+final readonly class DatabaseGroupMembershipResolver implements LocksGroupMembershipInTransaction, SnapshotsLocalGroupState
 {
     public function __construct(
         private SockitTables $tables,
@@ -61,6 +63,42 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
     public function membershipVerdictInPanel(ActorContext $actor, PanelId $panel, GroupRef $group): AudienceVerdict
     {
         return $this->evaluate($actor, $panel, $group, callSurfacePolicy: true);
+    }
+
+    /** @param list<GroupRef> $groups */
+    #[Override]
+    public function snapshotLocalGroupState(ActorContext $actor, PanelId $panel, array $groups): string
+    {
+        if (
+            ! $actor->actor instanceof ActorRef
+            || ! $this->panels->isFrozen()
+            || ! $this->panels->has($panel)
+            || ! $this->panels->get($panel)->hasModule('groups')
+            || $groups === []
+        ) {
+            return '';
+        }
+
+        $connection = $this->tables->connection($panel);
+        $states = [];
+        foreach ($groups as $group) {
+            $groupRow = $this->findGroupRow($connection, $panel, $group);
+            $memberRow = is_object($groupRow)
+                ? $connection->table($this->tables->table('group_members', $panel))
+                    ->where('group_id', SockitRows::str($groupRow, 'id'))
+                    ->where('actor_type', $actor->actor->type)
+                    ->where('actor_id', $actor->actor->id)
+                    ->first()
+                : null;
+            $surfaceRow = is_object($groupRow) ? $this->managementSurfaceQuery($connection, $panel, $groupRow)->first() : null;
+            $states[$group->value] = [
+                'group' => is_object($groupRow) ? get_object_vars($groupRow) : null,
+                'member' => is_object($memberRow) ? get_object_vars($memberRow) : null,
+                'surface' => is_object($surfaceRow) ? get_object_vars($surfaceRow) : null,
+            ];
+        }
+
+        return hash('sha256', CanonicalJson::encode(['groups' => $states]));
     }
 
     /**
@@ -328,12 +366,7 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
         );
         $incarnationValue = SockitRows::int($groupRow, 'surface_incarnation', 1);
 
-        $surfaceQuery = $connection->table($this->tables->table('surface_instances', $panel))
-            ->where('panel_id', $panel->value)
-            ->where('kind', $kind->value)
-            ->where('host_entity_type', $host->type)
-            ->where('host_entity_value', $host->value)
-            ->orderByDesc('incarnation');
+        $surfaceQuery = $this->managementSurfaceQuery($connection, $panel, $groupRow);
         $surfaceRow = $surfaceQuery->first();
 
         if (! is_object($surfaceRow)) {
@@ -384,5 +417,15 @@ final readonly class DatabaseGroupMembershipResolver implements LocksGroupMember
         }
 
         return $admit;
+    }
+
+    private function managementSurfaceQuery(Connection $connection, PanelId $panel, object $groupRow): Builder
+    {
+        return $connection->table($this->tables->table('surface_instances', $panel))
+            ->where('panel_id', $panel->value)
+            ->where('kind', SockitRows::str($groupRow, 'surface_kind'))
+            ->where('host_entity_type', SockitRows::str($groupRow, 'surface_host_type'))
+            ->where('host_entity_value', SockitRows::str($groupRow, 'surface_host_value'))
+            ->orderByDesc('incarnation');
     }
 }

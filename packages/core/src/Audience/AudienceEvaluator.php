@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Audience;
 
+use Closure;
 use Override;
 use Packman\Attributes\Api;
 use SocKit\Actors\Data\ActorContext;
@@ -23,6 +24,7 @@ use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Enums\ContourMembership;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Enums\VerdictDecision;
+use SocKit\Audience\Internal\SnapshotsLocalGroupState;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
@@ -58,7 +60,11 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             return AudienceVerdict::deny('audience.denied.other_installation');
         }
 
-        return $this->evaluateReadSpec($viewer, $subject->spec, $subject->archiveReaders, $subject->surface->panel);
+        return $this->evaluateWithStableGroups(
+            $viewer,
+            $subject,
+            fn (): AudienceVerdict => $this->evaluateReadSpec($viewer, $subject->spec, $subject->archiveReaders, $subject->surface->panel),
+        );
     }
 
     /**
@@ -93,7 +99,34 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             return AudienceVerdict::deny('audience.denied.other_installation');
         }
 
-        return $this->evaluatePublishSpec($author, $subject->spec, $floor, $subject->surface->panel);
+        return $this->evaluateWithStableGroups(
+            $author,
+            $subject,
+            fn (): AudienceVerdict => $this->evaluatePublishSpec($author, $subject->spec, $floor, $subject->surface->panel),
+        );
+    }
+
+    /** @param Closure(): AudienceVerdict $evaluate */
+    private function evaluateWithStableGroups(ActorContext $actor, AudienceSubject $subject, Closure $evaluate): AudienceVerdict
+    {
+        $groups = $subject->spec->referencedGroups();
+        if ($groups === [] || ! $this->groups instanceof SnapshotsLocalGroupState) {
+            return $evaluate();
+        }
+
+        try {
+            $before = $this->groups->snapshotLocalGroupState($actor, $subject->surface->panel, $groups);
+            $verdict = $evaluate();
+
+            // Reconfirm every group after later external admissions, including groups used in exclusions.
+            if ($before !== $this->groups->snapshotLocalGroupState($actor, $subject->surface->panel, $groups)) {
+                return AudienceVerdict::deny('audience.unknown');
+            }
+
+            return $verdict;
+        } catch (Throwable) {
+            return AudienceVerdict::deny('audience.resolver_error');
+        }
     }
 
     private function evaluateReadSpec(ActorContext $viewer, AudienceSpec $spec, bool $archiveReaders, PanelId $panel): AudienceVerdict

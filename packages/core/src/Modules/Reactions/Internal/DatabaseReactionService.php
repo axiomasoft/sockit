@@ -13,6 +13,7 @@ use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\TransactionAudienceSnapshot;
 use SocKit\Audience\Exceptions\AuthorizationDeniedException;
+use SocKit\Audience\Internal\SnapshotsLocalGroupState;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Modules\Reactions\Configuration\ReactionsOptions;
@@ -435,17 +436,21 @@ final readonly class DatabaseReactionService implements ReactionService
                 continue;
             }
 
-            if (! is_object($confirmSurface)) {
-                return new ReactionCountsView($surface, $target, [], 0, new Revision(1));
-            }
+            // Fence the final audience evaluation through the last external target lookup with local-only reads.
+            $groups = $resolved->audience?->referencedGroups() ?? [];
+            $groupResolver = $groups !== [] ? $this->runtime->groupMembershipResolver() : null;
+            $groupState = $groups !== [] && $groupResolver instanceof SnapshotsLocalGroupState
+                ? $groupResolver->snapshotLocalGroupState($actor, $surface->panel, $groups)
+                : null;
+            $this->assertTargetAudience($actor, $surface, $target, $surfaceDef, $confirmTarget, requireWrite: false, surfaceArchived: $confirmArchived);
 
-            $rows = $connection->table($this->tables->table('reaction_counts', $surface->panel))
+            $rows = is_object($confirmSurface) ? $connection->table($this->tables->table('reaction_counts', $surface->panel))
                 ->where('panel_id', $surface->panel->value)
                 ->where('surface_instance_id', SockitRows::str($confirmSurface, 'id'))
                 ->where('target_type', $target->type)
                 ->where('target_key', $target->value)
                 ->orderBy('reaction_type')
-                ->get();
+                ->get() : [];
 
             // Final confirmation after reading counts so concurrent deletion/narrowing cannot disclose totals
             $postReadTarget = $assertTargetState($resolver instanceof TargetResolver ? $resolver->resolve($actor, $surface, $target) : null);
@@ -454,11 +459,18 @@ final readonly class DatabaseReactionService implements ReactionService
             $postReadArchived = $assertSurfaceReadable($postReadSurface);
 
             if (
-                ! is_object($postReadSurface)
+                (is_object($postReadSurface) ? get_object_vars($postReadSurface) : null) !== (is_object($confirmSurface) ? get_object_vars($confirmSurface) : null)
                 || $postReadArchived !== $confirmArchived
                 || ! $this->targetResolutionMatches($resolved, $postReadTarget)
             ) {
                 continue;
+            }
+
+            if (
+                $groupState !== null
+                && $groupState !== $groupResolver->snapshotLocalGroupState($actor, $surface->panel, $groups)
+            ) {
+                throw OperationException::audienceDenied('audience.unknown');
             }
 
             $counts = [];
@@ -719,8 +731,22 @@ final readonly class DatabaseReactionService implements ReactionService
             throw AuthorizationDeniedException::unknown('reaction.target_fence_required');
         }
 
+        $this->assertTargetAudience($actor, $surface, $target, $surfaceDef, $resolution, $requireWrite, $surfaceArchived);
+
+        return $resolution;
+    }
+
+    private function assertTargetAudience(
+        ActorContext $actor,
+        SurfaceRef $surface,
+        HostEntityRef $target,
+        SurfaceDefinition $surfaceDef,
+        TargetResolution $resolution,
+        bool $requireWrite,
+        bool $surfaceArchived,
+    ): void {
         if ($resolution->audience instanceof AudienceSpec) {
-            $verdict = $audienceGate->read($actor, new AudienceSubject(
+            $verdict = $this->runtime->audienceGate()->read($actor, new AudienceSubject(
                 key: $target->toWire(),
                 spec: $resolution->audience,
                 author: $resolution->owner,
@@ -734,8 +760,6 @@ final readonly class DatabaseReactionService implements ReactionService
                 throw OperationException::audienceDenied($verdict->reason);
             }
         }
-
-        return $resolution;
     }
 
     private function sampleTransactionSnapshotIfNeeded(

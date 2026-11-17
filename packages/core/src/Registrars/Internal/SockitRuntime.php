@@ -12,6 +12,7 @@ use Packman\Plugins\Contracts\Contributions\Extensions;
 use SocKit\Actors\ActorContexts;
 use SocKit\Audience\AudienceGate;
 use SocKit\Audience\Contracts\ActionAuthorizer;
+use SocKit\Audience\Contracts\GroupMembershipResolver;
 use SocKit\Configuration\SockitOptions;
 use SocKit\Modules\Groups\Contracts\MembershipConsent;
 use SocKit\Operations\Contracts\ContentSafetyChecker;
@@ -44,6 +45,13 @@ final class SockitRuntime
     public function audienceGate(): AudienceGate
     {
         return $this->container()->make(AudienceGate::class);
+    }
+
+    public function groupMembershipResolver(): ?GroupMembershipResolver
+    {
+        $container = $this->container();
+
+        return $container->bound(GroupMembershipResolver::class) ? $container->make(GroupMembershipResolver::class) : null;
     }
 
     public function envelope(): OperationEnvelopeRunner

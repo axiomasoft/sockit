@@ -1814,6 +1814,174 @@ final class ReAuditHardeningTest extends SocKitTestCase
         self::assertSame($state, DB::table('sk_surface_instances')->where('host_entity_value', $surface->host->value)->value('lifecycle_state'));
     }
 
+    public function test_reaction_counts_recheck_membership_after_third_target_lookup(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $fake->consent->allowAll();
+        $management = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'final-membership'), Incarnation::initial());
+        $surface = new SurfaceRef($management->panel, $management->kind, new HostEntityRef('board', 'final-membership-content'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $created = $groups->create(new CreateGroupCommand(new CommandKey('cmd-final-membership-create'), $management, 'final-membership', 'Final membership', joinPolicy: GroupJoinPolicy::Auto));
+        $groupId = (string) $created->resource?->id;
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-final-membership-alice'), $management, $groupId, new Revision(1), new ActorRef('user', 'alice')));
+        $target = new HostEntityRef('article', 'final-membership');
+        $fake->targets->withLocalWriteFence()->register($target, audience: AudienceSpec::group(new GroupRef($groupId)), privacyRevision: new Revision(1));
+        $reactions = $this->app->make(ReactionService::class);
+        $reactions->add(new AddReactionCommand(new CommandKey('cmd-final-membership-add'), $surface, $target, 'like'));
+        self::assertSame(1, $reactions->counts($surface, $target)->total);
+
+        $resolver = new class($fake->targets, $groups, $management, $groupId) implements TargetResolver
+        {
+            public int $calls = 0;
+
+            public ?OperationResult $leave = null;
+
+            public function __construct(
+                private readonly TargetResolver $inner,
+                private readonly GroupService $groups,
+                private readonly SurfaceRef $management,
+                private readonly string $groupId,
+            ) {}
+
+            #[Override]
+            public function supports(HostEntityRef $target): bool
+            {
+                return $this->inner->supports($target);
+            }
+
+            #[Override]
+            public function resolve(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target): TargetResolution
+            {
+                $resolution = $this->inner->resolve($actor, $surface, $target);
+                if (++$this->calls === 3) {
+                    ReAuditHardeningTest::assertSame(0, DB::connection()->transactionLevel());
+                    $this->leave = $this->groups->leave(new LeaveGroupCommand(new CommandKey('cmd-final-membership-leave'), $this->management, $this->groupId, new Revision(2)));
+                }
+
+                return $resolution;
+            }
+        };
+        $this->app->instance(TargetResolver::class, $resolver);
+
+        try {
+            $reactions->counts($surface, $target);
+            self::fail('Counts must not retain group authorization from before the third target lookup.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        self::assertSame(3, $resolver->calls);
+        self::assertInstanceOf(OperationResult::class, $resolver->leave);
+        self::assertTrue($resolver->leave->isSuccess());
+        self::assertSame(GroupMemberStatus::Left->value, DB::table('sk_group_members')->where('group_id', $groupId)->where('actor_id', 'alice')->value('status'));
+        self::assertSame(1, DB::table('sk_reaction_counts')->where('target_key', $target->value)->value('count'));
+    }
+
+    /** @return array<string, array{string, string, string}> */
+    public static function compositeManagementAdmissionChanges(): array
+    {
+        $cases = [];
+        foreach (self::managementAdmissionChanges() as $name => [$read, $change]) {
+            $cases['all_of '.$name] = [$read, $change, 'all_of'];
+        }
+        foreach (['post', 'counts'] as $read) {
+            foreach (['any_of', 'exclude'] as $operator) {
+                $cases[$operator.' '.$read.' leave'] = [$read, 'leave', $operator];
+            }
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('compositeManagementAdmissionChanges')]
+    public function test_composite_reads_recheck_earlier_groups_after_later_management_admission(string $read, string $change, string $operator): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $fake->consent->allowAll();
+        $managementA = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'composite-a'), Incarnation::initial());
+        $managementB = new SurfaceRef($managementA->panel, $managementA->kind, new HostEntityRef('board', 'composite-b'), Incarnation::initial());
+        $surface = new SurfaceRef($managementA->panel, $managementA->kind, new HostEntityRef('board', 'composite-content'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $posts = $this->app->make(PostService::class);
+        $reactions = $this->app->make(ReactionService::class);
+        $groupIds = [];
+        foreach (['a' => $managementA, 'b' => $managementB] as $name => $management) {
+            $created = $groups->create(new CreateGroupCommand(new CommandKey('cmd-composite-create-'.$name), $management, 'composite-'.$name, 'Composite '.$name, joinPolicy: GroupJoinPolicy::Auto));
+            $groupIds[$name] = (string) $created->resource?->id;
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-composite-alice-'.$name), $management, $groupIds[$name], new Revision(1), new ActorRef('user', 'alice')));
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-composite-bob-'.$name), $management, $groupIds[$name], new Revision(2), new ActorRef('user', 'bob')));
+        }
+
+        $audienceA = AudienceSpec::group(new GroupRef($groupIds['a']));
+        $audienceB = AudienceSpec::group(new GroupRef($groupIds['b']));
+        $audience = match ($operator) {
+            'any_of' => AudienceSpec::anyOf($audienceA, $audienceB),
+            'exclude' => AudienceSpec::exclude($audienceA, AudienceSpec::exclude($audienceB, $audienceB)),
+            default => AudienceSpec::allOf($audienceA, $audienceB),
+        };
+        $published = $posts->publish(new PublishPostCommand(new CommandKey('cmd-composite-post'), $surface, 'Composite protected body', audience: $audience));
+        $postId = (string) $published->resource?->id;
+        $target = new HostEntityRef('post', $postId);
+        $reactions->add(new AddReactionCommand(new CommandKey('cmd-composite-reaction'), $surface, $target, 'like'));
+
+        $fake->actors->actAsPerson('bob');
+        self::assertSame('Composite protected body', $posts->get($surface, $postId)->body);
+        self::assertSame(1, $reactions->counts($surface, $target)->total);
+        $admissions = [];
+        $changed = false;
+        $leave = null;
+        $fake->surfacePolicy->admitUsing(static function (ActorContext $viewer, SurfaceRef $admitted) use ($managementA, $managementB, $groups, $groupIds, $change, $operator, &$admissions, &$changed, &$leave): AudienceVerdict {
+            if ($admitted->host->equals($managementA->host) || $admitted->host->equals($managementB->host)) {
+                $admissions[] = $admitted->host->value;
+            }
+            if (! $changed && $admitted->host->equals($managementB->host)) {
+                $changed = true;
+                if ($change === 'leave') {
+                    $leave = $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-composite-leave-a'), $managementA, $groupIds['a'], new Revision(3)));
+                } elseif ($change === 'removed' || $change === 'banned') {
+                    DB::table('sk_group_members')->where('group_id', $groupIds['a'])->where('actor_id', 'bob')->update(['status' => $change]);
+                } elseif ($change === 'policy') {
+                    DB::table('sk_groups')->where('id', $groupIds['a'])->update(['join_policy' => GroupJoinPolicy::Invite->value]);
+                } elseif ($change === 'generation') {
+                    DB::table('sk_groups')->where('id', $groupIds['a'])->increment('membership_generation');
+                } elseif ($change === 'inactive') {
+                    DB::table('sk_groups')->where('id', $groupIds['a'])->update(['state' => 'deleted']);
+                } elseif ($change === 'incarnation') {
+                    DB::table('sk_surface_instances')->where('host_entity_value', $managementA->host->value)->increment('incarnation');
+                } else {
+                    DB::table('sk_surface_instances')->where('host_entity_value', $managementA->host->value)->update(['lifecycle_state' => $change]);
+                }
+            }
+
+            return $operator === 'any_of' && ! $changed && $admitted->host->equals($managementA->host)
+                ? AudienceVerdict::allowReadOnly('management.read_only')
+                : AudienceVerdict::allow('management.admitted');
+        });
+
+        try {
+            if ($read === 'post') {
+                $posts->get($surface, $postId);
+            } else {
+                $reactions->counts($surface, $target);
+            }
+            self::fail('A later group admission must not retain an earlier group verdict after its local state changes.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        self::assertTrue($changed);
+        self::assertSame([$managementA->host->value, $managementB->host->value], array_slice($admissions, 0, 2));
+        if ($change === 'leave') {
+            self::assertInstanceOf(OperationResult::class, $leave);
+            self::assertTrue($leave->isSuccess());
+            self::assertSame(GroupMemberStatus::Left->value, DB::table('sk_group_members')->where('group_id', $groupIds['a'])->where('actor_id', 'bob')->value('status'));
+        }
+    }
+
     /** @return array<string, array{string, string}> */
     public static function managementAdmissionChanges(): array
     {

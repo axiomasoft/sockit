@@ -12,6 +12,7 @@ use Packman\Attributes\Internal;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
+use SocKit\Audience\Internal\LocalGroupReadGuard;
 use SocKit\Database\Internal\SockitRows;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Modules\Posts\Configuration\PostsOptions;
@@ -109,6 +110,9 @@ final readonly class DatabaseFeedService implements FeedService
         $cursor = $query->cursor;
         $batchSize = max($limit * 2, 20);
         $accepted = [];
+        $acceptedSubjects = [];
+        $acceptedGroupStates = [];
+        $groupGuard = new LocalGroupReadGuard($this->runtime->groupMembershipResolver());
         $hasMore = false;
         $lastScannedRow = null;
 
@@ -175,6 +179,8 @@ final readonly class DatabaseFeedService implements FeedService
                 );
             }
 
+            // Start before authorization so no local change between the verdict and body fetch is missed.
+            $checkedGroupStates = $groupGuard->snapshot($viewer, $subjects);
             $verdicts = $audienceGate->readMany($viewer, $subjects);
 
             $permittedIds = [];
@@ -244,7 +250,7 @@ final readonly class DatabaseFeedService implements FeedService
                     || $freshCanonicalSpec !== $checkedSpecs[$postId]
                     || $latestSurfaceArchived !== $surfaceArchived
                 ) {
-                    $recheckVerdict = $audienceGate->read($viewer, new AudienceSubject(
+                    $subjects[$index] = new AudienceSubject(
                         key: $postId,
                         spec: $freshSpec,
                         author: $freshAuthor,
@@ -252,7 +258,9 @@ final readonly class DatabaseFeedService implements FeedService
                         installation: $viewer->installation,
                         surfaceArchived: $latestSurfaceArchived,
                         archiveReaders: $surfaceDef->archiveReaders,
-                    ));
+                    );
+                    $checkedGroupStates[$postId] = $groupGuard->snapshot($viewer, [$subjects[$index]])[$postId];
+                    $recheckVerdict = $audienceGate->read($viewer, $subjects[$index]);
 
                     if (! $recheckVerdict->canRead()) {
                         continue;
@@ -286,6 +294,8 @@ final readonly class DatabaseFeedService implements FeedService
                     $fresh = $confirm;
                 }
 
+                $acceptedSubjects[] = $subjects[$index];
+                $acceptedGroupStates[$postId] = $checkedGroupStates[$postId];
                 $accepted[] = new PostView(
                     id: $postId,
                     panel: $query->surface->panel,
@@ -335,6 +345,12 @@ final readonly class DatabaseFeedService implements FeedService
                 expiresAt: $now->modify('+'.$cursorTtlSeconds.' seconds'),
             );
         }
+
+        // Later privacy rechecks and scan rounds can also revoke an earlier item's membership.
+        // Confirm all accepted items together, after every body fetch and external admission.
+        $confirmedGroupStates = $groupGuard->snapshot($viewer, $acceptedSubjects);
+        $accepted = array_values(array_filter($accepted, static fn (PostView $post): bool => $acceptedGroupStates[$post->id] !== null
+            && $acceptedGroupStates[$post->id] === $confirmedGroupStates[$post->id]));
 
         return new FeedPageView(
             items: $accepted,

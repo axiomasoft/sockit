@@ -8,6 +8,7 @@ use Packman\Attributes\Api;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Actors\Enums\ActorKind;
 use SocKit\Audience\Contracts\AudienceResolver;
+use SocKit\Audience\Contracts\GroupMembershipResolver;
 use SocKit\Audience\Contracts\ResolvesAudienceInBatch;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\AudienceSpec;
@@ -17,6 +18,7 @@ use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Data\TransactionAudienceSnapshot;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Enums\VerdictDecision;
+use SocKit\Audience\Internal\LocalGroupReadGuard;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Surfaces\Data\SurfaceRef;
@@ -32,6 +34,7 @@ final readonly class AudienceGate
     public function __construct(
         private AudienceResolver $resolver,
         private ?SurfaceAudiencePolicy $surfacePolicy = null,
+        private ?GroupMembershipResolver $groups = null,
     ) {}
 
     public function admitForRead(ActorContext $actor, SurfaceRef $surface): AudienceVerdict
@@ -80,6 +83,19 @@ final readonly class AudienceGate
      * @return array<string, AudienceVerdict>
      */
     public function readMany(ActorContext $viewer, array $subjects): array
+    {
+        return new LocalGroupReadGuard($this->groups)->evaluateMany(
+            $viewer,
+            $subjects,
+            fn (): array => $this->evaluateMany($viewer, $subjects),
+        );
+    }
+
+    /**
+     * @param  list<AudienceSubject>  $subjects
+     * @return array<string, AudienceVerdict>
+     */
+    private function evaluateMany(ActorContext $viewer, array $subjects): array
     {
         if ($subjects === []) {
             return [];

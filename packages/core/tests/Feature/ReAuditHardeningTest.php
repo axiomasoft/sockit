@@ -54,6 +54,7 @@ use SocKit\Modules\Posts\Contracts\PostService;
 use SocKit\Modules\Posts\Data\EditPostCommand;
 use SocKit\Modules\Posts\Data\FeedCursor;
 use SocKit\Modules\Posts\Data\GetFeedQuery;
+use SocKit\Modules\Posts\Data\PostView;
 use SocKit\Modules\Posts\Data\PublishPostCommand;
 use SocKit\Modules\Posts\Data\TransitionPostStateCommand;
 use SocKit\Modules\Posts\Enums\ContentState;
@@ -1877,6 +1878,153 @@ final class ReAuditHardeningTest extends SocKitTestCase
         self::assertTrue($resolver->leave->isSuccess());
         self::assertSame(GroupMemberStatus::Left->value, DB::table('sk_group_members')->where('group_id', $groupId)->where('actor_id', 'alice')->value('status'));
         self::assertSame(1, DB::table('sk_reaction_counts')->where('target_key', $target->value)->value('count'));
+    }
+
+    /** @return array<string, array{string, bool}> */
+    public static function batchGroupRevocationReads(): array
+    {
+        return [
+            'evaluator' => ['evaluator', false],
+            'gate' => ['gate', false],
+            'gate with sequential resolver' => ['sequential_gate', false],
+            'feed admission' => ['feed', false],
+            'feed body fetch' => ['feed_body_fetch', false],
+            'feed privacy recheck' => ['feed_recheck', false],
+            'evaluator retry exhaustion' => ['evaluator', true],
+            'gate retry exhaustion' => ['sequential_gate', true],
+        ];
+    }
+
+    #[DataProvider('batchGroupRevocationReads')]
+    public function test_batch_reads_reconfirm_earlier_groups_after_later_admissions(string $read, bool $unstable): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+        $fake->consent->allowAll();
+        $managementA = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'batch-a'), Incarnation::initial());
+        $managementB = new SurfaceRef($managementA->panel, $managementA->kind, new HostEntityRef('board', 'batch-b'), Incarnation::initial());
+        $surface = new SurfaceRef($managementA->panel, $managementA->kind, new HostEntityRef('board', 'batch-content'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $posts = $this->app->make(PostService::class);
+        $groupIds = [];
+        $postIds = [];
+        $subjects = [];
+        foreach (['a' => $managementA, 'b' => $managementB] as $name => $management) {
+            $created = $groups->create(new CreateGroupCommand(new CommandKey('cmd-batch-race-create-'.$name), $management, 'batch-'.$name, 'Batch '.$name, joinPolicy: GroupJoinPolicy::Auto));
+            $groupIds[$name] = (string) $created->resource?->id;
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-batch-race-alice-'.$name), $management, $groupIds[$name], new Revision(1), new ActorRef('user', 'alice')));
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-batch-race-bob-'.$name), $management, $groupIds[$name], new Revision(2), new ActorRef('user', 'bob')));
+            $spec = AudienceSpec::group(new GroupRef($groupIds[$name]));
+            $published = $posts->publish(new PublishPostCommand(new CommandKey('cmd-batch-race-post-'.$name), $surface, 'Private body '.$name, audience: $spec));
+            $postIds[$name] = (string) $published->resource?->id;
+            // The feed must evaluate A before B, regardless of generated IDs or clock precision.
+            DB::table('sk_posts')->where('id', $postIds[$name])->update(['published_at' => $name === 'a' ? '2026-01-02 00:00:00' : '2026-01-01 00:00:00']);
+            $subjects[] = new AudienceSubject($name, $spec, new ActorRef('user', 'alice'), $surface, $this->app->make(ActorContexts::class)->current()->installation);
+        }
+
+        $fake->actors->actAsPerson('bob');
+        $viewer = $this->app->make(ActorContexts::class)->current();
+        $resolver = $this->app->make(AudienceResolver::class);
+        self::assertInstanceOf(ResolvesAudienceInBatch::class, $resolver);
+        foreach ($resolver->decideReadMany($viewer, $subjects) as $verdict) {
+            self::assertTrue($verdict->canRead());
+        }
+
+        if ($read === 'sequential_gate') {
+            $this->app->instance(AudienceResolver::class, new readonly class($resolver) implements AudienceResolver
+            {
+                public function __construct(private AudienceResolver $inner) {}
+
+                #[Override]
+                public function decideRead(ActorContext $viewer, AudienceSubject $subject): AudienceVerdict
+                {
+                    return $this->inner->decideRead($viewer, $subject);
+                }
+
+                #[Override]
+                public function decidePublish(ActorContext $author, AudienceSubject $subject, PrivacyFloor $floor): AudienceVerdict
+                {
+                    return $this->inner->decidePublish($author, $subject, $floor);
+                }
+            });
+        }
+
+        $armed = ! in_array($read, ['feed_body_fetch', 'feed_recheck'], true);
+        $changed = false;
+        $leave = null;
+        $admissions = [];
+        $fake->surfacePolicy->admitUsing(static function (ActorContext $actor, SurfaceRef $admitted) use ($managementA, $managementB, $groups, $groupIds, $unstable, &$armed, &$changed, &$leave, &$admissions): AudienceVerdict {
+            if ($admitted->host->equals($managementA->host) || $admitted->host->equals($managementB->host)) {
+                $admissions[] = $admitted->host->value;
+            }
+            if ($unstable && $admitted->host->equals($managementB->host)) {
+                $changed = true;
+                DB::table('sk_groups')->where('id', $groupIds['a'])->increment('revision');
+            } elseif ($armed && ! $changed && $admitted->host->equals($managementB->host)) {
+                $changed = true;
+                $leave = $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-batch-race-leave-a'), $managementA, $groupIds['a'], new Revision(3)));
+            }
+
+            return AudienceVerdict::allow('management.admitted');
+        });
+
+        $gate = $this->app->make(SockitRuntime::class)->audienceGate();
+        if (in_array($read, ['feed_body_fetch', 'feed_recheck'], true)) {
+            DB::listen(static function (QueryExecuted $query) use ($read, $gate, $viewer, $managementB, &$armed): void {
+                if ($armed || ! str_starts_with($query->sql, 'select * from "sk_posts"') || ! str_contains($query->sql, ' in (')) {
+                    return;
+                }
+
+                $armed = true;
+                if ($read === 'feed_body_fetch') {
+                    // The body query has completed, after readMany returned its allowed verdicts.
+                    $gate->admitForRead($viewer, $managementB);
+                }
+            });
+            if ($read === 'feed_recheck') {
+                $fake->surfacePolicy->admitUsing(static function (ActorContext $actor, SurfaceRef $admitted) use ($managementA, $managementB, $groups, $groupIds, $postIds, &$armed, &$changed, &$leave, &$admissions): AudienceVerdict {
+                    if ($admitted->host->equals($managementA->host) || $admitted->host->equals($managementB->host)) {
+                        $admissions[] = $admitted->host->value;
+                    }
+                    if ($admitted->host->equals($managementB->host)) {
+                        if (! $armed) {
+                            DB::table('sk_posts')->where('id', $postIds['b'])->increment('privacy_revision');
+                        } elseif (! $changed) {
+                            $changed = true;
+                            $leave = $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-batch-race-leave-a'), $managementA, $groupIds['a'], new Revision(3)));
+                        }
+                    }
+
+                    return AudienceVerdict::allow('management.admitted');
+                });
+            }
+        }
+
+        if (str_starts_with($read, 'feed')) {
+            $page = $this->app->make(FeedService::class)->feed(new GetFeedQuery($surface));
+            self::assertSame([$postIds['b']], array_map(static fn (PostView $post): string => $post->id, $page->items));
+            self::assertSame('Private body b', $page->items[0]->body);
+        } else {
+            // Repeated A also exercises verdict memoization after B's revocation.
+            $subjects[] = new AudienceSubject('a-copy', $subjects[0]->spec, $subjects[0]->author, $surface, $viewer->installation);
+            $verdicts = $read === 'evaluator' ? $resolver->decideReadMany($viewer, $subjects) : $gate->readMany($viewer, $subjects);
+            self::assertFalse($verdicts['a']->canRead());
+            self::assertFalse($verdicts['a-copy']->canRead());
+            self::assertTrue($verdicts['b']->canRead());
+        }
+
+        self::assertTrue($changed);
+        self::assertSame([$managementA->host->value, $managementB->host->value], array_slice($admissions, 0, 2));
+        if ($unstable) {
+            self::assertCount(2, array_filter($admissions, static fn (string $host): bool => $host === $managementB->host->value));
+            self::assertSame(GroupMemberStatus::Active->value, DB::table('sk_group_members')->where('group_id', $groupIds['a'])->where('actor_id', 'bob')->value('status'));
+
+            return;
+        }
+        self::assertInstanceOf(OperationResult::class, $leave);
+        self::assertTrue($leave->isSuccess());
+        self::assertSame(GroupMemberStatus::Left->value, DB::table('sk_group_members')->where('group_id', $groupIds['a'])->where('actor_id', 'bob')->value('status'));
     }
 
     /** @return array<string, array{string, string, string}> */

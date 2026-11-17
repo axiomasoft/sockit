@@ -1027,6 +1027,15 @@
                             "optional": true,
                             "default": "null",
                             "flags": 4
+                        },
+                        {
+                            "name": "groups",
+                            "type": "?SocKit\\Audience\\Contracts\\GroupMembershipResolver",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "null",
+                            "flags": 4
                         }
                     ],
                     "return": null,

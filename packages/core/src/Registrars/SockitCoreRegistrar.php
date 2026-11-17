@@ -224,6 +224,7 @@ final class SockitCoreRegistrar implements PackageRegistrar
             return new AudienceGate(
                 resolver: $app->make(AudienceResolver::class),
                 surfacePolicy: $policy,
+                groups: self::resolveOptionalGroupResolver($app, $options->groupResolver),
             );
         });
     }

@@ -24,6 +24,7 @@ use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Enums\ContourMembership;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Enums\VerdictDecision;
+use SocKit\Audience\Internal\LocalGroupReadGuard;
 use SocKit\Audience\Internal\SnapshotsLocalGroupState;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Data\ActorRef;
@@ -73,6 +74,19 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
      */
     #[Override]
     public function decideReadMany(ActorContext $viewer, array $subjects): array
+    {
+        return new LocalGroupReadGuard($this->groups)->evaluateMany(
+            $viewer,
+            $subjects,
+            fn (): array => $this->evaluateMany($viewer, $subjects),
+        );
+    }
+
+    /**
+     * @param  list<AudienceSubject>  $subjects
+     * @return array<string, AudienceVerdict>
+     */
+    private function evaluateMany(ActorContext $viewer, array $subjects): array
     {
         $results = [];
         $memo = [];

@@ -302,9 +302,9 @@ final readonly class DatabasePostService implements PostService
 
                 public string $effectiveBodyFormat = 'plain';
 
-                public string $effectiveAudienceCanonical = '';
+                public string $storedAudienceCanonical = '';
 
-                public ?AudienceSpec $effectiveAudience = null;
+                public ?AudienceSpec $guardAudience = null;
 
                 public ?TransactionAudienceSnapshot $audienceSnapshot = null;
 
@@ -370,15 +370,25 @@ final readonly class DatabasePostService implements PostService
                         }
 
                         $existingAudienceWire = SockitRows::jsonArray($existing, 'audience_wire');
-                        $effectiveAudience = $command->audience instanceof AudienceSpec
-                            ? $command->audience
-                            : AudienceSpec::fromWire($existingAudienceWire);
-                        $precheck->effectiveAudience = $effectiveAudience;
-                        $precheck->effectiveAudienceCanonical = CanonicalJson::encode($effectiveAudience->toWire());
+                        $storedAudience = AudienceSpec::fromWire($existingAudienceWire);
+                        $precheck->storedAudienceCanonical = CanonicalJson::encode($storedAudience->toWire());
 
-                        // Always enforce current surface admission, containment, privacy floor, and audience on edit.
-                        $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $effectiveAudience, $surfaceDef);
-                        $precheck->audienceSnapshot = $this->samplePostTransactionSnapshot($verifiedActor, $command->surface, $effectiveAudience, $surfaceDef->archiveReaders);
+                        // Always enforce current surface admission, containment, privacy floor, and audience on BOTH
+                        // the currently stored audience (preventing removed authors/editors from widening/hijacking)
+                        // and any newly proposed audience.
+                        $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $storedAudience, $surfaceDef);
+
+                        if ($command->audience instanceof AudienceSpec) {
+                            $this->assertAudienceAllowedToPublish($verifiedActor, $command->surface, $command->audience, $surfaceDef);
+                            $guardAudience = CanonicalJson::encode($command->audience->toWire()) !== $precheck->storedAudienceCanonical
+                                ? AudienceSpec::allOf($storedAudience, $command->audience)
+                                : $storedAudience;
+                        } else {
+                            $guardAudience = $storedAudience;
+                        }
+
+                        $precheck->guardAudience = $guardAudience;
+                        $precheck->audienceSnapshot = $this->samplePostTransactionSnapshot($verifiedActor, $command->surface, $guardAudience, $surfaceDef->archiveReaders);
 
                         $precheck->effectiveBodyFormat = $command->bodyFormat ?? SockitRows::str($existing, 'body_format');
 
@@ -399,8 +409,8 @@ final readonly class DatabasePostService implements PostService
                         $postsTable = $this->tables->table('posts', $command->surface->panel);
                         $surfaceRow = $this->findSurfaceRow($connection, $command->surface);
 
-                        if ($precheck->effectiveAudience instanceof AudienceSpec) {
-                            $this->reverifyPublishGroupsInsideTx($verifiedActor, $command->surface, $precheck->effectiveAudience, $precheck->audienceSnapshot);
+                        if ($precheck->guardAudience instanceof AudienceSpec) {
+                            $this->reverifyPublishGroupsInsideTx($verifiedActor, $command->surface, $precheck->guardAudience, $precheck->audienceSnapshot);
                         }
 
                         $row = $this->lockPostRow($connection, $postsTable, $command->surface->panel->value, $command->postId);
@@ -428,7 +438,7 @@ final readonly class DatabasePostService implements PostService
                         $bodyFormat = $command->bodyFormat ?? SockitRows::str($row, 'body_format');
 
                         if (
-                            (! $command->audience instanceof AudienceSpec && CanonicalJson::encode($currentAudienceWire) !== $precheck->effectiveAudienceCanonical)
+                            CanonicalJson::encode($currentAudienceWire) !== $precheck->storedAudienceCanonical
                             || ($command->bodyFormat === null && $bodyFormat !== $precheck->effectiveBodyFormat)
                         ) {
                             throw OperationException::revisionConflict($command->expectedRevision->value, $actualRevision);
@@ -873,98 +883,131 @@ final readonly class DatabasePostService implements PostService
     {
         [, $surfaceDef] = $this->assertPostsEnabled($surface);
         $actor = $this->runtime->actors()->current();
-
         $connection = $this->tables->connection($surface->panel);
-        $row = $connection->table($this->tables->table('posts', $surface->panel))
-            ->where('panel_id', $surface->panel->value)
-            ->where('id', $postId)
-            ->first();
+        $postsTable = $this->tables->table('posts', $surface->panel);
+        $surfacesTable = $this->tables->table('surface_instances', $surface->panel);
 
-        if (! is_object($row)) {
-            throw OperationException::contentHidden('post.not_found');
-        }
+        $loadConfirmedRows = static function () use ($connection, $postsTable, $surfacesTable, $surface, $postId, $surfaceDef): array {
+            $row = $connection->table($postsTable)
+                ->where('panel_id', $surface->panel->value)
+                ->where('id', $postId)
+                ->first();
 
-        $surfaceRow = $connection->table($this->tables->table('surface_instances', $surface->panel))
-            ->where('panel_id', $surface->panel->value)
-            ->where('kind', $surface->kind->value)
-            ->where('host_entity_type', $surface->host->type)
-            ->where('host_entity_value', $surface->host->value)
-            ->where('incarnation', $surface->incarnation->value)
-            ->first();
+            if (! is_object($row)) {
+                throw OperationException::contentHidden('post.not_found');
+            }
 
-        if (! is_object($surfaceRow) || SockitRows::str($surfaceRow, 'id') !== SockitRows::str($row, 'surface_instance_id')) {
-            throw OperationException::contentHidden('post.wrong_surface');
-        }
+            $surfaceRow = $connection->table($surfacesTable)
+                ->where('panel_id', $surface->panel->value)
+                ->where('kind', $surface->kind->value)
+                ->where('host_entity_type', $surface->host->type)
+                ->where('host_entity_value', $surface->host->value)
+                ->where('incarnation', $surface->incarnation->value)
+                ->first();
 
-        if (SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
-            throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
-        }
+            if (! is_object($surfaceRow) || SockitRows::str($surfaceRow, 'id') !== SockitRows::str($row, 'surface_instance_id')) {
+                throw OperationException::contentHidden('post.wrong_surface');
+            }
 
-        $state = ContentState::from(SockitRows::str($row, 'state'));
+            if (SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
+                throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
+            }
 
-        if ($state === ContentState::Erased) {
-            throw OperationException::contentErased($postId);
-        }
+            $archived = SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
+            if ($archived && ! $surfaceDef->archiveReaders) {
+                throw OperationException::audienceDenied('audience.denied.surface_archived');
+            }
 
-        if ($state === ContentState::Deleted) {
-            throw OperationException::contentDeleted($postId);
-        }
+            $state = ContentState::from(SockitRows::str($row, 'state'));
+            if ($state === ContentState::Erased) {
+                throw OperationException::contentErased($postId);
+            }
 
-        $author = new ActorRef(SockitRows::str($row, 'author_type'), SockitRows::str($row, 'author_id'));
+            if ($state === ContentState::Deleted) {
+                throw OperationException::contentDeleted($postId);
+            }
 
-        if (! $state->isPubliclyVisible()) {
-            $isAuthor = $actor->actor instanceof ActorRef && $actor->actor->equals($author);
+            return [$row, $state, $archived];
+        };
 
-            if ($state === ContentState::Draft) {
-                if (! $isAuthor) {
-                    throw OperationException::contentHidden('content.draft');
-                }
-            } else {
-                $modDecision = $this->runtime->authorizer()->decide(new ActionRequest(
-                    actor: $actor,
-                    action: 'sockit.posts.view_hidden',
-                    surface: $surface,
-                    resource: new ResourceRef($surface->panel, ResourceKind::Post, $postId),
-                ));
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            [$row, $state, $archived] = $loadConfirmedRows();
+            $author = new ActorRef(SockitRows::str($row, 'author_type'), SockitRows::str($row, 'author_id'));
 
-                if (! $isAuthor && ! $modDecision->isAllowed()) {
-                    throw OperationException::contentHidden('content.'.$state->value);
+            if (! $state->isPubliclyVisible()) {
+                $isAuthor = $actor->actor instanceof ActorRef && $actor->actor->equals($author);
+
+                if ($state === ContentState::Draft) {
+                    if (! $isAuthor) {
+                        throw OperationException::contentHidden('content.draft');
+                    }
+                } else {
+                    $modDecision = $this->runtime->authorizer()->decide(new ActionRequest(
+                        actor: $actor,
+                        action: 'sockit.posts.view_hidden',
+                        surface: $surface,
+                        resource: new ResourceRef($surface->panel, ResourceKind::Post, $postId),
+                    ));
+
+                    if (! $isAuthor && ! $modDecision->isAllowed()) {
+                        throw OperationException::contentHidden('content.'.$state->value);
+                    }
                 }
             }
+
+            $audience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
+            $checkedAudienceCanonical = CanonicalJson::encode($audience->toWire());
+            $checkedPrivacyRevision = SockitRows::int($row, 'privacy_revision', 1);
+
+            $verdict = $this->runtime->audienceGate()->read($actor, new AudienceSubject(
+                key: $postId,
+                spec: $audience,
+                author: $author,
+                surface: $surface,
+                installation: $actor->installation,
+                surfaceArchived: $archived,
+                archiveReaders: $surfaceDef->archiveReaders,
+            ));
+
+            if (! $verdict->canRead()) {
+                throw OperationException::audienceDenied($verdict->reason);
+            }
+
+            // Re-verify post & surface lifecycle/privacy after external admission and hydrate from the confirmed row
+            [$confirmRow, $confirmState, $confirmArchived] = $loadConfirmedRows();
+            $confirmAuthor = new ActorRef(SockitRows::str($confirmRow, 'author_type'), SockitRows::str($confirmRow, 'author_id'));
+            $confirmAudience = AudienceSpec::fromWire(SockitRows::jsonArray($confirmRow, 'audience_wire'));
+            $confirmAudienceCanonical = CanonicalJson::encode($confirmAudience->toWire());
+            $confirmPrivacyRevision = SockitRows::int($confirmRow, 'privacy_revision', 1);
+
+            if (
+                $confirmState !== $state
+                || $confirmArchived !== $archived
+                || ! $confirmAuthor->equals($author)
+                || $confirmPrivacyRevision !== $checkedPrivacyRevision
+                || $confirmAudienceCanonical !== $checkedAudienceCanonical
+            ) {
+                continue;
+            }
+
+            return new PostView(
+                id: SockitRows::str($confirmRow, 'id'),
+                panel: $surface->panel,
+                surface: $surface,
+                author: $confirmAuthor,
+                state: $confirmState,
+                bodyFormat: SockitRows::str($confirmRow, 'body_format'),
+                body: SockitRows::optStr($confirmRow, 'current_body'),
+                revision: new Revision(SockitRows::int($confirmRow, 'revision', 1)),
+                privacyRevision: new Revision($confirmPrivacyRevision),
+                audience: $confirmAudience,
+                publishedAt: SockitRows::optDate($confirmRow, 'published_at'),
+                createdAt: SockitRows::date($confirmRow, 'created_at'),
+                updatedAt: SockitRows::date($confirmRow, 'updated_at'),
+            );
         }
 
-        $audience = AudienceSpec::fromWire(SockitRows::jsonArray($row, 'audience_wire'));
-        $archived = SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
-
-        $verdict = $this->runtime->audienceGate()->read($actor, new AudienceSubject(
-            key: $postId,
-            spec: $audience,
-            author: $author,
-            surface: $surface,
-            installation: $actor->installation,
-            surfaceArchived: $archived,
-            archiveReaders: $surfaceDef->archiveReaders,
-        ));
-
-        if (! $verdict->canRead()) {
-            throw OperationException::audienceDenied($verdict->reason);
-        }
-
-        return new PostView(
-            id: SockitRows::str($row, 'id'),
-            panel: $surface->panel,
-            surface: $surface,
-            author: $author,
-            state: $state,
-            bodyFormat: SockitRows::str($row, 'body_format'),
-            body: SockitRows::optStr($row, 'current_body'),
-            revision: new Revision(SockitRows::int($row, 'revision', 1)),
-            privacyRevision: new Revision(SockitRows::int($row, 'privacy_revision', 1)),
-            audience: $audience,
-            publishedAt: SockitRows::optDate($row, 'published_at'),
-            createdAt: SockitRows::date($row, 'created_at'),
-            updatedAt: SockitRows::date($row, 'updated_at'),
-        );
+        throw OperationException::contentHidden('post.concurrent_mutation');
     }
 
     /** @return array{0: PostsOptions, 1: SurfaceDefinition} */

@@ -13,6 +13,7 @@ use SocKit\Modules\Groups\Contracts\GroupService;
 use SocKit\Modules\Groups\Data\AddGroupMemberCommand;
 use SocKit\Modules\Groups\Data\CreateGroupCommand;
 use SocKit\Modules\Groups\Data\RemoveGroupMemberCommand;
+use SocKit\Modules\Groups\Enums\GroupJoinPolicy;
 use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
 use SocKit\Modules\Posts\Contracts\FeedService;
@@ -81,6 +82,7 @@ final class GroupsAndAudienceTest extends SocKitTestCase
             slug: 'engineers',
             title: 'Engineering Group',
             visibility: GroupVisibility::Private,
+            joinPolicy: GroupJoinPolicy::Auto,
         ));
         self::assertTrue($createRes->isSuccess());
         $groupId = $createRes->resource?->id ?? '';

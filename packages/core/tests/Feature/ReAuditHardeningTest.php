@@ -134,6 +134,7 @@ final class ReAuditHardeningTest extends SocKitTestCase
             surface: $surfaceA,
             slug: 'cross-surface-grp',
             title: 'Bound Surface Group',
+            joinPolicy: GroupJoinPolicy::Auto,
         ));
         $groupId = (string) $created->resource?->id;
 
@@ -243,7 +244,7 @@ final class ReAuditHardeningTest extends SocKitTestCase
         $groups = $this->app->make(GroupService::class);
         $posts = $this->app->make(PostService::class);
 
-        $grpRes = $groups->create(new CreateGroupCommand(new CommandKey('cmd-rcpt-grp-create-1'), $surface, 'replay-grp', 'Replay Group'));
+        $grpRes = $groups->create(new CreateGroupCommand(new CommandKey('cmd-rcpt-grp-create-1'), $surface, 'replay-grp', 'Replay Group', joinPolicy: GroupJoinPolicy::Auto));
         $groupId = (string) $grpRes->resource?->id;
         $groups->addMember(new AddGroupMemberCommand(
             key: new CommandKey('cmd-rcpt-grp-add-alice'),
@@ -377,7 +378,7 @@ final class ReAuditHardeningTest extends SocKitTestCase
         $posts = $this->app->make(PostService::class);
         $feed = $this->app->make(FeedService::class);
 
-        $grpRes = $groups->create(new CreateGroupCommand(new CommandKey('cmd-mgmtsurf-grp-1'), $mgmtSurface, 'mgmt-grp', 'Mgmt Group'));
+        $grpRes = $groups->create(new CreateGroupCommand(new CommandKey('cmd-mgmtsurf-grp-1'), $mgmtSurface, 'mgmt-grp', 'Mgmt Group', joinPolicy: GroupJoinPolicy::Auto));
         $groupId = (string) $grpRes->resource?->id;
 
         $alice = new ActorRef('user', 'alice');
@@ -1034,8 +1035,8 @@ final class ReAuditHardeningTest extends SocKitTestCase
         $posts = $this->app->make(PostService::class);
         $reactions = $this->app->make(ReactionService::class);
 
-        $groupA = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-ro-group-a-0001'), $mgmtA, 'ro-a', 'RO Group A'))->resource?->id;
-        $groupB = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-ro-group-b-0001'), $mgmtB, 'rw-b', 'RW Group B'))->resource?->id;
+        $groupA = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-ro-group-a-0001'), $mgmtA, 'ro-a', 'RO Group A', joinPolicy: GroupJoinPolicy::Auto))->resource?->id;
+        $groupB = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-ro-group-b-0001'), $mgmtB, 'rw-b', 'RW Group B', joinPolicy: GroupJoinPolicy::Auto))->resource?->id;
 
         $alice = new ActorRef('user', 'alice');
         $bob = new ActorRef('user', 'bob');
@@ -1611,6 +1612,302 @@ final class ReAuditHardeningTest extends SocKitTestCase
         }
         foreach ($policySpy->txLevelsOnContains as $level) {
             self::assertSame(0, $level, 'SurfaceAudiencePolicy::contains() must NEVER run under SQL transaction locks.');
+        }
+    }
+
+    public function test_single_post_get_and_reaction_counts_confirm_lifecycle_and_privacy_after_external_admission(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'single-read-race'), Incarnation::initial());
+        $posts = $this->app->make(PostService::class);
+        $reactions = $this->app->make(ReactionService::class);
+
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-srr-post-00001'),
+            surface: $surface,
+            body: 'SECRET_BODY_BEFORE_NARROW',
+            audience: AudienceSpec::platform(),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        $reactions->add(new AddReactionCommand(
+            key: new CommandKey('cmd-srr-react-00001'),
+            surface: $surface,
+            target: new HostEntityRef('post', $postId),
+            reactionType: 'like',
+        ));
+
+        // 1) During external AudienceGate admission on Bob's get(), narrow post to Direct(alice) + bump privacy_revision
+        $fake->actors->actAsPerson('bob');
+        $narrowed = false;
+        $fake->surfacePolicy->admitUsing(static function () use (&$narrowed, $postId): AudienceVerdict {
+            if (! $narrowed) {
+                $narrowed = true;
+                DB::table('sk_posts')->where('id', $postId)->update([
+                    'privacy_revision' => 2,
+                    'audience_wire' => json_encode(AudienceSpec::direct(new ActorRef('user', 'alice'))->toWire(), JSON_THROW_ON_ERROR),
+                    'current_body' => 'NARROWED_SECRET',
+                ]);
+            }
+
+            return AudienceVerdict::allow('surface.ok');
+        });
+
+        try {
+            $posts->get($surface, $postId);
+            self::fail('PostService::get() must re-verify narrowed privacy after external admission.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        // 2) Restore Platform for counts() test, then narrow post to Direct(alice) during external admission in counts()
+        $fake->surfacePolicy->allowAll();
+        DB::table('sk_posts')->where('id', $postId)->update([
+            'privacy_revision' => 3,
+            'audience_wire' => json_encode(AudienceSpec::platform()->toWire(), JSON_THROW_ON_ERROR),
+        ]);
+
+        $countsNarrowed = false;
+        $fake->surfacePolicy->admitUsing(static function () use (&$countsNarrowed, $postId): AudienceVerdict {
+            if (! $countsNarrowed) {
+                $countsNarrowed = true;
+                DB::table('sk_posts')->where('id', $postId)->update([
+                    'privacy_revision' => 4,
+                    'audience_wire' => json_encode(AudienceSpec::direct(new ActorRef('user', 'alice'))->toWire(), JSON_THROW_ON_ERROR),
+                ]);
+            }
+
+            return AudienceVerdict::allow('surface.ok');
+        });
+
+        try {
+            $reactions->counts($surface, new HostEntityRef('post', $postId));
+            self::fail('ReactionService::counts() must re-verify target privacy after external admission.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        // 3) Deleting surface mid-admission on PostService::get() refuses disclosure even for Alice
+        $fake->surfacePolicy->allowAll();
+        $fake->actors->actAsPerson('alice');
+        $surfDeleted = false;
+        $fake->surfacePolicy->admitUsing(static function () use (&$surfDeleted, $surface): AudienceVerdict {
+            if (! $surfDeleted) {
+                $surfDeleted = true;
+                DB::table('sk_surface_instances')
+                    ->where('panel_id', $surface->panel->value)
+                    ->where('host_entity_value', $surface->host->value)
+                    ->update(['lifecycle_state' => 'deleted', 'deleted_at' => gmdate('Y-m-d H:i:s.uP'), 'revision' => 2]);
+            }
+
+            return AudienceVerdict::allow('surface.ok');
+        });
+
+        try {
+            $posts->get($surface, $postId);
+            self::fail('PostService::get() must reject concurrently deleted surface after admission.');
+        } catch (SurfaceException $e) {
+            self::assertSame(SockitErrorCode::ContentDeleted, $e->problem());
+        }
+    }
+
+    public function test_single_post_get_enforces_surface_archive_readers_false(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->actors->actAsPerson('alice');
+
+        // AlphaWallSurfaceProvider leaves archiveReaders=false
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'arch-no-readers'), Incarnation::initial());
+        $surfaces = $this->app->make(SurfaceService::class);
+        $posts = $this->app->make(PostService::class);
+        $feed = $this->app->make(FeedService::class);
+
+        $created = $surfaces->create(new CommandKey('cmd-anr-surf-create-1'), $surface);
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-anr-post-pub-1'),
+            surface: $surface,
+            body: 'Hidden when surface archived',
+            audience: AudienceSpec::platform(),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        $surfaces->archive(new CommandKey('cmd-anr-surf-arch-1'), $surface, $created->revision);
+
+        $fake->actors->actAsPerson('bob');
+        self::assertCount(0, $feed->feed(new GetFeedQuery($surface))->items);
+
+        try {
+            $posts->get($surface, $postId);
+            self::fail('PostService::get() must deny archived surface when archiveReaders=false.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+    }
+
+    public function test_post_edit_widening_audience_still_enforces_existing_stored_group_guard(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+        $fake->consent->allowAll();
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'edit-widen-guard'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $posts = $this->app->make(PostService::class);
+        $bob = new ActorRef('user', 'bob');
+
+        $fake->actors->actAsPerson('alice');
+        $groupId = (string) $groups->create(new CreateGroupCommand(
+            key: new CommandKey('cmd-ewg-grp-create-1'),
+            surface: $surface,
+            slug: 'widen-guard',
+            title: 'Widen Guard',
+            joinPolicy: GroupJoinPolicy::Auto,
+        ))->resource?->id;
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-ewg-add-bob-0001'), $surface, $groupId, new Revision(1), $bob));
+
+        $fake->actors->actAsPerson('bob');
+        $pub = $posts->publish(new PublishPostCommand(
+            key: new CommandKey('cmd-ewg-post-pub-001'),
+            surface: $surface,
+            body: 'Group-scoped post',
+            audience: AudienceSpec::group(new GroupRef($groupId)),
+        ));
+        $postId = (string) $pub->resource?->id;
+
+        // 1) Alice removes Bob from group -> Bob cannot widen post audience to Platform!
+        $fake->actors->actAsPerson('alice');
+        $groups->removeMember(new RemoveGroupMemberCommand(new CommandKey('cmd-ewg-rem-bob-0001'), $surface, $groupId, new Revision(2), $bob));
+
+        $fake->actors->actAsPerson('bob');
+        try {
+            $posts->edit(new EditPostCommand(
+                key: new CommandKey('cmd-ewg-edit-widen-fail'),
+                surface: $surface,
+                postId: $postId,
+                expectedRevision: new Revision(1),
+                body: 'Hijacked to Platform',
+                audience: AudienceSpec::platform(),
+            ));
+            self::fail('Removed author must NOT be able to widen stored Group post to Platform.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        // 2) Re-enroll Bob -> mid-flight leave() inside safety callback STILL blocks widening under TX lock!
+        $fake->actors->actAsPerson('alice');
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-ewg-add-bob-0002'), $surface, $groupId, new Revision(3), $bob));
+
+        $fake->actors->actAsPerson('bob');
+        $fake->safety->using(static function () use ($groups, $surface, $groupId): SafetyVerdict {
+            $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-ewg-bob-leave-01'), $surface, $groupId, new Revision(4)));
+
+            return SafetyVerdict::allow();
+        });
+
+        try {
+            $posts->edit(new EditPostCommand(
+                key: new CommandKey('cmd-ewg-edit-tx-widen'),
+                surface: $surface,
+                postId: $postId,
+                expectedRevision: new Revision(1),
+                body: 'Mid-flight widened to Platform',
+                audience: AudienceSpec::platform(),
+            ));
+            self::fail('Mid-flight leave() must block widening edit under TX lock.');
+        } catch (OperationException $e) {
+            self::assertSame(SockitErrorCode::AudienceDenied, $e->problem());
+        }
+
+        $row = DB::table('sk_posts')->where('id', $postId)->first();
+        self::assertSame(1, (int) $row->revision);
+        self::assertSame(AudienceSpec::group(new GroupRef($groupId))->toWire(), json_decode((string) $row->audience_wire, true, 16, JSON_THROW_ON_ERROR));
+    }
+
+    public function test_group_add_member_enforces_p53_policy_matrix_consent_and_obsolete_cancellation(): void
+    {
+        $this->migrateSockitSchema();
+        $fake = $this->installFakeSocKit();
+
+        $surface = new SurfaceRef(new PanelId('sockit.alpha'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'add-member-matrix'), Incarnation::initial());
+        $groups = $this->app->make(GroupService::class);
+        $bob = new ActorRef('user', 'bob');
+
+        // 1) Approval policy forbids addMember() and requires join() + approve()
+        $fake->actors->actAsPerson('alice');
+        $groupId = (string) $groups->create(new CreateGroupCommand(
+            key: new CommandKey('cmd-amm-create-0001'),
+            surface: $surface,
+            slug: 'add-matrix',
+            title: 'Add Member Matrix',
+            visibility: GroupVisibility::Public,
+            joinPolicy: GroupJoinPolicy::Approval,
+        ))->resource?->id;
+
+        try {
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-amm-app-denied'), $surface, $groupId, new Revision(1), $bob));
+            self::fail('addMember() must be denied under Approval policy.');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.auto_policy_required', $e->detail()['reason'] ?? null);
+        }
+
+        // Bob creates Pending request under Approval -> rev 2, gen 2
+        $fake->actors->actAsPerson('bob');
+        $groups->join(new JoinGroupCommand(new CommandKey('cmd-amm-bob-pend-1'), $surface, $groupId, new Revision(1)));
+
+        // 2) Invite policy ALSO forbids addMember()
+        $fake->actors->actAsPerson('alice');
+        $groups->setJoinPolicy(new SetGroupJoinPolicyCommand(new CommandKey('cmd-amm-pol-inv-01'), $surface, $groupId, new Revision(2), GroupJoinPolicy::Invite));
+        try {
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-amm-inv-denied'), $surface, $groupId, new Revision(3), new ActorRef('user', 'carol')));
+            self::fail('addMember() must be denied under Invite policy.');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.auto_policy_required', $e->detail()['reason'] ?? null);
+        }
+
+        // 3) Under Auto policy: obsolete Pending state blocks addMember() until cancelled via leave(); consent is required!
+        $groups->setJoinPolicy(new SetGroupJoinPolicyCommand(new CommandKey('cmd-amm-pol-auto-1'), $surface, $groupId, new Revision(3), GroupJoinPolicy::Auto));
+        try {
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-amm-obs-pend-fail'), $surface, $groupId, new Revision(4), $bob));
+            self::fail('Obsolete Pending must block addMember() until cancelled via leave().');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.obsolete_state_must_leave', $e->detail()['reason'] ?? null);
+        }
+
+        // Bob cancels obsolete Pending via leave() -> rev 5, gen 3
+        $fake->actors->actAsPerson('bob');
+        $groups->leave(new LeaveGroupCommand(new CommandKey('cmd-amm-bob-cancel-1'), $surface, $groupId, new Revision(4)));
+
+        // Alice tries addMember() without consent -> denied; grants consent -> succeeds (rev 6, gen 4)!
+        $fake->actors->actAsPerson('alice');
+        try {
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-amm-noconsent-01'), $surface, $groupId, new Revision(5), $bob));
+            self::fail('addMember() without consent must fail closed.');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('consent.required', $e->detail()['reason'] ?? null);
+        }
+
+        $fake->consent->allow($bob, $groupId, 'consent-bob-auto-1');
+        $added = $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-amm-add-bob-ok1'), $surface, $groupId, new Revision(5), $bob, GroupMemberRole::Moderator));
+        self::assertTrue($added->isSuccess());
+        self::assertSame(6, $added->revision?->value);
+        self::assertSame(4, $groups->get($surface->panel, $groupId)->membershipGeneration);
+
+        // Repeated addMember with same role & NEW key -> rejected no_change
+        $noOp = $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-amm-add-bob-noop'), $surface, $groupId, new Revision(6), $bob, GroupMemberRole::Moderator));
+        self::assertSame(OperationOutcome::Rejected, $noOp->outcome);
+        self::assertSame('groups.no_change', $noOp->problemDetail['reason'] ?? null);
+
+        // 4) Closed policy denies addMember()
+        $groups->setJoinPolicy(new SetGroupJoinPolicyCommand(new CommandKey('cmd-amm-pol-closed-1'), $surface, $groupId, new Revision(6), GroupJoinPolicy::Closed));
+        try {
+            $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-amm-closed-denied'), $surface, $groupId, new Revision(7), new ActorRef('user', 'carol')));
+            self::fail('Closed policy must deny addMember().');
+        } catch (AuthorizationDeniedException $e) {
+            self::assertSame('groups.join_policy_closed', $e->detail()['reason'] ?? null);
         }
     }
 }

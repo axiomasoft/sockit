@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Core\Tests\Integration;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Database\Connectors\PostgresConnector;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
@@ -16,8 +17,11 @@ use Packman\Testkit\Concurrency\Postgres\PostgresBarrier;
 use Packman\Testkit\Concurrency\Process\Concurrency;
 use Packman\Testkit\Data\Concurrency\ConcurrencyOutcome;
 use Packman\Testkit\Exceptions\Database\UnsafeTestDatabaseException;
+use PDO;
 use PHPUnit\Framework\Attributes\Group;
 use SocKit\Actors\Data\ActorContext;
+use SocKit\Audience\Contracts\GroupMembershipResolver;
+use SocKit\Audience\Contracts\LocksGroupMembershipInTransaction;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\AuthorizationDecision;
@@ -1064,37 +1068,40 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
         $fake->consent->allowAll();
         $fake->actors->actAsPerson('alice');
 
-        $surface = new SurfaceRef(new PanelId('sockit.pg'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'pg-canon-group-lock'), Incarnation::initial());
+        $mgmtSurface = new SurfaceRef(new PanelId('sockit.pg'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'pg-canon-mgmt'), Incarnation::initial());
+        $contentSurface1 = new SurfaceRef(new PanelId('sockit.pg'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'pg-canon-content-1'), Incarnation::initial());
+        $contentSurface2 = new SurfaceRef(new PanelId('sockit.pg'), new SurfaceKindId('sockit.wall'), new HostEntityRef('board', 'pg-canon-content-2'), Incarnation::initial());
         $groups = $this->app->make(GroupService::class);
         $posts = $this->app->make(PostService::class);
 
         // Ensure first UUID < second UUID while slugs have inverse alphabetical order ('slug-z' > 'a-slug-...')
-        $gFirst = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-pgl-create-grp-1'), $surface, 'slug-z', 'Group Z', GroupVisibility::Private, joinPolicy: GroupJoinPolicy::Auto))->resource?->id;
+        $gFirst = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-pgl-create-grp-1'), $mgmtSurface, 'slug-z', 'Group Z', GroupVisibility::Private, joinPolicy: GroupJoinPolicy::Auto))->resource?->id;
         do {
             $slugCandidate = 'a-slug-'.bin2hex(random_bytes(2));
-            $gHigher = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-pgl-ga-'.Ids::uuid7()), $surface, $slugCandidate, 'Group A', GroupVisibility::Private, joinPolicy: GroupJoinPolicy::Auto))->resource?->id;
+            $gHigher = (string) $groups->create(new CreateGroupCommand(new CommandKey('cmd-pgl-ga-'.Ids::uuid7()), $mgmtSurface, $slugCandidate, 'Group A', GroupVisibility::Private, joinPolicy: GroupJoinPolicy::Auto))->resource?->id;
         } while ($gHigher <= $gFirst);
 
         $alice = new ActorRef('user', 'alice');
         $bob = new ActorRef('user', 'bob');
         $carol = new ActorRef('user', 'carol');
-        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-alice-01'), $surface, $gFirst, new Revision(1), $alice, GroupMemberRole::Owner));
-        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-alice-02'), $surface, $gHigher, new Revision(1), $alice, GroupMemberRole::Owner));
-        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-bob-001'), $surface, $gFirst, new Revision(2), $bob));
-        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-bob-002'), $surface, $gHigher, new Revision(2), $bob));
-        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-carol-01'), $surface, $gFirst, new Revision(3), $carol));
-        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-carol-02'), $surface, $gHigher, new Revision(3), $carol));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-alice-01'), $mgmtSurface, $gFirst, new Revision(1), $alice, GroupMemberRole::Owner));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-alice-02'), $mgmtSurface, $gHigher, new Revision(1), $alice, GroupMemberRole::Owner));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-bob-001'), $mgmtSurface, $gFirst, new Revision(2), $bob));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-bob-002'), $mgmtSurface, $gHigher, new Revision(2), $bob));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-carol-01'), $mgmtSurface, $gFirst, new Revision(3), $carol));
+        $groups->addMember(new AddGroupMemberCommand(new CommandKey('cmd-pgl-add-carol-02'), $mgmtSurface, $gHigher, new Revision(3), $carol));
 
+        // Use two DISTINCT content surfaces so DatabaseOperationEnvelope holds separate surface locks simultaneously
         $postByUuid = (string) $posts->publish(new PublishPostCommand(
             key: new CommandKey('cmd-pgl-post-uuid'),
-            surface: $surface,
+            surface: $contentSurface1,
             body: 'UUID ordered audience',
             audience: AudienceSpec::allOf(AudienceSpec::group(new GroupRef($gFirst)), AudienceSpec::group(new GroupRef($gHigher))),
         ))->resource?->id;
 
         $postBySlug = (string) $posts->publish(new PublishPostCommand(
             key: new CommandKey('cmd-pgl-post-slug'),
-            surface: $surface,
+            surface: $contentSurface2,
             body: 'Slug reverse-alphabet audience',
             audience: AudienceSpec::allOf(AudienceSpec::group(new GroupRef($slugCandidate)), AudienceSpec::group(new GroupRef('slug-z'))),
         ))->resource?->id;
@@ -1104,116 +1111,22 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
         DB::disconnect('pgsql');
 
         $outcomes = Concurrency::run([
-            function () use ($surface, $postByUuid, $lockRaceBarrier): array {
-                DB::purge('pgsql');
-                $fakeChild = $this->app->make(SocKitFake::class);
-                $fakeChild->actors->actAsPerson('bob');
-
-                $inner = null;
-                foreach ($this->app->make(Extensions::class)->resolve(TargetResolver::class) as $candidate) {
-                    if ($candidate->supports(new HostEntityRef('post', $postByUuid))) {
-                        $inner = $candidate;
-
-                        break;
-                    }
-                }
-                if (! $inner instanceof TargetWriteFence) {
-                    throw new LogicException('Expected TargetWriteFence.');
-                }
-
-                $fence = new class($inner, $lockRaceBarrier) implements TargetWriteFence
-                {
-                    private int $calls = 0;
-
-                    public function __construct(private readonly TargetWriteFence $inner, private readonly string $barrierName) {}
-
-                    #[Override]
-                    public function supports(HostEntityRef $target): bool
-                    {
-                        return $this->inner->supports($target);
-                    }
-
-                    #[Override]
-                    public function resolve(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target): TargetResolution
-                    {
-                        $res = $this->inner->resolve($actor, $surface, $target);
-                        if (DB::connection('pgsql')->transactionLevel() === 0 && ++$this->calls === 1) {
-                            new PostgresBarrier(DB::connection('pgsql')->getPdo(), $this->barrierName, 2)->arriveAndWait('uuid-worker', 5.0);
-                        }
-
-                        return $res;
-                    }
-
-                    #[Override]
-                    public function recheck(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target, TargetResolution $prechecked): AuthorizationDecision
-                    {
-                        return $this->inner->recheck($actor, $surface, $target, $prechecked);
-                    }
-                };
-                $this->app->instance(TargetResolver::class, $fence);
-
-                return $this->app->make(ReactionService::class)->add(new AddReactionCommand(
-                    key: new CommandKey('cmd-pgl-react-bob'),
-                    surface: $surface,
-                    target: new HostEntityRef('post', $postByUuid),
-                    reactionType: 'like',
-                ))->toWire();
-            },
-            function () use ($surface, $postBySlug, $lockRaceBarrier): array {
-                DB::purge('pgsql');
-                $fakeChild = $this->app->make(SocKitFake::class);
-                $fakeChild->actors->actAsPerson('carol');
-
-                $inner = null;
-                foreach ($this->app->make(Extensions::class)->resolve(TargetResolver::class) as $candidate) {
-                    if ($candidate->supports(new HostEntityRef('post', $postBySlug))) {
-                        $inner = $candidate;
-
-                        break;
-                    }
-                }
-                if (! $inner instanceof TargetWriteFence) {
-                    throw new LogicException('Expected TargetWriteFence.');
-                }
-
-                $fence = new class($inner, $lockRaceBarrier) implements TargetWriteFence
-                {
-                    private int $calls = 0;
-
-                    public function __construct(private readonly TargetWriteFence $inner, private readonly string $barrierName) {}
-
-                    #[Override]
-                    public function supports(HostEntityRef $target): bool
-                    {
-                        return $this->inner->supports($target);
-                    }
-
-                    #[Override]
-                    public function resolve(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target): TargetResolution
-                    {
-                        $res = $this->inner->resolve($actor, $surface, $target);
-                        if (DB::connection('pgsql')->transactionLevel() === 0 && ++$this->calls === 1) {
-                            new PostgresBarrier(DB::connection('pgsql')->getPdo(), $this->barrierName, 2)->arriveAndWait('slug-worker', 5.0);
-                        }
-
-                        return $res;
-                    }
-
-                    #[Override]
-                    public function recheck(ActorContext $actor, SurfaceRef $surface, HostEntityRef $target, TargetResolution $prechecked): AuthorizationDecision
-                    {
-                        return $this->inner->recheck($actor, $surface, $target, $prechecked);
-                    }
-                };
-                $this->app->instance(TargetResolver::class, $fence);
-
-                return $this->app->make(ReactionService::class)->add(new AddReactionCommand(
-                    key: new CommandKey('cmd-pgl-react-carol'),
-                    surface: $surface,
-                    target: new HostEntityRef('post', $postBySlug),
-                    reactionType: 'like',
-                ))->toWire();
-            },
+            fn (): array => $this->runBarrieredReactionWorker(
+                person: 'bob',
+                workerTag: 'uuid-worker',
+                barrierName: $lockRaceBarrier,
+                surface: $contentSurface1,
+                postId: $postByUuid,
+                commandKey: 'cmd-pgl-react-bob',
+            ),
+            fn (): array => $this->runBarrieredReactionWorker(
+                person: 'carol',
+                workerTag: 'slug-worker',
+                barrierName: $lockRaceBarrier,
+                surface: $contentSurface2,
+                postId: $postBySlug,
+                commandKey: 'cmd-pgl-react-carol',
+            ),
         ]);
 
         self::assertTrue($outcomes[0]->succeeded, $outcomes[0]->errorMessage ?? 'UUID-order worker deadlocked/failed');
@@ -1221,7 +1134,124 @@ final class PostgresConcurrencyPgTest extends SocKitTestCase
 
         $reactions = $this->app->make(ReactionService::class);
         $fake->actors->actAsPerson('bob');
-        self::assertSame(1, $reactions->counts($surface, new HostEntityRef('post', $postByUuid))->total);
-        self::assertSame(1, $reactions->counts($surface, new HostEntityRef('post', $postBySlug))->total);
+        self::assertSame(1, $reactions->counts($contentSurface1, new HostEntityRef('post', $postByUuid))->total);
+        self::assertSame(1, $reactions->counts($contentSurface2, new HostEntityRef('post', $postBySlug))->total);
+    }
+
+    /**
+     * Executes a reaction command inside an isolated PostgreSQL worker after synchronizing at transaction-time group locking.
+     *
+     * @return array<string, mixed>
+     */
+    private function runBarrieredReactionWorker(
+        string $person,
+        string $workerTag,
+        string $barrierName,
+        SurfaceRef $surface,
+        string $postId,
+        string $commandKey,
+    ): array {
+        DB::purge('pgsql');
+        $fakeChild = $this->app->make(SocKitFake::class);
+        $fakeChild->actors->actAsPerson($person);
+
+        $innerResolver = $this->app->make(GroupMembershipResolver::class);
+        if (! $innerResolver instanceof LocksGroupMembershipInTransaction) {
+            throw new LogicException('Expected LocksGroupMembershipInTransaction.');
+        }
+
+        $barrierPdo = $this->separatePgsqlPdo();
+        $this->app->instance(
+            GroupMembershipResolver::class,
+            $this->wrapResolverWithTransactionBarrier($innerResolver, $barrierPdo, $barrierName, $workerTag),
+        );
+
+        return $this->app->make(ReactionService::class)->add(new AddReactionCommand(
+            key: new CommandKey($commandKey),
+            surface: $surface,
+            target: new HostEntityRef('post', $postId),
+            reactionType: 'like',
+        ))->toWire();
+    }
+
+    /**
+     * Wraps a transactional group membership resolver so its first in-transaction lock waits on an out-of-band PostgreSQL barrier.
+     */
+    private function wrapResolverWithTransactionBarrier(
+        LocksGroupMembershipInTransaction $inner,
+        PDO $barrierPdo,
+        string $barrierName,
+        string $workerTag,
+    ): LocksGroupMembershipInTransaction {
+        return new class($inner, $barrierPdo, $barrierName, $workerTag) implements LocksGroupMembershipInTransaction
+        {
+            private int $calls = 0;
+
+            public function __construct(
+                private readonly LocksGroupMembershipInTransaction $inner,
+                private readonly PDO $barrierPdo,
+                private readonly string $barrierName,
+                private readonly string $workerTag,
+            ) {}
+
+            #[Override]
+            public function isMember(ActorContext $actor, GroupRef $group): bool
+            {
+                return $this->inner->isMember($actor, $group);
+            }
+
+            #[Override]
+            public function isMemberInPanel(ActorContext $actor, PanelId $panel, GroupRef $group): bool
+            {
+                return $this->inner->isMemberInPanel($actor, $panel, $group);
+            }
+
+            #[Override]
+            public function membershipVerdictInPanel(ActorContext $actor, PanelId $panel, GroupRef $group): AudienceVerdict
+            {
+                return $this->inner->membershipVerdictInPanel($actor, $panel, $group);
+            }
+
+            #[Override]
+            public function lockGroupInTransaction(PanelId $panel, GroupRef $group): void
+            {
+                $this->lockGroupsInTransaction($panel, [$group]);
+            }
+
+            #[Override]
+            public function lockGroupsInTransaction(PanelId $panel, array $groups): void
+            {
+                if (DB::connection('pgsql')->transactionLevel() > 0 && ++$this->calls === 1) {
+                    new PostgresBarrier($this->barrierPdo, $this->barrierName, 2)->arriveAndWait($this->workerTag, 5.0);
+                }
+
+                $this->inner->lockGroupsInTransaction($panel, $groups);
+            }
+
+            #[Override]
+            public function managementSurfacesInPanel(PanelId $panel, array $groups): array
+            {
+                return $this->inner->managementSurfacesInPanel($panel, $groups);
+            }
+
+            #[Override]
+            public function membershipVerdictInTransaction(ActorContext $actor, PanelId $panel, GroupRef $group, ?array $preSampledSurfaceAdmissions = null): AudienceVerdict
+            {
+                return $this->inner->membershipVerdictInTransaction($actor, $panel, $group, $preSampledSurfaceAdmissions);
+            }
+        };
+    }
+
+    /**
+     * Opens a dedicated auto-committing PostgreSQL PDO outside Laravel's open worker transaction.
+     */
+    private function separatePgsqlPdo(): PDO
+    {
+        $config = $this->app->make(ConfigRepository::class)->get('database.connections.pgsql');
+        if (! is_array($config)) {
+            throw new LogicException('Expected pgsql connection config array.');
+        }
+
+        return (new PostgresConnector)->connect($config);
     }
 }

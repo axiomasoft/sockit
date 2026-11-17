@@ -21,6 +21,7 @@ use SocKit\Errors\Enums\SockitErrorCode;
 use SocKit\Modules\Groups\Contracts\GroupService;
 use SocKit\Modules\Groups\Data\AddGroupMemberCommand;
 use SocKit\Modules\Groups\Data\CreateGroupCommand;
+use SocKit\Modules\Groups\Enums\GroupJoinPolicy;
 use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
 use SocKit\Modules\Posts\Contracts\PostService;
@@ -265,6 +266,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
             slug: 'staff',
             title: 'Alpha Staff',
             visibility: GroupVisibility::Private,
+            joinPolicy: GroupJoinPolicy::Auto,
         ));
         $alphaGroupId = (string) $alphaGroupRes->resource?->id;
         $groups->addMember(new AddGroupMemberCommand(
@@ -291,6 +293,7 @@ final class SecurityBoundariesAndModulesTest extends SocKitTestCase
             slug: 'staff',
             title: 'Beta Staff',
             visibility: GroupVisibility::Private,
+            joinPolicy: GroupJoinPolicy::Auto,
         ));
         $betaGroupId = (string) $betaGroupRes->resource?->id;
         $groups->addMember(new AddGroupMemberCommand(

@@ -28,6 +28,7 @@ use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\Exceptions\PanelException;
 use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Support\CanonicalJson;
+use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Data\PayloadDigest;
@@ -374,56 +375,129 @@ final readonly class DatabaseReactionService implements ReactionService
             ->where('incarnation', $surface->incarnation->value)
             ->first();
 
-        $surfaceRow = $loadSurfaceRow();
-        if (is_object($surfaceRow) && SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Deleted->value) {
-            throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
-        }
-
-        $surfaceArchived = is_object($surfaceRow)
-            && SockitRows::str($surfaceRow, 'lifecycle_state') === SurfaceLifecycleState::Archived->value;
-
-        if ($surfaceArchived && ! $surfaceDef->archiveReaders) {
-            throw OperationException::audienceDenied('audience.denied.surface_archived');
-        }
-
-        $this->resolveVisibleTarget($actor, $surface, $target, $surfaceDef, requireWrite: false, surfaceArchived: $surfaceArchived);
-
-        $surfaceRow = $loadSurfaceRow();
-        if (! is_object($surfaceRow)) {
-            return new ReactionCountsView($surface, $target, [], 0, new Revision(1));
-        }
-
-        $freshState = SockitRows::str($surfaceRow, 'lifecycle_state');
-        if ($freshState === SurfaceLifecycleState::Deleted->value) {
-            throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
-        }
-
-        if ($freshState === SurfaceLifecycleState::Archived->value && ! $surfaceDef->archiveReaders) {
-            throw OperationException::audienceDenied('audience.denied.surface_archived');
-        }
-
-        $rows = $connection->table($this->tables->table('reaction_counts', $surface->panel))
-            ->where('panel_id', $surface->panel->value)
-            ->where('surface_instance_id', SockitRows::str($surfaceRow, 'id'))
-            ->where('target_type', $target->type)
-            ->where('target_key', $target->value)
-            ->orderBy('reaction_type')
-            ->get();
-
-        $counts = [];
-        $total = 0;
-        $maxRevision = 1;
-
-        foreach ($rows as $row) {
-            $count = SockitRows::int($row, 'count');
-            $maxRevision = max($maxRevision, SockitRows::int($row, 'source_revision', 1));
-            if ($count > 0) {
-                $counts[SockitRows::str($row, 'reaction_type')] = $count;
-                $total += $count;
+        $assertSurfaceReadable = static function (?object $row) use ($surface, $surfaceDef): bool {
+            if (! is_object($row)) {
+                return false;
             }
+
+            $state = SockitRows::str($row, 'lifecycle_state');
+            if ($state === SurfaceLifecycleState::Deleted->value) {
+                throw SurfaceException::deleted($surface->panel->value.'/'.$surface->kind->value);
+            }
+
+            $archived = $state === SurfaceLifecycleState::Archived->value;
+            if ($archived && ! $surfaceDef->archiveReaders) {
+                throw OperationException::audienceDenied('audience.denied.surface_archived');
+            }
+
+            return $archived;
+        };
+
+        $assertTargetState = static function (?TargetResolution $resolution) use ($target): TargetResolution {
+            if (! $resolution instanceof TargetResolution || ! $resolution->exists) {
+                $missingReason = $resolution instanceof TargetResolution ? $resolution->reason : null;
+
+                throw match ($missingReason) {
+                    'content.deleted' => OperationException::contentDeleted($target->value),
+                    'content.erased' => OperationException::contentErased($target->value),
+                    default => OperationException::contentHidden($missingReason ?? 'target.not_found'),
+                };
+            }
+
+            if (! $resolution->visible) {
+                throw match ($resolution->reason) {
+                    'content.deleted' => OperationException::contentDeleted($target->value),
+                    'content.erased' => OperationException::contentErased($target->value),
+                    default => OperationException::contentHidden($resolution->reason ?? 'target.hidden'),
+                };
+            }
+
+            return $resolution;
+        };
+
+        $resolver = $this->findSupportingResolver($target);
+
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $surfaceRow = $loadSurfaceRow();
+            $surfaceArchived = $assertSurfaceReadable($surfaceRow);
+
+            $resolved = $this->resolveVisibleTarget($actor, $surface, $target, $surfaceDef, requireWrite: false, surfaceArchived: $surfaceArchived);
+
+            // Re-verify surface & target privacy/visibility after external admission before reading counts
+            $confirmSurface = $loadSurfaceRow();
+            $confirmArchived = $assertSurfaceReadable($confirmSurface);
+            if ($confirmArchived !== $surfaceArchived || is_object($confirmSurface) !== is_object($surfaceRow)) {
+                continue;
+            }
+
+            $confirmTarget = $assertTargetState($resolver instanceof TargetResolver ? $resolver->resolve($actor, $surface, $target) : null);
+            if (! $this->targetResolutionMatches($resolved, $confirmTarget)) {
+                continue;
+            }
+
+            if (! is_object($confirmSurface)) {
+                return new ReactionCountsView($surface, $target, [], 0, new Revision(1));
+            }
+
+            $rows = $connection->table($this->tables->table('reaction_counts', $surface->panel))
+                ->where('panel_id', $surface->panel->value)
+                ->where('surface_instance_id', SockitRows::str($confirmSurface, 'id'))
+                ->where('target_type', $target->type)
+                ->where('target_key', $target->value)
+                ->orderBy('reaction_type')
+                ->get();
+
+            // Final confirmation after reading counts so concurrent deletion/narrowing cannot disclose totals
+            $postReadSurface = $loadSurfaceRow();
+            $postReadArchived = $assertSurfaceReadable($postReadSurface);
+            $postReadTarget = $assertTargetState($resolver instanceof TargetResolver ? $resolver->resolve($actor, $surface, $target) : null);
+
+            if (
+                ! is_object($postReadSurface)
+                || $postReadArchived !== $confirmArchived
+                || ! $this->targetResolutionMatches($resolved, $postReadTarget)
+            ) {
+                continue;
+            }
+
+            $counts = [];
+            $total = 0;
+            $maxRevision = 1;
+
+            foreach ($rows as $row) {
+                $count = SockitRows::int($row, 'count');
+                $maxRevision = max($maxRevision, SockitRows::int($row, 'source_revision', 1));
+                if ($count > 0) {
+                    $counts[SockitRows::str($row, 'reaction_type')] = $count;
+                    $total += $count;
+                }
+            }
+
+            return new ReactionCountsView($surface, $target, $counts, $total, new Revision($maxRevision));
         }
 
-        return new ReactionCountsView($surface, $target, $counts, $total, new Revision($maxRevision));
+        throw OperationException::contentHidden('target.concurrent_mutation');
+    }
+
+    private function targetResolutionMatches(TargetResolution $expected, TargetResolution $current): bool
+    {
+        $ownerMatches = match (true) {
+            $expected->owner instanceof ActorRef && $current->owner instanceof ActorRef => $expected->owner->equals($current->owner),
+            ! $expected->owner instanceof ActorRef && ! $current->owner instanceof ActorRef => true,
+            default => false,
+        };
+        if (! $ownerMatches) {
+            return false;
+        }
+
+        if ($expected->privacyRevision?->value !== $current->privacyRevision?->value) {
+            return false;
+        }
+
+        $expectedWire = $expected->audience instanceof AudienceSpec ? CanonicalJson::encode($expected->audience->toWire()) : null;
+        $currentWire = $current->audience instanceof AudienceSpec ? CanonicalJson::encode($current->audience->toWire()) : null;
+
+        return $expectedWire === $currentWire;
     }
 
     #[Override]

@@ -31,6 +31,7 @@ use SocKit\Errors\Enums\SockitErrorCode;
 use SocKit\Modules\Groups\Contracts\GroupService;
 use SocKit\Modules\Groups\Data\AddGroupMemberCommand;
 use SocKit\Modules\Groups\Data\CreateGroupCommand;
+use SocKit\Modules\Groups\Enums\GroupJoinPolicy;
 use SocKit\Modules\Groups\Enums\GroupMemberRole;
 use SocKit\Modules\Groups\Enums\GroupVisibility;
 use SocKit\Modules\Groups\Internal\DatabaseGroupMembershipResolver;
@@ -197,6 +198,7 @@ final class ProductionWiringAndMultiSchemaPgTest extends SocKitTestCase
             slug: 'staff',
             title: 'Alpha Schema Staff',
             visibility: GroupVisibility::Private,
+            joinPolicy: GroupJoinPolicy::Auto,
         ));
         self::assertTrue($alphaGroup->isSuccess());
         $groups->addMember(new AddGroupMemberCommand(

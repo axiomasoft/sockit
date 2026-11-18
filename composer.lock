@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ffd81db061eb06ff2e0d05ddace62f5d",
+    "content-hash": "960886b5524267c75e2d04e50a4337f8",
     "packages": [
         {
             "name": "axiomasoft/packman",
-            "version": "0.1.x-dev",
+            "version": "0.1.0",
             "dist": {
                 "type": "path",
                 "url": "../packman/packages/core",
-                "reference": "8d61c9303a474f7c469035a0882fa11ad08b4429"
+                "reference": "fe837667a8142f79fe7469a3c163c8070f56f699"
             },
             "require": {
                 "php": "^8.4",
@@ -90,15 +90,15 @@
         },
         {
             "name": "axiomasoft/packman-panels",
-            "version": "0.1.x-dev",
+            "version": "0.1.0",
             "dist": {
                 "type": "path",
                 "url": "../packman/packages/panels",
-                "reference": "eba117caa649e2c7a52bb6062bd6569612752605"
+                "reference": "e414f549ae08dffc1d64a2e77397c6f267e5da42"
             },
             "require": {
-                "axiomasoft/packman": "^0.1|^1.0@dev",
-                "axiomasoft/packman-schema": "^0.1|^1.0@dev",
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-schema": "^0.1",
                 "illuminate/contracts": "^12.0|^13.0",
                 "illuminate/database": "^12.0|^13.0",
                 "illuminate/support": "^12.0|^13.0",
@@ -144,14 +144,14 @@
         },
         {
             "name": "axiomasoft/packman-plugins",
-            "version": "0.1.x-dev",
+            "version": "0.1.0",
             "dist": {
                 "type": "path",
                 "url": "../packman/packages/plugins",
-                "reference": "1413808d28f1506dff75ff711907db6ac2556142"
+                "reference": "46dd91fa5d292233c2ed09b0027b22d75ae24e1d"
             },
             "require": {
-                "axiomasoft/packman": "^0.1|^1.0@dev",
+                "axiomasoft/packman": "^0.1",
                 "illuminate/console": "^12.0|^13.0",
                 "illuminate/container": "^12.0|^13.0",
                 "illuminate/contracts": "^12.0|^13.0",
@@ -196,14 +196,14 @@
         },
         {
             "name": "axiomasoft/packman-schema",
-            "version": "0.1.x-dev",
+            "version": "0.1.0",
             "dist": {
                 "type": "path",
                 "url": "../packman/packages/schema",
-                "reference": "6f8e27c2672f9b07951588127ee773225e2ae0e4"
+                "reference": "ed82c3c0e22531482f8435bfe4c3e0239cfa32ad"
             },
             "require": {
-                "axiomasoft/packman": "^0.1|^1.0@dev",
+                "axiomasoft/packman": "^0.1",
                 "illuminate/console": "^12.0|^13.0",
                 "illuminate/contracts": "^12.0|^13.0",
                 "illuminate/database": "^12.0|^13.0",
@@ -250,7 +250,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/core",
-                "reference": "39bba34ef1b2bc23364c47e32ee6ca607da6a917"
+                "reference": "c0c28c39e5c75fa5e0ec79ac580b30ad1cf2ef41"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
@@ -284,6 +284,7 @@
                         "Actors",
                         "Audience",
                         "Configuration",
+                        "Console",
                         "Contracts",
                         "Data",
                         "Database",
@@ -6247,15 +6248,14 @@
     "packages-dev": [
         {
             "name": "axiomasoft/packman-devtools",
-            "version": "0.1.x-dev",
+            "version": "0.1.0",
             "dist": {
                 "type": "path",
                 "url": "../packman/packages/devtools",
-                "reference": "06571a6bbeae1a3f9f8db1666fdc9b65ca50d933"
+                "reference": "6008f6a407a0a0f1b8be18b36b4aa971c6fdfa64"
             },
             "require": {
-                "axiomasoft/packman": "^0.1|^1.0@dev",
-                "driftingly/rector-laravel": "^2.0",
+                "axiomasoft/packman": "^0.1",
                 "illuminate/support": "^12.0|^13.0",
                 "nette/neon": "^3.4",
                 "nikic/php-parser": "^5.4",
@@ -6267,6 +6267,9 @@
                 "symfony/finder": "^7.2|^8.0",
                 "symfony/process": "^7.2|^8.0",
                 "symfony/yaml": "^7.2|^8.0"
+            },
+            "suggest": {
+                "driftingly/rector-laravel": "Optional Laravel Rector rule sets (^2.0) alongside PackmanRectorSet."
             },
             "bin": [
                 "bin/packman"
@@ -6302,15 +6305,15 @@
         },
         {
             "name": "axiomasoft/packman-testkit",
-            "version": "0.1.x-dev",
+            "version": "0.1.0",
             "dist": {
                 "type": "path",
                 "url": "../packman/packages/testkit",
-                "reference": "f22e99b8d63dddf0aa58fb148100715c18c118d2"
+                "reference": "101d4271df6ffd7b6878b7dfc2f400783030e8c9"
             },
             "require": {
-                "axiomasoft/packman": "^0.1|^1.0@dev",
-                "axiomasoft/packman-schema": "^0.1|^1.0@dev",
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-schema": "^0.1",
                 "illuminate/contracts": "^12.0|^13.0",
                 "illuminate/database": "^12.0|^13.0",
                 "illuminate/http": "^12.0|^13.0",
@@ -6363,7 +6366,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/testkit",
-                "reference": "c29a6d0e84c2718d63e7ac18f104631722e09b44"
+                "reference": "b65a5e296e4f8f686f3bd10c1bfd7781316c61ea"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
@@ -6383,6 +6386,7 @@
                 "packman": {
                     "schema-version": 1,
                     "package-type": "dev",
+                    "stability": "dev",
                     "profile": "laravel-package",
                     "dev_only": true,
                     "owns": [

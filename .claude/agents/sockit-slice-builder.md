@@ -27,7 +27,7 @@ Upgrade: harness agent-packs upgrade --pack laravel-package --target .
 -->
 
 You are the implementer of one feature Laravel-**package** **sockit**
-(SocKit, code in `src/`). The package lives with strangers
+(Sockit, code in `src/`). The package lives with strangers
 consumers: each one is yours `public` — promise out. They give you one feature; you are building
 its full path and leave the tree clean.
 
@@ -67,10 +67,6 @@ Build in this order:
 - `declare(strict_types=1)`, typing as in surrounding code, named arguments
   when >1 argument.
 
-- Backwater migrations as required by features: anonymous-class
-  (`return new class extends Migration`), reversible `down()`, distribution via
-  `loadMigrationsFrom`/publishable.
-
 <!-- shared:config-honesty -->
 - **Config-honesty**: default works out of the box OR explicitly `null` + `throw` when
   use (anti-pattern `?? 'echo'` without a registered driver).
@@ -78,7 +74,7 @@ Build in this order:
 
 ## Hard gates sockit (do not violate)
 
-- PHP/run tests only through `/usr/bin/php8.4` (`composer test`), never bare `php`.
+- PHP/run tests only through `/usr/bin/php` (`composer test`), never bare `php`.
 - Test infrastructure - Orchestra Testbench (batch `TestCase`, in-memory sqlite
   `:memory:`); no real `.env`/external database.
 - Project test framework - **pest**.

@@ -23,7 +23,7 @@ export const meta = {
 // performs, and does not invent product volume.
 // ---------------------------------------------------------------------------
 
-const PROJECT_DIR = '.'
+const PROJECT_DIR = '/home/vostrikov/projects/packages/sockit'
 
 // Lesson overnight-run: hardcap MUST survive resume. args on resume may not
 // fly → default we keep the literal IN THE SCRIPT, and not just in args.
@@ -56,8 +56,8 @@ const SLICES = ALL_SLICES.slice(0, MAX)
 // and not app-canon (no access-layer/migrations-application - only that package
 // distributes himself). NOT migrate:fresh/test-DB-canon application - they are not here by definition.
 const HARD_GATES = `HARD GATES sockit (do not violate):
-- PHP/tests ONLY via '/usr/bin/php8.4' (composer test), not bare 'php'.
-- Project test framework - pest, test database - :memory: (Orchestra Testbench, in-memory sqlite): mirrors the style of existing tests. Package Migrations - Only anonymous-class ('return new class extends Migration'), reversible 'down()', distribution via loadMigrationsFrom/publishable. Static check (if configured) — vendor/bin/phpstan analyse.
+- PHP/tests ONLY via '/usr/bin/php' (composer test), not bare 'php'.
+- Project test framework - pest, test database - :memory: (Orchestra Testbench, in-memory sqlite): mirrors the style of existing tests. The migration package does not distribute - a new backwater migration only upon the explicit request of the slice. Static check (if configured) — vendor/bin/phpstan analyse.
 - NOT git push, DO NOT open/flicker PR, NOT tag/release-commands.
 - DO NOT change files outside the package: workbench/testbench ('tests/', Testbench-config) — the only one «application» platform on which you can install fixtures/stubs for package tests; grocery app-there is no code in the package repository.
 - .claude/agents|workflows|hooks with generated-header DO NOT edit - overrides in .claude/rules/*-overrides.md (and .claude/rules/sockit-reviewer-overrides.md for review).
@@ -92,7 +92,7 @@ phase('Setup')
 await safeAgent(
   `B ${PROJECT_DIR} prepare a working branch and check the environment BEFORE distributing slices.
 1. 'git status' — if the tree is dirty, stop and report (DO NOT overwrite other people's edits).
-2. ENV-PREFLIGHT (environment blocker ≠ code bug): 'composer validate --strict' (composer.json/lock are valid and synchronous - otherwise Testbench will supply inconsistent dependencies); '/usr/bin/php8.4 -v' (version); '/usr/bin/php8.4 -r "print_r(PDO::getAvailableDrivers());"' — sqlite-driver present (Testbench holds a test database :memory: in-memory on sqlite); trial 'composer test --filter=__preflight_nonexistent__' (smoke) does not crash with environment fatality. Some of it is broken → STOP the run and report (chatom F3: php without worker pdo_sqlite popped up only on the first DB-test).
+2. ENV-PREFLIGHT (environment blocker ≠ code bug): 'composer validate --strict' (composer.json/lock are valid and synchronous - otherwise Testbench will supply inconsistent dependencies); '/usr/bin/php -v' (version); '/usr/bin/php -r "print_r(PDO::getAvailableDrivers());"' — sqlite-driver present (Testbench holds a test database :memory: in-memory on sqlite); trial 'composer test --filter=__preflight_nonexistent__' (smoke) does not crash with environment fatality. Some of it is broken → STOP the run and report (chatom F3: php without worker pdo_sqlite popped up only on the first DB-test).
 3. Thread: if ${BRANCH} exists - 'git checkout ${BRANCH}'. Otherwise 'git checkout ${BASE}' then 'git checkout -b ${BRANCH}'.
 4. Confirm: environment ok, current branch = ${BRANCH}, tree is clean, last commit (subject).
 NOT push, DO NOT delete branches.

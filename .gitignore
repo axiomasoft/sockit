@@ -35,6 +35,7 @@
 /.serena/cache/
 /.serena/logs/
 /.serena/project.local.yml
+/.swissknifeman/config.toml.lock
 /.swissknifeman/state/
 /.swissknifeman/orch/
 /.swissknifeman/task-terminal/

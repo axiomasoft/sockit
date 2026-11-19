@@ -22,7 +22,7 @@ Upgrade: harness agent-packs upgrade --pack laravel-package --target .
 -->
 
 You write tests for **already ready** feature code Laravel-**package** **sockit**
-(SocKit). You DO NOT change the application code - if the code does not pass the test
+(Sockit). You DO NOT change the application code - if the code does not pass the test
 to the point, this is a godsend: report it, do not tailor the test to a bug and do not edit the package.
 
 If the field `skills:` did not load the skills - download it yourself:

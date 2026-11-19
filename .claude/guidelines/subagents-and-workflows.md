@@ -8,7 +8,7 @@ Upgrade: harness agent-packs upgrade --pack laravel-package --target .
 -->
 # Guideline: subagents and workflow in sockit
 
-How sockit (Laravel-**package**, SocKit) uses subagents and
+How sockit (Laravel-**package**, Sockit) uses subagents and
 Workflow-orchestration. Operationalizes skill `laravel-architecture:laravel-subagents` +
 lessons overnight-run under package canon (public contract/BC instead app-canon).
 Context and references - skill `laravel-architecture:laravel-subagents`.
@@ -76,13 +76,13 @@ context - knowledge of technical specifications is concentrated there. Don't kic
 ## Project Agents
 
 Preloaded with architectural skills through the native field `skills:` (Claude Code
-≥2.0.43, deterministic preload). Tuned for sockit: /usr/bin/php8.4,
+≥2.0.43, deterministic preload). Tuned for sockit: /usr/bin/php,
 test framework pest, public contract/BC instead app-canon access-layer.
 
 | Agent | Role | When to call |
 |:--|:--|:--|
 | `sockit-slice-builder` | package feature implementer (contract→implementation→ServiceProvider→publishables), commits to the current branch, does not write tests | for feature implementation |
-| `sockit-test-writer` | tests (pest on Testbench) according to the finished code, iterates until green through /usr/bin/php8.4 | after the feature is implemented |
+| `sockit-test-writer` | tests (pest on Testbench) according to the finished code, iterates until green through /usr/bin/php | after the feature is implemented |
 | `sockit-reviewer` | risk-adaptive read-only review (LOW→spot / MED→contracts-BC / HIGH→adversarial+fresh-context), severity-enum, detect≠gating | after each green one |
 | `sockit-api-surface` | **read-only recon**: map added/changed/removed public surface (BC-diff) — input for reviewer'a | before review, when public is affected API |
 | `sockit-{test-verifier,security-review}` | **read-only recon** (running tests→summary / security-pass) in ISOLATED context - summary only to top | heavy reconnaissance before editing (main-context does not swell); model `haiku` (cheap) |
@@ -163,7 +163,7 @@ This deterministic-insurance on top of the reviewing agent, not a replacement fo
 
 ## Hard gates sockit (for agents and workflow)
 
-- Tests/PHP — only `/usr/bin/php8.4` (composer test), not bare `php`.
+- Tests/PHP — only `/usr/bin/php` (composer test), not bare `php`.
 - Test infrastructure - Orchestra Testbench, DB `:memory:` (in-memory sqlite); none
   real `.env`/external database - the package does not have them.
 - Project test framework - pest. Scheme/change migrations as needed
@@ -179,7 +179,7 @@ This deterministic-insurance on top of the reviewing agent, not a replacement fo
 - [ ] Research - Explore-agents/api-surface; architectural code itself.
 - [ ] Run on ONE branch; hard cap is set and experiencing resume.
 - [ ] Model/effort are set by cut risk (not inheriting by default).
-- [ ] Each unit passed `sockit-reviewer`; tests green through /usr/bin/php8.4.
+- [ ] Each unit passed `sockit-reviewer`; tests green through /usr/bin/php.
 - [ ] Parallel only on independent files (otherwise worktree/sequentially).
 - [ ] Background agents are not streaming - I'm waiting for notification; prompts are deterministic (resume-cache).
 - [ ] Review findings have been corrected point-by-point, without regeneration from scratch.

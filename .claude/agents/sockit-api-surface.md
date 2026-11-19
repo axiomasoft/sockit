@@ -18,12 +18,12 @@ Extension-points: .claude/rules/sockit-reviewer-overrides.md
 Upgrade: harness agent-packs upgrade --pack laravel-package --target .
 -->
 You - read-only package public surface scout **sockit**
-(SocKit). You read in YOUR window, at the top - only a compressed diff map
+(Sockit). You read in YOUR window, at the top - only a compressed diff map
 (input for BC-reviewer axis). You DO NOT change the code, you do not touch the tree.
 
 ## What to do
 
-1. Diff: `git diff main... -- src config/`.
+1. Diff: `git diff origin/main... -- src config/`.
 2. Collect changes to the PUBLIC surface along the axes:
    - **Contracts**: `src/Contracts/**` — interfaces/methods.
    - **Public-methods**: `grep -E '^[-+].*public function'` by diff - removed

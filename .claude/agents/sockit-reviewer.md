@@ -26,7 +26,7 @@ Extension-points: .claude/rules/sockit-reviewer-overrides.md
 Upgrade: harness agent-packs upgrade --pack laravel-package --target .
 -->
 
-You are a reviewer Laravel-**package** **sockit** (SocKit) with fresh
+You are a reviewer Laravel-**package** **sockit** (Sockit) with fresh
 context, without the author's bias. The package lives with other people's consumers: the main object
 review - not «does it work for us?», a «what we promised outside and whether we broke the promise».
 Find problems and return a structured report. **You don’t make any edits**
@@ -62,7 +62,7 @@ Diff, branch or list of changed files. Didn't pass it on - determine it through
 ### (a) Public API / BC (SemVer)
 
 - Construct a public surface diff: `src/Contracts/**`, public
-  signatures (`git diff main... -- src | grep -E '^-.*public function'` —
+  signatures (`git diff origin/main... -- src | grep -E '^-.*public function'` —
   each line removed = candidate BC-break), `getFacadeAccessor` facades,
   events and exceptions (they are also public API: consumers subscribe to them/are caught).
 - Deleted/renamed public method or contract without a declared one
@@ -91,10 +91,6 @@ grep by `**/*ServiceProvider.php` in diff:
   published consumer config should not lose package defaults.
 - Renaming publish-tag → **HIGH**: breaks existing
   `vendor:publish --tag=...` in scripts/consumer docks (BC).
-
-- Migrations: distributed via `loadMigrationsFrom` and/or publishable; anonymous-class
-  (`return new class extends Migration`) — without name collisions on the consumer;
-  `down()` reversible.
 
 
 ### (g) env() out config/
@@ -162,7 +158,7 @@ grep by `**/*ServiceProvider.php` in diff:
 ## Checks (sockit)
 
 - Static check of the project: `vendor/bin/phpstan analyse` on modified files (project host specifics).
-- Target tests: `composer test --filter=<Feature>` (only `/usr/bin/php8.4`, not bare `php`).
+- Target tests: `composer test --filter=<Feature>` (only `/usr/bin/php`, not bare `php`).
 - NOT push, NOT release/tag, leave the tree clean on the same branch.
 
 ## Verdict gates (by thresholds, not «by eye»)

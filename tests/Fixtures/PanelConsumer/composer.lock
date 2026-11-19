@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2a15c1839ef88fb4d35cc7139c5bf58a",
+    "content-hash": "4423399ede42dba829cf199b3286404f",
     "packages": [
         {
             "name": "axiomasoft/packman",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "../../../vendor/axiomasoft/packman",
-                "reference": "c8c7500d783e97f2956e8861774d0d319e615d92"
+                "reference": "484e32cd39bc4e34cb6f196699ae858bf14b9d20"
             },
             "require": {
                 "php": "^8.4",
@@ -90,11 +90,11 @@
         },
         {
             "name": "axiomasoft/packman-plugins",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "../../../vendor/axiomasoft/packman-plugins",
-                "reference": "a012ef4729898b2e0449d2911d06f71ec7c42105"
+                "reference": "bcd8cc75cbebe36c2526c25958bb05d9d85d9e36"
             },
             "require": {
                 "axiomasoft/packman": "^0.1.1",
@@ -149,11 +149,11 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/core",
-                "reference": "bb1286c8ce199ade021c9b9e69203734092f26b1"
+                "reference": "3b183574c1cdce5cdeec96c30eff1c63c94837b1"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
-                "axiomasoft/packman-plugins": "^0.1.1",
+                "axiomasoft/packman-plugins": "^0.1.2",
                 "illuminate/config": "^13.0",
                 "illuminate/console": "^13.0",
                 "illuminate/container": "^13.0",

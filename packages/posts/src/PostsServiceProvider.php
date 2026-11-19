@@ -6,6 +6,7 @@ namespace SocKit\Posts;
 
 use Illuminate\Support\ServiceProvider;
 use Packman\Attributes\Api;
+use Packman\Plugins\Contracts\Registry\PluginInspector;
 use Packman\Plugins\Laravel\ExtensionRegistrar;
 use SocKit\Posts\Internal\PostTarget;
 
@@ -15,7 +16,13 @@ final class PostsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->scoped(PostTarget::class);
         ExtensionRegistrar::builtInFor($this->app, PostsPlugin::class);
+    }
+
+    public function boot(): void
+    {
+        if ($this->app->make(PluginInspector::class)->facetsOf('axiomasoft.sockit.posts') !== null) {
+            $this->app->scopedIf(PostTarget::class);
+        }
     }
 }

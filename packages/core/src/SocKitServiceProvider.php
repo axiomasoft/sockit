@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace SocKit;
 
+use Illuminate\Console\Events\ArtisanStarting;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Packman\Attributes\Api;
-use Packman\Errors\Laravel\ProblemDefinitions;
 use Packman\Plugins\Contracts\Contributions\Extensions;
+use Packman\Plugins\Contracts\Registry\PluginInspector;
 use Packman\Plugins\Laravel\ExtensionRegistrar;
 use Packman\Plugins\Laravel\PluginsServiceProvider;
 use SocKit\Actors\ActorContexts;
 use SocKit\Audience\AudienceEvaluator;
 use SocKit\Audience\AudienceGate;
 use SocKit\Configuration\SocKitConfig;
-use SocKit\Errors\SockitProblemDefinitions;
 use SocKit\Internal\Console\DiagnoseCommand;
 use SocKit\Internal\Console\DoctorCommand;
 use SocKit\Internal\Console\MakePanelCommand;
@@ -38,40 +39,60 @@ class SocKitServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        if ($this->app->getProvider(self::class) !== null) {
+            return;
+        }
+
         $this->app->register(PluginsServiceProvider::class);
         ExtensionRegistrar::builtInFor($this->app, SockitCorePlugin::class);
-        ProblemDefinitions::register($this->app, dirname(__DIR__).'/composer.json', SockitProblemDefinitions::class);
-        new ResolverRegistrar()->register($this->app);
-        $this->app->scoped(ActorContexts::class);
-        OperationHandles::configure($this->app);
-        $this->app->scoped(OutboxRelay::class);
-        $this->app->scoped(Operations::class);
-        $this->app->scoped(SurfaceInstances::class);
-        $this->app->scoped(AudienceEvaluator::class);
-        $this->app->scoped(AudienceGate::class);
         Surfaces::configure($this->app);
         PanelDefinitions::configure($this->app);
         Modules::configure($this->app);
+        if ($this->app->isBooted()) {
+            $this->activate();
+        } else {
+            $this->app->booting($this->activate(...));
+        }
+    }
+
+    private function activate(): void
+    {
         $app = $this->app;
-        $app->booting(static function () use ($app): void {
-            foreach ($app->make(Extensions::class)->contributions(Module::class) as $contribution) {
-                Modules::add($app, $contribution->implementation);
-            }
-            $draft = Modules::compile($app);
-            new PanelSchemaCompiler()->validateComponents($draft->schemaComponents());
-            $panels = PanelDefinitions::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft);
-            Surfaces::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft, panels: $panels);
-            Modules::publish(app: $app, draft: $draft);
-            PanelDefinitions::publish(app: $app, draft: $panels);
-            Surfaces::publish($app);
-        });
+        if ($app->make(PluginInspector::class)->facetsOf('axiomasoft.sockit.core') === null) {
+            return;
+        }
+
+        new ResolverRegistrar()->register($app);
+        $app->scopedIf(ActorContexts::class);
+        OperationHandles::configure($app);
+        $app->scopedIf(OutboxRelay::class);
+        $app->scopedIf(Operations::class);
+        $app->scopedIf(SurfaceInstances::class);
+        $app->scopedIf(AudienceEvaluator::class);
+        $app->scopedIf(AudienceGate::class);
+        foreach ($app->make(Extensions::class)->contributions(Module::class) as $contribution) {
+            Modules::add($app, $contribution->implementation);
+        }
+        $draft = Modules::compile($app);
+        new PanelSchemaCompiler()->validateComponents($draft->schemaComponents());
+        $panels = PanelDefinitions::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft);
+        Surfaces::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft, panels: $panels);
+        Modules::publish(app: $app, draft: $draft);
+        PanelDefinitions::publish(app: $app, draft: $panels);
+        Surfaces::publish($app);
     }
 
     public function boot(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([DiagnoseCommand::class, OutboxRunCommand::class, DoctorCommand::class, MakePanelCommand::class, PanelMigrationsCommand::class, RelayCommand::class]);
-            $this->publishes(paths: [__DIR__.'/../config/sockit.php' => config_path('sockit.php')], groups: 'sockit-config');
+        if (! $this->app->runningInConsole()
+            || $this->app->getProvider(self::class) !== $this
+            || $this->app->make(PluginInspector::class)->facetsOf('axiomasoft.sockit.core') === null) {
+            return;
         }
+
+        $this->app->make(Dispatcher::class)->listen(ArtisanStarting::class, static function (ArtisanStarting $event): void {
+            $event->artisan->resolveCommands([DiagnoseCommand::class, OutboxRunCommand::class, DoctorCommand::class, MakePanelCommand::class, PanelMigrationsCommand::class, RelayCommand::class]);
+        });
+        $this->publishes(paths: [__DIR__.'/../config/sockit.php' => $this->app->configPath('sockit.php')], groups: 'sockit-config');
     }
 }

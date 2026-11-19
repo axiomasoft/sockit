@@ -66,7 +66,9 @@ final readonly class Modules
             throw new Exceptions\InvalidModuleException([['module' => $module, 'key' => 'modules', 'rule' => 'MODULE_IMPLEMENTATION_INVALID']]);
         }
 
-        return in_array($instance->manifest()->id, SocKitConfig::fromRepository($app->make('config'))->modules->enabled, true);
+        $enabled = $app->make('config')->get('sockit.modules.enabled', []);
+
+        return is_array($enabled) && in_array($instance->manifest()->id, $enabled, true);
     }
 
     /** @return array<string, ModuleManifest> */

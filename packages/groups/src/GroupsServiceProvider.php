@@ -6,6 +6,7 @@ namespace SocKit\Groups;
 
 use Illuminate\Support\ServiceProvider;
 use Packman\Attributes\Api;
+use Packman\Plugins\Contracts\Registry\PluginInspector;
 use Packman\Plugins\Laravel\ExtensionRegistrar;
 use SocKit\Groups\Internal\GroupTarget;
 
@@ -16,6 +17,12 @@ final class GroupsServiceProvider extends ServiceProvider
     public function register(): void
     {
         ExtensionRegistrar::builtInFor($this->app, GroupsPlugin::class);
-        $this->app->scoped(GroupTarget::class);
+    }
+
+    public function boot(): void
+    {
+        if ($this->app->make(PluginInspector::class)->facetsOf('axiomasoft.sockit.groups') !== null) {
+            $this->app->scopedIf(GroupTarget::class);
+        }
     }
 }

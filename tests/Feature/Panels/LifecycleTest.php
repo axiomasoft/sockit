@@ -134,5 +134,6 @@ it('rejects duplicate configured providers and invalid FQCNs', function (): void
         ->and(fn () => $app->make(Modules::class))->toThrow(InvalidModuleException::class);
     $invalid = new Application;
     $invalid->instance('config', new Repository(['sockit' => ['panels' => [stdClass::class]]]));
-    expect(fn () => $invalid->register(SocKitServiceProvider::class))->toThrow(InvalidConfigurationException::class);
+    $invalid->register(SocKitServiceProvider::class);
+    expect(fn () => $invalid->boot())->toThrow(InvalidConfigurationException::class);
 });

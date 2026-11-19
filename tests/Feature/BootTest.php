@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use Illuminate\Console\Application as Artisan;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\DatabaseManager;
+use Illuminate\Foundation\Application;
 use Packman\Config\Contracts\SettingsLookup;
 use Packman\Doctor\Data\DoctorContext;
 use Packman\Doctor\Laravel\DoctorChecks;
@@ -11,13 +14,16 @@ use Packman\Errors\Contracts\ProblemRegistry;
 use Packman\PackmanServiceProvider;
 use Packman\Plugins\Laravel\PluginsServiceProvider;
 use SocKit\Actors\ActorContexts;
+use SocKit\Actors\Contracts\TenantResolver;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Diagnostics\SockitDoctorCheck;
 use SocKit\Errors\Enums\ProblemCode;
+use SocKit\Groups\Internal\GroupTarget;
 use SocKit\Modules\Modules;
 use SocKit\Operations\Internal\Storage\OwnerStorage;
 use SocKit\Operations\OperationHandles;
 use SocKit\Panels\PanelDefinitions;
+use SocKit\Posts\Internal\PostTarget;
 use SocKit\SocKitServiceProvider;
 use SocKit\Tests\Fixtures\Groups\Selection;
 use SocKit\Tests\Fixtures\Modules\PackmanModulePlugin;
@@ -80,4 +86,36 @@ it('contributes the SocKit read-only check to Packman doctor', function (): void
         }
     }
     throw new RuntimeException('SocKit doctor check missing');
+});
+
+it('isolates Sockit activation, resolver defaults and Artisan commands by host', function (): void {
+    $active = Selection::app(enabled: ['sockit.reactions']);
+    $active->register(SocKitServiceProvider::class, force: true);
+    $active->boot();
+    $inactive = Selection::app(extra: [
+        'sockit' => ['privacy' => ['floor' => ['default_scope' => 'invalid']]],
+        'packman' => ['disabled_plugins' => ['axiomasoft.sockit.core', 'axiomasoft.sockit.reactions', 'axiomasoft.sockit.groups', 'axiomasoft.sockit.posts']],
+    ]);
+    $inactive->boot();
+
+    $commands = static function (Application $app): Artisan {
+        return (new Artisan($app, $app->make(Dispatcher::class), $app->version()))->setContainerCommandLoader();
+    };
+
+    foreach ([$active, $inactive, $active] as $app) {
+        $artisan = $commands($app);
+        expect($artisan->has('sockit:doctor'))->toBe($app === $active)
+            ->and($artisan->has('sockit:reactions:rebuild'))->toBe($app === $active)
+            ->and($app->bound(SocKitConfig::class))->toBe($app === $active)
+            ->and($app->bound(TenantResolver::class))->toBe($app === $active)
+            ->and($app->bound(OperationHandles::class))->toBe($app === $active)
+            ->and($app->bound(GroupTarget::class))->toBe($app === $active)
+            ->and($app->bound(PostTarget::class))->toBe($app === $active)
+            ->and($app->make('db')->getConnections())->toBe([]);
+    }
+
+    expect($inactive->make('config')->has('sockit.ids'))->toBeFalse();
+    $offered = Selection::app();
+    $offered->boot();
+    expect($commands($offered)->has('sockit:reactions:rebuild'))->toBeFalse();
 });

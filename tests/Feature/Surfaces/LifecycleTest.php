@@ -202,7 +202,8 @@ it('fails closed when a configured provider binding has the wrong runtime implem
 it('checks configured provider FQCN contracts and detects config module declaration collisions', function (): void {
     $invalid = new Application;
     $invalid->instance('config', new Repository(['sockit' => ['surfaces' => [stdClass::class]]]));
-    expect(fn () => $invalid->register(SocKitServiceProvider::class))->toThrow(InvalidConfigurationException::class);
+    $invalid->register(SocKitServiceProvider::class);
+    expect(fn () => $invalid->boot())->toThrow(InvalidConfigurationException::class);
     $app = new Application;
     $app->instance('config', new Repository(['sockit' => ['surfaces' => [EdufyClassFeedSurface::class], 'privacy' => ['floor' => Wire::floorWire()],
         'modules' => ['enabled' => ['social.posts', 'social.reactions', 'surface.bundle']]]]));

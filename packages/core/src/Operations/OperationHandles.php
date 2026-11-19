@@ -30,8 +30,8 @@ final readonly class OperationHandles
 
     public static function configure(Application $app): void
     {
-        $app->scoped(self::class);
-        $app->scoped(abstract: OwnerStorage::class, concrete: static fn (Application $app): OwnerStorage => new OwnerStorage(connections: $app->make(ConnectionResolverInterface::class), handles: $app->make(self::class)));
+        $app->scopedIf(self::class);
+        $app->scopedIf(abstract: OwnerStorage::class, concrete: static fn (Application $app): OwnerStorage => new OwnerStorage(connections: $app->make(ConnectionResolverInterface::class), handles: $app->make(self::class)));
     }
 
     /** Sample current target visibility outside transactions on every protected entry/replay. */

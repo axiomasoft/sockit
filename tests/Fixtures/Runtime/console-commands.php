@@ -19,6 +19,9 @@ register_shutdown_function(static function () use ($scenario): void {
     $scenario->db->close();
 });
 if (getenv('SOCKIT_NO_IDENTITY') !== '1') {
+    foreach (['owner_a', 'owner_b', 'decoy'] as $name) {
+        $scenario->app->make('config')->set('database.connections.'.$name, $scenario->db->capsule->getConnection($name)->getConfig());
+    }
     $connection = $scenario->db->capsule->getConnection('owner_a');
     $endpoint = $connection->getConfig();
     if (! is_array($endpoint)) {
@@ -26,7 +29,7 @@ if (getenv('SOCKIT_NO_IDENTITY') !== '1') {
     }
     $observed = PgTarget::query($scenario->db->owner, 'SELECT host(inet_server_addr()) AS host, inet_server_port() AS port')->fetch(PDO::FETCH_ASSOC);
     $descriptor = ['cluster' => 'owned-test-cluster', 'endpoint' => ['host' => $endpoint['host'], 'port' => $endpoint['port']], 'aliases' => [$observed]];
-    $scenario->app->make('config')->set('sockit.storage.deployments', ['owner_a' => $descriptor, 'owner_b' => $descriptor]);
+    $scenario->app->make('config')->set('sockit.storage.deployments', ['owner_a' => $descriptor, 'owner_b' => $descriptor, 'decoy' => $descriptor]);
 }
 $scenario->consumer->fault = getenv('SOCKIT_CONSOLE_FAULT') ?: '';
 if (getenv('SOCKIT_NO_HANDLES') !== '1') {

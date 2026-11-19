@@ -14,9 +14,22 @@ def docker(*args):
     return subprocess.check_output(['docker', *args], text=True).strip()
 
 try:
-    container = docker('run', '-d', '--name', name, '--label', 'sockit.test.run=' + run,
-                       '-e', 'POSTGRES_PASSWORD=' + password, '-e', 'POSTGRES_DB=' + owner,
-                       '-p', '127.0.0.1::5432', 'postgres:16-alpine')
+    for attempt in range(4):
+        started = subprocess.run(['docker', 'run', '-d', '--name', name, '--label', 'sockit.test.run=' + run,
+                                  '-e', 'POSTGRES_PASSWORD=' + password, '-e', 'POSTGRES_DB=' + owner,
+                                  '-p', '127.0.0.1::5432', 'postgres:16-alpine'], capture_output=True, text=True)
+        if started.returncode == 0:
+            container = started.stdout.strip()
+            break
+        # RootlessKit can select a loopback port already bound by a concurrent runner.
+        # A failed docker run may still leave a created container and an anonymous volume.
+        label = subprocess.run(['docker', 'inspect', '--format', '{{index .Config.Labels "sockit.test.run"}}', name],
+                               capture_output=True, text=True)
+        if label.returncode == 0 and label.stdout.strip() == run:
+            docker('rm', '--volumes', name)
+        if 'address already in use' not in started.stderr or attempt == 3:
+            raise RuntimeError('cannot start private PostgreSQL: ' + started.stderr.strip().replace(password, '[redacted]'))
+        time.sleep(.5)
     inspect = json.loads(docker('inspect', container))[0]
     if inspect['Config']['Labels']['sockit.test.run'] != run:
         raise RuntimeError('container ownership mismatch')

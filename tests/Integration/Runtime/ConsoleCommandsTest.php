@@ -41,7 +41,7 @@ it('runs doctor and bounded relay against isolated panel storage in fresh proces
         sort($statuses);
         expect($statuses)->toBe(['pending', 'retry']);
         $configured = consoleProcess(['sockit:diagnose', '--panel=acme.a', '--json']);
-        expect($configured->getExitCode())->toBe(0)->and($configured->getOutput())->toContain('configured');
+        expect($configured->getOutput())->toContain('configured')->and($configured->getExitCode())->toBe(0);
         $probed = consoleProcess(['sockit:diagnose', '--panel=acme.a', '--json', '--probe-storage']);
         expect($probed->getExitCode())->toBe(1)->and($probed->getOutput())->toContain('SCHEMA_HISTORY_MISSING');
         $projection = consoleProcess(['sockit:outbox:run', '--panel=acme.a', '--replay-mode=projection_only', '--limit=1']);

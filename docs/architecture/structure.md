@@ -4,7 +4,7 @@
 
 ```text
 packages/core/                 # axiomasoft/sockit, SocKit\
-  src/{Plugins,Support,Actors,Audience,Panels,Surfaces,Operations,Errors,Modules,Configuration,Testing,Internal}/
+  src/{Plugins,Support,Actors,Audience,Panels,Surfaces,Operations,Errors,Modules,Configuration,Diagnostics,Testing,Internal}/
   config/sockit.php
   resources/contracts/{fixtures,schemas}/
   stubs/                       # panel provider/model/migration; consumer owns generated output

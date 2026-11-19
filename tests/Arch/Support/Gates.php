@@ -28,7 +28,7 @@ final class Gates
 {
     private const array MODULES = [
         'Attributes', 'Plugins', 'Support', 'Schema', 'Actors', 'Audience', 'Panels', 'Surfaces',
-        'Operations', 'Errors', 'Modules', 'Configuration', 'Testing', 'Internal', 'Facades',
+        'Operations', 'Errors', 'Modules', 'Configuration', 'Diagnostics', 'Testing', 'Internal', 'Facades',
     ];
 
     private const array FORBIDDEN = [

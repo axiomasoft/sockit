@@ -1228,6 +1228,16 @@
             "uses": [],
             "doc": [],
             "methods": {
+                "boot": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "void",
+                    "doc": []
+                },
                 "register": {
                     "visibility": "public",
                     "static": false,

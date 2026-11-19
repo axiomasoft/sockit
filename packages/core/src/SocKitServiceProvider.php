@@ -8,30 +8,19 @@ use Illuminate\Console\Events\ArtisanStarting;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Packman\Attributes\Api;
-use Packman\Plugins\Contracts\Contributions\Extensions;
 use Packman\Plugins\Contracts\Registry\PluginInspector;
 use Packman\Plugins\Laravel\ExtensionRegistrar;
 use Packman\Plugins\Laravel\PluginsServiceProvider;
-use SocKit\Actors\ActorContexts;
-use SocKit\Audience\AudienceEvaluator;
-use SocKit\Audience\AudienceGate;
-use SocKit\Configuration\SocKitConfig;
 use SocKit\Internal\Console\DiagnoseCommand;
 use SocKit\Internal\Console\DoctorCommand;
 use SocKit\Internal\Console\MakePanelCommand;
 use SocKit\Internal\Console\OutboxRunCommand;
 use SocKit\Internal\Console\PanelMigrationsCommand;
 use SocKit\Internal\Console\RelayCommand;
-use SocKit\Internal\ResolverRegistrar;
-use SocKit\Modules\Contracts\Module;
+use SocKit\Internal\RuntimeRegistrar;
 use SocKit\Modules\Modules;
-use SocKit\Operations\OperationHandles;
-use SocKit\Operations\Operations;
-use SocKit\Operations\OutboxRelay;
 use SocKit\Panels\PanelDefinitions;
 use SocKit\Plugins\SockitCorePlugin;
-use SocKit\Schema\PanelSchemaCompiler;
-use SocKit\Surfaces\SurfaceInstances;
 use SocKit\Surfaces\Surfaces;
 
 #[Api(since: '1.0')]
@@ -62,24 +51,7 @@ class SocKitServiceProvider extends ServiceProvider
             return;
         }
 
-        new ResolverRegistrar()->register($app);
-        $app->scopedIf(ActorContexts::class);
-        OperationHandles::configure($app);
-        $app->scopedIf(OutboxRelay::class);
-        $app->scopedIf(Operations::class);
-        $app->scopedIf(SurfaceInstances::class);
-        $app->scopedIf(AudienceEvaluator::class);
-        $app->scopedIf(AudienceGate::class);
-        foreach ($app->make(Extensions::class)->contributions(Module::class) as $contribution) {
-            Modules::add($app, $contribution->implementation);
-        }
-        $draft = Modules::compile($app);
-        new PanelSchemaCompiler()->validateComponents($draft->schemaComponents());
-        $panels = PanelDefinitions::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft);
-        Surfaces::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft, panels: $panels);
-        Modules::publish(app: $app, draft: $draft);
-        PanelDefinitions::publish(app: $app, draft: $panels);
-        Surfaces::publish($app);
+        new RuntimeRegistrar()->register($app);
     }
 
     public function boot(): void

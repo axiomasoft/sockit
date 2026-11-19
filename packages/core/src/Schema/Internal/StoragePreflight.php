@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace SocKit\Schema\Internal;
 
 use Illuminate\Database\Connection;
+use Packman\Attributes\Internal;
 use PDO;
 use SocKit\Panels\PanelStorage;
 use SocKit\Schema\Exceptions\InvalidSchemaException;
 use SocKit\Schema\PanelSchema;
 
+#[Internal]
 final class StoragePreflight
 {
     /** Explicit command entrypoint: bind prefix and live schema to the same write connection. */

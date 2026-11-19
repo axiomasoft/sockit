@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
 use PDO;
 use Pdo\Sqlite;
 use SocKit\Internal\Generation\GenerationFailure;
 
 /** The unpublished SQLite preview supported arbitrary physical table names. Inspect only column metadata. */
+#[Internal]
 final class PreviewSqliteReceipts
 {
     /** @param array<string, mixed> $connection */

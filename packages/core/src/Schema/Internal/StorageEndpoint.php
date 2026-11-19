@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
+
 /** No DNS lookup: equivalence beyond spelling is a host deployment assertion. */
+#[Internal]
 final class StorageEndpoint
 {
     public static function normalize(mixed $host, mixed $port = 5432): string

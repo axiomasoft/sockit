@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Internal\Generation;
 
 use Illuminate\Contracts\Config\Repository;
+use Packman\Attributes\Internal;
 use SocKit\Modules\Modules;
 use SocKit\Panels\Panel;
 use SocKit\Panels\PanelDefinition;
@@ -14,6 +15,7 @@ use SocKit\Schema\ModelEmitter;
 use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\Schema\StoragePreflight;
 
+#[Internal]
 final readonly class PanelGenerator
 {
     public function __construct(private Modules $modules, private PanelDefinitions $panels, private Repository $config) {}

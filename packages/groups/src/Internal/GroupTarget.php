@@ -6,6 +6,7 @@ namespace SocKit\Groups\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
@@ -36,6 +37,7 @@ use SocKit\Surfaces\SurfaceInstances;
  * The kernel fences the management lifecycle/generations on the owner connection;
  * the host's existing authority fence independently proves admission. Unknown facts deny.
  */
+#[Internal]
 final class GroupTarget implements TargetResolver, TargetWriteFence
 {
     private ?OperationHandle $prepared = null;

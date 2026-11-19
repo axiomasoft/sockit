@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Internal\Generation\GenerationFailure;
 use SocKit\Internal\Generation\GenerationPaths;
 use SocKit\Panels\PanelStorage;
 use SocKit\Schema\PanelSchema;
 
+#[Internal]
 final class MigrationHistory
 {
     /** @return list<array<string, mixed>> */

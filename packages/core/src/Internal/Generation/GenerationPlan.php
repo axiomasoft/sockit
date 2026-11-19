@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SocKit\Internal\Generation;
 
+use Packman\Attributes\Internal;
+
+#[Internal]
 final readonly class GenerationPlan
 {
     /** @param array<string, string> $sources Relative path => source

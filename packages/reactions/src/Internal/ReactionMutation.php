@@ -7,6 +7,7 @@ namespace SocKit\Reactions\Internal;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\AuthorizationDecision;
@@ -26,6 +27,7 @@ use SocKit\Support\Ids;
 use SocKit\Surfaces\Enums\TargetLifecycle;
 
 /** One invocation, one immutable owner routing. The kernel owns transaction/receipt/outbox and fences. */
+#[Internal]
 final readonly class ReactionMutation implements OwnerMutation
 {
     public function __construct(private Application $app, private ReactionCommand $reaction, private string $action)

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Schema\Internal;
 
 use Illuminate\Database\Connection;
+use Packman\Attributes\Internal;
 use SocKit\Internal\Generation\GenerationFailure;
 use SocKit\Internal\Generation\GenerationPaths;
 use SocKit\Internal\Generation\GenerationPlan;
@@ -13,6 +14,7 @@ use SocKit\Schema\ModelEmitter;
 use SocKit\Schema\PanelSchema;
 use SocKit\Schema\SnapshotRenderer;
 
+#[Internal]
 final class MigrationPlanner
 {
     /** @param list<string> $ran */

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace SocKit\Internal\Generation;
 
 use Composer\Autoload\ClassLoader;
+use Packman\Attributes\Internal;
 use PhpToken;
 
+#[Internal]
 final class GenerationPaths
 {
     /** Reject symlinks (including dangling ones), aliases on case-insensitive hosts, and escapes.

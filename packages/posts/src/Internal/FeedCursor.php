@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SocKit\Posts\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Posts\Exceptions\InvalidFeedCursorException;
 use SocKit\Support\CanonicalJson;
 
 /** Encrypt-then-MAC: even a denied candidate's ID/time stays opaque. Keys are server managed, base64 32-byte secrets. */
+#[Internal]
 final readonly class FeedCursor
 {
     /** @param array<string, string> $keys */

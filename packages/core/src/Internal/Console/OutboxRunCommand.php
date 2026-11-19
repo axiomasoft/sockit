@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace SocKit\Internal\Console;
 
 use Illuminate\Console\Command;
+use Packman\Attributes\Internal;
 use SocKit\Panels\PanelDefinitions;
 
+#[Internal]
 final class OutboxRunCommand extends Command
 {
     protected $signature = 'sockit:outbox:run {--panel=} {--limit=100} {--replay-mode=normal}';

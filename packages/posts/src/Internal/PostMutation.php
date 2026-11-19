@@ -6,6 +6,7 @@ namespace SocKit\Posts\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\AuthorizationDecision;
@@ -26,6 +27,7 @@ use SocKit\Support\Ids;
 use SocKit\Surfaces\Enums\TargetLifecycle;
 
 /** One operation-local preparation. Safety/media assess outside tx; only owner rows change under locks. */
+#[Internal]
 final class PostMutation implements OwnerMutation
 {
     private ?PublicationState $publication = null;

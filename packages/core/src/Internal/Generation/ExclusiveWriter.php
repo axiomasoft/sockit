@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Internal\Generation;
 
+use Packman\Attributes\Internal;
+
 /** Cooperative root lock + atomic link(2) no-replace; never rename over a host file. */
+#[Internal]
 final readonly class ExclusiveWriter
 {
     /** @param (\Closure(string, string): void)|null $observe Internal failure/race injection seam. */

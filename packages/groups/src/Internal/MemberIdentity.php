@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SocKit\Groups\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 
 /** A subject actor, never the trusted executor. Resolve and verify the owning group first. */
+#[Internal]
 final readonly class MemberIdentity
 {
     public function __construct(private string $groupId, private ActorRef $actor)

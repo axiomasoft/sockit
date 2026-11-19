@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Operations\Internal\Envelope;
 
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\AuthorizationDecision;
@@ -21,6 +22,7 @@ use SocKit\Surfaces\Enums\SurfaceLifecycle;
 use SocKit\Surfaces\Enums\TargetLifecycle;
 
 /** Kernel-only, cannot be impersonated by a module commandType. */
+#[Internal]
 final readonly class SurfaceMutation implements OwnerMutation
 {
     public function __construct(private OwnerConnection $owner, public string $action)

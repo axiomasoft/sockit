@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
+
 /** Frozen final-name snapshot for future DDL consumers; no live connection reference. */
+#[Internal]
 final readonly class PhysicalSchema
 {
     private string $descriptor;

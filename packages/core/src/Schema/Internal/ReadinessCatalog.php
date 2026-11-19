@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
 use PDO;
 
 /** Required catalog invariants, independent of rollback's deliberately exact fingerprint. */
+#[Internal]
 final class ReadinessCatalog
 {
     /** @param array<string, mixed> $physical

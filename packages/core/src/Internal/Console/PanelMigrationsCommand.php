@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace SocKit\Internal\Console;
 
 use Illuminate\Console\Command;
+use Packman\Attributes\Internal;
 use SocKit\Errors\Exceptions\SocKitException;
 use SocKit\Internal\Generation\GenerationFailure;
 use SocKit\Schema\PanelMigrations;
 
+#[Internal]
 final class PanelMigrationsCommand extends Command
 {
     protected $signature = 'sockit:panel:migrations {panel : Stable registered panel ID} {--upgrade : Append to the consumer snapshot chain} {--dry-run : Inspect the complete output plan without writing}';

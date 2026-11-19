@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Internal;
 use Packman\Foundation\Contracts\PackageRegistrar;
 use Packman\Plugins\Contracts\Contributions\Extensions;
 use SocKit\Actors\ActorContexts;
@@ -22,6 +23,7 @@ use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\Surfaces\SurfaceInstances;
 use SocKit\Surfaces\Surfaces;
 
+#[Internal]
 final class RuntimeRegistrar implements PackageRegistrar
 {
     public function register(Application $app): void

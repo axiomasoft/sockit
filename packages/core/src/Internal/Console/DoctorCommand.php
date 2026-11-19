@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace SocKit\Internal\Console;
 
 use Illuminate\Console\Command;
+use Packman\Attributes\Internal;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\PanelDefinitions;
 use SocKit\Schema\SchemaReadiness;
 
+#[Internal]
 final class DoctorCommand extends Command
 {
     protected $signature = 'sockit:doctor {--panel=} {--json} {--configuration-only}';

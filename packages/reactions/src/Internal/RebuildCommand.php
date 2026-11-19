@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Reactions\Internal;
 
 use Illuminate\Console\Command;
+use Packman\Attributes\Internal;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\PanelDefinitions;
@@ -13,6 +14,7 @@ use SocKit\Support\Data\HostEntityRef;
 use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\TargetRef;
 
+#[Internal]
 final class RebuildCommand extends Command
 {
     protected $signature = 'sockit:reactions:rebuild {--panel=} {--target=} {--incarnation=1}';

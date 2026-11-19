@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Posts\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Internal;
 use SocKit\Audience\AudienceGate;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
@@ -23,6 +24,7 @@ use SocKit\Surfaces\Data\SurfaceInstance;
 use SocKit\Surfaces\Data\TargetResolution;
 use SocKit\Surfaces\Enums\SurfaceLifecycle;
 
+#[Internal]
 final readonly class PostFeed
 {
     public function __construct(private Application $app) {}

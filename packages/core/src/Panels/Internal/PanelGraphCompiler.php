@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Panels\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Exceptions\FloorWidensException;
 use SocKit\Configuration\Data\ModulesConfig;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
@@ -19,6 +20,7 @@ use SocKit\Panels\PanelDefinition;
 use SocKit\Panels\PanelProvider;
 use SocKit\Schema\PanelSchemaCompiler;
 
+#[Internal]
 final class PanelGraphCompiler
 {
     /** @var array<string, true> */

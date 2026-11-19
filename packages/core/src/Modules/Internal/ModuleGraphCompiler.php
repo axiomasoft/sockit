@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Modules\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Internal;
 use SocKit\Configuration\Data\ModulesConfig;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Configuration\SocKitConfig;
@@ -16,6 +17,7 @@ use SocKit\Modules\ModuleRegistrar;
 use SocKit\Schema\Contracts\SchemaContribution;
 use SocKit\Schema\Exceptions\InvalidSchemaException;
 
+#[Internal]
 final class ModuleGraphCompiler
 {
     /** @var array<string, true> */

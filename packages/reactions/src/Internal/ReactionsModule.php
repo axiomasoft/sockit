@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SocKit\Reactions\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Modules\Contracts\Module;
 use SocKit\Modules\ModuleManifest;
 use SocKit\Modules\ModuleRegistrar;
 
+#[Internal]
 final class ReactionsModule implements Module
 {
     public function manifest(): ModuleManifest

@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Audience\AudienceGate;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
@@ -55,6 +56,7 @@ use SocKit\Surfaces\Enums\SurfaceLifecycle;
 use SocKit\Surfaces\Enums\TargetLifecycle;
 
 /** Fixed core protocol. No user stages can skip claim/guards/CAS/outbox or commit an outer transaction. */
+#[Internal]
 final readonly class Envelope
 {
     public function __construct(private Application $app) {}

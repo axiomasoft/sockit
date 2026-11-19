@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Surfaces\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Configuration\Exceptions\ProviderUnavailableException;
@@ -17,6 +18,7 @@ use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
 /** Only FQCN declarations live in the singleton, never scoped resolver/actor/installation instances. */
+#[Internal]
 final class TargetCapabilities
 {
     /** @var array<string, array<string, class-string<TargetResolver>>>|null */

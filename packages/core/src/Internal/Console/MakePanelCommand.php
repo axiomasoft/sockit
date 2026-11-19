@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace SocKit\Internal\Console;
 
 use Illuminate\Console\Command;
+use Packman\Attributes\Internal;
 use SocKit\Errors\Exceptions\SocKitException;
 use SocKit\Internal\Generation\ExclusiveWriter;
 use SocKit\Internal\Generation\GenerationFailure;
 use SocKit\Internal\Generation\PanelGenerator;
 
+#[Internal]
 final class MakePanelCommand extends Command
 {
     protected $signature = 'sockit:make-panel {name : PascalCase panel name}

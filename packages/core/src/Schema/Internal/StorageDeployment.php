@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
+
 /** Trusted, config-cache-safe host assertion; never inferred from a connection name. */
+#[Internal]
 final readonly class StorageDeployment
 {
     /** @param list<string> $aliases */

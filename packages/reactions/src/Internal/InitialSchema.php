@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Reactions\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Schema\Contracts\SchemaContribution;
 use SocKit\Schema\SchemaCheck;
 use SocKit\Schema\SchemaColumn;
@@ -13,6 +14,7 @@ use SocKit\Schema\SchemaModel;
 use SocKit\Schema\SchemaStep;
 
 /** Append-only v1. Existing snapshots never call this class at migration time. */
+#[Internal]
 final class InitialSchema implements SchemaContribution
 {
     public function component(): SchemaComponent

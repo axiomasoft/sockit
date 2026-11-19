@@ -7,12 +7,14 @@ namespace SocKit\Operations\Internal\Storage;
 use Closure;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\OperationHandles;
 use SocKit\Support\Data\CommandNamespace;
 
 /** Internal owner repositories. A transaction callback must perform local owner SQL only; no remote resolvers. */
+#[Internal]
 final readonly class OwnerConnection
 {
     /** @param array<string, string> $tables */

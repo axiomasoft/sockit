@@ -7,6 +7,7 @@ namespace SocKit\Posts\Internal;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Audience\AudienceGate;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
@@ -30,6 +31,7 @@ use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
 use SocKit\Surfaces\Enums\SurfaceLifecycle;
 
+#[Internal]
 final readonly class PostStore
 {
     public function __construct(private Application $app) {}

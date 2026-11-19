@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Modules\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Modules\ModuleManifest;
 use SocKit\Operations\Contracts\OutboxConsumer;
@@ -11,6 +12,7 @@ use SocKit\Schema\Contracts\SchemaContribution;
 use SocKit\Schema\SchemaComponent;
 use SocKit\Surfaces\Contracts\TargetResolver;
 
+#[Internal]
 final readonly class CompiledModuleGraph
 {
     /** @param array<string, ModuleManifest> $manifests

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SocKit\Groups\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Support\Data\InstallationRef;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Surfaces\Data\SurfaceRef;
 
 /** One group per management surface incarnation. Identity does not grant admission. */
+#[Internal]
 final readonly class GroupIdentity
 {
     public function __construct(private InstallationRef $installation, private SurfaceRef $surface) {}

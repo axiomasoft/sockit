@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Operations\Internal\Envelope;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\Internal\Storage\OwnerStorage;
@@ -15,6 +16,7 @@ use SocKit\Surfaces\Data\SurfaceInstance;
 use SocKit\Surfaces\Enums\SurfaceLifecycle;
 
 /** Narrow kernel call composition, never an implement SPI or an alternate operation pipeline. */
+#[Internal]
 final readonly class SurfaceFence
 {
     public function __construct(private Application $app) {}

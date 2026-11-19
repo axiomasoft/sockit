@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace SocKit\Surfaces\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Data\SurfaceDefinition;
 use SocKit\Surfaces\Data\SurfaceKindId;
 use SocKit\Surfaces\Exceptions\UnknownSurfaceKindException;
 
+#[Internal]
 final readonly class CompiledSurfaceDefinitions implements SurfaceDefinitions
 {
     /** @param array<string, SurfaceDefinition> $definitions */

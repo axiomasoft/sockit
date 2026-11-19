@@ -6,6 +6,7 @@ namespace SocKit\Posts\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\AuthorizationDecision;
@@ -24,6 +25,7 @@ use SocKit\Support\Ids;
 use SocKit\Surfaces\Enums\TargetLifecycle;
 
 /** Lifecycle is an overlay on publication, never an implicit publication or an erasure workflow. */
+#[Internal]
 final class PostLifecycleMutation implements OwnerMutation
 {
     /** @var array<string, mixed>|null */

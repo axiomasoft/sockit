@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace SocKit\Internal\Console;
 
 use Illuminate\Console\Command;
+use Packman\Attributes\Internal;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\Enums\ReplayMode;
 use SocKit\Operations\OutboxRelay;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\PanelDefinitions;
 
+#[Internal]
 final class RelayCommand extends Command
 {
     protected $signature = 'sockit:relay {--panel=} {--once} {--limit=100} {--replay-mode=delivery}';

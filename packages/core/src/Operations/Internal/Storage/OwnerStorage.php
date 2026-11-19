@@ -6,6 +6,7 @@ namespace SocKit\Operations\Internal\Storage;
 
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\OperationHandles;
@@ -13,6 +14,7 @@ use SocKit\Panels\PanelStorage;
 use SocKit\Support\Data\CommandNamespace;
 
 /** Runtime routing only: no schema discovery, DDL, default connection or global configuration mutation. */
+#[Internal]
 final readonly class OwnerStorage
 {
     public function __construct(private ConnectionResolverInterface $connections, private OperationHandles $handles) {}

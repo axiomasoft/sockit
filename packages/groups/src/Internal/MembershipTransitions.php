@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SocKit\Groups\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Groups\Enums\JoinPolicy;
 use SocKit\Groups\Enums\MembershipState;
 use SocKit\Groups\Exceptions\GroupException;
 
+#[Internal]
 final class MembershipTransitions
 {
     public static function next(JoinPolicy $policy, ?MembershipState $state, string $action): MembershipState

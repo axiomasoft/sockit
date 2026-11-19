@@ -6,6 +6,7 @@ namespace SocKit\Operations\Internal\Receipts;
 
 use Closure;
 use Illuminate\Database\Connection;
+use Packman\Attributes\Internal;
 use SocKit\Actors\Enums\ActorKind;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Errors\Enums\ProblemCode;
@@ -29,6 +30,7 @@ use SocKit\Support\Ids;
  * a rejected outcome. No host callbacks under locks: $write performs local owner SQL only.
  * Owns the complete transaction so an unfinished claim cannot be committed separately.
  */
+#[Internal]
 final readonly class ReceiptLedger
 {
     public function __construct(private OwnerConnection $owner) {}

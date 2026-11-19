@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Operations\Internal\Outbox;
 
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Configuration\Data\EventsConfig;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Operations\Data\DeliveryResult;
@@ -18,6 +19,7 @@ use SocKit\Support\Ids;
  * Append joins the caller's owner transaction. Claims and ACK each own a short transaction.
  * PostgreSQL clock, row locks and current random token fence expiry/reclaim, independent of worker clocks.
  */
+#[Internal]
 final readonly class OutboxStore
 {
     public function __construct(private OwnerConnection $owner, private EventsConfig $config) {}

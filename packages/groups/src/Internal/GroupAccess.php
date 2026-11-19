@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Groups\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Support\Data\ResourceRef;
@@ -11,6 +12,7 @@ use SocKit\Surfaces\Data\SurfaceInstance;
 use SocKit\Surfaces\Data\TargetResolution;
 
 /** Operation-local sampled facts, never permission to bypass a current guard. */
+#[Internal]
 final readonly class GroupAccess
 {
     /** @param array<string, mixed> $group

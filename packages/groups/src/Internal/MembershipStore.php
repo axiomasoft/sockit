@@ -7,10 +7,12 @@ namespace SocKit\Groups\Internal;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Groups\Exceptions\GroupException;
 use SocKit\Operations\Data\OperationHandle;
 
+#[Internal]
 final readonly class MembershipStore
 {
     public function __construct(private Application $app) {}

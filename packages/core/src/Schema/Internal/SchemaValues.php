@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Schema\Exceptions\InvalidSchemaException;
 
+#[Internal]
 final class SchemaValues
 {
     /** @phpstan-assert true $valid */

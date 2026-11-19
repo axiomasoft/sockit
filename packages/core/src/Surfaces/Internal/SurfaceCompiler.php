@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Surfaces\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Exceptions\FloorWidensException;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Modules\Modules;
@@ -15,6 +16,7 @@ use SocKit\Surfaces\Exceptions\InvalidSurfaceDefinitionException;
 use SocKit\Surfaces\Surface;
 use SocKit\Surfaces\SurfaceProvider;
 
+#[Internal]
 final class SurfaceCompiler
 {
     /** @var array<string, true> */

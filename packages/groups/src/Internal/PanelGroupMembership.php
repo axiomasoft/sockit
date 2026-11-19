@@ -6,6 +6,7 @@ namespace SocKit\Groups\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Audience\Contracts\ResolvesGroupVerdicts;
 use SocKit\Audience\Data\AudienceVerdict;
@@ -26,6 +27,7 @@ use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Enums\SurfaceLifecycle;
 
 /** One subject's immutable panel binding; never an ambient current-panel service or allow cache. */
+#[Internal]
 final readonly class PanelGroupMembership implements ResolvesGroupVerdicts
 {
     public function __construct(private Application $app, private SurfaceRef $surface) {}

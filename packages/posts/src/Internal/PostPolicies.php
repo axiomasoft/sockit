@@ -6,6 +6,7 @@ namespace SocKit\Posts\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Posts\Contracts\ContentSafety;
@@ -15,6 +16,7 @@ use SocKit\Posts\Data\SafetyVerdict;
 use SocKit\Posts\Enums\PublicationState;
 use SocKit\Posts\Enums\SafetyDecision;
 
+#[Internal]
 final readonly class PostPolicies
 {
     public function __construct(private Application $app) {}

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace SocKit\Audience\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Audience\Enums\Scope;
 
+#[Internal]
 final class PublicationFloor
 {
     public static function denial(ActorContext $author, AudienceSpec $spec, PrivacyFloor $floor): ?AudienceVerdict

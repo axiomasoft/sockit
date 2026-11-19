@@ -98,9 +98,7 @@ it('isolates Sockit activation, resolver defaults and Artisan commands by host',
     ]);
     $inactive->boot();
 
-    $commands = static function (Application $app): Artisan {
-        return (new Artisan($app, $app->make(Dispatcher::class), $app->version()))->setContainerCommandLoader();
-    };
+    $commands = (static fn (Application $app): Artisan => new Artisan($app, $app->make(Dispatcher::class), $app->version())->setContainerCommandLoader());
 
     foreach ([$active, $inactive, $active] as $app) {
         $artisan = $commands($app);

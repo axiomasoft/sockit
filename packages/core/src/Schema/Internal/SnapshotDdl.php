@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
+
 /** PostgreSQL initial-install program. Only validated data predicates, never module SQL. */
+#[Internal]
 final class SnapshotDdl
 {
     /** @param array<string, mixed> $draft

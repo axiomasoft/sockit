@@ -7,6 +7,7 @@ namespace SocKit\Groups\Internal;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\GroupRef;
@@ -27,6 +28,7 @@ use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
+#[Internal]
 final readonly class GroupStore
 {
     public function __construct(private Application $app) {}

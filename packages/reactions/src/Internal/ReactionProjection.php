@@ -8,6 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AudienceSpec;
@@ -32,6 +33,7 @@ use SocKit\Surfaces\Enums\SurfaceLifecycle;
 use SocKit\Surfaces\SurfaceInstances;
 
 /** Rebuildable state is never an access grant. No foreign SQL or historical delivery path. */
+#[Internal]
 final readonly class ReactionProjection
 {
     public function __construct(private Application $app) {}

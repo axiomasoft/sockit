@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
+
 /** Resolved physical namespace. Contains no connection credentials or search_path. */
+#[Internal]
 final readonly class StorageLocation
 {
     public function __construct(public StorageDeployment $deployment, public string $database, public string $schema)

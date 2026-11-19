@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Reactions\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 
+#[Internal]
 final class ReactionsSettings implements ModuleSettingsSchema
 {
     public function defaults(): array

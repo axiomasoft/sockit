@@ -7,6 +7,7 @@ namespace SocKit\Operations\Internal\Storage;
 use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Database\Query\Builder;
+use Packman\Attributes\Internal;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Support\Data\Revision;
 use SocKit\Support\Exceptions\InvalidPayloadException;
@@ -23,6 +24,7 @@ use SocKit\Surfaces\Enums\SurfaceLifecycle;
  * NOWAIT through the kernel SurfaceFence; contention aborts, never waits in reverse order.
  * The current row is permanent, including after deletion. Never lock a missing row to claim creation.
  */
+#[Internal]
 final readonly class SurfaceInstances
 {
     public function __construct(private OwnerConnection $owner) {}

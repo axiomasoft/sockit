@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
 use PDO;
 use SocKit\Internal\Generation\GenerationFailure;
 
+#[Internal]
 final class SnapshotCatalog
 {
     public const string SQL = <<<'SQL'

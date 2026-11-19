@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Reactions\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\InstallationRef;
 use SocKit\Support\Exceptions\InvalidPayloadException;
@@ -11,6 +12,7 @@ use SocKit\Surfaces\Data\SurfaceRef;
 use SocKit\Surfaces\Data\TargetRef;
 
 /** Persistence identity only, never authorization. Every digest lookup must verify the full row. */
+#[Internal]
 final readonly class ReactionIdentity
 {
     public function __construct(private InstallationRef $installation, private SurfaceRef $surface, private TargetRef $target, private string $kind, private ?ActorRef $actor = null)

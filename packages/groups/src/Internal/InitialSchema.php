@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Groups\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Groups\Enums\GroupVisibility;
 use SocKit\Groups\Enums\JoinPolicy;
 use SocKit\Groups\Enums\MembershipRole;
@@ -18,6 +19,7 @@ use SocKit\Schema\SchemaModel;
 use SocKit\Schema\SchemaStep;
 
 /** Append-only v1. Applied snapshots never call this class at migration time. */
+#[Internal]
 final class InitialSchema implements SchemaContribution
 {
     public function component(): SchemaComponent

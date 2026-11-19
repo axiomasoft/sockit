@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace SocKit\Internal\Console;
 
 use Illuminate\Console\Command;
+use Packman\Attributes\Internal;
 use SocKit\Panels\PanelDefinitions;
 use Symfony\Component\Console\Output\BufferedOutput;
 
+#[Internal]
 final class DiagnoseCommand extends Command
 {
     protected $signature = 'sockit:diagnose {--panel=} {--json} {--probe-storage}';

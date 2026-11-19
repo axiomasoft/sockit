@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Schema\Internal;
 
+use Packman\Attributes\Internal;
+
 /** Compare frozen physical descriptors. No module callbacks and no destructive diff vocabulary. */
+#[Internal]
 final class AdditiveDdl
 {
     /** @param array<string, mixed> $previous

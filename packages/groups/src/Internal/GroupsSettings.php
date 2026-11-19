@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace SocKit\Groups\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 
 /** Join policy belongs to each group; host consent and roles are not configuration. */
+#[Internal]
 final class GroupsSettings implements ModuleSettingsSchema
 {
     public function defaults(): array

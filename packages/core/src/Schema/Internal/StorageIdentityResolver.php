@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace SocKit\Schema\Internal;
 
 use Illuminate\Database\Connection;
+use Packman\Attributes\Internal;
 use PDO;
 use SocKit\Schema\Exceptions\InvalidSchemaException;
 
 /** Shared by explicit generation/install/doctor callers. Nothing is registered at boot. */
+#[Internal]
 final class StorageIdentityResolver
 {
     /** Pure path: explicit schema and trusted deployment are mandatory. No PDO/DNS access.

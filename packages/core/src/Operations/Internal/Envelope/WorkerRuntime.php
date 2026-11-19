@@ -6,6 +6,7 @@ namespace SocKit\Operations\Internal\Envelope;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Contracts\TenantResolver;
 use SocKit\Operations\Internal\Storage\OwnerStorage;
@@ -15,6 +16,7 @@ use SocKit\Panels\PanelDefinitions;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 
+#[Internal]
 final class WorkerRuntime
 {
     public static function create(Application $host, ActorRef $actor): Application

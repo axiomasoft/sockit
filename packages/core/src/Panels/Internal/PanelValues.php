@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Panels\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Panels\Exceptions\InvalidPanelException;
 
+#[Internal]
 final class PanelValues
 {
     /** @phpstan-assert true $valid */

@@ -6,6 +6,7 @@ namespace SocKit\Posts\Internal;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Internal;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Audience\Data\AuthorizationDecision;
@@ -28,6 +29,7 @@ use SocKit\Surfaces\Enums\TargetLifecycle;
  * `sockit.post` is the canonical social target. IDs are never reused: incarnation 1 is permanent.
  * Scoped preparation is replaced on EVERY resolve and consumed by the local fence, never an access cache.
  */
+#[Internal]
 final class PostTarget implements TargetResolver, TargetWriteFence
 {
     private ?OperationHandle $prepared = null;

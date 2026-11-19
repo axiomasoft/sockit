@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SocKit\Internal\Generation;
 
+use Packman\Attributes\Internal;
+
+#[Internal]
 final class GenerationFailure extends \RuntimeException
 {
     /** @param list<string> $recovery */

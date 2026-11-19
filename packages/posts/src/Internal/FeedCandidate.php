@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SocKit\Posts\Internal;
 
+use Packman\Attributes\Internal;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Posts\Data\PostView;
 use SocKit\Surfaces\Data\SurfaceInstance;
 
 /** Captured owner state accompanies its guarded view until the whole-page output check. */
+#[Internal]
 final readonly class FeedCandidate
 {
     /** @param array<string, mixed> $row */

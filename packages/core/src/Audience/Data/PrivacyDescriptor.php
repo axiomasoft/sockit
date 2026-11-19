@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Audience\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 

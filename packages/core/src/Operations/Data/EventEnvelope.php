@@ -6,7 +6,7 @@ namespace SocKit\Operations\Data;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Operations\Internal\Outbox\OutboxException;

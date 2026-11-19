@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Surfaces\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Data\PrivacyFloor;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Surfaces\Exceptions\InvalidSurfaceDefinitionException;

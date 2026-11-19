@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace SocKit\Testing;
 
 use Illuminate\Contracts\Foundation\Application;
+use Packman\Attributes\Api;
 use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Contracts\ActorContextResolver;
 use SocKit\Actors\Contracts\TenantResolver;
-use SocKit\Attributes\Api;
 use SocKit\Audience\AudienceGate;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Contracts\AudienceResolver;

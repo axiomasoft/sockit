@@ -1,0 +1,100 @@
+{
+    "$schema": "../packman/schemas/packman.schema.json",
+    "schema_version": 1,
+    "name": "axiomasoft/sockit-monorepo",
+    "profile": "laravel-package",
+    "php": ">=8.4 <8.6",
+    "phpstan_level": "max",
+    "provider_max_lines": 80,
+    "packages": [
+        {
+            "name": "axiomasoft/sockit",
+            "path": "packages/core",
+            "namespace": "SocKit\\",
+            "profile": "laravel-package",
+            "layer": "L2",
+            "type": "domain",
+            "owns": [
+                "Actors",
+                "Audience",
+                "Configuration",
+                "Errors",
+                "Internal",
+                "Modules",
+                "Operations",
+                "Panels",
+                "Plugins",
+                "Schema",
+                "Support",
+                "Surfaces",
+                "Testing"
+            ]
+        },
+        {
+            "name": "axiomasoft/sockit-reactions",
+            "path": "packages/reactions",
+            "namespace": "SocKit\\Reactions\\",
+            "profile": "laravel-package",
+            "layer": "L3",
+            "type": "domain",
+            "owns": [
+                "Data",
+                "Internal"
+            ]
+        },
+        {
+            "name": "axiomasoft/sockit-posts",
+            "path": "packages/posts",
+            "namespace": "SocKit\\Posts\\",
+            "profile": "laravel-package",
+            "layer": "L3",
+            "type": "domain",
+            "owns": [
+                "Contracts",
+                "Data",
+                "Enums",
+                "Exceptions",
+                "Internal"
+            ]
+        },
+        {
+            "name": "axiomasoft/sockit-groups",
+            "path": "packages/groups",
+            "namespace": "SocKit\\Groups\\",
+            "profile": "laravel-package",
+            "layer": "L3",
+            "type": "domain",
+            "owns": [
+                "Contracts",
+                "Data",
+                "Enums",
+                "Exceptions",
+                "Internal"
+            ]
+        },
+        {
+            "name": "axiomasoft/sockit-testkit",
+            "path": "packages/testkit",
+            "namespace": "SocKit\\Testkit\\",
+            "profile": "laravel-package",
+            "layer": "L4",
+            "type": "dev",
+            "dev_only": true,
+            "owns": [
+                "Concerns",
+                "Contracts",
+                "Data",
+                "Fakes",
+                "Internal",
+                "Laravel"
+            ]
+        }
+    ],
+    "gates": {
+        "strict_ownership": true,
+        "provider_size_limit": 80,
+        "disallow_internal_cross_imports": true,
+        "require_api_manifest": true,
+        "error_urn_prefix": "urn:packman:problem:"
+    }
+}

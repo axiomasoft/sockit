@@ -6,13 +6,13 @@ namespace SocKit\Schema;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use SocKit\Schema\Internal\SchemaValues;
 use SocKit\Support\Ids;
 
 /** Persistence extension only. An ORM instance carries no domain authorization. */
-#[Spi(kind: SpiKind::Extend)]
+#[Spi(kind: SpiKind::Implement)]
 abstract class PanelModel extends Model
 {
     /** @var array<string, mixed> Frozen consumer-owned binding. */

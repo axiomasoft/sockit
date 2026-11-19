@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace SocKit\Testing\ArchFixtures;
-use SocKit\Attributes\{Api as PublicApi, Spi as Port, SpiKind};
+use Packman\Attributes\{Api as PublicApi, Spi as Port, SpiKind};
 #[PublicApi]
 interface GoodSignature {
     public function handle(\DateTimeImmutable $at): string|int;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Surfaces\Contracts;
 
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Data\OperationHandle;
 use SocKit\Surfaces\Data\TargetResolution;

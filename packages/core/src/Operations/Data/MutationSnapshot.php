@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Operations\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Support\Data\ResourceRef;
 use SocKit\Support\Data\Revision;

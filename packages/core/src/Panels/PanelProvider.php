@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace SocKit\Panels;
 
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 
-#[Spi(kind: SpiKind::Extend, since: '1.0')]
+#[Spi(kind: SpiKind::Implement, since: '1.0')]
 abstract class PanelProvider
 {
     abstract public function panel(Panel $panel): Panel;

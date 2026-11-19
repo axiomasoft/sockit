@@ -9,7 +9,7 @@ use SocKit\Tests\Integration\Support\PgTarget;
 use SocKit\Tests\Unit\Audience\Support\Scenario;
 
 /** Composer installs a non-symlink package before any generated panel is booted. */
-final class InstalledConsumer
+final readonly class InstalledConsumer
 {
     private SocialConsumer $base;
 

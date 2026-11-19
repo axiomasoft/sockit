@@ -97,6 +97,8 @@ final class MembershipScenario
         return match ($input->action) {
             'join' => $this->f->groups->join($this->f->handle, $input, $command),
             'leave' => $this->f->groups->leave($this->f->handle, $input, $command),
+            'add_member' => $this->f->groups->addMember($this->f->handle, $input, $command),
+            'remove_member' => $this->f->groups->removeMember($this->f->handle, $input, $command),
             'approve' => $this->f->groups->approve($this->f->handle, $input, $command),
             'invite' => $this->f->groups->invite($this->f->handle, $input, $command),
             default => throw new \RuntimeException('Invalid fixture action'),

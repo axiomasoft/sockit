@@ -1,0 +1,225 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "axiomasoft/sockit configuration",
+    "type": "object",
+    "properties": {
+        "sections": {
+            "type": "object",
+            "properties": {
+                "sockit.events": {
+                    "type": "object"
+                },
+                "sockit.ids": {
+                    "type": "object"
+                },
+                "sockit.modules": {
+                    "type": "object"
+                },
+                "sockit.panels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                },
+                "sockit.privacy": {
+                    "type": "object"
+                },
+                "sockit.resolvers": {
+                    "type": "object"
+                },
+                "sockit.storage": {
+                    "type": "object"
+                },
+                "sockit.surfaces": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "sockit": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "object",
+                    "properties": {
+                        "lease_seconds": {
+                            "type": "integer",
+                            "default": 30
+                        },
+                        "max_attempts": {
+                            "type": "integer",
+                            "default": 10
+                        },
+                        "retry_seconds": {
+                            "type": "integer",
+                            "default": 5
+                        },
+                        "source_generation": {
+                            "type": "string",
+                            "default": "1"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "ids": {
+                    "type": "object",
+                    "properties": {
+                        "strategy": {
+                            "type": "string",
+                            "default": "uuid7"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "modules": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": [
+                                "array",
+                                "object"
+                            ]
+                        },
+                        "settings": {
+                            "type": [
+                                "array",
+                                "object"
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "panels": {
+                    "type": [
+                        "array",
+                        "object"
+                    ]
+                },
+                "privacy": {
+                    "type": "object",
+                    "properties": {
+                        "floor": {
+                            "type": "object",
+                            "properties": {
+                                "allowed_scopes": {
+                                    "type": "array"
+                                },
+                                "contour_levels": {
+                                    "type": [
+                                        "array",
+                                        "object"
+                                    ]
+                                },
+                                "default_scope": {
+                                    "type": "string",
+                                    "default": "direct"
+                                },
+                                "max_scope": {
+                                    "type": "string",
+                                    "default": "direct"
+                                },
+                                "minor_default_scope": {
+                                    "type": "string",
+                                    "default": "direct"
+                                },
+                                "minor_max_scope": {
+                                    "type": "string",
+                                    "default": "direct"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "resolvers": {
+                    "type": "object",
+                    "properties": {
+                        "actor": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "audience": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "authorizer": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "contour": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "groups": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "surface_policy": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "targets": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "tenant": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "storage": {
+                    "type": "object",
+                    "properties": {
+                        "deployments": {
+                            "type": [
+                                "array",
+                                "object"
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "surfaces": {
+                    "type": [
+                        "array",
+                        "object"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

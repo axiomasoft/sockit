@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Testing;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Data\ActionRequest;
 use SocKit\Audience\Data\AuthorizationDecision;

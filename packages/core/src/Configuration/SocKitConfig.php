@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace SocKit\Configuration;
 
 use Illuminate\Contracts\Config\Repository;
+use Packman\Attributes\Api;
+use Packman\Config\Contracts\OptionsFactory;
+use Packman\Config\Exceptions\InvalidConfiguration;
 use SocKit\Actors\Contracts\ActorContextResolver;
 use SocKit\Actors\Contracts\TenantResolver;
-use SocKit\Attributes\Api;
 use SocKit\Audience\Contracts\ActionAuthorizer;
 use SocKit\Audience\Contracts\AudienceResolver;
 use SocKit\Audience\Contracts\ContourResolver;
@@ -32,13 +34,28 @@ use SocKit\Surfaces\Contracts\TargetResolver;
 use SocKit\Surfaces\SurfaceProvider;
 
 #[Api(since: '1.0')]
-final readonly class SocKitConfig
+final readonly class SocKitConfig implements OptionsFactory
 {
     public function __construct(public IdsConfig $ids, public PanelsConfig $panels, public SurfacesConfig $surfaces, public ModulesConfig $modules, public ResolversConfig $resolvers, public PrivacyConfig $privacy, public EventsConfig $events = new EventsConfig) {}
 
     public static function fromRepository(Repository $repository): self
     {
-        $data = self::normalize($repository);
+        return self::build(self::normalize($repository));
+    }
+
+    /** @param array<array-key, mixed> $config */
+    public static function fromArray(array $config, string $path): self
+    {
+        try {
+            return self::build(self::normalizeRoot($config));
+        } catch (InvalidConfigurationException $error) {
+            throw new InvalidConfiguration([$path.': '.$error->getMessage()]);
+        }
+    }
+
+    /** @param array<string, mixed> $data */
+    private static function build(array $data): self
+    {
         $events = self::map(value: $data['events'], key: 'sockit.events');
         self::requireRule(valid: is_string($events['source_generation']), key: 'sockit.events.source_generation', rule: 'CONFIG_STRING');
         foreach (['lease_seconds', 'retry_seconds', 'max_attempts'] as $key) {
@@ -95,7 +112,12 @@ final readonly class SocKitConfig
      * @return array<string, mixed> */
     public static function normalize(Repository $repository): array
     {
-        $raw = $repository->get('sockit', []);
+        return self::normalizeRoot($repository->get('sockit', []));
+    }
+
+    /** @return array<string, mixed> */
+    private static function normalizeRoot(mixed $raw): array
+    {
         ModulesConfig::assertSerializable(value: $raw, key: 'sockit');
         $raw = self::map(value: $raw, key: 'sockit', allowed: ['ids', 'panels', 'surfaces', 'modules', 'resolvers', 'privacy', 'events', 'storage']);
         $defaults = self::map(value: require __DIR__.'/../../config/sockit.php', key: 'sockit');
@@ -120,7 +142,7 @@ final readonly class SocKitConfig
         return $data;
     }
 
-    /** @return array<string, string> */
+    /** @return array<string, class-string> */
     public static function resolverContracts(): array
     {
         return ['tenant' => TenantResolver::class, 'actor' => ActorContextResolver::class, 'contour' => ContourResolver::class,

@@ -4,17 +4,153 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1fccbdb14f7ba017b1540542777adfe2",
+    "content-hash": "fcbc29c48910715ba0aa38ab6d1e0df9",
     "packages": [
+        {
+            "name": "axiomasoft/packman",
+            "version": "0.1.1",
+            "dist": {
+                "type": "path",
+                "url": "../packman/packages/core",
+                "reference": "813a65468554beea5069af2707c47bdfd7e5cf2e"
+            },
+            "require": {
+                "php": "^8.4",
+                "psr/clock": "^1.0"
+            },
+            "suggest": {
+                "illuminate/console": "Optional Laravel Artisan console commands (`packman:doctor`, `packman:config:validate`).",
+                "illuminate/contracts": "Optional Laravel container, event dispatcher, config, and validation bindings.",
+                "illuminate/database": "Optional schema status checks in Laravel applications.",
+                "illuminate/support": "Optional PackmanServiceProvider auto-discovery and Laravel adapters."
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "schema-version": 1,
+                    "package-type": "kernel",
+                    "stability": "stable",
+                    "error-prefix": "packman",
+                    "owns": [
+                        "Attributes",
+                        "Config",
+                        "Context",
+                        "Data",
+                        "Doctor",
+                        "Errors",
+                        "Events",
+                        "Features",
+                        "Foundation",
+                        "Settings"
+                    ]
+                },
+                "laravel": {
+                    "providers": [
+                        "Packman\\PackmanServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packman\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Packman\\Core\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dmitry Vostrikov",
+                    "email": "dv.vostrikov@gmail.com"
+                }
+            ],
+            "description": "Packman unified ecosystem kernel — attributes, foundation registrars, context contracts, JsonDocument, configuration options/compiler/cache, RFC 9457 error registry, doctor diagnostics, domain events, features, and settings contracts.",
+            "keywords": [
+                "attributes",
+                "config",
+                "doctor",
+                "errors",
+                "kernel",
+                "laravel",
+                "packman",
+                "php"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/packman-plugins",
+            "version": "0.1.1",
+            "dist": {
+                "type": "path",
+                "url": "../packman/packages/plugins",
+                "reference": "bf8d4b6fe8552afa16c9577ef4db447e4dd3a330"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "illuminate/console": "^12.0|^13.0",
+                "illuminate/container": "^12.0|^13.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "php": "^8.4"
+            },
+            "suggest": {
+                "axiomasoft/packman-schema": "Optional schema ownership integration for plugins declaring owned schema nouns."
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "error-prefix": "plugins"
+                },
+                "laravel": {
+                    "providers": [
+                        "Packman\\Plugins\\Laravel\\PluginsServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packman\\Plugins\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Packman\\Plugins\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Universal Packman intra-package plugin graph compiler, capabilities, typed slots, and immutable contribution registry.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
         {
             "name": "axiomasoft/sockit",
             "version": "0.1.x-dev",
             "dist": {
                 "type": "path",
                 "url": "packages/core",
-                "reference": "469d1aa48561eed52cb8eb0b2b3b97c87dddb6b7"
+                "reference": "2caf6a774438cf1dbd065da4b64cce3d9f47b2e0"
             },
             "require": {
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-plugins": "^0.1.1",
                 "illuminate/config": "^13.0",
                 "illuminate/console": "^13.0",
                 "illuminate/container": "^13.0",
@@ -65,70 +201,34 @@
                                 "SocKit\\Posts\\",
                                 "SocKit\\Groups\\"
                             ]
-                        },
-                        "reactions": {
-                            "namespaces": [
-                                "SocKit\\Reactions\\"
-                            ],
-                            "paths": [
-                                "packages/core/modules/reactions/src"
-                            ],
-                            "tables": [
-                                "reactions",
-                                "reaction_counts"
-                            ],
-                            "config": [],
-                            "publish-tags": [],
-                            "commands": [],
-                            "module-ids": [
-                                "sockit.reactions"
-                            ]
-                        },
-                        "posts": {
-                            "namespaces": [
-                                "SocKit\\Posts\\"
-                            ],
-                            "paths": [
-                                "packages/core/modules/posts/src"
-                            ],
-                            "tables": [
-                                "posts",
-                                "post_revisions"
-                            ],
-                            "config": [],
-                            "publish-tags": [],
-                            "commands": [],
-                            "module-ids": [
-                                "sockit.posts"
-                            ]
-                        },
-                        "groups": {
-                            "namespaces": [
-                                "SocKit\\Groups\\"
-                            ],
-                            "paths": [
-                                "packages/core/modules/groups/src"
-                            ],
-                            "tables": [
-                                "groups",
-                                "group_members"
-                            ],
-                            "config": [],
-                            "publish-tags": [],
-                            "commands": [],
-                            "module-ids": [
-                                "sockit.groups"
-                            ]
                         }
                     }
+                },
+                "packman": {
+                    "error-prefix": "sockit",
+                    "package-type": "domain",
+                    "schema-version": 1,
+                    "stability": "dev",
+                    "owns": [
+                        "Actors",
+                        "Audience",
+                        "Configuration",
+                        "Errors",
+                        "Internal",
+                        "Modules",
+                        "Operations",
+                        "Panels",
+                        "Plugins",
+                        "Schema",
+                        "Support",
+                        "Surfaces",
+                        "Testing"
+                    ]
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "SocKit\\": "src/",
-                    "SocKit\\Reactions\\": "modules/reactions/src/",
-                    "SocKit\\Posts\\": "modules/posts/src/",
-                    "SocKit\\Groups\\": "modules/groups/src/"
+                    "SocKit\\": "src/"
                 }
             },
             "license": [
@@ -6059,6 +6159,427 @@
     ],
     "packages-dev": [
         {
+            "name": "axiomasoft/packman-devtools",
+            "version": "0.1.1",
+            "dist": {
+                "type": "path",
+                "url": "../packman/packages/devtools",
+                "reference": "933f14d604b1d8cf3f4b719a7b7b79736b36b6e3"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "illuminate/support": "^12.0|^13.0",
+                "nette/neon": "^3.4",
+                "nikic/php-parser": "^5.4",
+                "opis/json-schema": "^2.4",
+                "php": "^8.4",
+                "phpstan/phpdoc-parser": "^2.1",
+                "rector/rector": "^2.0",
+                "symfony/console": "^7.2|^8.0",
+                "symfony/finder": "^7.2|^8.0",
+                "symfony/process": "^7.2|^8.0",
+                "symfony/yaml": "^7.2|^8.0"
+            },
+            "suggest": {
+                "driftingly/rector-laravel": "Optional Laravel Rector rule sets (^2.0) alongside PackmanRectorSet."
+            },
+            "bin": [
+                "bin/packman"
+            ],
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "profile": "laravel-package",
+                    "dev_only": true
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packman\\DevTools\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Packman\\DevTools\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Shared monorepo quality gates, API/error/config scanners, scaffolding stubs, Rector rules, AI pack sync, and subtree split tools for Packman.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/packman-schema",
+            "version": "0.1.1",
+            "dist": {
+                "type": "path",
+                "url": "../packman/packages/schema",
+                "reference": "61b9f62f200346d87a0833c6c32072397a9cadbb"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "illuminate/console": "^12.0|^13.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "illuminate/database": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "php": "^8.4",
+                "psr/clock": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "error-prefix": "schema"
+                },
+                "laravel": {
+                    "providers": [
+                        "Packman\\Schema\\Laravel\\SchemaServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packman\\Schema\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Packman\\Schema\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Universal Packman schema governance, schema sets, table ownership, prefix fingerprinting, PostgreSQL constraint naming, and step compiler.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/packman-testkit",
+            "version": "0.1.1",
+            "dist": {
+                "type": "path",
+                "url": "../packman/packages/testkit",
+                "reference": "b869667989c001a74f64cd4737fdae4eabac5177"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-schema": "^0.1",
+                "illuminate/contracts": "^12.0|^13.0",
+                "illuminate/database": "^12.0|^13.0",
+                "illuminate/http": "^12.0|^13.0",
+                "illuminate/routing": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "illuminate/testing": "^12.0|^13.0",
+                "opis/json-schema": "^2.4",
+                "orchestra/testbench": "^10.0|^11.0",
+                "php": "^8.4",
+                "phpunit/phpunit": "^11.5|^12.0|^13.0"
+            },
+            "suggest": {
+                "axiomasoft/packman-modules": "Enables ModuleContractTests and module discovery harness assertions.",
+                "axiomasoft/packman-plugins": "Enables PluginContractTests and PluginGraph deterministic compilation checks.",
+                "pestphp/pest": "First-class Pest integration helpers.",
+                "symfony/yaml": "Enables YAML OpenAPI specification loading in OpenApiResponse."
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "profile": "laravel-package",
+                    "dev_only": true
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packman\\Testkit\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Packman\\Testkit\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Shared testing harnesses, PostgreSQL database isolation, concurrency barriers, contract assertions, and fake recorders for Packman packages.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/sockit-groups",
+            "version": "0.1.x-dev",
+            "dist": {
+                "type": "path",
+                "url": "packages/groups",
+                "reference": "dc80daba3d62caacf4ce58cf68a42fbfab08c883"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-plugins": "^0.1.1",
+                "axiomasoft/sockit": "^0.1@dev",
+                "illuminate/database": "^13.0",
+                "illuminate/support": "^13.0",
+                "php": "^8.4"
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "schema-version": 1,
+                    "package-type": "domain",
+                    "stability": "dev",
+                    "owns": [
+                        "Contracts",
+                        "Data",
+                        "Enums",
+                        "Exceptions",
+                        "Internal"
+                    ]
+                },
+                "sockit": {
+                    "owners": {
+                        "groups": {
+                            "namespaces": [
+                                "SocKit\\Groups\\"
+                            ],
+                            "paths": [
+                                "packages/groups/src"
+                            ],
+                            "tables": [
+                                "groups",
+                                "group_members"
+                            ],
+                            "config": [],
+                            "publish-tags": [],
+                            "commands": [],
+                            "module-ids": [
+                                "sockit.groups"
+                            ]
+                        }
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SocKit\\Groups\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Groups module for the SocKit social engine for Laravel.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/sockit-posts",
+            "version": "0.1.x-dev",
+            "dist": {
+                "type": "path",
+                "url": "packages/posts",
+                "reference": "70c7e2222aba5ef0ae4e2a91a6d3b15f8e8e6f92"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-plugins": "^0.1.1",
+                "axiomasoft/sockit": "^0.1@dev",
+                "illuminate/database": "^13.0",
+                "illuminate/support": "^13.0",
+                "php": "^8.4"
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "schema-version": 1,
+                    "package-type": "domain",
+                    "stability": "dev",
+                    "owns": [
+                        "Contracts",
+                        "Data",
+                        "Enums",
+                        "Exceptions",
+                        "Internal"
+                    ]
+                },
+                "sockit": {
+                    "owners": {
+                        "posts": {
+                            "namespaces": [
+                                "SocKit\\Posts\\"
+                            ],
+                            "paths": [
+                                "packages/posts/src"
+                            ],
+                            "tables": [
+                                "posts",
+                                "post_revisions"
+                            ],
+                            "config": [],
+                            "publish-tags": [],
+                            "commands": [],
+                            "module-ids": [
+                                "sockit.posts"
+                            ]
+                        }
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SocKit\\Posts\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Posts module for the SocKit social engine for Laravel.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/sockit-reactions",
+            "version": "0.1.x-dev",
+            "dist": {
+                "type": "path",
+                "url": "packages/reactions",
+                "reference": "5cb55017ef32f424830886fea28400ae64178186"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-plugins": "^0.1.1",
+                "axiomasoft/sockit": "^0.1@dev",
+                "illuminate/database": "^13.0",
+                "illuminate/support": "^13.0",
+                "php": "^8.4"
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "schema-version": 1,
+                    "package-type": "domain",
+                    "stability": "dev",
+                    "owns": [
+                        "Data",
+                        "Internal"
+                    ]
+                },
+                "sockit": {
+                    "owners": {
+                        "reactions": {
+                            "namespaces": [
+                                "SocKit\\Reactions\\"
+                            ],
+                            "paths": [
+                                "packages/reactions/src"
+                            ],
+                            "tables": [
+                                "reactions",
+                                "reaction_counts"
+                            ],
+                            "config": [],
+                            "publish-tags": [],
+                            "commands": [],
+                            "module-ids": [
+                                "sockit.reactions"
+                            ]
+                        }
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SocKit\\Reactions\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Reactions module for the SocKit social engine for Laravel.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/sockit-testkit",
+            "version": "0.1.x-dev",
+            "dist": {
+                "type": "path",
+                "url": "packages/testkit",
+                "reference": "ae519ad6d8b936bf16aa8add2675762385ba5653"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-plugins": "^0.1",
+                "axiomasoft/packman-testkit": "^0.1",
+                "axiomasoft/sockit": "^0.1@dev",
+                "axiomasoft/sockit-groups": "^0.1@dev",
+                "axiomasoft/sockit-posts": "^0.1@dev",
+                "axiomasoft/sockit-reactions": "^0.1@dev",
+                "illuminate/contracts": "^13.0",
+                "illuminate/support": "^13.0",
+                "orchestra/testbench": "^11.3",
+                "php": ">=8.4 <8.6",
+                "phpunit/phpunit": "^11.5|^12.0|^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "schema-version": 1,
+                    "package-type": "dev",
+                    "stability": "dev",
+                    "profile": "laravel-package",
+                    "dev_only": true,
+                    "owns": [
+                        "Concerns",
+                        "Contracts",
+                        "Data",
+                        "Fakes",
+                        "Internal",
+                        "Laravel"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SocKit\\Testkit\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "SocKit\\Testkit\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Shared Testbench base cases, conformance traits, and fixture builders for SocKit packages and host consumers.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "brianium/paratest",
             "version": "v7.27.4",
             "source": {
@@ -7079,6 +7600,75 @@
             "time": "2026-08-11T10:17:44+00:00"
         },
         {
+            "name": "nette/neon",
+            "version": "v3.4.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nette/neon.git",
+                "reference": "af5d261a7664b3d6377c8528206cd5a7fe21b982"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nette/neon/zipball/af5d261a7664b3d6377c8528206cd5a7fe21b982",
+                "reference": "af5d261a7664b3d6377c8528206cd5a7fe21b982",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "8.0 - 8.6"
+            },
+            "require-dev": {
+                "nette/tester": "^2.4",
+                "phpstan/phpstan-nette": "^2.0@stable",
+                "tracy/tracy": "^2.7"
+            },
+            "bin": [
+                "bin/neon-lint"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nette\\": "src"
+                },
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause",
+                "GPL-2.0-only",
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "David Grudl",
+                    "homepage": "https://davidgrudl.com"
+                }
+            ],
+            "description": "🍸 Nette NEON: a human-friendly data format, simpler than YAML and with entities for objects. Comes with a fast encoder and decoder.",
+            "homepage": "https://neon.nette.org",
+            "keywords": [
+                "config",
+                "configuration",
+                "data format",
+                "neon",
+                "nette",
+                "parser",
+                "yaml"
+            ],
+            "support": {
+                "issues": "https://github.com/nette/neon/issues",
+                "source": "https://github.com/nette/neon/tree/v3.4.10"
+            },
+            "time": "2026-10-25T22:35:03+00:00"
+        },
+        {
             "name": "nikic/php-parser",
             "version": "v5.9.0",
             "source": {
@@ -7230,6 +7820,196 @@
                 }
             ],
             "time": "2026-07-15T19:09:14+00:00"
+        },
+        {
+            "name": "opis/json-schema",
+            "version": "2.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opis/json-schema.git",
+                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opis/json-schema/zipball/b87b424da3fbeaab09567910fda48dc88d9dcbd8",
+                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "opis/string": "^2.1",
+                "opis/uri": "^1.0",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "ext-bcmath": "*",
+                "ext-intl": "*",
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Opis\\JsonSchema\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Sorin Sarca",
+                    "email": "sarca_sorin@hotmail.com"
+                },
+                {
+                    "name": "Marius Sarca",
+                    "email": "marius.sarca@gmail.com"
+                }
+            ],
+            "description": "Json Schema Validator for PHP",
+            "homepage": "https://opis.io/json-schema",
+            "keywords": [
+                "json",
+                "json-schema",
+                "schema",
+                "validation",
+                "validator"
+            ],
+            "support": {
+                "issues": "https://github.com/opis/json-schema/issues",
+                "source": "https://github.com/opis/json-schema/tree/2.6.2"
+            },
+            "time": "2026-11-08T08:09:42+00:00"
+        },
+        {
+            "name": "opis/string",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opis/string.git",
+                "reference": "3e4d2aaff518ac518530b89bb26ed40f4503635e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opis/string/zipball/3e4d2aaff518ac518530b89bb26ed40f4503635e",
+                "reference": "3e4d2aaff518ac518530b89bb26ed40f4503635e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-iconv": "*",
+                "ext-json": "*",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Opis\\String\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Marius Sarca",
+                    "email": "marius.sarca@gmail.com"
+                },
+                {
+                    "name": "Sorin Sarca",
+                    "email": "sarca_sorin@hotmail.com"
+                }
+            ],
+            "description": "Multibyte strings as objects",
+            "homepage": "https://opis.io/string",
+            "keywords": [
+                "multi-byte",
+                "opis",
+                "string",
+                "string manipulation",
+                "utf-8"
+            ],
+            "support": {
+                "issues": "https://github.com/opis/string/issues",
+                "source": "https://github.com/opis/string/tree/2.1.0"
+            },
+            "time": "2025-10-17T12:38:41+00:00"
+        },
+        {
+            "name": "opis/uri",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opis/uri.git",
+                "reference": "0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opis/uri/zipball/0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a",
+                "reference": "0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a",
+                "shasum": ""
+            },
+            "require": {
+                "opis/string": "^2.0",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Opis\\Uri\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Marius Sarca",
+                    "email": "marius.sarca@gmail.com"
+                },
+                {
+                    "name": "Sorin Sarca",
+                    "email": "sarca_sorin@hotmail.com"
+                }
+            ],
+            "description": "Build, parse and validate URIs and URI-templates",
+            "homepage": "https://opis.io",
+            "keywords": [
+                "URI Template",
+                "parse url",
+                "punycode",
+                "uri",
+                "uri components",
+                "url",
+                "validate uri"
+            ],
+            "support": {
+                "issues": "https://github.com/opis/uri/issues",
+                "source": "https://github.com/opis/uri/tree/1.1.0"
+            },
+            "time": "2021-05-22T15:57:08+00:00"
         },
         {
             "name": "orchestra/canvas",
@@ -10559,7 +11339,11 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "axiomasoft/sockit": 20
+        "axiomasoft/sockit": 20,
+        "axiomasoft/sockit-groups": 20,
+        "axiomasoft/sockit-posts": 20,
+        "axiomasoft/sockit-reactions": 20,
+        "axiomasoft/sockit-testkit": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

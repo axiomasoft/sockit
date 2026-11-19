@@ -4,18 +4,18 @@
 
 ```text
 packages/core/                 # axiomasoft/sockit, SocKit\
-  src/{Attributes,Support,Actors,Audience,Panels,Surfaces,Operations,Errors,Modules,Configuration,Testing,Internal}/
-  modules/{reactions,posts,groups}/  # отдельные владельцы; module-owned schema/generator contributions
+  src/{Plugins,Support,Actors,Audience,Panels,Surfaces,Operations,Errors,Modules,Configuration,Testing,Internal}/
   config/sockit.php
   resources/contracts/{fixtures,schemas}/
   stubs/                       # panel provider/model/migration; consumer owns generated output
-packages/testkit/              # P6
+packages/{reactions,posts,groups}/  # Composer-модули со своими схемами и провайдерами
+packages/testkit/              # Testbench, conformance suites, fixture builders
 packages/forum/                # P7 условный adapter с зависимостью Forum, без второго форума
 packages/chatom-bridge/        # P8 link-only announcements
 tests/{Arch,Unit,Feature,Integration}/
 docs/{architecture,adr}/
 ```
-Core owner manifest владеет namespaces/config; schema-компоненты модулей владеют своими таблицами. Consumer host владеет сгенерированными providers/models/migrations. Функциональные модули не требуют отдельных Composer-пакетов без реальной границы зависимости/поставки. Нет packages/comments.
+Core owner manifest владеет namespaces/config; schema-компоненты модулей владеют своими таблицами. Consumer host владеет сгенерированными providers/models/migrations. Groups, Posts и Reactions поставляются независимо через Composer. Зарегистрируйте Laravel-провайдер каждого выбранного модуля. Провайдер объявляет модуль через Packman до фиксации набора модулей.
 
 ## Именование
 

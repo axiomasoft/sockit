@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Filesystem\Filesystem;
+use SocKit\Tests\Fixtures\ConsumerPackages;
 use SocKit\Tests\Fixtures\Runtime\EnvelopeScenario;
 use SocKit\Tests\Integration\Support\PgTarget;
 use Symfony\Component\Process\Process;
@@ -33,8 +34,9 @@ it('installs and boots the standalone consumer with an owned PostgreSQL target',
     try {
         $files->ensureDirectoryExists($root.'/packages');
         $files->ensureDirectoryExists($root.'/tests/Fixtures');
-        $files->copyDirectory($project.'/packages/core', $root.'/packages/core');
+        ConsumerPackages::copy($files, $project, $root, social: false);
         $files->copyDirectory($project.'/tests/Fixtures/Consumer', $consumer);
+        $files->ensureDirectoryExists($consumer.'/bootstrap/cache');
         runConsumer($consumer, ['composer', 'install', '--no-dev', '--no-interaction', '--no-scripts']);
         expect(is_link($consumer.'/vendor/axiomasoft/sockit'))->toBeFalse();
         $installedGraph = json_decode((string) file_get_contents($consumer.'/vendor/composer/installed.json'), true, flags: JSON_THROW_ON_ERROR);
@@ -42,7 +44,7 @@ it('installs and boots the standalone consumer with an owned PostgreSQL target',
             throw new RuntimeException('Invalid installed graph');
         }
         $names = array_column($installedGraph['packages'], 'name');
-        foreach (['axiomasoft/sockit-monorepo', 'axiomasoft/chatom', 'axiomasoft/forum', 'axiomasoft/azguard', 'axiomasoft/vaulter', 'axiomasoft/edufy', 'axiomasoft/corex', 'orchestra/testbench'] as $forbidden) {
+        foreach (['axiomasoft/sockit-monorepo', 'axiomasoft/sockit-groups', 'axiomasoft/sockit-posts', 'axiomasoft/sockit-reactions', 'axiomasoft/sockit-testkit', 'axiomasoft/chatom', 'axiomasoft/forum', 'axiomasoft/azguard', 'axiomasoft/vaulter', 'axiomasoft/edufy', 'axiomasoft/corex', 'orchestra/testbench'] as $forbidden) {
             expect($names)->not->toContain($forbidden);
         }
         $source = $root.'/packages/core';

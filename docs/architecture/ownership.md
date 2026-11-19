@@ -17,8 +17,8 @@
 | Generated panel provider/models/migrations | consumer host | consumer-owned files; без перезаписи upgrade-командой |
 
 Production schema modules are explicit consumer opt-ins. Register
-`SocKit\Reactions\Internal\ReactionsServiceProvider` and/or
-`SocKit\Posts\Internal\PostsServiceProvider`, enable their canonical IDs
+`SocKit\Reactions\ReactionsServiceProvider` and/or
+`SocKit\Posts\PostsServiceProvider`, enable their canonical IDs
 `sockit.reactions` / `sockit.posts` in `sockit.modules.enabled`, then select the
 required subset on each panel. These internal providers offer declarations only;
 package discovery registers only the kernel provider. Registration, boot and
@@ -28,8 +28,8 @@ Each module owns its source root, settings and append-only v1 contribution:
 
 | Module root | Feature | Entities | Settings |
 |:--|:--|:--|:--|
-| `packages/core/modules/reactions/src` | `reactions` | `reactions`, `reaction_counts` | `kinds`: nonempty unique list of stable aliases, default `['like']` |
-| `packages/core/modules/posts/src` | `posts` | `posts`, `post_revisions` | empty; unknown keys rejected |
+| `packages/reactions/src` | `reactions` | `reactions`, `reaction_counts` | `kinds`: nonempty unique list of stable aliases, default `['like']` |
+| `packages/posts/src` | `posts` | `posts`, `post_revisions` | empty; unknown keys rejected |
 
 The kernel never imports either module. Modules use public kernel contracts and
 cannot import a sibling or foreign `Internal`. The manifest explicitly excludes

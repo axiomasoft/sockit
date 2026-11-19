@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Actors;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Contracts\TenantResolver;
-use SocKit\Attributes\Api;
 use SocKit\Support\Data\InstallationRef;
 
 /** Explicit opt-in for single-installation hosts; never an implicit resolver binding. */

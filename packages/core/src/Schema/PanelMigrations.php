@@ -8,8 +8,8 @@ use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use SocKit\Internal\Generation\ExclusiveWriter;
 use SocKit\Internal\Generation\GenerationFailure;
 use SocKit\Modules\Modules;
@@ -17,6 +17,7 @@ use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\PanelDefinitions;
 use SocKit\Schema\Internal\MigrationHistory;
 use SocKit\Schema\Internal\MigrationPlanner;
+use SocKit\Schema\Internal\PreviewSqliteReceipts;
 use SocKit\Schema\Internal\SchemaValues;
 
 /** Explicit console tooling. Reads the owner ledger/catalog; DDL is left to Laravel migrate. */
@@ -29,6 +30,10 @@ final readonly class PanelMigrations
     public function run(string $root, string $panel, bool $upgrade = false, bool $dryRun = false): array
     {
         $definition = $this->panels->get(new PanelId($panel));
+        if ($upgrade) {
+            $connections = SchemaValues::map($this->config->get('database.connections', []));
+            PreviewSqliteReceipts::check(SchemaValues::map($connections[$definition->storage->connection] ?? []), $root);
+        }
         $schema = new PanelSchemaCompiler()->compile(panel: $definition, components: $this->modules->schemaComponents());
         // Include frozen ownership of disabled/unregistered panels in the collision preflight.
         $schemas = [];

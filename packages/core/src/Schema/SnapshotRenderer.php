@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SocKit\Schema;
 
 use Illuminate\Database\Connection;
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use SocKit\Schema\Internal\SchemaValues;
 use SocKit\Schema\Internal\SnapshotDdl;
 use SocKit\Schema\Internal\StorageDeployment;

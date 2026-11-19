@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace SocKit\Testing\ArchFixtures;
-use SocKit\Attributes\{Api as PublicApi, Spi as Port, SpiKind};
+use Packman\Attributes\{Api as PublicApi, Spi as Port, SpiKind};
 use Illuminate\Database\Eloquent\Model as Record;
 use Illuminate\Database\Eloquent\Builder as Query;
 use Illuminate\Http\{Request as Input, Response as Output};

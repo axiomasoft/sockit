@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Testing;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Contracts\TenantResolver;
-use SocKit\Attributes\Api;
 use SocKit\Support\Data\InstallationRef;
 
 #[Api(since: '1.0')]

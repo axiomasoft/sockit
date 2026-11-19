@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace SocKit\Actors\Data;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Enums\ActorKind;
 use SocKit\Actors\Enums\AgeBand;
 use SocKit\Actors\Enums\ContextProvenance;
 use SocKit\Actors\Exceptions\InvalidActorContextException;
-use SocKit\Attributes\Api;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\InstallationRef;
 

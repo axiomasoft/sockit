@@ -4,23 +4,29 @@ declare(strict_types=1);
 
 namespace SocKit;
 
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use Packman\Attributes\Api;
+use Packman\Errors\Laravel\ProblemDefinitions;
+use Packman\Plugins\Contracts\Contributions\Extensions;
+use Packman\Plugins\Laravel\ExtensionRegistrar;
+use Packman\Plugins\Laravel\PluginsServiceProvider;
 use SocKit\Actors\ActorContexts;
-use SocKit\Attributes\Api;
 use SocKit\Audience\AudienceEvaluator;
 use SocKit\Audience\AudienceGate;
-use SocKit\Configuration\Exceptions\ProviderUnavailableException;
 use SocKit\Configuration\SocKitConfig;
+use SocKit\Errors\SockitProblemDefinitions;
 use SocKit\Internal\Console\DoctorCommand;
 use SocKit\Internal\Console\MakePanelCommand;
 use SocKit\Internal\Console\PanelMigrationsCommand;
 use SocKit\Internal\Console\RelayCommand;
+use SocKit\Internal\ResolverRegistrar;
+use SocKit\Modules\Contracts\Module;
 use SocKit\Modules\Modules;
 use SocKit\Operations\OperationHandles;
 use SocKit\Operations\Operations;
 use SocKit\Operations\OutboxRelay;
 use SocKit\Panels\PanelDefinitions;
+use SocKit\Plugins\SockitCorePlugin;
 use SocKit\Schema\PanelSchemaCompiler;
 use SocKit\Surfaces\SurfaceInstances;
 use SocKit\Surfaces\Surfaces;
@@ -30,24 +36,10 @@ class SocKitServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        SocKitConfig::fromRepository($this->app->make('config'));
-        $this->app->make('config')->set(key: 'sockit', value: SocKitConfig::normalize($this->app->make('config')));
-        $this->app->singleton(abstract: SocKitConfig::class, concrete: fn (Application $app): SocKitConfig => SocKitConfig::fromRepository($app->make('config')));
-        foreach (SocKitConfig::resolverContracts() as $key => $contract) {
-            $this->app->scoped(abstract: $contract, concrete: static function (Application $app) use ($key, $contract): object {
-                $resolvers = $app->make(SocKitConfig::class)->resolvers;
-                $fqcn = $resolvers->for($key);
-                if ($fqcn === null) {
-                    throw new ProviderUnavailableException(message: 'Required SocKit resolver is unavailable', detail: ['key' => 'sockit.resolvers.'.$key, 'rule' => 'PROVIDER_REQUIRED']);
-                }
-                $instance = $app->make($fqcn);
-                if (! is_object($instance) || ! is_a($instance, $contract)) {
-                    throw new ProviderUnavailableException(message: 'Configured resolver binding does not implement its contract', detail: ['key' => 'sockit.resolvers.'.$key, 'rule' => 'PROVIDER_IMPLEMENTATION']);
-                }
-
-                return $instance;
-            });
-        }
+        $this->app->register(PluginsServiceProvider::class);
+        ExtensionRegistrar::builtInFor($this->app, SockitCorePlugin::class);
+        ProblemDefinitions::register($this->app, dirname(__DIR__).'/composer.json', SockitProblemDefinitions::class);
+        new ResolverRegistrar()->register($this->app);
         $this->app->scoped(ActorContexts::class);
         OperationHandles::configure($this->app);
         $this->app->scoped(OutboxRelay::class);
@@ -60,6 +52,9 @@ class SocKitServiceProvider extends ServiceProvider
         Modules::configure($this->app);
         $app = $this->app;
         $app->booting(static function () use ($app): void {
+            foreach ($app->make(Extensions::class)->contributions(Module::class) as $contribution) {
+                Modules::add($app, $contribution->implementation);
+            }
             $draft = Modules::compile($app);
             new PanelSchemaCompiler()->validateComponents($draft->schemaComponents());
             $panels = PanelDefinitions::compile(app: $app, config: $app->make(SocKitConfig::class), modules: $draft);

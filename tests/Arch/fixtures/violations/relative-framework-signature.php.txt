@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Testing\ArchFixtures\Relative;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 
 #[Api]
 class RelativeRecord extends \Illuminate\Database\Eloquent\Model

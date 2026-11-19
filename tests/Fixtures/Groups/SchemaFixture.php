@@ -9,11 +9,16 @@ use Illuminate\Database\PostgresConnection;
 use Illuminate\Support\Facades\DB;
 use SocKit\Modules\Modules;
 use SocKit\Panels\Panel;
+use SocKit\Schema\Internal\AdditiveDdl;
+use SocKit\Schema\Internal\StorageDeployment;
+use SocKit\Schema\Internal\StoragePreflight;
 use SocKit\Schema\ModelBindings;
 use SocKit\Schema\ModelEmitter;
 use SocKit\Schema\PanelModel;
 use SocKit\Schema\PanelSchema;
 use SocKit\Schema\PanelSchemaCompiler;
+use SocKit\Schema\SchemaComponent;
+use SocKit\Schema\SchemaStep;
 use SocKit\Schema\SnapshotRenderer;
 use SocKit\Tests\Fixtures\Schema\LoadedSnapshot;
 use SocKit\Tests\Fixtures\Schema\SnapshotFixture;
@@ -37,8 +42,11 @@ final class SchemaFixture
 
     private readonly mixed $previousDb;
 
+    /** @var array<string,list<string>> */
+    public array $groupUpgrade = [];
+
     /** @param list<string> $selected */
-    public function __construct(array $selected = ['sockit.groups'])
+    public function __construct(array $selected = ['sockit.groups'], bool $previousGroups = false)
     {
         // Exact container, loopback endpoint, database run marker and *_test verified before first DDL.
         $this->pg = new StoragePgFixture;
@@ -58,7 +66,8 @@ final class SchemaFixture
                 $custom = $namespace.strtoupper($id).'CustomGroup';
                 $panel->tables(['groups' => 'custom_groups'])->models(['groups' => $custom]);
             }
-            $schema = new PanelSchemaCompiler()->compile($panel->materialize(entities: new PanelSchemaCompiler()->entities($selected, $components)), $components, modelNamespace: $namespace);
+            $definition = $panel->materialize(entities: new PanelSchemaCompiler()->entities($selected, $components));
+            $schema = new PanelSchemaCompiler()->compile($definition, $components, modelNamespace: $namespace);
             $this->schemas[$id] = $schema;
             $config = Scenario::object($connection->getConfig());
             $observed = $this->pg->owner->query('SELECT host(inet_server_addr()) AS host, inet_server_port() AS port');
@@ -66,6 +75,17 @@ final class SchemaFixture
                 throw new \RuntimeException('Cannot observe isolated PG endpoint');
             }
             $deployment = ['cluster' => 'owned_pg', 'endpoint' => ['host' => $config['host'], 'port' => $config['port']], 'aliases' => [$observed->fetch(\PDO::FETCH_ASSOC)]];
+            if ($previousGroups) {
+                $component = $components['sockit.groups'];
+                $v1 = new SchemaComponent($component->id, 1, array_values(array_filter($component->steps, static fn (SchemaStep $step): bool => $step->version === 1)));
+                $previous = [...$components, 'sockit.groups' => $v1];
+                $previousSchema = new PanelSchemaCompiler()->compile($definition, $previous, modelNamespace: $namespace);
+                $probe = new StoragePreflight;
+                $target = StorageDeployment::fromArray($deployment);
+                $ddl = new AdditiveDdl()->compile($probe->inspect($previousSchema, $connection, $target)->toArray(), $probe->inspect($schema, $connection, $target));
+                $this->groupUpgrade[$id] = $ddl['up'];
+                $schema = $previousSchema;
+            }
             $source = new SnapshotRenderer()->render($schema, $connection, $deployment);
             $path = SnapshotFixture::file($source);
             $this->paths[] = $path;

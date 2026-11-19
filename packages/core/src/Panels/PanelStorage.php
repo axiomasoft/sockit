@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Panels;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Panels\Internal\PanelValues;
 
 #[Api(since: '1.0')]

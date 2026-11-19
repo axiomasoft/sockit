@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Schema;
 
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use SocKit\Schema\Internal\SchemaValues;
 
 /** Returns consumer-owned sources without writing, overwriting or autoloading files. */

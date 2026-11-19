@@ -6,9 +6,9 @@ namespace SocKit\Operations;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Api;
 use SocKit\Actors\ActorContexts;
 use SocKit\Actors\Exceptions\ActorContextMismatchException;
-use SocKit\Attributes\Api;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 use SocKit\Operations\Data\OperationHandle;

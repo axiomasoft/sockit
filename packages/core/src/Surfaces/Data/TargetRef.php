@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Surfaces\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 

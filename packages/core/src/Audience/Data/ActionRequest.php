@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Audience\Data;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Attributes\Api;
 use SocKit\Support\Data\ResourceRef;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Surfaces\Data\SurfaceRef;

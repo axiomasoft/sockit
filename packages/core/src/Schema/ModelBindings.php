@@ -6,10 +6,10 @@ namespace SocKit\Schema;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use ReflectionClass;
 use ReflectionNamedType;
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
 use SocKit\Schema\Internal\SchemaValues;
 
 /** Explicit persistence preflight; boot-time data compilation never autoloads consumer models. */

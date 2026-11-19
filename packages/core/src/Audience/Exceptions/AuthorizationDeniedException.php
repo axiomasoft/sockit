@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Audience\Exceptions;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Enums\AuthorizationStatus;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Errors\Exceptions\SocKitException;

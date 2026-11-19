@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SocKit\Errors\Enums;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
+use Packman\Errors\Contracts\ErrorCode;
+use Packman\Errors\Enums\ErrorCategory;
 use SocKit\Errors\Data\ProblemSpec;
 
 #[Api]
-enum ProblemCode: string
+enum ProblemCode: string implements ErrorCode
 {
     case AuthenticationRequired = 'sockit.authentication_required';
     case ActorContextInvalid = 'sockit.actor_context_invalid';
@@ -36,6 +38,43 @@ enum ProblemCode: string
     case ModuleInvalid = 'sockit.module_invalid';
     case PanelNotFound = 'sockit.panel_not_found';
     case PanelBindingMismatch = 'sockit.panel_binding_mismatch';
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    public function category(): ErrorCategory
+    {
+        return match ($this) {
+            self::AuthenticationRequired => ErrorCategory::Authentication,
+            self::ActorContextInvalid,
+            self::AuthorizationDenied,
+            self::AudienceDenied => ErrorCategory::Authorization,
+            self::AudienceNotContained,
+            self::PayloadInvalid => ErrorCategory::Validation,
+            self::AudienceVersionUnknown,
+            self::WireVersionUnsupported => ErrorCategory::Unsupported,
+            self::SurfaceNotFound,
+            self::ContentHidden,
+            self::ContentDeleted,
+            self::ContentErased,
+            self::PanelNotFound => ErrorCategory::NotFound,
+            self::SurfaceArchived,
+            self::SurfaceIncarnationMismatch,
+            self::BackendBindingMismatch,
+            self::ContentHeld,
+            self::RevisionConflict,
+            self::IdempotencyConflict,
+            self::EventIdentityConflict,
+            self::PanelBindingMismatch => ErrorCategory::Conflict,
+            self::AuthorizationUnknown,
+            self::ProviderUnavailable,
+            self::ExternalOutcomeUnknown => ErrorCategory::Unavailable,
+            self::ConfigurationInvalid,
+            self::ModuleInvalid => ErrorCategory::Internal,
+        };
+    }
 
     public function spec(): ProblemSpec
     {

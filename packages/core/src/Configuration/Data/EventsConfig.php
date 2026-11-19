@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Configuration\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
 
 /** Server-owned source epoch. It is unrelated to actor generations and client payloads. */

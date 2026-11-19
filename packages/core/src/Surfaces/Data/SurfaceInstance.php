@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Surfaces\Data;
 
 use DateTimeImmutable;
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Support\Data\InstallationRef;
 use SocKit\Support\Data\ResourceRef;
 use SocKit\Support\Data\Revision;

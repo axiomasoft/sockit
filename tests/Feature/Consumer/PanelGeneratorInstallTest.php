@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Filesystem\Filesystem;
+use SocKit\Tests\Fixtures\ConsumerPackages;
 use SocKit\Tests\Integration\Support\PgTarget;
 use SocKit\Tests\Unit\Audience\Support\Scenario;
 use Symfony\Component\Process\Process;
@@ -34,7 +35,7 @@ it('composer-installs the CLI and loads only generated provider/models across fr
     try {
         $files->ensureDirectoryExists($root.'/packages');
         $files->ensureDirectoryExists($root.'/tests/Fixtures');
-        $files->copyDirectory($project.'/packages/core', $root.'/packages/core');
+        ConsumerPackages::copy($files, $project, $root, social: true);
         $files->copyDirectory($project.'/tests/Fixtures/PanelConsumer', $consumer);
         $files->ensureDirectoryExists($consumer.'/bootstrap/cache');
         $files->ensureDirectoryExists($consumer.'/storage/framework/views');

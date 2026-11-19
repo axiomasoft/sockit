@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -eu
+if [ "$#" -gt 0 ]; then
+    exec vendor/bin/pest "$@"
+fi
+vendor/bin/pest --testsuite=Arch,Unit,Testkit
+exec vendor/bin/pest tests/Feature/Schema/SqlitePanelModelTest.php

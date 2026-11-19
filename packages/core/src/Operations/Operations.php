@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SocKit\Operations;
 
 use Illuminate\Contracts\Foundation\Application;
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Contracts\OwnerMutation;
 use SocKit\Operations\Data\CommandEnvelope;

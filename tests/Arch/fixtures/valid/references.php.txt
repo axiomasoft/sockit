@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Support {
     use SocKit\Support\Internal\{Codec as LocalCodec};
-    use SocKit\Attributes\{Api, function api_label, const API_VERSION};
+    use Packman\Attributes\{Api, function api_label, const API_VERSION};
     // use Chatom\NotAnImport;
     #[Api]
     final class References {

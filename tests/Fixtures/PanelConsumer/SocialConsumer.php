@@ -6,6 +6,7 @@ namespace SocKit\Tests\Fixtures\PanelConsumer;
 
 use Illuminate\Filesystem\Filesystem;
 use PDO;
+use SocKit\Tests\Fixtures\ConsumerPackages;
 use SocKit\Tests\Integration\Support\PgTarget;
 use SocKit\Tests\Unit\Audience\Support\Scenario;
 use Symfony\Component\Process\Process;
@@ -45,7 +46,7 @@ final class SocialConsumer
             $files = new Filesystem;
             $files->ensureDirectoryExists($this->root.'/packages');
             $files->ensureDirectoryExists($this->root.'/tests/Fixtures');
-            $files->copyDirectory($project.'/packages/core', $this->root.'/packages/core');
+            ConsumerPackages::copy($files, $project, $this->root, social: true);
             $files->copyDirectory(__DIR__, $this->consumer);
             $files->ensureDirectoryExists($this->consumer.'/bootstrap/cache');
             $files->ensureDirectoryExists($this->consumer.'/storage/framework/views');
@@ -334,7 +335,7 @@ CONFIG);
         file_put_contents($provider, str_replace("'article_'", "'changed_'", $original));
         file_put_contents($surface, $surfaceOriginal);
         $this->clearConfig();
-        $schemaPath = $this->consumer.'/vendor/axiomasoft/sockit/modules/reactions/src/Internal/InitialSchema.php';
+        $schemaPath = $this->consumer.'/vendor/axiomasoft/sockit-reactions/src/Internal/InitialSchema.php';
         $schemaSource = (string) file_get_contents($schemaPath);
         $changed = str_replace("id: 'sockit.reactions', version: 1", "id: 'sockit.reactions', version: 2", $schemaSource);
         $changed = str_replace('        ]);', "            new SchemaStep(id: 'future_note', version: 2, entity: 'reactions', columns: ['future_note' => new SchemaColumn(type: 'text', nullable: true)]),\n        ]);", $changed);

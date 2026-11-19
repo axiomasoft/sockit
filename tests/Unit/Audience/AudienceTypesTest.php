@@ -97,3 +97,12 @@ it('restricts audience reasons to the native contract dictionary', function (): 
         ->and(AudienceVerdict::allowReadOnly('audience.allowed.observer')->canWrite())->toBeFalse()
         ->and(AudienceVerdict::deny('audience.unknown')->canRead())->toBeFalse();
 });
+
+it('round trips nested logical audiences and rejects malformed mixed forms', function (): void {
+    $spec = AudienceSpec::allOf(AudienceSpec::platform(), AudienceSpec::anyOf(AudienceSpec::public(),
+        AudienceSpec::exclude(AudienceSpec::public(), AudienceSpec::group(new GroupRef('club')))));
+    expect(AudienceSpec::fromWire($spec->toWire())->toWire())->toBe($spec->toWire())
+        ->and($spec->referencedGroups())->toEqual([new GroupRef('club')]);
+    expect(fn () => AudienceSpec::fromWire([...$spec->toWire(), 'scope' => 'public']))->toThrow(InvalidPayloadException::class)
+        ->and(fn () => AudienceSpec::anyOf())->toThrow(InvalidPayloadException::class);
+});

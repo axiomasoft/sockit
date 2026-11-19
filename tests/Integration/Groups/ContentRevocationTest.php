@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Posts\Data\FeedQuery;
 use SocKit\Support\Data\Revision;
 use SocKit\Tests\Fixtures\Groups\ContentScenario;
@@ -21,7 +22,10 @@ it('revokes post and reaction access after the author leaves', function (): void
         expect($s->posts->feed($s->handle, new FeedQuery)->items)->toHaveCount(1)
             ->and($s->posts->revision($s->handle, $resource, new Revision(1))->body)->toBe('Group post')
             ->and($s->reactions->summary($s->handle, $s->reactionInput($resource)->target)->counts)->toBe(['like' => 1]);
+        $sample = $s->gate->read($s->handle->actor, $s->subject());
+        expect($sample->isCurrent())->toBeTrue();
         expect($s->membership->run($s->group, 'leave')->isSuccess())->toBeTrue();
+        expect($sample->isCurrent())->toBeFalse();
         expect(fn () => $s->posts->read($s->handle, $resource))->toThrow(Exception::class);
         expect(fn () => $s->posts->revision($s->handle, $resource, new Revision(1)))->toThrow(Exception::class);
         expect($s->posts->feed($s->handle, new FeedQuery)->items)->toBeEmpty()
@@ -57,5 +61,21 @@ it('enforces group audience on installed generated posts and reactions', functio
         $consumer->run();
     } finally {
         $consumer->cleanup();
+    }
+});
+
+it('invalidates a composite exclusion after a previously absent member joins', function (): void {
+    $s = new ContentScenario(active: false);
+    try {
+        $spec = AudienceSpec::exclude(AudienceSpec::platform(), $s->audience());
+        $subject = $s->subject(spec: $spec);
+        $sample = $s->gate->read($s->handle->actor, $subject);
+        expect(AudienceSpec::fromWire($spec->toWire())->toWire())->toBe($spec->toWire())
+            ->and($sample->isCurrent())->toBeTrue();
+        expect($s->membership->run($s->group, 'join')->isSuccess())->toBeTrue();
+        expect($sample->isCurrent())->toBeFalse()
+            ->and($s->gate->read($s->handle->actor, $subject)->canRead())->toBeFalse();
+    } finally {
+        $s->cleanup();
     }
 });

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Testing;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Attributes\Api;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
 use SocKit\Audience\Data\AudienceSpec;
 use SocKit\Audience\Data\AudienceVerdict;

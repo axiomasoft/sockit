@@ -223,3 +223,23 @@ it('rolls back the frozen owning panel with changed configuration preserving the
         $f->cleanup();
     }
 });
+
+it('upgrades populated v1 PostgreSQL group and member rows with unprivileged role defaults', function (): void {
+    $f = new SchemaFixture(previousGroups: true);
+    try {
+        $f->migrations['a']->up();
+        $model = $f->model('groups')->newQuery()->create(Rows::group());
+        $key = $model->getAttribute('id');
+        assert(is_string($key));
+        $member = $f->model('group_members')->newQuery()->create(Rows::member($key));
+        foreach ($f->groupUpgrade['a'] as $sql) {
+            $f->connection()->statement($sql);
+        }
+        expect($model->fresh()?->getAttribute('visibility'))->toBe('public')
+            ->and($model->fresh()?->getAttribute('name'))->toBe('Клуб «Шахматы»')
+            ->and($member->fresh()?->getAttribute('role'))->toBe('member')
+            ->and($member->fresh()?->getAttribute('state'))->toBe('pending');
+    } finally {
+        $f->cleanup();
+    }
+});

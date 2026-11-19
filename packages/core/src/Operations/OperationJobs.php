@@ -6,8 +6,8 @@ namespace SocKit\Operations;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionResolverInterface;
+use Packman\Attributes\Api;
 use SocKit\Actors\Contracts\TenantResolver;
-use SocKit\Attributes\Api;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Errors\Contracts\ProvidesProblem;
 use SocKit\Errors\Enums\ProblemCode;

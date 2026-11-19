@@ -11,14 +11,13 @@
         "illuminate/config": "^13.0",
         "ramsey/uuid": "^4.9",
         "illuminate/database": "^13.0",
-        "illuminate/console": "^13.0"
+        "illuminate/console": "^13.0",
+        "axiomasoft/packman": "^0.1",
+        "axiomasoft/packman-plugins": "^0.1.1"
     },
     "autoload": {
         "psr-4": {
-            "SocKit\\": "src/",
-            "SocKit\\Reactions\\": "modules/reactions/src/",
-            "SocKit\\Posts\\": "modules/posts/src/",
-            "SocKit\\Groups\\": "modules/groups/src/"
+            "SocKit\\": "src/"
         }
     },
     "extra": {
@@ -61,62 +60,29 @@
                         "SocKit\\Posts\\",
                         "SocKit\\Groups\\"
                     ]
-                },
-                "reactions": {
-                    "namespaces": [
-                        "SocKit\\Reactions\\"
-                    ],
-                    "paths": [
-                        "packages/core/modules/reactions/src"
-                    ],
-                    "tables": [
-                        "reactions",
-                        "reaction_counts"
-                    ],
-                    "config": [],
-                    "publish-tags": [],
-                    "commands": [],
-                    "module-ids": [
-                        "sockit.reactions"
-                    ]
-                },
-                "posts": {
-                    "namespaces": [
-                        "SocKit\\Posts\\"
-                    ],
-                    "paths": [
-                        "packages/core/modules/posts/src"
-                    ],
-                    "tables": [
-                        "posts",
-                        "post_revisions"
-                    ],
-                    "config": [],
-                    "publish-tags": [],
-                    "commands": [],
-                    "module-ids": [
-                        "sockit.posts"
-                    ]
-                },
-                "groups": {
-                    "namespaces": [
-                        "SocKit\\Groups\\"
-                    ],
-                    "paths": [
-                        "packages/core/modules/groups/src"
-                    ],
-                    "tables": [
-                        "groups",
-                        "group_members"
-                    ],
-                    "config": [],
-                    "publish-tags": [],
-                    "commands": [],
-                    "module-ids": [
-                        "sockit.groups"
-                    ]
                 }
             }
+        },
+        "packman": {
+            "error-prefix": "sockit",
+            "package-type": "domain",
+            "schema-version": 1,
+            "stability": "dev",
+            "owns": [
+                "Actors",
+                "Audience",
+                "Configuration",
+                "Errors",
+                "Internal",
+                "Modules",
+                "Operations",
+                "Panels",
+                "Plugins",
+                "Schema",
+                "Support",
+                "Surfaces",
+                "Testing"
+            ]
         }
     }
 }

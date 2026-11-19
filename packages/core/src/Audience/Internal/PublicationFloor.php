@@ -14,7 +14,16 @@ final class PublicationFloor
 {
     public static function denial(ActorContext $author, AudienceSpec $spec, PrivacyFloor $floor): ?AudienceVerdict
     {
-        if (! in_array($spec->scope, $floor->allowedScopes, true)) {
+        if ($spec->operator !== null) {
+            foreach ($spec->operator === 'exclude' ? [$spec->children[0]] : $spec->children as $child) {
+                if (($denied = self::denial($author, $child, $floor)) !== null) {
+                    return $denied;
+                }
+            }
+
+            return null;
+        }
+        if ($spec->scope === null || ! in_array($spec->scope, $floor->allowedScopes, true)) {
             return AudienceVerdict::deny('audience.denied.scope_not_allowed');
         }
         if ($spec->scope->isWiderThan($floor->maxFor($author))) {

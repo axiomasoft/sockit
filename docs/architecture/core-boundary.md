@@ -2,7 +2,7 @@
 
 | Модуль (`SocKit\<X>\`) | Что содержит | Публичное | Фаза |
 |:--|:--|:--|:--|
-| Attributes | `#[Api]`, `#[Spi(kind, since)]`, `SpiKind` (Implement, Call, Extend) | всё | P1 |
+| Packman Attributes | `#[Api]`, `#[Spi(kind, since)]`, `SpiKind` (Implement, Call) | всё | P1 |
 | Support | ids (UUIDv7), `HostEntityRef`, `ActorRef`, `ResourceRef`, `Revision`, `CommandKey`, `PayloadDigest`, `CanonicalJson`, `WireVersion` | Data/, Contracts/ | P1 |
 | Actors | `ActorKind`, `ActorContext`, `ActorContextResolver` SPI, `TrustedActorContextFactory`, исключения | Data/, Contracts/, Enums/, Exceptions/ | P1 |
 | Audience | `Scope`, `AudienceSpec`, `PrivacyFloor`, `PrivacyDescriptor`, `ContourResolver` SPI, `AudienceResolver` SPI, `AudienceVerdict`, `AudienceEvaluator` (чистый), `TenantResolver` SPI | всё кроме Internal | P1 |
@@ -14,7 +14,7 @@
 | Testing | `FakeActorContextResolver`, `FakeContourResolver`, `FakeAudienceResolver`, `FakeTenantResolver` | всё (#[Api]) | P1 |
 | Internal | компилятор реестров, codec | — | P1+ |
 
-Модули posts/reactions/groups (P4/P5) — `packages/core/modules/<m>/src` с namespace `SocKit\Posts\`, `SocKit\Reactions\`, `SocKit\Groups\`; ядро их не импортирует.
+Модули posts/reactions/groups (P4/P5) — `packages/<m>/src` с namespace `SocKit\Posts\`, `SocKit\Reactions\`, `SocKit\Groups\`; ядро их не импортирует.
 
 Panels — обязательный модуль механизма: PanelId, PanelProvider, Panel builder, immutable PanelDefinition/PanelStorage, PanelDefinitions. Контракты P1.13; runtime P2, генератор P3. Surfaces всегда разрешается внутри panel. Schema-компиляция появляется в P3 под конкретного потребителя, не как универсальный plugin runtime в P1.
 

@@ -7,7 +7,7 @@ namespace Acme\Groups;
 use Acme\Runtime\RuntimeModule;
 use Illuminate\Support\ServiceProvider;
 use SocKit\Groups\Contracts\MembershipConsent;
-use SocKit\Groups\Internal\GroupsServiceProvider;
+use SocKit\Groups\GroupsServiceProvider;
 use SocKit\Modules\Modules;
 use SocKit\Operations\Contracts\MutationAuthorityFence;
 

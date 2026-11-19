@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Audience\Data;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Data\ActorContext;
-use SocKit\Attributes\Api;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Audience\Exceptions\FloorWidensException;
 use SocKit\Audience\Exceptions\InvalidPrivacyFloorException;

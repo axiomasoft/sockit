@@ -12,8 +12,28 @@
             "options": {
                 "symlink": true,
                 "versions": {
-                    "axiomasoft/sockit": "0.1.x-dev"
-                }
+                    "axiomasoft/sockit": "0.1.x-dev",
+                    "axiomasoft/sockit-testkit": "0.1.x-dev",
+                    "axiomasoft/sockit-reactions": "0.1.x-dev",
+                    "axiomasoft/sockit-posts": "0.1.x-dev",
+                    "axiomasoft/sockit-groups": "0.1.x-dev"
+                },
+                "reference": "config"
+            }
+        },
+        {
+            "type": "path",
+            "url": "../packman/packages/*",
+            "options": {
+                "symlink": true,
+                "versions": {
+                    "axiomasoft/packman": "0.1.1",
+                    "axiomasoft/packman-plugins": "0.1.1",
+                    "axiomasoft/packman-schema": "0.1.1",
+                    "axiomasoft/packman-testkit": "0.1.1",
+                    "axiomasoft/packman-devtools": "0.1.1"
+                },
+                "reference": "config"
             }
         }
     ],
@@ -27,7 +47,12 @@
         "pestphp/pest-plugin-arch": "^5.0",
         "larastan/larastan": "^3.0",
         "laravel/pint": "^1.0",
-        "rector/rector": "^2.0"
+        "rector/rector": "^2.0",
+        "axiomasoft/sockit-testkit": "^0.1@dev",
+        "axiomasoft/packman-devtools": "^0.1",
+        "axiomasoft/sockit-reactions": "^0.1@dev",
+        "axiomasoft/sockit-posts": "^0.1@dev",
+        "axiomasoft/sockit-groups": "^0.1@dev"
     },
     "autoload-dev": {
         "psr-4": {
@@ -40,14 +65,17 @@
         }
     },
     "scripts": {
-        "test": "pest",
+        "test": "bin/test",
         "analyse": "phpstan analyse --no-progress",
         "lint": "pint --test",
         "refactor:check": "rector process --dry-run",
         "check": [
             "@lint",
             "@analyse",
-            "@test"
-        ]
+            "@test",
+            "@gate"
+        ],
+        "gate": "@php bin/packman gate",
+        "test:pg": "bin/test-pg"
     }
 }

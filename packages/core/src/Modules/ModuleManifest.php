@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Modules;
 
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 
 #[Spi(kind: SpiKind::Call, since: '1.0')]
 final readonly class ModuleManifest

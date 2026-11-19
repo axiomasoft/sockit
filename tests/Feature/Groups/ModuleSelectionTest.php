@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Filesystem\Filesystem;
 use SocKit\Configuration\Exceptions\InvalidConfigurationException;
+use SocKit\Groups\Internal\GroupTarget;
 use SocKit\Modules\Exceptions\InvalidModuleException;
 use SocKit\Modules\Modules;
 use SocKit\Panels\Data\PanelId;
@@ -35,7 +36,11 @@ it('selects only explicitly enabled and panel selected modules without boot SQL 
         $features = [];
         foreach ($selected as $id) {
             $features = [...$features, ...$modules->declarations()[$id]['features']];
-            expect($modules->declarations()[$id]['targets'])->toBe($id === 'sockit.posts' ? ['post' => PostTarget::class, 'sockit.post' => PostTarget::class] : []);
+            expect($modules->declarations()[$id]['targets'])->toBe(match ($id) {
+                'sockit.groups' => ['group' => GroupTarget::class, 'sockit.group' => GroupTarget::class],
+                'sockit.posts' => ['post' => PostTarget::class, 'sockit.post' => PostTarget::class],
+                default => [],
+            });
         }
         expect(in_array('posts', $features, true))->toBe(in_array('sockit.posts', $selected, true))
             ->and(in_array('groups', $features, true))->toBe(in_array('sockit.groups', $selected, true));

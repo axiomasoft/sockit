@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Errors\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 
 #[Api]
 final readonly class ProblemSpec

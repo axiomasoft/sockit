@@ -1,0 +1,49 @@
+{
+    "name": "axiomasoft/sockit-testkit",
+    "description": "Shared Testbench base cases, conformance traits, and fixture builders for SocKit packages and host consumers.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.4 <8.6",
+        "axiomasoft/packman": "^0.1",
+        "axiomasoft/packman-plugins": "^0.1",
+        "axiomasoft/packman-testkit": "^0.1",
+        "axiomasoft/sockit": "^0.1@dev",
+        "illuminate/contracts": "^13.0",
+        "illuminate/support": "^13.0",
+        "orchestra/testbench": "^11.3",
+        "phpunit/phpunit": "^11.5|^12.0|^13.0",
+        "axiomasoft/sockit-reactions": "^0.1@dev",
+        "axiomasoft/sockit-posts": "^0.1@dev",
+        "axiomasoft/sockit-groups": "^0.1@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "SocKit\\Testkit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SocKit\\Testkit\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "packman": {
+            "schema-version": 1,
+            "package-type": "dev",
+            "stability": "dev",
+            "profile": "laravel-package",
+            "dev_only": true,
+            "owns": [
+                "Concerns",
+                "Contracts",
+                "Data",
+                "Fakes",
+                "Internal",
+                "Laravel"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

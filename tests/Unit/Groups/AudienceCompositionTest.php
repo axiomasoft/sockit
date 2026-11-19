@@ -12,7 +12,7 @@ use SocKit\Audience\Data\AudienceSubject;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Audience\Data\GroupRef;
 use SocKit\Groups\GroupAudienceResolver;
-use SocKit\Groups\Internal\GroupsServiceProvider;
+use SocKit\Groups\GroupsServiceProvider;
 use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Testing\FakeAudienceResolver;

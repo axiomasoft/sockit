@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SocKit\Modules;
 
 use Illuminate\Contracts\Foundation\Application;
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Modules\Contracts\ModuleSettingsSchema;
 use SocKit\Modules\Internal\CompiledModuleGraph;

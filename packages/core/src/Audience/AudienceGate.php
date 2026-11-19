@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace SocKit\Audience;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Actors\Enums\ActorKind;
-use SocKit\Attributes\Api;
 use SocKit\Audience\Contracts\AudienceResolver;
 use SocKit\Audience\Contracts\ResolvesAudienceInBatch;
 use SocKit\Audience\Contracts\SurfaceAudiencePolicy;
@@ -34,7 +34,9 @@ final readonly class AudienceGate
                 return $admission;
             }
 
-            return $this->intersect(admission: $admission, content: $this->resolver->decideRead(viewer: $viewer, subject: $subject), subject: $subject);
+            $verdict = $this->intersect(admission: $admission, content: $this->resolver->decideRead(viewer: $viewer, subject: $subject), subject: $subject);
+
+            return $verdict->canRead() && ! $verdict->isCurrent() ? AudienceVerdict::deny('audience.unknown') : $verdict;
         } catch (\Throwable) {
             return AudienceVerdict::deny('audience.resolver_error');
         }
@@ -59,7 +61,7 @@ final readonly class AudienceGate
                 $result[$subject->key] = $this->read(viewer: $viewer, subject: $subject);
             }
 
-            return $result;
+            return $this->currentReads($result);
         }
         $result = $admissions = $eligible = [];
         foreach ($subjects as $subject) {
@@ -108,7 +110,20 @@ final readonly class AudienceGate
             $ordered[$subject->key] = $result[$subject->key];
         }
 
-        return $ordered;
+        return $this->currentReads($ordered);
+    }
+
+    /** @param array<string, AudienceVerdict> $verdicts
+     * @return array<string, AudienceVerdict> */
+    private function currentReads(array $verdicts): array
+    {
+        foreach ($verdicts as $key => $verdict) {
+            if ($verdict->canRead() && ! $verdict->isCurrent()) {
+                $verdicts[$key] = AudienceVerdict::deny('audience.unknown');
+            }
+        }
+
+        return $verdicts;
     }
 
     public function publish(ActorContext $author, AudienceSubject $subject, PrivacyFloor $floor): AudienceVerdict
@@ -169,6 +184,7 @@ final readonly class AudienceGate
             reason: ! $admission->canWrite() ? $admission->reason : $content->reason,
             policyVersion: $content->policyVersion,
             expiresAt: $this->earliestExpiry(left: $admission->expiresAt, right: $content->expiresAt),
+            checkpoints: [...$admission->checkpoints, ...$content->checkpoints],
         );
     }
 
@@ -185,6 +201,7 @@ final readonly class AudienceGate
             reason: $batch->reason,
             policyVersion: $batch->policyVersion,
             expiresAt: $this->earliestExpiry(left: $batch->expiresAt, right: $scalar->expiresAt),
+            checkpoints: [...$batch->checkpoints, ...$scalar->checkpoints],
         );
     }
 

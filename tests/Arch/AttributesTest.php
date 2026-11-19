@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use SocKit\Attributes\Api;
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Api;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 
 it('exposes the exact attribute contract and string backed SPI kinds', function (): void {
     expect((new Api)->since)->toBe('1.0')
         ->and((new Api(since: '2.0'))->since)->toBe('2.0')
         ->and((new Spi(kind: SpiKind::Implement))->kind)->toBe(SpiKind::Implement)
         ->and((new Spi(kind: SpiKind::Call))->since)->toBe('1.0')
-        ->and((new Spi(kind: SpiKind::Extend, since: '2.0'))->since)->toBe('2.0')
-        ->and(array_column(SpiKind::cases(), 'value'))->toBe(['implement', 'call', 'extend']);
+        ->and((new Spi(kind: SpiKind::Implement, since: '2.0'))->since)->toBe('2.0')
+        ->and(array_column(SpiKind::cases(), 'value'))->toBe(['implement', 'call']);
 });
 
 it('makes the marker types final readonly class attributes with an API marker', function (Api|Spi $marker): void {

@@ -9,8 +9,8 @@ use Acme\Runtime\RuntimeModule;
 use Illuminate\Support\ServiceProvider;
 use SocKit\Modules\Modules;
 use SocKit\Operations\Contracts\MutationAuthorityFence;
-use SocKit\Posts\Internal\PostsServiceProvider;
-use SocKit\Reactions\Internal\ReactionsServiceProvider;
+use SocKit\Posts\PostsServiceProvider;
+use SocKit\Reactions\ReactionsServiceProvider;
 
 final class Provider extends ServiceProvider
 {

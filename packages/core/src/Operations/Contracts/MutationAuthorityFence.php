@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SocKit\Operations\Contracts;
 
-use SocKit\Attributes\Spi;
-use SocKit\Attributes\SpiKind;
+use Packman\Attributes\Spi;
+use Packman\Attributes\SpiKind;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Data\MutationRequest;
 use SocKit\Operations\Data\OperationHandle;

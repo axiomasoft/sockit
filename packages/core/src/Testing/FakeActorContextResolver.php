@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace SocKit\Testing;
 
+use Packman\Attributes\Api;
 use SocKit\Actors\Contracts\ActorContextResolver;
 use SocKit\Actors\Data\ActorContext;
 use SocKit\Actors\Enums\ContextProvenance;
 use SocKit\Actors\Exceptions\UnresolvedActorException;
-use SocKit\Attributes\Api;
 use SocKit\Support\Data\ActorRef;
 
 #[Api(since: '1.0')]

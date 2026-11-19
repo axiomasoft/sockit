@@ -4,17 +4,153 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6bc64d66ade67878f84b238c43058d25",
+    "content-hash": "899e7a449814ebfef9650f53cad5a02d",
     "packages": [
+        {
+            "name": "axiomasoft/packman",
+            "version": "0.1.1",
+            "dist": {
+                "type": "path",
+                "url": "../../../vendor/axiomasoft/packman",
+                "reference": "c8c7500d783e97f2956e8861774d0d319e615d92"
+            },
+            "require": {
+                "php": "^8.4",
+                "psr/clock": "^1.0"
+            },
+            "suggest": {
+                "illuminate/console": "Optional Laravel Artisan console commands (`packman:doctor`, `packman:config:validate`).",
+                "illuminate/contracts": "Optional Laravel container, event dispatcher, config, and validation bindings.",
+                "illuminate/database": "Optional schema status checks in Laravel applications.",
+                "illuminate/support": "Optional PackmanServiceProvider auto-discovery and Laravel adapters."
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "schema-version": 1,
+                    "package-type": "kernel",
+                    "stability": "stable",
+                    "error-prefix": "packman",
+                    "owns": [
+                        "Attributes",
+                        "Config",
+                        "Context",
+                        "Data",
+                        "Doctor",
+                        "Errors",
+                        "Events",
+                        "Features",
+                        "Foundation",
+                        "Settings"
+                    ]
+                },
+                "laravel": {
+                    "providers": [
+                        "Packman\\PackmanServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packman\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Packman\\Core\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dmitry Vostrikov",
+                    "email": "dv.vostrikov@gmail.com"
+                }
+            ],
+            "description": "Packman unified ecosystem kernel — attributes, foundation registrars, context contracts, JsonDocument, configuration options/compiler/cache, RFC 9457 error registry, doctor diagnostics, domain events, features, and settings contracts.",
+            "keywords": [
+                "attributes",
+                "config",
+                "doctor",
+                "errors",
+                "kernel",
+                "laravel",
+                "packman",
+                "php"
+            ],
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "axiomasoft/packman-plugins",
+            "version": "0.1.1",
+            "dist": {
+                "type": "path",
+                "url": "../../../vendor/axiomasoft/packman-plugins",
+                "reference": "5b544a7c57b013d067ebe6af2235bc59f889f323"
+            },
+            "require": {
+                "axiomasoft/packman": "^0.1",
+                "illuminate/console": "^12.0|^13.0",
+                "illuminate/container": "^12.0|^13.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "php": "^8.4"
+            },
+            "suggest": {
+                "axiomasoft/packman-schema": "Optional schema ownership integration for plugins declaring owned schema nouns."
+            },
+            "type": "library",
+            "extra": {
+                "packman": {
+                    "error-prefix": "plugins"
+                },
+                "laravel": {
+                    "providers": [
+                        "Packman\\Plugins\\Laravel\\PluginsServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packman\\Plugins\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Packman\\Plugins\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Universal Packman intra-package plugin graph compiler, capabilities, typed slots, and immutable contribution registry.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
         {
             "name": "axiomasoft/sockit",
             "version": "0.1.x-dev",
             "dist": {
                 "type": "path",
                 "url": "../../../packages/core",
-                "reference": "196985dce3d84ae5f329f52a80ac2a50dde69af6"
+                "reference": "ad11560b4a8dd63f17877e7ed092c1138fc00c82"
             },
             "require": {
+                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman-plugins": "^0.1.1",
                 "illuminate/config": "^13.0",
                 "illuminate/console": "^13.0",
                 "illuminate/container": "^13.0",
@@ -56,11 +192,38 @@
                             ],
                             "commands": [
                                 "sockit:doctor",
+                                "sockit:make-panel",
                                 "sockit:relay"
                             ],
-                            "module-ids": []
+                            "module-ids": [],
+                            "exclude-namespaces": [
+                                "SocKit\\Reactions\\",
+                                "SocKit\\Posts\\",
+                                "SocKit\\Groups\\"
+                            ]
                         }
                     }
+                },
+                "packman": {
+                    "error-prefix": "sockit",
+                    "package-type": "domain",
+                    "schema-version": 1,
+                    "stability": "dev",
+                    "owns": [
+                        "Actors",
+                        "Audience",
+                        "Configuration",
+                        "Errors",
+                        "Internal",
+                        "Modules",
+                        "Operations",
+                        "Panels",
+                        "Plugins",
+                        "Schema",
+                        "Support",
+                        "Surfaces",
+                        "Testing"
+                    ]
                 }
             },
             "autoload": {

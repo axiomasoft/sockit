@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Surfaces;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Data\CommandEnvelope;
 use SocKit\Operations\Data\OperationHandle;

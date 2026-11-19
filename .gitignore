@@ -59,6 +59,7 @@ __pycache__/
 
 # Local dependencies, test caches and secrets.
 /vendor/
+/build/
 /node_modules/
 /.phpunit.cache/
 /.phpunit.result.cache

@@ -7,9 +7,9 @@ namespace SocKit\Tests\Fixtures\Groups;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Foundation\Application;
-use SocKit\Groups\Internal\GroupsServiceProvider;
-use SocKit\Posts\Internal\PostsServiceProvider;
-use SocKit\Reactions\Internal\ReactionsServiceProvider;
+use SocKit\Groups\GroupsServiceProvider;
+use SocKit\Posts\PostsServiceProvider;
+use SocKit\Reactions\ReactionsServiceProvider;
 use SocKit\SocKitServiceProvider;
 use SocKit\Tests\Fixtures\Social\SocialPanel;
 

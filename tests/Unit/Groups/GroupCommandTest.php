@@ -15,7 +15,7 @@ it('validates typed create and policy inputs without caller authority', function
     $create = new GroupCommand(JoinPolicy::Approval, 'Chess');
     $policy = new GroupCommand(JoinPolicy::Closed, resource: $resource);
     expect($create->name)->toBe('Chess')->and($policy->resource)->toBe($resource)
-        ->and(array_keys(get_object_vars($create)))->toBe(['joinPolicy', 'name', 'resource']);
+        ->and(array_keys(get_object_vars($create)))->toBe(['joinPolicy', 'name', 'resource', 'visibility']);
     expect(fn () => new GroupCommand(JoinPolicy::Auto, ''))->toThrow(InvalidPayloadException::class);
     expect(fn () => new GroupCommand(JoinPolicy::Auto, str_repeat('x', 513)))->toThrow(InvalidPayloadException::class);
     expect(fn () => new GroupCommand(JoinPolicy::Auto, 'name', $resource))->toThrow(InvalidPayloadException::class);

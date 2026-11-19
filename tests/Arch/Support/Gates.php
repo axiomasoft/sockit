@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use LogicException;
+use Packman\Attributes\Api;
+use Packman\Attributes\Spi;
 use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionType;
 use ReflectionUnionType;
-use SocKit\Attributes\Api;
-use SocKit\Attributes\Spi;
 use Throwable;
 
 /**
@@ -27,7 +27,7 @@ use Throwable;
 final class Gates
 {
     private const array MODULES = [
-        'Attributes', 'Support', 'Schema', 'Actors', 'Audience', 'Panels', 'Surfaces',
+        'Attributes', 'Plugins', 'Support', 'Schema', 'Actors', 'Audience', 'Panels', 'Surfaces',
         'Operations', 'Errors', 'Modules', 'Configuration', 'Testing', 'Internal', 'Facades',
     ];
 
@@ -169,7 +169,7 @@ final class Gates
                 continue;
             }
             foreach (array_keys($data['require']) as $name) {
-                if (is_string($name) && preg_match('~^(axiomasoft|edufy|corex)/~i', $name) === 1) {
+                if (is_string($name) && ! in_array($name, ['axiomasoft/packman', 'axiomasoft/packman-plugins'], true) && preg_match('~^(axiomasoft|edufy|corex)/~i', $name) === 1) {
                     $violations[] = self::violation('A7', $file, self::line($file, $name), 'Forbidden core require '.$name);
                 }
             }
@@ -181,18 +181,25 @@ final class Gates
     /** @param list<string> $files PHP sources owned by the manifest
      * @return list<Violation>
      */
-    public static function ownership(array $files, string $manifest = 'packages/core/composer.json'): array
+    public static function ownership(array $files, ?string $manifest = null): array
     {
-        $data = json_decode(SourceScanner::read($manifest), true, flags: JSON_THROW_ON_ERROR);
-        $owners = is_array($data) && isset($data['extra']) && is_array($data['extra']) ? ($data['extra']['sockit'] ?? null) : null;
-        $owners = is_array($owners) ? ($owners['owners'] ?? null) : null;
+        $manifests = $manifest === null
+            ? ['packages/core/composer.json', 'packages/groups/composer.json', 'packages/posts/composer.json', 'packages/reactions/composer.json']
+            : [$manifest];
+        $owners = [];
+        foreach ($manifests as $file) {
+            $data = json_decode(SourceScanner::read($file), true, flags: JSON_THROW_ON_ERROR);
+            $entries = data_get($data, 'extra.sockit.owners');
+            if (! is_array($entries) || $entries === []) {
+                return [self::violation('A8', $file, 1, 'Missing extra.sockit.owners')];
+            }
+            $owners = [...$owners, ...array_values($entries)];
+        }
+        $manifest ??= $manifests[0];
         $prefixes = [];
         $exclusions = [];
         $paths = [];
         $violations = [];
-        if (! is_array($owners) || $owners === []) {
-            return [self::violation('A8', $manifest, 1, 'Missing extra.sockit.owners')];
-        }
         foreach ($owners as $owner) {
             if (! is_array($owner) || ! isset($owner['namespaces']) || ! is_array($owner['namespaces']) || $owner['namespaces'] === []) {
                 $violations[] = self::violation('A8', $manifest, 1, 'Owner requires namespace prefixes');
@@ -353,7 +360,7 @@ final class Gates
     private static function socialRoot(string $file): ?string
     {
         foreach (['reactions' => 'Reactions', 'posts' => 'Posts', 'groups' => 'Groups'] as $path => $name) {
-            if (str_starts_with($file, 'packages/core/modules/'.$path.'/src/')) {
+            if (str_starts_with($file, 'packages/'.$path.'/src/')) {
                 return $name;
             }
         }

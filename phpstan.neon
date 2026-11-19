@@ -3,8 +3,10 @@ includes:
 parameters:
     level: max
     paths:
+        - packages/testkit/src
+        - packages/testkit/tests
         - packages/core/src
-        - packages/core/modules/reactions/src
-        - packages/core/modules/posts/src
-        - packages/core/modules/groups/src
+        - packages/reactions/src
+        - packages/posts/src
+        - packages/groups/src
         - tests

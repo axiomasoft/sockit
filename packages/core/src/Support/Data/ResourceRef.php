@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Support\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Support\Enums\ResourceKind;
 use SocKit\Support\Exceptions\InvalidPayloadException;

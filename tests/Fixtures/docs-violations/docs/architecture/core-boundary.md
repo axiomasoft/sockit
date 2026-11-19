@@ -14,7 +14,7 @@
 | Testing | `FakeActorContextResolver`, `FakeContourResolver`, `FakeAudienceResolver`, `FakeTenantResolver` | всё (#[Api]) | P1 |
 | Internal | компилятор реестров, codec | — | P1+ |
 
-Модули posts/reactions/groups (P4/P5) — `packages/core/modules/<m>/src` с namespace `SocKit\Posts\`, `SocKit\Reactions\`, `SocKit\Groups\`; ядро их не импортирует.
+Модули posts/reactions/groups (P4/P5) — `packages/<m>/src` с namespace `SocKit\Posts\`, `SocKit\Reactions\`, `SocKit\Groups\`; ядро их не импортирует.
 
 Panels — обязательный модуль механизма: PanelId, PanelProvider, Panel builder, immutable PanelDefinition/PanelStorage, PanelDefinitions. Контракты P1.13; runtime P2, генератор P3. Surfaces всегда разрешается внутри panel. Schema-компиляция появляется в P3 под конкретного потребителя, не как универсальный plugin runtime в P1.
 

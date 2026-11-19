@@ -1,0 +1,52 @@
+{
+    "name": "axiomasoft/sockit-reactions",
+    "description": "Reactions module for the SocKit social engine for Laravel.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "axiomasoft/sockit": "^0.1@dev",
+        "axiomasoft/packman": "^0.1",
+        "illuminate/database": "^13.0",
+        "illuminate/support": "^13.0",
+        "axiomasoft/packman-plugins": "^0.1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "SocKit\\Reactions\\": "src/"
+        }
+    },
+    "extra": {
+        "packman": {
+            "schema-version": 1,
+            "package-type": "domain",
+            "stability": "dev",
+            "owns": [
+                "Data",
+                "Internal"
+            ]
+        },
+        "sockit": {
+            "owners": {
+                "reactions": {
+                    "namespaces": [
+                        "SocKit\\Reactions\\"
+                    ],
+                    "paths": [
+                        "packages/reactions/src"
+                    ],
+                    "tables": [
+                        "reactions",
+                        "reaction_counts"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.reactions"
+                    ]
+                }
+            }
+        }
+    }
+}

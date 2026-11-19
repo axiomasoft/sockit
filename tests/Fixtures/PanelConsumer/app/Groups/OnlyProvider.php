@@ -6,7 +6,7 @@ namespace Acme\Groups;
 
 use Illuminate\Support\ServiceProvider;
 use SocKit\Groups\Contracts\MembershipConsent;
-use SocKit\Groups\Internal\GroupsServiceProvider;
+use SocKit\Groups\GroupsServiceProvider;
 use SocKit\Operations\Contracts\MutationAuthorityFence;
 
 final class OnlyProvider extends ServiceProvider

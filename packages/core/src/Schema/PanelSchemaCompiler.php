@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Schema;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Panels\PanelDefinition;
 use SocKit\Panels\PanelStorage;
 use SocKit\Schema\Internal\KernelSchema;

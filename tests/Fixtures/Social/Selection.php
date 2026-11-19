@@ -7,8 +7,8 @@ namespace SocKit\Tests\Fixtures\Social;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Foundation\Application;
-use SocKit\Posts\Internal\PostsServiceProvider;
-use SocKit\Reactions\Internal\ReactionsServiceProvider;
+use SocKit\Posts\PostsServiceProvider;
+use SocKit\Reactions\ReactionsServiceProvider;
 use SocKit\SocKitServiceProvider;
 
 final class Selection

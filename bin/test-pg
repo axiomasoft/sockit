@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -eu
+if [ "$#" -gt 0 ]; then
+    exec python3 scripts/testing/pg-run.py vendor/bin/pest "$@"
+fi
+python3 scripts/testing/pg-run.py vendor/bin/pest tests/Feature --fail-on-skipped
+exec python3 scripts/testing/pg-run.py vendor/bin/pest -c phpunit.pg.xml tests/Integration --fail-on-skipped

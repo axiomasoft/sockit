@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Support\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Support\Exceptions\InvalidPayloadException;
 
 #[Api(since: '1.0')]

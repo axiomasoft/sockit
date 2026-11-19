@@ -1,0 +1,55 @@
+{
+    "name": "axiomasoft/sockit-groups",
+    "description": "Groups module for the SocKit social engine for Laravel.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "axiomasoft/sockit": "^0.1@dev",
+        "axiomasoft/packman": "^0.1",
+        "illuminate/database": "^13.0",
+        "illuminate/support": "^13.0",
+        "axiomasoft/packman-plugins": "^0.1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "SocKit\\Groups\\": "src/"
+        }
+    },
+    "extra": {
+        "packman": {
+            "schema-version": 1,
+            "package-type": "domain",
+            "stability": "dev",
+            "owns": [
+                "Contracts",
+                "Data",
+                "Enums",
+                "Exceptions",
+                "Internal"
+            ]
+        },
+        "sockit": {
+            "owners": {
+                "groups": {
+                    "namespaces": [
+                        "SocKit\\Groups\\"
+                    ],
+                    "paths": [
+                        "packages/groups/src"
+                    ],
+                    "tables": [
+                        "groups",
+                        "group_members"
+                    ],
+                    "config": [],
+                    "publish-tags": [],
+                    "commands": [],
+                    "module-ids": [
+                        "sockit.groups"
+                    ]
+                }
+            }
+        }
+    }
+}

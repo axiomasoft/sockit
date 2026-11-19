@@ -86,6 +86,6 @@ final class Consent implements MembershipConsent
     {
         return hash('sha256', CanonicalJson::encode(['installation' => $handle->actor->installation->id, 'surface' => $handle->surface->toWire(),
             'executor' => $handle->actor->actor?->toWire(), 'group' => $activation->group->toWire(), 'subject' => $activation->subject->toWire(),
-            'transition' => $activation->transition, 'generation' => $row->generation ?? null]));
+            'transition' => $activation->transition, 'role' => $activation->role->value, 'generation' => $row->generation ?? null]));
     }
 }

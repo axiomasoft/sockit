@@ -1,0 +1,28 @@
+{
+    "schema": "packman-ai-pack/1",
+    "name": "sockit-packman-ai",
+    "version": "1.0.0",
+    "description": "Canonical Packman AI rules and agent definitions synchronized for axiomasoft/sockit-monorepo.",
+    "targets": [
+        ".claude/",
+        ".codex/agents/",
+        ".gemini/",
+        "AGENTS.md"
+    ],
+    "preserve": [
+        ".claude/rules/generated-assets.md",
+        ".claude/rules/package-migrations.md",
+        ".claude/rules/public-api.md",
+        ".claude/rules/service-provider.md",
+        ".claude/rules/sockit-reviewer-overrides.md",
+        ".claude/rules/tests.md",
+        ".claude/agents/sockit-api-surface.md",
+        ".claude/agents/sockit-orchestrator.md",
+        ".claude/agents/sockit-reviewer.md",
+        ".claude/agents/sockit-security-review.md",
+        ".claude/agents/sockit-slice-builder.md",
+        ".claude/agents/sockit-spec-writer.md",
+        ".claude/agents/sockit-test-verifier.md",
+        ".claude/agents/sockit-test-writer.md"
+    ]
+}

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Audience\Data;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 use SocKit\Audience\Enums\Scope;
 use SocKit\Support\Data\ActorRef;
 use SocKit\Support\Data\HostEntityRef;
@@ -16,16 +16,25 @@ final readonly class AudienceSpec
 {
     public WireVersion $version;
 
+    private int $depth;
+
     /**
      * @param  list<ActorRef>  $actors
+     * @param  list<self>  $children
      */
     private function __construct(
-        public Scope $scope,
+        public ?Scope $scope,
         public array $actors = [],
         public ?GroupRef $group = null,
         public ?string $contourLevel = null,
         public ?HostEntityRef $contour = null,
+        public ?string $operator = null,
+        public array $children = [],
     ) {
+        $this->depth = $children === [] ? 1 : 1 + max(array_map(static fn (self $spec): int => $spec->depth, $children));
+        if ($this->depth > 32 || count($children) > 500 || ($operator !== null && $children === [])) {
+            throw new InvalidPayloadException('Invalid audience expression size');
+        }
         $this->version = new WireVersion(major: 1, minor: 0);
     }
 
@@ -64,11 +73,44 @@ final readonly class AudienceSpec
         return new self(Scope::Public);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    public static function allOf(self ...$specs): self
+    {
+        return new self(scope: null, operator: 'all_of', children: array_values($specs));
+    }
+
+    public static function anyOf(self ...$specs): self
+    {
+        return new self(scope: null, operator: 'any_of', children: array_values($specs));
+    }
+
+    public static function exclude(self $include, self $exclude): self
+    {
+        return new self(scope: null, operator: 'exclude', children: [$include, $exclude]);
+    }
+
+    /** @return list<GroupRef> */
+    public function referencedGroups(): array
+    {
+        $groups = $this->group === null ? [] : [$this->group->value => $this->group];
+        foreach ($this->children as $child) {
+            foreach ($child->referencedGroups() as $group) {
+                $groups[$group->value] = $group;
+            }
+        }
+
+        return array_values($groups);
+    }
+
+    /** @return array<string, mixed> */
     public function toWire(): array
     {
+        if ($this->operator !== null) {
+            return ['version' => $this->version->toWire(), 'operator' => $this->operator] + ($this->operator === 'exclude'
+                ? ['include' => $this->children[0]->toWire(), 'exclude' => $this->children[1]->toWire()]
+                : ['specs' => array_map(static fn (self $spec): array => $spec->toWire(), $this->children)]);
+        }
+        assert($this->scope !== null);
+
         return ['version' => $this->version->toWire(), 'scope' => $this->scope->value] + match ($this->scope) {
             Scope::Direct => ['actors' => array_map(fn (ActorRef $actor): string => $actor->toWire(), $this->actors)],
             Scope::Group => ['group' => $this->group?->value],
@@ -82,11 +124,32 @@ final readonly class AudienceSpec
      */
     public static function fromWire(array $wire): self
     {
-        if (! isset($wire['version'], $wire['scope']) || ! is_string($wire['version']) || ! is_string($wire['scope'])) {
+        return self::decode($wire, 1);
+    }
+
+    /** @param array<array-key,mixed> $wire */
+    private static function decode(array $wire, int $depth): self
+    {
+        if ($depth > 32 || ! is_string($wire['version'] ?? null)) {
             throw new InvalidPayloadException('Invalid audience wire');
         }
         new WireVersion(major: 1, minor: 0)->requireSupported(WireVersion::fromWire($wire['version']));
-        $scope = Scope::tryFrom($wire['scope']) ?? throw new InvalidPayloadException('Unknown audience scope');
+        if (array_key_exists('operator', $wire)) {
+            $decode = static fn (mixed $child): self => is_array($child) ? self::decode($child, $depth + 1) : throw new InvalidPayloadException('Invalid audience child');
+            if ($wire['operator'] === 'exclude' && count($wire) === 4 && isset($wire['include'], $wire['exclude'])) {
+                return self::exclude($decode($wire['include']), $decode($wire['exclude']));
+            }
+            if (count($wire) !== 3 || ! is_array($wire['specs'] ?? null) || ! array_is_list($wire['specs']) || count($wire['specs']) > 500) {
+                throw new InvalidPayloadException('Invalid audience expression');
+            }
+
+            return match ($wire['operator']) {
+                'all_of' => self::allOf(...array_map($decode, $wire['specs'])),
+                'any_of' => self::anyOf(...array_map($decode, $wire['specs'])),
+                default => throw new InvalidPayloadException('Invalid audience operator'),
+            };
+        }
+        $scope = Scope::tryFrom(is_string($wire['scope'] ?? null) ? $wire['scope'] : '') ?? throw new InvalidPayloadException('Unknown audience scope');
         $expected = ['version', 'scope', ...match ($scope) {
             Scope::Direct => ['actors'], Scope::Group => ['group'], Scope::Contour => ['contour_level', 'contour'], default => [],
         }];

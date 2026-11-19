@@ -19,11 +19,9 @@ use SocKit\Tests\Fixtures\Groups\GroupScenario;
 it('guards creation, reads, policy CAS and receipt disclosure on an owned PostgreSQL target', function (): void {
     $f = new GroupScenario;
     try {
-        $command = function (GroupCommand $input, string $key, ?Revision $revision = null) use ($f): CommandEnvelope {
-            return new CommandEnvelope(key: new CommandKey($key), namespace: new CommandNamespace(installation: $f->handle->actor->installation,
-                panel: $f->handle->surface->panel, integration: 'host.client', commandType: $input->resource === null ? 'groups.create' : 'groups.policy'),
-                digest: $f->groups->digest($f->handle, $input, $revision), expectedRevision: $revision);
-        };
+        $command = (fn (GroupCommand $input, string $key, ?Revision $revision = null): CommandEnvelope => new CommandEnvelope(key: new CommandKey($key), namespace: new CommandNamespace(installation: $f->handle->actor->installation,
+            panel: $f->handle->surface->panel, integration: 'host.client', commandType: $input->resource === null ? 'groups.create' : 'groups.policy'),
+            digest: $f->groups->digest($f->handle, $input, $revision), expectedRevision: $revision));
         $create = new GroupCommand(JoinPolicy::Approval, 'Chess');
         $c = $command($create, 'group.create.0001');
         $result = $f->groups->create($f->handle, $create, $c);

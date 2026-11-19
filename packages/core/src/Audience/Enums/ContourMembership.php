@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocKit\Audience\Enums;
 
-use SocKit\Attributes\Api;
+use Packman\Attributes\Api;
 
 #[Api(since: '1.0')]
 enum ContourMembership: string

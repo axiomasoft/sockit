@@ -253,11 +253,11 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/groups",
-                "reference": "4ef940b3b3014939089fb9274a5771257a25c432"
+                "reference": "dec4f1dd7f1a470ad43333469424467dfc4bbf63"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
-                "axiomasoft/packman-plugins": "^0.1.1",
+                "axiomasoft/packman-plugins": "^0.1.2",
                 "axiomasoft/sockit": "^0.1@dev",
                 "illuminate/database": "^13.0",
                 "illuminate/support": "^13.0",
@@ -320,11 +320,11 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/posts",
-                "reference": "67b358751f8c82de48784a8026875fa5ae6ce9eb"
+                "reference": "33a5cd7d5255644c00189f96fd86cf48ce285525"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
-                "axiomasoft/packman-plugins": "^0.1.1",
+                "axiomasoft/packman-plugins": "^0.1.2",
                 "axiomasoft/sockit": "^0.1@dev",
                 "illuminate/database": "^13.0",
                 "illuminate/support": "^13.0",
@@ -387,11 +387,11 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/reactions",
-                "reference": "2d7da95fbc344ff7c45e40fa93dff0f4898f602f"
+                "reference": "fd0aabc728432e1c7ea24c0d73f55e463a98274b"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
-                "axiomasoft/packman-plugins": "^0.1.1",
+                "axiomasoft/packman-plugins": "^0.1.2",
                 "axiomasoft/sockit": "^0.1@dev",
                 "illuminate/database": "^13.0",
                 "illuminate/support": "^13.0",

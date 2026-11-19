@@ -31,7 +31,6 @@ final class SocKitServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../../config/sockit.php', 'sockit');
         $this->registerPackageRegistrars();
     }
 

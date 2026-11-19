@@ -7,6 +7,7 @@ use Illuminate\Contracts\Console\Kernel as ConsoleKernelContract;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Facade;
 use Packman\Config\Contracts\SettingsLookup;
+use Packman\Config\Exceptions\InvalidConfiguration;
 use Packman\Plugins\Contracts\Registry\PluginInspector;
 use SocKit\Configuration\SockitOptions;
 use SocKit\Configuration\SockitSectionSettings;
@@ -28,6 +29,14 @@ use SocKit\Surfaces\Exceptions\SurfaceException;
 use SocKit\Surfaces\Internal\SurfaceRegistry;
 use SocKit\Surfaces\Surface;
 use SocKit\Surfaces\SurfaceProvider;
+
+test('the registered options reject a malformed host configuration root', function (): void {
+    $this->app['config']->set('sockit', 'invalid');
+    $this->app->forgetInstance(SockitOptions::class);
+
+    expect(fn (): SockitOptions => $this->app->make(SockitOptions::class))
+        ->toThrow(InvalidConfiguration::class, 'sockit: expected an array');
+});
 
 test('SockitConfigSection binds SettingsLookup and SockitOptions roundtrips through real Laravel config:cache', function (): void {
     $appLookup = $this->app->make(SettingsLookup::class);

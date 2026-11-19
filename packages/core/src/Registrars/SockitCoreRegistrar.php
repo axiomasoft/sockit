@@ -11,7 +11,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\DatabaseManager;
 use Override;
 use Packman\Attributes\Internal;
-use Packman\Errors\Laravel\ProblemDefinitions;
+use Packman\Extensions\Laravel\ExtensionFacetRegistrar;
 use Packman\Foundation\Contracts\PackageRegistrar;
 use Packman\Plugins\Contracts\Registry\PluginInspector;
 use SocKit\Actors\ActorContexts;
@@ -31,7 +31,6 @@ use SocKit\Console\Reactions\RebuildReactionsCommand;
 use SocKit\Database\Internal\SockitTables;
 use SocKit\Database\StorageCollisionChecker;
 use SocKit\Diagnostics\SockitDoctorCheck;
-use SocKit\Errors\SockitProblemDefinitions;
 use SocKit\Modules\Groups\Contracts\GroupService;
 use SocKit\Modules\Groups\Contracts\MembershipConsent;
 use SocKit\Modules\Groups\Internal\DatabaseGroupMembershipResolver;
@@ -50,6 +49,7 @@ use SocKit\Operations\Internal\DatabaseOutboxService;
 use SocKit\Panels\Contracts\PanelDefinitions;
 use SocKit\Panels\Internal\SockitPanelRegistry;
 use SocKit\Panels\SockitPanelProvider;
+use SocKit\Plugins\SockitCorePlugin;
 use SocKit\Registrars\Internal\SockitRuntime;
 use SocKit\Surfaces\Contracts\SurfaceDefinitions;
 use SocKit\Surfaces\Contracts\SurfaceService;
@@ -65,11 +65,7 @@ final class SockitCoreRegistrar implements PackageRegistrar
     #[Override]
     public function register(Application $app): void
     {
-        $app->singletonIf(SockitOptions::class, static function (Application $app): SockitOptions {
-            $raw = $app->bound(Repository::class) ? $app->make(Repository::class)->get('sockit', []) : [];
-
-            return SockitOptions::fromArray(is_array($raw) ? $raw : [], 'sockit');
-        });
+        ExtensionFacetRegistrar::register($app, SockitCorePlugin::class, dirname(__DIR__, 2).'/composer.json');
 
         $app->singleton(StorageCollisionChecker::class);
         $app->singleton(SockitPanelRegistry::class);
@@ -103,7 +99,6 @@ final class SockitCoreRegistrar implements PackageRegistrar
             container: $app === IlluminateContainer::getInstance() ? null : $app,
         ));
 
-        ProblemDefinitions::register($app, dirname(__DIR__, 2).'/composer.json', SockitProblemDefinitions::class);
     }
 
     #[Override]

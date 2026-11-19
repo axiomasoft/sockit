@@ -35,7 +35,7 @@ final class SockitPluginRegistrar implements PackageRegistrar
     #[Override]
     public function register(Application $app): void
     {
-        ExtensionRegistrar::builtIn(SockitCorePlugin::class);
+        ExtensionRegistrar::builtInFor($app, SockitCorePlugin::class);
 
         $app->beforeResolving(PluginInspector::class, static function (string $abstract, array $parameters, mixed $container): void {
             if ($container instanceof Application) {
@@ -87,6 +87,6 @@ final class SockitPluginRegistrar implements PackageRegistrar
             }
         }
 
-        ExtensionRegistrar::builtIn(...$plugins);
+        ExtensionRegistrar::builtInFor($app, ...$plugins);
     }
 }

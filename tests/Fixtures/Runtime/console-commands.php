@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Console\Application as Artisan;
-use Illuminate\Events\Dispatcher;
+use Illuminate\Contracts\Events\Dispatcher;
 use SocKit\Audience\Data\AudienceVerdict;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Tests\Fixtures\Runtime\OutboxScenario;
@@ -48,5 +48,5 @@ foreach (PgTarget::query(pdo: $scenario->db->owner, sql: 'SELECT event_id FROM p
     }
     $scenario->fake->audience->verdict(key: $id, verdict: AudienceVerdict::allow('audience.allowed.platform'));
 }
-$artisan = new Artisan($scenario->app, new Dispatcher($scenario->app), 'test');
+$artisan = new Artisan($scenario->app, $scenario->app->make(Dispatcher::class), 'test');
 exit($artisan->run(new ArgvInput, new ConsoleOutput));

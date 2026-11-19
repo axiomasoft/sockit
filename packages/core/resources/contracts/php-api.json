@@ -1613,6 +1613,76 @@
                 }
             },
             "properties": {
+                "actors": {
+                    "flags": 1,
+                    "type": "array",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "children": {
+                    "flags": 1,
+                    "type": "array",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "contour": {
+                    "flags": 1,
+                    "type": "?SocKit\\Support\\Data\\HostEntityRef",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "contourLevel": {
+                    "flags": 1,
+                    "type": "?string",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "group": {
+                    "flags": 1,
+                    "type": "?SocKit\\Audience\\Data\\GroupRef",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "operator": {
+                    "flags": 1,
+                    "type": "?string",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "scope": {
+                    "flags": 1,
+                    "type": "?SocKit\\Audience\\Enums\\Scope",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
                 "version": {
                     "flags": 1,
                     "type": "SocKit\\Support\\Data\\WireVersion",
@@ -1997,7 +2067,28 @@
                     "doc": []
                 }
             },
-            "properties": {},
+            "properties": {
+                "reason": {
+                    "flags": 1,
+                    "type": "string",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "status": {
+                    "flags": 1,
+                    "type": "SocKit\\Audience\\Enums\\AuthorizationStatus",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                }
+            },
             "constants": [],
             "enum_backing": null,
             "enum_cases": []
@@ -4821,7 +4912,38 @@
                     "doc": []
                 }
             },
-            "properties": {},
+            "properties": {
+                "problem": {
+                    "flags": 1,
+                    "type": "?SocKit\\Errors\\Enums\\ProblemCode",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "reason": {
+                    "flags": 1,
+                    "type": "string",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                },
+                "status": {
+                    "flags": 1,
+                    "type": "string",
+                    "readonly": true,
+                    "visibility": "public",
+                    "static": false,
+                    "default": null,
+                    "doc": [],
+                    "hooks": []
+                }
+            },
             "constants": [],
             "enum_backing": null,
             "enum_cases": []
@@ -6329,6 +6451,35 @@
                         }
                     ],
                     "return": "?SocKit\\Operations\\Data\\OperationResult",
+                    "doc": []
+                },
+                "readCheckpoint": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "handle",
+                            "type": "SocKit\\Operations\\Data\\OperationHandle",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        },
+                        {
+                            "name": "surface",
+                            "type": "SocKit\\Surfaces\\Data\\SurfaceInstance",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "SocKit\\Audience\\Contracts\\ReadCheckpoint",
                     "doc": []
                 },
                 "recheckSurface": {
@@ -9081,6 +9232,15 @@
                             "variadic": false,
                             "optional": true,
                             "default": "null",
+                            "flags": 0
+                        },
+                        {
+                            "name": "probeStorage",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "true",
                             "flags": 0
                         }
                     ],

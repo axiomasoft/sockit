@@ -32,6 +32,12 @@ final readonly class PostFeed
         $store = new PostStore($this->app);
         $store->outside($handle);
         $settings = $handle->panel->moduleSettings['sockit.posts'] ?? [];
+        $defaultLimit = $settings['default_page_limit'] ?? 20;
+        $maxLimit = $settings['max_page_limit'] ?? 100;
+        if (! is_int($defaultLimit) || ! is_int($maxLimit)) {
+            throw new PostException(ProblemCode::ConfigurationInvalid);
+        }
+        $limit = min($query->limit ?? $defaultLimit, $maxLimit);
         $keys = $settings['feed_keys'] ?? null;
         $active = $settings['feed_key'] ?? null;
         $ttl = $settings['feed_ttl'] ?? null;
@@ -55,9 +61,9 @@ final readonly class PostFeed
         $scanned = 0;
         $exhausted = false;
         do {
-            while (count($items) < $query->limit && $scanned < $budget) {
+            while (count($items) < $limit && $scanned < $budget) {
                 // Never fetch beyond remaining output capacity: an unprocessed tail cannot become the cursor.
-                $size = min($chunk, $budget - $scanned, $query->limit - count($items));
+                $size = min($chunk, $budget - $scanned, $limit - count($items));
                 $candidates = $store->table($handle, 'posts')->where($store->identity($handle))
                     ->where('surface_digest', hash('sha256', CanonicalJson::encode($handle->surface->toWire())))
                     ->where('publication_state', 'published')->where('visibility', 'visible')->where('content_state', 'retained')->whereNotNull('published_at');
@@ -115,7 +121,7 @@ final readonly class PostFeed
             }
             $items = $this->currentOwnerItems($handle, $store, $currentItems);
             // A final denial leaves a hole: continue below the last evaluated candidate while budget remains.
-        } while (count($items) < $query->limit && ! $exhausted && $scanned < $budget);
+        } while (count($items) < $limit && ! $exhausted && $scanned < $budget);
 
         return new FeedPage(items: array_map(static fn (FeedCandidate $item): PostView => $item->view, $items), nextCursor: $exhausted || $position === null ? null : $codec->encode($context, $position));
     }

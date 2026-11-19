@@ -22,9 +22,9 @@ final readonly class PostCommand
 
     /** @param array<array-key, mixed> $media */
     public function __construct(public SurfaceRef $surface, public string $body, public ?AudienceSpec $audience = null, public bool $publish = false,
-        array $media = [], public ?ResourceRef $resource = null, public ?string $reason = null)
+        array $media = [], public ?ResourceRef $resource = null, public ?string $reason = null, public string $format = 'plain')
     {
-        if (strlen($body) > 1048576 || ! mb_check_encoding($body, 'UTF-8') || (trim($body) === '' && $media === []) || ! array_is_list($media) || count($media) > 32
+        if (preg_match('/^[a-z][a-z0-9_-]{0,47}$/D', $format) !== 1 || strlen($body) > 1048576 || ! mb_check_encoding($body, 'UTF-8') || (trim($body) === '' && $media === []) || ! array_is_list($media) || count($media) > 32
             || ($resource !== null && ($resource->kind !== ResourceKind::Post || ! $resource->panel->equals($surface->panel)))
             || ($reason !== null && (trim($reason) === '' || strlen($reason) > 4096))) {
             throw new InvalidPayloadException('Invalid post command');

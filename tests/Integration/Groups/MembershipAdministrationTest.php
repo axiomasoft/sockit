@@ -72,3 +72,16 @@ it('fences host administration, binds consent to the recipient role and guards p
         $s->cleanup();
     }
 })->with(GroupVisibility::cases());
+
+it('rejects group names and secret creation outside configured panel limits', function (): void {
+    $s = new MembershipScenario(allowSecret: false, maxTitle: 4);
+    try {
+        foreach ([new GroupCommand(JoinPolicy::Auto, 'Chess'), new GroupCommand(JoinPolicy::Auto, 'Club', visibility: GroupVisibility::Secret)] as $input) {
+            expect($s->f->groups->create($s->f->handle, $input, $s->command($input, null))->isSuccess())->toBeFalse();
+        }
+        $valid = new GroupCommand(JoinPolicy::Auto, 'Club');
+        expect($s->f->groups->create($s->f->handle, $valid, $s->command($valid, null))->isSuccess())->toBeTrue();
+    } finally {
+        $s->cleanup();
+    }
+});

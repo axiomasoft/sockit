@@ -10,11 +10,13 @@ use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Errors\Exceptions\SocKitException;
 use SocKit\Operations\Enums\ReplayMode;
 use SocKit\Operations\OperationHandles;
+use SocKit\Reactions\Internal\RebuildCommand;
 use SocKit\Support\Data\Revision;
 use SocKit\Support\Ids;
 use SocKit\Tests\Fixtures\Runtime\RuntimeScenario;
 use SocKit\Tests\Fixtures\Social\ProjectionRace;
 use SocKit\Tests\Fixtures\Social\ReactionScenario;
+use Symfony\Component\Console\Tester\CommandTester;
 
 it('repairs exact active membership aggregates and leaves all historical state byte identical', function (): void {
     $s = new ReactionScenario;
@@ -154,3 +156,22 @@ it('requires explicit trusted maintenance permission current fences and projecti
         $s->cleanup();
     }
 })->with(['permission', 'target', 'authority', 'surface-generation', 'generation', 'stale', 'archive', 'read-only', 'delivery']);
+
+it('enforces the per-actor cap and rebuilds a panel through the public maintenance command', function (): void {
+    $s = new ReactionScenario(cap: 1);
+    try {
+        expect($s->execute()->isSuccess())->toBeTrue();
+        $another = $s->reaction('thanks');
+        expect($s->execute(command: $s->command(key: 'reaction.limit.00001', reaction: $another), reaction: $another)->isSuccess())->toBeFalse();
+        $counts = $s->connection()->table('panel_a.a_reaction_counts')->where('reaction_kind', 'like');
+        $counts->update(['count' => 7]);
+        $s->app->bind('sockit.relay.handles', fn (): array => [$s->handle]);
+        $command = new RebuildCommand;
+        $command->setLaravel($s->app);
+        $tester = new CommandTester($command);
+        expect($tester->execute(['--panel' => 'acme.a']))->toBe(0)
+            ->and($counts->value('count'))->toBe(1);
+    } finally {
+        $s->cleanup();
+    }
+});

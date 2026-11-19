@@ -41,7 +41,7 @@
                     ],
                     "config": [],
                     "publish-tags": [],
-                    "commands": [],
+                    "commands": ["sockit:reactions:rebuild"],
                     "module-ids": [
                         "sockit.reactions"
                     ]

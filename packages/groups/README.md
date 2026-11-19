@@ -11,3 +11,5 @@ A host grants membership administration by binding `MembershipAdministration`. I
 `Groups::addMember` takes a `MembershipCommand($group, 'add_member', $recipient, MembershipRole::Moderator)` and a command envelope with the expected group revision. It activates the recipient under the automatic join policy. `Groups::removeMember` takes `MembershipCommand($group, 'remove_member', $recipient)`, transitions the subject to left, advances the membership generation and emits a removal event. Administrative commands require a different executor and recipient. Active members can inspect their role via `GroupView::$viewerRole`. An invite can preselect a role, and the recipient's acceptance retains it.
 
 Run the standard panel migration generator with `--upgrade` for the two additive Groups v2 steps. Existing PostgreSQL rows receive the previous host-admitted visibility (public) and the unprivileged member role. Historical v1 receipt digests are preserved when callers omit the new optional fields.
+
+Set `max_title_length` and `allow_secret_groups` in the panel module settings to constrain names and secret group creation. The storage limit for names is 512 UTF-8 bytes.

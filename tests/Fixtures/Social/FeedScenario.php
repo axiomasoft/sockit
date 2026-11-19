@@ -13,9 +13,9 @@ final readonly class FeedScenario
 {
     public PostScenario $s;
 
-    public function __construct(int $chunk = 2, int $budget = 20, bool $reactions = false, bool $contours = false)
+    public function __construct(int $chunk = 2, int $budget = 20, bool $reactions = false, bool $contours = false, int $defaultLimit = 20, int $maxLimit = 100)
     {
-        $this->s = new PostScenario(reactions: $reactions, privacy: $contours ? ['floor' => ['allowed_scopes' => ['direct', 'contour'], 'default_scope' => 'direct', 'max_scope' => 'contour', 'minor_default_scope' => 'direct', 'minor_max_scope' => 'direct', 'contour_levels' => ['class']]] : [], feed: ['feed_keys' => ['current' => base64_encode(random_bytes(32))], 'feed_key' => 'current', 'feed_chunk' => $chunk, 'feed_budget' => $budget]);
+        $this->s = new PostScenario(reactions: $reactions, privacy: $contours ? ['floor' => ['allowed_scopes' => ['direct', 'contour'], 'default_scope' => 'direct', 'max_scope' => 'contour', 'minor_default_scope' => 'direct', 'minor_max_scope' => 'direct', 'contour_levels' => ['class']]] : [], feed: ['default_page_limit' => $defaultLimit, 'max_page_limit' => $maxLimit, 'feed_keys' => ['current' => base64_encode(random_bytes(32))], 'feed_key' => 'current', 'feed_chunk' => $chunk, 'feed_budget' => $budget]);
     }
 
     public function add(string $body, ?AudienceSpec $audience = null, bool $publish = true): ResourceRef

@@ -166,11 +166,11 @@
                     "parameters": [
                         {
                             "name": "limit",
-                            "type": "int",
+                            "type": "?int",
                             "by_reference": false,
                             "variadic": false,
                             "optional": true,
-                            "default": "20",
+                            "default": "null",
                             "flags": 1
                         },
                         {
@@ -338,6 +338,15 @@
                             "variadic": false,
                             "optional": true,
                             "default": "null",
+                            "flags": 1
+                        },
+                        {
+                            "name": "format",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'plain'",
                             "flags": 1
                         }
                     ],
@@ -608,6 +617,15 @@
                             "variadic": false,
                             "optional": false,
                             "default": null,
+                            "flags": 1
+                        },
+                        {
+                            "name": "format",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": "'plain'",
                             "flags": 1
                         }
                     ],

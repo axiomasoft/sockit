@@ -29,7 +29,7 @@ final readonly class SchemaReadiness
 
     /** @param (callable(): list<string>)|null $runtimeProbe
      * @return array{status:string, panel:string, provider:string, generated:int, applied:int, components:array<string, array{version:mixed, status:string}>, problems:list<array{code:string, step:string, path?:string, action:string, ...}>, deliveries:array<string, mixed>, generated_digest?:mixed, installed_digest?:string, desired_digest?:string} */
-    public function inspect(string $root, PanelDefinition $panel, ?callable $runtimeProbe = null): array
+    public function inspect(string $root, PanelDefinition $panel, ?callable $runtimeProbe = null, bool $probeStorage = true): array
     {
         $step = 'compile';
         $path = 'database/sockit/'.$panel->id->value;
@@ -40,6 +40,18 @@ final readonly class SchemaReadiness
         try {
             $compiler = new PanelSchemaCompiler;
             $desired = $compiler->compile(panel: $panel, components: $this->modules->schemaComponents());
+            if (! $probeStorage) {
+                $settings = SchemaValues::map($this->config->get('database.connections', []));
+                $schemas = [];
+                foreach ($this->panels->all() as $configuredPanel) {
+                    $schemas[] = $compiler->compile($configuredPanel, $this->modules->schemaComponents());
+                }
+                StoragePreflight::generation($schemas, array_map(SchemaValues::map(...), $settings), $this->config->get('sockit.storage.deployments', []));
+                $report['desired_digest'] = $desired->digest;
+                $report['status'] = 'configured';
+
+                return $report;
+            }
             $step = 'history';
             $history = new MigrationHistory;
             $chain = $history->read(root: $root, panel: $desired->panel);

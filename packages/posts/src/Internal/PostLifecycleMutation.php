@@ -127,7 +127,7 @@ final class PostLifecycleMutation implements OwnerMutation
         $store->table($handle, 'post_revisions')->insert(['id' => Ids::uuid7(), 'post_id' => $this->transition->resource->id, 'revision' => $revision->value,
             'actor_ref' => $handle->actor->actor?->toWire(), 'reason' => $this->transition->reason, 'action' => $this->transition->action,
             'publication_state' => $state, 'visibility' => $visibility, 'audience' => $audience, 'privacy_revision' => $revision->value,
-            'body' => $visibility === 'deleted' ? null : $store->text($row, 'body'), 'media_refs' => $visibility === 'deleted' ? '[]' : $store->text($row, 'media_refs'), 'created_at' => $now]);
+            'body_format' => $store->text($row, 'body_format'), 'body' => $visibility === 'deleted' ? null : $store->text($row, 'body'), 'media_refs' => $visibility === 'deleted' ? '[]' : $store->text($row, 'media_refs'), 'created_at' => $now]);
 
         return new MutationEffect(affectedRows: $affected, resource: $this->transition->resource, newRevision: $revision,
             events: [new MutationEvent(type: 'posts.'.match ($this->transition->action) {

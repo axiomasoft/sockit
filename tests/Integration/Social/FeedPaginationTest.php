@@ -194,3 +194,16 @@ it('holds a feed shortlist across independent process commits without losing chr
         $s->cleanup();
     }
 })->with(['insert', 'edit', 'restore', 'delete']);
+
+it('uses the configured default and caps an explicit page size for the panel', function (): void {
+    $f = new FeedScenario(defaultLimit: 1, maxLimit: 2);
+    try {
+        $f->add('one');
+        $f->add('two');
+        $f->add('three');
+        expect($f->s->posts->feed($f->s->handle, new FeedQuery)->items)->toHaveCount(1)
+            ->and($f->page(3)->items)->toHaveCount(2);
+    } finally {
+        $f->s->cleanup();
+    }
+});

@@ -94,15 +94,18 @@
             "dist": {
                 "type": "path",
                 "url": "../../../vendor/axiomasoft/packman-plugins",
-                "reference": "5b544a7c57b013d067ebe6af2235bc59f889f323"
+                "reference": "a012ef4729898b2e0449d2911d06f71ec7c42105"
             },
             "require": {
-                "axiomasoft/packman": "^0.1",
+                "axiomasoft/packman": "^0.1.1",
                 "illuminate/console": "^12.0|^13.0",
                 "illuminate/container": "^12.0|^13.0",
                 "illuminate/contracts": "^12.0|^13.0",
                 "illuminate/support": "^12.0|^13.0",
                 "php": "^8.4"
+            },
+            "conflict": {
+                "axiomasoft/packman-schema": "<0.1.1"
             },
             "suggest": {
                 "axiomasoft/packman-schema": "Optional schema ownership integration for plugins declaring owned schema nouns."
@@ -146,7 +149,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/core",
-                "reference": "85f86b9ffd79ff951e0a6bdabb344d8739320382"
+                "reference": "be00ab9d7588219f74982fda5134596379fc7a7f"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
@@ -191,6 +194,9 @@
                                 "sockit-config"
                             ],
                             "commands": [
+                                "sockit:diagnose",
+                                "sockit:outbox:run",
+                                "sockit:panel:migrations",
                                 "sockit:doctor",
                                 "sockit:make-panel",
                                 "sockit:relay"
@@ -380,7 +386,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/reactions",
-                "reference": "b644a5289d4c59dd1042ef24a35b118670050df1"
+                "reference": "2d7da95fbc344ff7c45e40fa93dff0f4898f602f"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
@@ -416,7 +422,9 @@
                             ],
                             "config": [],
                             "publish-tags": [],
-                            "commands": [],
+                            "commands": [
+                                "sockit:reactions:rebuild"
+                            ],
                             "module-ids": [
                                 "sockit.reactions"
                             ]

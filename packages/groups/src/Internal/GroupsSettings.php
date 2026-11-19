@@ -11,14 +11,21 @@ final class GroupsSettings implements ModuleSettingsSchema
 {
     public function defaults(): array
     {
-        return [];
+        return ['max_title_length' => 512, 'allow_secret_groups' => true];
     }
 
     public function validate(array $settings): array
     {
         $errors = [];
-        foreach (array_keys($settings) as $key) {
-            $errors[] = ['key' => $key, 'rule' => 'SETTING_INVALID'];
+        foreach ($settings as $key => $value) {
+            $valid = match ($key) {
+                'max_title_length' => is_int($value) && $value >= 1 && $value <= 512,
+                'allow_secret_groups' => is_bool($value),
+                default => false,
+            };
+            if (! $valid) {
+                $errors[] = ['key' => $key, 'rule' => 'SETTING_INVALID'];
+            }
         }
 
         return $errors;

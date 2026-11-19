@@ -65,6 +65,12 @@ final readonly class Reactions
         new ReactionProjection($this->app)->rebuild(handle: $handle, target: $target, mode: $mode);
     }
 
+    /** Rebuild each distinct stored target under current per-target guards. */
+    public function rebuildForSurface(OperationHandle $handle): int
+    {
+        return new ReactionProjection($this->app)->rebuildForSurface($handle);
+    }
+
     public function digest(OperationHandle $handle, ReactionCommand $reaction, string $action, ?Revision $expectedRevision = null): PayloadDigest
     {
         return $this->operations->digest(handle: $handle, mutation: new ReactionMutation(app: $this->app, reaction: $reaction, action: $action), expectedRevision: $expectedRevision);

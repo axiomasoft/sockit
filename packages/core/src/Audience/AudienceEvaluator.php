@@ -110,7 +110,11 @@ final readonly class AudienceEvaluator implements AudienceResolver, ResolvesAudi
             $child = new AudienceSubject($subject->key, $spec, $subject->author, $subject->surface, $subject->installation,
                 $subject->surfaceArchived, $subject->archiveReaders);
 
-            return $floor === null ? $this->decideRead($actor, $child) : $this->decidePublish($actor, $child, $floor);
+            try {
+                return $floor === null ? $this->decideRead($actor, $child) : $this->decidePublish($actor, $child, $floor);
+            } catch (\Throwable) {
+                return AudienceVerdict::deny('audience.resolver_error');
+            }
         };
         $spec = $subject->spec;
         if ($spec->operator === 'exclude') {

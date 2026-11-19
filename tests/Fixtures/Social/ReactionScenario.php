@@ -71,12 +71,12 @@ final class ReactionScenario
     /** @var array<string, string> */
     private readonly array $sentinels;
 
-    public function __construct(bool $install = true, bool $feature = true, bool $module = true)
+    public function __construct(bool $install = true, bool $feature = true, bool $module = true, int $cap = 100)
     {
         $this->app = new Application;
         $this->app->instance('config', new Repository(['sockit' => [
             'panels' => [ReactionPanel::class, OtherReactionPanel::class], 'surfaces' => [ReactionSurface::class, OtherReactionSurface::class],
-            'modules' => ['enabled' => ['sockit.reactions']],
+            'modules' => ['enabled' => ['sockit.reactions'], 'settings' => ['sockit.reactions' => ['max_per_target' => $cap]]],
         ]]));
         $this->app->instance(ReactionPanel::class, new ReactionPanel(enabled: $module));
         $this->app->instance(ReactionSurface::class, new ReactionSurface(enabled: $feature && $module));

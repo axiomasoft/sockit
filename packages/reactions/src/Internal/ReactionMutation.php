@@ -83,6 +83,15 @@ final readonly class ReactionMutation implements OwnerMutation
         $resource = $snapshot->resource ?? new ResourceRef(panel: $handle->surface->panel, kind: ResourceKind::Reaction, id: Ids::uuid7());
         $revision = $snapshot->revision?->next() ?? new Revision(1);
         $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        if ($this->action === 'add') {
+            // The owner surface lock serializes additions across kinds on this target.
+            $scope = $identity->columns();
+            unset($scope['reaction_kind']);
+            $limit = $handle->panel->moduleSettings['sockit.reactions']['max_per_target'] ?? 100;
+            if (! is_int($limit) || $this->table($handle, 'reactions')->where($scope)->where('active', true)->count() >= $limit) {
+                throw new ReactionException(ProblemCode::PayloadInvalid);
+            }
+        }
         $query = $this->table(handle: $handle, entity: 'reactions');
         if ($snapshot->revision === null) {
             $affected = $query->insertOrIgnore([...$identity->columns(), 'identity_digest' => $identity->digest(), 'id' => $resource->id,

@@ -12,6 +12,10 @@ Run composer test for the architecture, unit, testkit and SQLite Eloquent checks
 
 ## Статус и что дальше
 
+For a configuration report across all registered panels run `php artisan sockit:diagnose --json`. Add `--probe-storage` to check live schema and runtime readiness. `sockit:doctor --panel=<id>` remains the panel-specific live check.
+
+The host supplies trusted maintenance handles through `sockit.relay.handles`. `sockit:outbox:run --panel=<id> --replay-mode=projection_only` replays projections. Omitting the panel visits each registered panel. `sockit:relay --panel=<id> --once` runs a delivery pass. `sockit:reactions:rebuild` visits selected reaction panels, enumerates stored targets and rebuilds counts through the guarded domain operation. Use `--target=type:key --incarnation=1` to restrict the target.
+
 P1 defines the core contracts, panel and surface configuration, fixtures, architecture boundaries and checks. These are contract-level evidence, not end-to-end or production readiness. The P2 core runtime has an isolated PostgreSQL and standalone Laravel consumer fixture; P3 generated schema infrastructure is exercised by an isolated consumer; P4 supplies reactions and posts/feed with isolated consumer evidence; host qualification follows in P6; Forum and Chatom integrations are conditional. See the [traceability matrix](docs/architecture/traceability.md) for requirements, evidence and pending work.
 
 

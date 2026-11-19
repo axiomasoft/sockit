@@ -327,3 +327,20 @@ it('does not expose a held historical body after a different clean revision is p
         $s->cleanup();
     }
 });
+
+it('applies configured body size and formats and preserves the original revision format', function (): void {
+    $s = new PostScenario(feed: ['max_body_bytes' => 8, 'allowed_formats' => ['markdown']]);
+    try {
+        $sample = $s->post();
+        foreach ([['123456789', 'markdown'], ['ok', 'plain']] as $i => [$body, $format]) {
+            $post = new PostCommand($s->handle->surface, $body, $sample->audience, true, format: $format);
+            expect($s->posts->create($s->handle, $post, $s->command($post, key: 'post.limits.rejected.'.$i))->isPublished())->toBeFalse();
+        }
+        $post = new PostCommand($s->handle->surface, '**ok**', $sample->audience, true, format: 'markdown');
+        $result = $s->posts->create($s->handle, $post, $s->command($post, key: 'post.limits.accepted.01'));
+        $resource = $result->operation->resource ?? throw new RuntimeException;
+        expect($s->posts->revision($s->handle, $resource, new Revision(1))->format)->toBe('markdown');
+    } finally {
+        $s->cleanup();
+    }
+});

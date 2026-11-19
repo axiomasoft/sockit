@@ -23,7 +23,7 @@ final class InitialSchema implements SchemaContribution
         $json = new SchemaColumn('json');
         $revision = new SchemaColumn('bigint');
 
-        return new SchemaComponent(id: 'sockit.posts', version: 1, steps: [
+        return new SchemaComponent(id: 'sockit.posts', version: 2, steps: [
             new SchemaStep(id: 'create_posts', version: 1, entity: 'posts', columns: [...$this->surface(),
                 'id' => new SchemaColumn('uuid'), 'surface_digest' => new SchemaColumn(type: 'string', length: 64, collation: 'C'),
                 'author_ref' => new SchemaColumn(type: 'text', collation: 'C'),
@@ -65,6 +65,12 @@ final class InitialSchema implements SchemaContribution
                     'publication' => new SchemaCheck(kind: 'one_of', columns: ['publication_state'], values: $states),
                     'visibility' => new SchemaCheck(kind: 'one_of', columns: ['visibility'], values: ['visible', 'hidden', 'deleted']),
                     'audience_object' => new SchemaCheck(kind: 'json_object', columns: ['audience'])]),
+            new SchemaStep(id: 'add_post_format', version: 2, entity: 'posts', columns: [
+                'body_format' => new SchemaColumn(type: 'string', length: 48, default: 'plain', hasDefault: true, collation: 'C'),
+            ]),
+            new SchemaStep(id: 'add_revision_format', version: 2, entity: 'post_revisions', columns: [
+                'body_format' => new SchemaColumn(type: 'string', length: 48, default: 'plain', hasDefault: true, collation: 'C'),
+            ]),
         ]);
     }
 

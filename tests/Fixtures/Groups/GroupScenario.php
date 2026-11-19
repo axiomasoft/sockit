@@ -66,7 +66,7 @@ final class GroupScenario
     private readonly mixed $previousDb;
 
     /** @param array<string, mixed> $privacy */
-    public function __construct(bool $install = true, array $privacy = [], bool $reactions = false, bool $content = false, string $contentKind = 'acme.club')
+    public function __construct(bool $install = true, array $privacy = [], bool $reactions = false, bool $content = false, string $contentKind = 'acme.club', bool $allowSecret = true, int $maxTitle = 512)
     {
         if ($content && $privacy === []) {
             $privacy = ['floor' => ['allowed_scopes' => ['direct', 'group'], 'default_scope' => 'direct', 'max_scope' => 'group',
@@ -77,7 +77,7 @@ final class GroupScenario
             'panels' => $content ? [ContentPanel::class, NeighborPanel::class] : [GroupPanel::class],
             'surfaces' => $content ? [GroupSurface::class, ContentSurface::class, NeighborSurface::class] : [GroupSurface::class],
             'modules' => ['enabled' => $content ? ['sockit.groups', 'sockit.posts', 'sockit.reactions'] : ['sockit.groups'],
-                'settings' => $content ? ['sockit.posts' => ['feed_keys' => ['current' => base64_encode(str_repeat('k', 32))], 'feed_key' => 'current']] : []],
+                'settings' => ['sockit.groups' => ['allow_secret_groups' => $allowSecret, 'max_title_length' => $maxTitle], ...($content ? ['sockit.posts' => ['feed_keys' => ['current' => base64_encode(str_repeat('k', 32))], 'feed_key' => 'current']] : [])]],
             ...($privacy === [] ? [] : ['privacy' => $privacy]),
         ]]));
         if ($content) {

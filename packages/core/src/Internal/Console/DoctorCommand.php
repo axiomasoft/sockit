@@ -12,7 +12,7 @@ use SocKit\Schema\SchemaReadiness;
 
 final class DoctorCommand extends Command
 {
-    protected $signature = 'sockit:doctor {--panel=} {--json}';
+    protected $signature = 'sockit:doctor {--panel=} {--json} {--configuration-only}';
 
     protected $description = 'Check panel runtime readiness without modifying storage';
 
@@ -43,7 +43,7 @@ final class DoctorCommand extends Command
             }
 
             return $errors;
-        });
+        }, probeStorage: ! $this->option('configuration-only'));
         $errors = [];
         foreach ($result['problems'] as $problem) {
             $errors[] = $problem['code'];

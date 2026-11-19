@@ -78,6 +78,12 @@ final class GroupMutation implements OwnerMutation
     {
         $this->transaction($handle);
         $store = new GroupStore($this->app);
+        $settings = $handle->panel->moduleSettings['sockit.groups'] ?? [];
+        $limit = $settings['max_title_length'] ?? 512;
+        if (! is_int($limit) || ($this->group->name !== null && mb_strlen($this->group->name) > $limit)
+            || ($this->group->visibility === GroupVisibility::Secret && ($settings['allow_secret_groups'] ?? true) !== true)) {
+            throw new GroupException(ProblemCode::PayloadInvalid);
+        }
         $resource = $snapshot->resource ?? new ResourceRef($handle->surface->panel, ResourceKind::Group, Ids::uuid7());
         $revision = $snapshot->revision?->next() ?? new Revision(1);
         $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));

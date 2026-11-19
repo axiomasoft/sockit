@@ -15,8 +15,10 @@ use SocKit\Audience\AudienceEvaluator;
 use SocKit\Audience\AudienceGate;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Errors\SockitProblemDefinitions;
+use SocKit\Internal\Console\DiagnoseCommand;
 use SocKit\Internal\Console\DoctorCommand;
 use SocKit\Internal\Console\MakePanelCommand;
+use SocKit\Internal\Console\OutboxRunCommand;
 use SocKit\Internal\Console\PanelMigrationsCommand;
 use SocKit\Internal\Console\RelayCommand;
 use SocKit\Internal\ResolverRegistrar;
@@ -68,7 +70,7 @@ class SocKitServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([DoctorCommand::class, MakePanelCommand::class, PanelMigrationsCommand::class, RelayCommand::class]);
+            $this->commands([DiagnoseCommand::class, OutboxRunCommand::class, DoctorCommand::class, MakePanelCommand::class, PanelMigrationsCommand::class, RelayCommand::class]);
             $this->publishes(paths: [__DIR__.'/../config/sockit.php' => config_path('sockit.php')], groups: 'sockit-config');
         }
     }

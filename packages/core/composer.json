@@ -50,6 +50,9 @@
                         "sockit-config"
                     ],
                     "commands": [
+                        "sockit:diagnose",
+                        "sockit:outbox:run",
+                        "sockit:panel:migrations",
                         "sockit:doctor",
                         "sockit:make-panel",
                         "sockit:relay"

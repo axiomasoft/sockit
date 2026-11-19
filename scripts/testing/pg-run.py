@@ -28,12 +28,18 @@ try:
         raise RuntimeError('unexpected private PostgreSQL mounts')
     print('private volume=' + mounts[0]['Name'], flush=True)
     port = int(binding[0]['HostPort'])
-    for attempt in range(60):
-        if subprocess.run(['docker', 'exec', container, 'psql', '-U', 'postgres', '-d', owner, '-Atqc', 'SELECT current_database()'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+    deadline = time.monotonic() + 180
+    while time.monotonic() < deadline:
+        # The initdb bootstrap server uses a Unix socket. Wait for the final TCP server.
+        if subprocess.run(['docker', 'exec', container, 'pg_isready', '-h', '127.0.0.1', '-U', 'postgres', '-d', owner],
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
             break
-        time.sleep(.5)
+        state = docker('inspect', '--format', '{{.State.Status}}', container)
+        if state in ('exited', 'dead'):
+            raise RuntimeError('private PostgreSQL container stopped during startup: ' + state)
+        time.sleep(1)
     else:
-        raise RuntimeError('private PostgreSQL did not become ready')
+        raise RuntimeError('private PostgreSQL did not become ready within 180 seconds')
     # Names and marker are generated locally and checked before any SQL mutation.
     if not owner.endswith('_test') or not decoy.endswith('_test') or owner == decoy:
         raise RuntimeError('unsafe database names')

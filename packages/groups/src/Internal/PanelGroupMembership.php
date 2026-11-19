@@ -105,17 +105,17 @@ final readonly class PanelGroupMembership implements ResolvesGroupVerdicts
             $membership->where(array_intersect_key($member, array_flip(['id', 'actor_ref', 'revision', 'state', 'role', 'consent_token', 'consent_generation'])));
             $query->whereExists($membership);
         }
-        $checkpoint = new GroupMembershipCheckpoint($query);
+        $checkpoints = [...$host->read->checkpoints, new GroupMembershipCheckpoint($query), $this->app->make(Operations::class)->readCheckpoint($management, $instance)];
         if ($member === null || $store->text($member, 'state') !== MembershipState::Active->value) {
             return new AudienceVerdict(VerdictDecision::Deny, 'audience.denied.not_in_group', expiresAt: $host->read->expiresAt,
-                checkpoints: [...$host->read->checkpoints, $checkpoint]);
+                checkpoints: $checkpoints);
         }
         if ($store->text($member, 'consent_token') === '') {
             throw new GroupException(ProblemCode::AudienceDenied);
         }
         $readOnly = ! $host->read->canWrite() || ! $host->write->canWrite() || $instance->lifecycle === SurfaceLifecycle::Archived;
         $verdict = new AudienceVerdict(decision: $readOnly ? VerdictDecision::AllowReadOnly : VerdictDecision::Allow,
-            reason: 'audience.allowed.group', expiresAt: $host->read->expiresAt, checkpoints: [...$host->read->checkpoints, $checkpoint]);
+            reason: 'audience.allowed.group', expiresAt: $host->read->expiresAt, checkpoints: $checkpoints);
 
         return new GroupAccess($management, $resource, $row, $member, $host, $instance, $verdict);
     }

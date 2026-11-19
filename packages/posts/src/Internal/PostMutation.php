@@ -46,7 +46,7 @@ final class PostMutation implements OwnerMutation
 
     public function payload(): array
     {
-        return ['selected_audience' => $this->post->audience?->toWire(), 'body' => $this->post->body, 'media' => array_map(fn ($ref): array => $ref->toWire(), $this->post->media),
+        return [...($this->post->format === 'plain' ? [] : ['format' => $this->post->format]), 'selected_audience' => $this->post->audience?->toWire(), 'body' => $this->post->body, 'media' => array_map(fn ($ref): array => $ref->toWire(), $this->post->media),
             'resource' => $this->post->resource?->toWire(), 'publish' => $this->post->publish, 'reason' => $this->post->reason];
     }
 
@@ -104,6 +104,12 @@ final class PostMutation implements OwnerMutation
     {
         $this->requireTransaction($handle);
         $store = new PostStore($this->app);
+        $settings = $handle->panel->moduleSettings['sockit.posts'] ?? [];
+        $limit = $settings['max_body_bytes'] ?? 1048576;
+        $formats = $settings['allowed_formats'] ?? ['plain', 'markdown'];
+        if (! is_int($limit) || strlen($this->post->body) > $limit || ! is_array($formats) || ! in_array($this->post->format, $formats, true)) {
+            throw new PostException(ProblemCode::PayloadInvalid);
+        }
         $state = $this->publication ?? throw new PostException(ProblemCode::PayloadInvalid);
         $audience = $this->audience ?? throw new PostException(ProblemCode::PayloadInvalid);
         $resource = $snapshot->resource ?? new ResourceRef(panel: $handle->surface->panel, kind: ResourceKind::Post, id: Ids::uuid7());
@@ -112,7 +118,7 @@ final class PostMutation implements OwnerMutation
         // Conservative invalidation: every immutable content/safety revision is a privacy fence.
         $privacy = $revision->value;
         $media = json_encode(array_map(fn ($ref): array => $ref->toWire(), $this->post->media), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $values = ['body' => $this->post->body, 'media_refs' => $media, 'audience' => CanonicalJson::encode($audience->toWire()),
+        $values = ['body' => $this->post->body, 'body_format' => $this->post->format, 'media_refs' => $media, 'audience' => CanonicalJson::encode($audience->toWire()),
             'revision' => $revision->value, 'privacy_revision' => $privacy, 'publication_state' => $state->value,
             'safety_generation' => $revision->value, 'published_at' => $this->locked['published_at'] ?? ($state === PublicationState::Published ? $now : null), 'updated_at' => $now];
         if ($snapshot->revision === null) {
@@ -128,7 +134,7 @@ final class PostMutation implements OwnerMutation
         $store->table($handle, 'post_revisions')->insert(['id' => Ids::uuid7(), 'post_id' => $resource->id, 'revision' => $revision->value,
             'actor_ref' => $handle->actor->actor?->toWire(), 'reason' => $this->post->reason, 'action' => $snapshot->resource === null ? 'create' : 'edit',
             'publication_state' => $state->value, 'visibility' => 'visible', 'audience' => $values['audience'], 'privacy_revision' => $privacy,
-            'body' => $this->post->body, 'media_refs' => $media, 'created_at' => $now]);
+            'body' => $this->post->body, 'body_format' => $this->post->format, 'media_refs' => $media, 'created_at' => $now]);
 
         return new MutationEffect(affectedRows: $affected, resource: $resource, newRevision: $revision,
             events: [new MutationEvent(type: $state === PublicationState::Published && ($this->locked['publication_state'] ?? null) === PublicationState::Published->value ? 'posts.edited' : 'posts.'.$state->value, refs: ['post' => $resource])]);

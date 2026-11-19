@@ -13,9 +13,9 @@ use SocKit\Support\Exceptions\InvalidPayloadException;
 final readonly class FeedQuery
 {
     /** @param array<string, string> $filters */
-    public function __construct(public int $limit = 20, public ?string $cursor = null, public array $filters = [])
+    public function __construct(public ?int $limit = null, public ?string $cursor = null, public array $filters = [])
     {
-        if ($limit < 1 || $limit > 100 || array_diff(array_keys($filters), ['author']) !== []) {
+        if (($limit !== null && ($limit < 1 || $limit > 500)) || array_diff(array_keys($filters), ['author']) !== []) {
             throw new InvalidPayloadException('Invalid feed query');
         }
         if (isset($filters['author'])) {

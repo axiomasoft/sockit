@@ -23,6 +23,7 @@ use SocKit\Operations\Operations;
 use SocKit\Support\Data\ResourceRef;
 use SocKit\Support\Data\Revision;
 use SocKit\Support\Enums\ResourceKind;
+use SocKit\Support\Exceptions\InvalidPayloadException;
 use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
 
@@ -91,7 +92,12 @@ final readonly class GroupStore
     public function viewerRole(OperationHandle $handle, ResourceRef $resource): ?MembershipRole
     {
         $actor = $handle->actor->actor;
-        $member = $actor === null ? null : new MembershipStore($this->app)->row($handle, new MemberIdentity($resource->id, $actor));
+        try {
+            $member = $actor === null ? null : new MembershipStore($this->app)->row($handle, new MemberIdentity($resource->id, $actor));
+        } catch (InvalidPayloadException) {
+            // A corrupt membership cannot grant a role or private metadata access.
+            return null;
+        }
 
         return $member !== null && $this->text($member, 'state') === MembershipState::Active->value && $this->text($member, 'consent_token') !== ''
             ? MembershipRole::from($this->text($member, 'role')) : null;

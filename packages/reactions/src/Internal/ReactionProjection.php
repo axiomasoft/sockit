@@ -22,7 +22,9 @@ use SocKit\Operations\OperationHandles;
 use SocKit\Reactions\Data\ReactionQuery;
 use SocKit\Reactions\Data\ReactionSummary;
 use SocKit\Support\Data\ActorRef;
+use SocKit\Support\Data\HostEntityRef;
 use SocKit\Support\Ids;
+use SocKit\Surfaces\Data\Incarnation;
 use SocKit\Surfaces\Data\SurfaceInstance;
 use SocKit\Surfaces\Data\TargetRef;
 use SocKit\Surfaces\Data\TargetResolution;
@@ -110,6 +112,30 @@ final readonly class ReactionProjection
     {
         // Identical shape/code for absent, hidden, denied, unknown and resolver failure.
         return new ReactionSummary(counts: null, ownKinds: null, problem: ProblemCode::ContentHidden);
+    }
+
+    public function rebuildForSurface(OperationHandle $handle): int
+    {
+        $this->app->make(OperationHandles::class)->assertCurrent($handle);
+        $this->kinds($handle);
+        $this->app->make(SurfaceInstances::class)->get($handle);
+        $this->app->make(ActionAuthorizer::class)->decide(new ActionRequest($handle->actor, 'reactions.rebuild', $handle->surface))->requireAllowed();
+        $scope = ['installation' => $handle->actor->installation->id, 'panel' => $handle->surface->panel->value,
+            'surface_kind' => $handle->surface->kind->value, 'host_type' => $handle->surface->host->type, 'host_key' => $handle->surface->host->value,
+            'surface_incarnation' => $handle->surface->incarnation->value];
+        $columns = ['target_type', 'target_key', 'target_incarnation'];
+        $targets = $this->table($handle, 'reactions')->where($scope)->select($columns)
+            ->union($this->table($handle, 'reaction_counts')->where($scope)->select($columns));
+        $count = 0;
+        foreach ($targets->cursor() as $row) {
+            if (! is_string($row->target_type) || ! is_string($row->target_key) || ! is_int($row->target_incarnation)) {
+                throw new ReactionException(ProblemCode::PayloadInvalid);
+            }
+            $this->rebuild($handle, new TargetRef(new HostEntityRef($row->target_type, $row->target_key), new Incarnation($row->target_incarnation)), ReplayMode::ProjectionOnly);
+            $count++;
+        }
+
+        return $count;
     }
 
     public function rebuild(OperationHandle $handle, TargetRef $target, ReplayMode $mode): void

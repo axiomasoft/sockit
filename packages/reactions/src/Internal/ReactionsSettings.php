@@ -10,16 +10,20 @@ final class ReactionsSettings implements ModuleSettingsSchema
 {
     public function defaults(): array
     {
-        return ['kinds' => ['like']];
+        return ['kinds' => ['like'], 'max_per_target' => 100];
     }
 
     public function validate(array $settings): array
     {
         $errors = [];
         foreach (array_keys($settings) as $key) {
-            if ($key !== 'kinds') {
+            if (! in_array($key, ['kinds', 'max_per_target'], true)) {
                 $errors[] = ['key' => $key, 'rule' => 'SETTING_UNKNOWN'];
             }
+        }
+        $limit = $settings['max_per_target'] ?? 100;
+        if (! is_int($limit) || $limit < 1 || $limit > 100) {
+            $errors[] = ['key' => 'max_per_target', 'rule' => 'SETTING_INVALID'];
         }
         $kinds = $settings['kinds'] ?? null;
         if (! is_array($kinds) || ! array_is_list($kinds) || $kinds === [] || count(array_unique($kinds, SORT_REGULAR)) !== count($kinds)

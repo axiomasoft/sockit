@@ -6,6 +6,7 @@ namespace SocKit\Operations;
 
 use Illuminate\Contracts\Foundation\Application;
 use Packman\Attributes\Api;
+use SocKit\Audience\Contracts\ReadCheckpoint;
 use SocKit\Audience\Data\AuthorizationDecision;
 use SocKit\Operations\Contracts\OwnerMutation;
 use SocKit\Operations\Data\CommandEnvelope;
@@ -13,6 +14,8 @@ use SocKit\Operations\Data\OperationHandle;
 use SocKit\Operations\Data\OperationResult;
 use SocKit\Operations\Internal\Envelope\Envelope;
 use SocKit\Operations\Internal\Envelope\SurfaceFence;
+use SocKit\Operations\Internal\Storage\OwnerStorage;
+use SocKit\Operations\Internal\Storage\SurfaceReadCheckpoint;
 use SocKit\Support\Data\CommandKey;
 use SocKit\Support\Data\CommandNamespace;
 use SocKit\Support\Data\PayloadDigest;
@@ -55,6 +58,20 @@ final readonly class Operations
     public function surface(OperationHandle $handle): SurfaceInstance
     {
         return new Envelope($this->app)->surface($handle);
+    }
+
+    /** Capture an owner-local version check for an already admitted surface. Never grants admission. */
+    public function readCheckpoint(OperationHandle $handle, SurfaceInstance $surface): ReadCheckpoint
+    {
+        $owner = $this->app->make(OwnerStorage::class)->forHandle($handle);
+
+        return new SurfaceReadCheckpoint($owner->table('surface_instances')->where([
+            'id' => $surface->id, 'installation' => $handle->actor->installation->id, 'panel' => $handle->surface->panel->value,
+            'kind' => $handle->surface->kind->value, 'host_type' => $handle->surface->host->type, 'host_key' => $handle->surface->host->value,
+            'incarnation' => $handle->surface->incarnation->value, 'lifecycle' => $surface->lifecycle->value,
+            'revision' => $surface->revision->value, 'source_generation' => $surface->sourceGeneration->value,
+            'privacy_generation' => $surface->privacyGeneration->value,
+        ]));
     }
 
     /** Local surface dependency check within an owning envelope; no new authority conferred. */

@@ -18,5 +18,5 @@ final readonly class PostView
     /** @param list<MediaReference> $media */
     public function __construct(public ResourceRef $resource, public Revision $revision, public ActorRef $actor, public string $action,
         public ?string $reason, public string $body, public AudienceSpec $audience, public array $media,
-        public PublicationState $publication, public ?\DateTimeImmutable $publishedAt) {}
+        public PublicationState $publication, public ?\DateTimeImmutable $publishedAt, public string $format = 'plain') {}
 }

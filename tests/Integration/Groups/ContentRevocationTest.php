@@ -65,8 +65,9 @@ it('enforces group audience on installed generated posts and reactions', functio
 });
 
 it('invalidates a composite exclusion after a previously absent member joins', function (): void {
-    $s = new ContentScenario(active: false);
+    $s = new ContentScenario;
     try {
+        expect($s->membership->run($s->group, 'leave')->isSuccess())->toBeTrue();
         $spec = AudienceSpec::exclude(AudienceSpec::platform(), $s->audience());
         $subject = $s->subject(spec: $spec);
         $sample = $s->gate->read($s->handle->actor, $subject);

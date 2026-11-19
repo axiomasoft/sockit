@@ -363,6 +363,26 @@
                     "return": "void",
                     "doc": []
                 },
+                "rebuildForSurface": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [
+                        {
+                            "name": "handle",
+                            "type": "SocKit\\Operations\\Data\\OperationHandle",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": null,
+                            "flags": 0
+                        }
+                    ],
+                    "return": "int",
+                    "doc": []
+                },
                 "remove": {
                     "visibility": "public",
                     "static": false,
@@ -529,6 +549,16 @@
             "uses": [],
             "doc": [],
             "methods": {
+                "boot": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "by_reference": false,
+                    "parameters": [],
+                    "return": "void",
+                    "doc": []
+                },
                 "register": {
                     "visibility": "public",
                     "static": false,

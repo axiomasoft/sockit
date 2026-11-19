@@ -6,13 +6,14 @@ namespace SocKit\Internal\Console;
 
 use Illuminate\Console\Command;
 use SocKit\Operations\Data\OperationHandle;
+use SocKit\Operations\Enums\ReplayMode;
 use SocKit\Operations\OutboxRelay;
 use SocKit\Panels\Data\PanelId;
 use SocKit\Panels\PanelDefinitions;
 
 final class RelayCommand extends Command
 {
-    protected $signature = 'sockit:relay {--panel=} {--once} {--limit=100}';
+    protected $signature = 'sockit:relay {--panel=} {--once} {--limit=100} {--replay-mode=delivery}';
 
     protected $description = 'Run one bounded, host-authorized panel relay pass';
 
@@ -20,7 +21,9 @@ final class RelayCommand extends Command
     {
         $panel = $this->option('panel');
         $limit = $this->option('limit');
-        if (! is_string($panel) || $panel === '' || ! is_string($limit) || ! ctype_digit($limit) || (int) $limit < 1 || (int) $limit > 1000 || ! $this->option('once')) {
+        $requested = $this->option('replay-mode');
+        $mode = is_string($requested) ? ReplayMode::tryFrom($requested === 'normal' ? 'delivery' : $requested) : null;
+        if (! is_string($panel) || $panel === '' || ! is_string($limit) || ! ctype_digit($limit) || (int) $limit < 1 || (int) $limit > 1000 || ! $this->option('once') || $mode === null) {
             $this->error('relay.usage');
 
             return 2;
@@ -51,10 +54,10 @@ final class RelayCommand extends Command
                 if (! $handle instanceof OperationHandle || ! $handle->panel->id->equals($id)) {
                     throw new \RuntimeException('Invalid host relay handle');
                 }
-                if ($remaining === 0) {
+                if ($remaining <= 0) {
                     break;
                 }
-                foreach ($this->laravel->make(OutboxRelay::class)->poll(handle: $handle, limit: $remaining) as $result) {
+                foreach ($this->laravel->make(OutboxRelay::class)->poll(handle: $handle, mode: $mode, limit: $remaining) as $result) {
                     $counts[$result->status]++;
                     $remaining--;
                     $this->line($result->reason);

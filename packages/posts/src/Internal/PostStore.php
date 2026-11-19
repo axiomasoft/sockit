@@ -117,7 +117,7 @@ final readonly class PostStore
             $media[] = new MediaReference($ref['owner'], $ref['id']);
         }
 
-        return new PostCommand(surface: $handle->surface, resource: $resource, body: $this->text($row, 'body'),
+        return new PostCommand(surface: $handle->surface, resource: $resource, body: $this->text($row, 'body'), format: $this->text($row, 'body_format'),
             audience: AudienceSpec::fromWire($this->object($this->text($row, 'audience'))), publish: $publish, media: $media);
     }
 
@@ -222,7 +222,7 @@ final readonly class PostStore
 
         return new PostView(resource: $resource, revision: new Revision($this->integer($row, 'revision')),
             actor: ActorRef::fromWire($this->text($row, $revision === null ? 'author_ref' : 'actor_ref')), action: $revision === null ? 'read' : $this->text($row, 'action'),
-            reason: isset($row['reason']) ? $this->text($row, 'reason') : null, body: $this->text($row, 'body'), audience: AudienceSpec::fromWire($this->object($this->text($row, 'audience'))),
+            reason: isset($row['reason']) ? $this->text($row, 'reason') : null, body: $this->text($row, 'body'), format: $this->text($row, 'body_format'), audience: AudienceSpec::fromWire($this->object($this->text($row, 'audience'))),
             media: $refs, publication: PublicationState::from($this->text($row, 'publication_state')), publishedAt: is_string($published) ? new \DateTimeImmutable($published, new \DateTimeZone('UTC')) : null);
     }
 

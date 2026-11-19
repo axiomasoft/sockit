@@ -74,8 +74,9 @@ it('requires explicit provider offering and canonical module IDs and rejects dis
 it('has no settings that could replace per-group policy or host consent and rejects global and panel overrides', function (): void {
     $app = Selection::app(enabled: ['sockit.groups'], selected: ['sockit.groups']);
     $app->boot();
-    expect($app->make(Modules::class)->settings()['sockit.groups'])->toBe([])
-        ->and($app->make(PanelDefinitions::class)->get(new PanelId('host.social'))->moduleSettings['sockit.groups'])->toBe([]);
+    $expected = ['max_title_length' => 512, 'allow_secret_groups' => true];
+    expect($app->make(Modules::class)->settings()['sockit.groups'])->toEqual($expected)
+        ->and($app->make(PanelDefinitions::class)->get(new PanelId('host.social'))->moduleSettings['sockit.groups'])->toEqual($expected);
     foreach ([['join_policy' => 'auto'], ['consent' => true], ['unknown' => true]] as $settings) {
         expect(fn () => Selection::app(enabled: ['sockit.groups'], extra: ['sockit' => ['modules' => ['settings' => ['sockit.groups' => $settings]]]])->boot())->toThrow(InvalidModuleException::class);
         expect(fn () => Selection::app(enabled: ['sockit.groups'], selected: ['sockit.groups'], extra: ['social_fixture' => ['settings' => ['sockit.groups' => $settings]]])->boot())->toThrow(InvalidPanelException::class);

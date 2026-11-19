@@ -5,11 +5,14 @@ declare(strict_types=1);
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\DatabaseManager;
 use Packman\Config\Contracts\SettingsLookup;
+use Packman\Doctor\Data\DoctorContext;
+use Packman\Doctor\Laravel\DoctorChecks;
 use Packman\Errors\Contracts\ProblemRegistry;
 use Packman\PackmanServiceProvider;
 use Packman\Plugins\Laravel\PluginsServiceProvider;
 use SocKit\Actors\ActorContexts;
 use SocKit\Configuration\SocKitConfig;
+use SocKit\Diagnostics\SockitDoctorCheck;
 use SocKit\Errors\Enums\ProblemCode;
 use SocKit\Modules\Modules;
 use SocKit\Operations\Internal\Storage\OwnerStorage;
@@ -64,4 +67,17 @@ it('offers Packman plugin modules to the SocKit compiler', function (): void {
     $app->boot();
 
     expect($app->make(Modules::class)->settings()['demo.module'])->toBe(['limit' => 10]);
+});
+
+it('contributes the SocKit read-only check to Packman doctor', function (): void {
+    $checks = app()->tagged(DoctorChecks::TAG);
+    foreach ($checks as $check) {
+        if ($check instanceof SockitDoctorCheck) {
+            expect($check->key())->toBe('sockit.runtime.configuration')
+                ->and($check->run(new DoctorContext)[0]->code)->toBe('sockit.panels.empty');
+
+            return;
+        }
+    }
+    throw new RuntimeException('SocKit doctor check missing');
 });

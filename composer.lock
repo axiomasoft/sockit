@@ -149,7 +149,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/core",
-                "reference": "0be6d80ef0f62c7f635b58e5d1ef5d8ac7c9c062"
+                "reference": "28cc3afac19a5f1185dbdc50299adef5bdaca325"
             },
             "require": {
                 "axiomasoft/packman": "^0.1",
@@ -219,6 +219,7 @@
                         "Actors",
                         "Audience",
                         "Configuration",
+                        "Diagnostics",
                         "Errors",
                         "Internal",
                         "Modules",

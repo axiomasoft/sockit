@@ -62,8 +62,8 @@ it('normalizes reaction kinds through defaults global settings and panel setting
         'social_fixture' => ['settings' => ['sockit.reactions' => ['kinds' => ['thanks']]]],
     ]);
     $app->boot();
-    expect($app->make(Modules::class)->settings()['sockit.reactions'])->toBe(['kinds' => ['like', 'thanks']])
-        ->and($app->make(PanelDefinitions::class)->get(new PanelId('host.social'))->moduleSettings['sockit.reactions'])->toBe(['kinds' => ['thanks']]);
+    expect($app->make(Modules::class)->settings()['sockit.reactions'])->toBe(['kinds' => ['like', 'thanks'], 'max_per_target' => 100])
+        ->and($app->make(PanelDefinitions::class)->get(new PanelId('host.social'))->moduleSettings['sockit.reactions'])->toBe(['kinds' => ['thanks'], 'max_per_target' => 100]);
     foreach ([['kinds' => []], ['kinds' => ['like', 'like']], ['kinds' => ['bad.kind']], ['kinds' => [1]], ['unknown' => true]] as $settings) {
         expect(fn () => Selection::app(enabled: ['sockit.reactions'], extra: ['sockit' => ['modules' => ['settings' => ['sockit.reactions' => $settings]]]])->boot())->toThrow(InvalidModuleException::class);
     }

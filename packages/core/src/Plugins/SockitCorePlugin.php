@@ -14,6 +14,7 @@ use Packman\Plugins\Enums\Contributions\SlotKind;
 use Packman\Plugins\Laravel\PluginRegistrar;
 use SocKit\Configuration\SocKitConfig;
 use SocKit\Configuration\SockitConfigSection;
+use SocKit\Diagnostics\SockitDoctorCheck;
 use SocKit\Errors\SockitProblemDefinitions;
 use SocKit\Modules\Contracts\Module;
 
@@ -56,7 +57,7 @@ final class SockitCorePlugin implements ExtensionPlugin, WithConfiguration, With
 
     public function healthChecks(): array
     {
-        return [];
+        return [SockitDoctorCheck::class];
     }
 
     public function problemProviders(): array

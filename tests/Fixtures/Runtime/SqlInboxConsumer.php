@@ -27,14 +27,18 @@ final class SqlInboxConsumer implements OutboxConsumer
 
     public int $deliveries = 0;
 
+    private bool $closed = false;
+
     public function __construct(private readonly Connection $owner, private \PDO $consumer, private readonly string $id = 'acme.inbox') {}
 
     public function close(): void
     {
-        if (isset($this->consumer)) {
-            PgTarget::release($this->consumer);
-            unset($this->consumer);
+        if ($this->closed) {
+            return;
         }
+        $this->closed = true;
+        PgTarget::release($this->consumer);
+        unset($this->consumer);
     }
 
     public function backendPid(): int

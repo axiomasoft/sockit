@@ -27,6 +27,8 @@ final class RuntimeDatabase
     /** @var list<array{connection: string|null, sql: string}> */
     public array $queries = [];
 
+    private bool $closed = false;
+
     public function __construct(Application $app)
     {
         $target = PgTarget::fromEnvironment();
@@ -88,6 +90,10 @@ final class RuntimeDatabase
 
     public function close(): void
     {
+        if ($this->closed) {
+            return;
+        }
+        $this->closed = true;
         $manager = $this->capsule->getDatabaseManager();
         foreach (['owner_a', 'owner_b', 'decoy'] as $name) {
             $connection = $manager->connection($name);
@@ -98,12 +104,8 @@ final class RuntimeDatabase
             }
             $manager->disconnect($name);
         }
-        if (isset($this->owner)) {
-            PgTarget::release($this->owner);
-        }
-        if (isset($this->decoy)) {
-            PgTarget::release($this->decoy);
-        }
+        PgTarget::release($this->owner);
+        PgTarget::release($this->decoy);
         unset($this->owner, $this->decoy);
     }
 

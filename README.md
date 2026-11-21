@@ -1,33 +1,75 @@
 # SocKit
 
-SocKit is an embeddable social engine for Laravel. The project is pre-1.0; its public API is not yet released.
+SocKit is an embeddable social engine for Laravel. The source repository is public. The license is proprietary: no license to use, modify, or distribute is granted yet. The project is pre-1.0, and its public API is not released.
+
+## Requirements
+
+- PHP 8.4
+- Laravel 13 (`illuminate/*` ^13.0)
+- PostgreSQL 16 for mutations, relay, and generated migrations
+- [`axiomasoft/packman`](https://github.com/axiomasoft/packman) 0.1.2 and `axiomasoft/packman-plugins` 0.1.2
+
+SQLite is enough for panel-bound Eloquent models and the architecture suite. Social writes, receipts, and the outbox require PostgreSQL.
 
 ## Packages
 
-Install axiomasoft/sockit for the Laravel kernel. The optional axiomasoft/sockit-groups, axiomasoft/sockit-posts and axiomasoft/sockit-reactions packages each provide a Laravel service provider. Register the providers you want to offer through Packman. Select each module in the application configuration and its panels. Use axiomasoft/sockit-testkit as a development dependency for Testbench and conformance tests.
+| Package | Role |
+|---|---|
+| `axiomasoft/sockit` | Laravel kernel: panels, surfaces, audience, operations, schema generation |
+| `axiomasoft/sockit-groups` | Groups and membership |
+| `axiomasoft/sockit-posts` | Posts and feed |
+| `axiomasoft/sockit-reactions` | Reactions and count rebuilds |
+| `axiomasoft/sockit-testkit` | Development dependency for Testbench and conformance tests |
+
+Install the kernel and register only the module providers you offer through Packman. Enable each module in configuration and select it on the panels that use it. The packages are not on Packagist yet. This repository is the public source, and the root project installs them through a path repository.
+
+```sh
+php artisan vendor:publish --tag=sockit-config
+```
+
+The host supplies actor, installation, surface, and target adapters. A command payload does not choose the author. Generated models are persistence rows. Authorization stays in the audience gate and operation envelope, not in Eloquent mass assignment.
+
+## Commands
+
+`php artisan sockit:diagnose --json` reports every registered panel. Add `--probe-storage` to check live schema and runtime readiness. `sockit:doctor --panel=<id>` is the panel-specific live check.
+
+The host supplies trusted maintenance handles through `sockit.relay.handles`.
+
+- `sockit:outbox:run --panel=<id> --replay-mode=projection_only` replays projections. Omitting `--panel` visits each registered panel.
+- `sockit:relay --panel=<id> --once` runs one delivery pass.
+- `sockit:reactions:rebuild` rebuilds counts for selected reaction panels. `--target=type:key --incarnation=1` restricts the target. An expired target admission is refused and does not rewrite counts.
+
+## Documentation
+
+- [Documentation index](docs/README.md)
+- [Social modules](docs/guide/social.md)
+- [Panel install, upgrade, and recovery](docs/guides/panel-install-upgrade.md)
+- [Requirement traceability](docs/architecture/traceability.md)
+
+P1 is contracts, fixtures, and architecture checks. P2 is the isolated PostgreSQL runtime. P3 is generated schema. P4 is reactions, posts, and groups. Host qualification, external adapters, and release erasure remain open. See the traceability matrix for what a test actually proves.
 
 ## Development
 
-Run composer test for the architecture, unit, testkit and SQLite Eloquent checks. Run composer test:pg for the Laravel consumer and transactional PostgreSQL suites in disposable containers. Use composer gate to check each package’s public contracts and ownership.
+Clone this repository and place Packman 0.1.2 beside it so `../packman/packages/*` resolves:
 
-## Статус и что дальше
+```sh
+git clone --branch v0.1.2 --depth 1 https://github.com/axiomasoft/packman.git ../packman
+composer install
+composer test
+composer gate
+composer docs
+```
 
-For a configuration report across all registered panels run `php artisan sockit:diagnose --json`. Add `--probe-storage` to check live schema and runtime readiness. `sockit:doctor --panel=<id>` remains the panel-specific live check.
+`composer test` runs the architecture, unit, testkit, and SQLite model checks. `composer test:pg` runs the Laravel consumer and transactional PostgreSQL suites in a disposable container started by `scripts/testing/pg-run.py`. Docker must be able to pull `postgres:16-alpine`.
 
-The host supplies trusted maintenance handles through `sockit.relay.handles`. `sockit:outbox:run --panel=<id> --replay-mode=projection_only` replays projections. Omitting the panel visits each registered panel. `sockit:relay --panel=<id> --once` runs a delivery pass. `sockit:reactions:rebuild` visits selected reaction panels, enumerates stored targets and rebuilds counts through the guarded domain operation. Use `--target=type:key --incarnation=1` to restrict the target.
+```sh
+composer lint
+composer analyse
+composer refactor:check
+```
 
-P1 defines the core contracts, panel and surface configuration, fixtures, architecture boundaries and checks. These are contract-level evidence, not end-to-end or production readiness. The P2 core runtime has an isolated PostgreSQL and standalone Laravel consumer fixture; P3 generated schema infrastructure is exercised by an isolated consumer; P4 supplies reactions and posts/feed with isolated consumer evidence; host qualification follows in P6; Forum and Chatom integrations are conditional. See the [traceability matrix](docs/architecture/traceability.md) for requirements, evidence and pending work.
+Continuous integration is GitHub Actions on PHP 8.4. It checks out Packman `v0.1.2`, then runs lint, PHPStan, the SQLite suite, both PostgreSQL suites, the Packman gate, the documentation check, and Rector. Dependency updates are reviewed by maintainers. This repository does not use Dependabot.
 
+## Security
 
-## Standalone consumer fixture
-
-`tests/Fixtures/Consumer` installs the package copy into its own Laravel 13 vendor. The
-consumer declares panel and surface providers, host actor and policy adapters, an owner
-mutation and an SQL inbox. Run its PostgreSQL acceptance with
-`python3 scripts/testing/pg-run.py composer test -- tests/Feature/Consumer/StandaloneRuntimeTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky`.
-The runner creates an isolated disposable PostgreSQL target. The fixture exercises public
-runtime APIs; it is not a production schema generator or a reactions/posts implementation.
-
-[Panel install, upgrade and recovery runbook](docs/guides/panel-install-upgrade.md) documents the verified fixture workflow and its limits.
-
-[Social modules and host recipe](docs/guide/social.md) describes the actual P4 APIs and their limits.
+Report vulnerabilities through GitHub private vulnerability reporting on [axiomasoft/sockit](https://github.com/axiomasoft/sockit). Do not open a public issue. Details are in [SECURITY.md](SECURITY.md).

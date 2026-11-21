@@ -95,8 +95,9 @@ final class MigrationPlanner
         // Manifest last: the history never claims a migration/model before its exclusive install.
         $sources[$migration] = $source;
         $sources[$manifest] = SchemaValues::json($record)."\n";
+        $listings = [];
         foreach (array_keys($sources) as $path) {
-            GenerationPaths::check(root: $root, relative: $path);
+            GenerationPaths::check(root: $root, relative: $path, listings: $listings);
         }
 
         return new GenerationPlan(root: $root, sources: $sources, manifest: ['status' => 'planned', 'panel' => $schema->panel, 'files' => array_keys($sources),
@@ -111,12 +112,12 @@ final class MigrationPlanner
     private function models(string $root, PanelSchema $schema): array
     {
         $mapping = GenerationPaths::mapping($root);
-        $sources = $classes = $changes = [];
+        $sources = $classes = $changes = $listings = [];
         $rendered = new ModelEmitter()->render($schema);
         foreach ($schema->storage->models as $entity => $class) {
             $path = str_starts_with($class, $mapping['namespace']) ? $mapping['directory'].'/'.str_replace('\\', '/', substr($class, strlen($mapping['namespace']))).'.php' : null;
             if ($path !== null) {
-                GenerationPaths::check(root: $root, relative: dirname($path), vacant: false);
+                GenerationPaths::check(root: $root, relative: dirname($path), vacant: false, listings: $listings);
                 GenerationFailure::require(valid: ! is_link($root.'/'.$path), rule: 'GENERATION_PATH_SYMLINK');
             }
             // Existing custom files are consumer-owned, including ones not yet autoloaded.
@@ -129,7 +130,7 @@ final class MigrationPlanner
                 continue;
             }
             GenerationFailure::require(valid: $path !== null, rule: 'MIGRATION_MODEL_MAPPING_MISSING');
-            GenerationPaths::check(root: $root, relative: $path);
+            GenerationPaths::check(root: $root, relative: $path, listings: $listings);
             $sources[$path] = $rendered[$class];
             $classes[] = $class;
         }

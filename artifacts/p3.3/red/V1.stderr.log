@@ -1,3 +1,0 @@
-> pest '--configuration' 'phpunit.pg.xml' 'tests/Integration/Schema/KernelSchemaTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
-PG identity database=sockit_p2_7dae3d3cd1e17fd3_test server_version_num=160014 marker=sockit-p21-7dae3d3cd1e17fd3 backend_pid=103
-Script pest handling the test event returned with error code 1

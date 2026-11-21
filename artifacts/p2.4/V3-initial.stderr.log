@@ -1,2 +1,0 @@
-> pest 'tests/Unit/Contracts' 'tests/Arch' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
-Script pest handling the test event returned with error code 1

@@ -1,8 +1,0 @@
-V1: native evidence schema, exit and stdout/stderr/log digests OK
-V2: native evidence schema, exit and stdout/stderr/log digests OK
-V90: native evidence schema, exit and stdout/stderr/log digests OK
-V91: native evidence schema, exit and stdout/stderr/log digests OK
-V92: native evidence schema, exit and stdout/stderr/log digests OK
-588 source paths match tested candidate
-416 outside file digests unchanged
-scoped dry-run paths verified

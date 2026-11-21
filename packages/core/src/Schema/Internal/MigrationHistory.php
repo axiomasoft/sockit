@@ -23,6 +23,8 @@ final class MigrationHistory
         $chain = [];
         $parent = null;
         $names = [];
+        $marker = substr(hash('sha256', $panel), 0, 16);
+        $migrationsChecked = false;
         foreach ($entries as $i => $entry) {
             GenerationFailure::require(valid: $entry === sprintf('%06d.json', $i + 1), rule: 'MIGRATION_HISTORY_GAP_OR_BRANCH');
             $path = $directory.'/'.$entry;
@@ -33,9 +35,12 @@ final class MigrationHistory
             GenerationFailure::require(valid: $digest === hash('sha256', SchemaValues::json($record)) && ($record['parent'] ?? null) === $parent && ($record['sequence'] ?? null) === $i + 1
                 && ($record['panel'] ?? null) === $panel && ($record['format_version'] ?? null) === 1, rule: 'MIGRATION_HISTORY_TAMPERED');
             $name = SchemaValues::text($record['migration'] ?? null);
-            GenerationFailure::require(valid: preg_match('/^[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{6}_[0-9]{6}_sockit_'.substr(hash('sha256', $panel), 0, 16).'$/D', $name) === 1
+            GenerationFailure::require(valid: preg_match('/^[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{6}_[0-9]{6}_sockit_'.$marker.'$/D', $name) === 1
                 && ($names === [] || $name > $names[array_key_last($names)]), rule: 'MIGRATION_HISTORY_NAME_INVALID');
-            GenerationPaths::check(root: $root, relative: 'database/migrations', vacant: false);
+            if (! $migrationsChecked) {
+                GenerationPaths::check(root: $root, relative: 'database/migrations', vacant: false);
+                $migrationsChecked = true;
+            }
             $file = $root.'/database/migrations/'.$name.'.php';
             GenerationFailure::require(valid: ! is_link($file) && is_file($file) && hash_file('sha256', $file) === ($record['migration_sha256'] ?? null), rule: 'MIGRATION_FILE_TAMPERED');
             $snapshot = self::snapshot((string) file_get_contents($file));
@@ -54,7 +59,7 @@ final class MigrationHistory
             $chain[] = [...$record, 'digest' => $digest];
             $names[] = $name;
         }
-        $files = glob($root.'/database/migrations/*_sockit_'.substr(hash('sha256', $panel), 0, 16).'.php') ?: [];
+        $files = glob($root.'/database/migrations/*_sockit_'.$marker.'.php') ?: [];
         $actual = array_map(fn (string $path): string => basename($path, '.php'), $files);
         sort($actual);
         GenerationFailure::require(valid: $actual === $names, rule: 'MIGRATION_ORPHAN_FILE');

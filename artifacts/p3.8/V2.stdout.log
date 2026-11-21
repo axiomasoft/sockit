@@ -1,9 +1,0 @@
-private volume=42b8e208a34df0c37f3545245bfc67bfb19a0a0210d474255026da6681bee36c
-private container=fdbeac26e17a15c0d81f1d8a396db1c843e6a905c46937e3e787eb2175db5607 owner=sockit_p2_d6ae949448fd0594_test decoy=sockit_p2_decoy_d6ae949448fd0594_test port=33093
-
-  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Consumer\StandaloneRuntimeTest[39m
-  [32;1m✓[39;22m[90m [39m[90mit installs and boots the standalone consumer with an owned Postgre[39m[90m…[39m [90m3.29s[39m  
-
-  [90mTests:[39m    [32;1m1 passed[39;22m[90m (720 assertions)[39m
-  [90mDuration:[39m [39m3.37s[39m
-

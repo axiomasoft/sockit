@@ -1,8 +1,0 @@
-{
-  "native_receipt": ".swissknifeman/state/p2.7-receipt.json",
-  "native_V99_evidence": ".swissknifeman/state/p2.7-finalization/V99.json",
-  "native_V99_log": ".swissknifeman/state/p2.7-finalization/V99.log",
-  "archived_V99_evidence": "artifacts/p2.7/finalization/V99.json",
-  "archived_V99_log": "artifacts/p2.7/finalization/V99.log",
-  "note": "Archive copies preserve exact native accepted bytes; log SHA-256 verifies the archived sibling regardless of its original state path."
-}

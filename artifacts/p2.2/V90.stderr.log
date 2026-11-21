@@ -1,2 +1,0 @@
-> phpstan analyse --no-progress '--memory-limit=512M'
-Note: Using configuration file /home/vostrikov/projects/packages/sockit/phpstan.neon.

@@ -11,18 +11,29 @@ use PhpToken;
 #[Internal]
 final class GenerationPaths
 {
-    /** Reject symlinks (including dangling ones), aliases on case-insensitive hosts, and escapes.
-     * @return string Absolute path */
-    public static function check(string $root, string $relative, bool $vacant = true): string
+    /**
+     * Reject symlinks (including dangling ones), aliases on case-insensitive hosts, and escapes.
+     *
+     * @param  array<string, list<string>>|null  $listings  Reused directory listings for one plan. Do not keep them across writes.
+     * @return string Absolute path
+     */
+    public static function check(string $root, string $relative, bool $vacant = true, ?array &$listings = null): string
     {
-        GenerationFailure::require(valid: preg_match('~^[A-Za-z0-9_./-]+$~D', $relative) === 1 && ! str_starts_with($relative, '/') && ! in_array('..', explode('/', $relative), true) && ! in_array('.', explode('/', $relative), true), rule: 'GENERATION_PATH_INVALID');
-        $path = $root;
         $parts = explode('/', $relative);
+        GenerationFailure::require(valid: preg_match('~^[A-Za-z0-9_./-]+$~D', $relative) === 1 && ! str_starts_with($relative, '/') && ! in_array('..', $parts, true) && ! in_array('.', $parts, true), rule: 'GENERATION_PATH_INVALID');
+        $path = $root;
         foreach ($parts as $index => $part) {
             GenerationFailure::require(valid: $part !== '', rule: 'GENERATION_PATH_INVALID');
             if (is_dir($path)) {
-                $entries = scandir($path);
-                GenerationFailure::require(valid: $entries !== false, rule: 'GENERATION_PATH_UNREADABLE');
+                if ($listings !== null && isset($listings[$path])) {
+                    $entries = $listings[$path];
+                } else {
+                    $entries = scandir($path);
+                    GenerationFailure::require(valid: $entries !== false, rule: 'GENERATION_PATH_UNREADABLE');
+                    if ($listings !== null) {
+                        $listings[$path] = $entries;
+                    }
+                }
                 foreach ($entries as $entry) {
                     GenerationFailure::require(valid: strtolower($entry) !== strtolower($part) || $entry === $part, rule: 'GENERATION_PATH_CASE_COLLISION');
                 }
@@ -60,15 +71,20 @@ final class GenerationPaths
     public static function classes(string $root, string $directory, array $classes): void
     {
         $claimed = [];
+        $classMap = [];
+        foreach (ClassLoader::getRegisteredLoaders() as $loader) {
+            foreach (array_keys($loader->getClassMap()) as $existing) {
+                $classMap[strtolower($existing)] = true;
+            }
+        }
         foreach ($classes as $class) {
-            GenerationFailure::require(valid: ! isset($claimed[strtolower($class)]), rule: 'GENERATION_FQCN_COLLISION');
-            $claimed[strtolower($class)] = true;
+            $lower = strtolower($class);
+            GenerationFailure::require(valid: ! isset($claimed[$lower]), rule: 'GENERATION_FQCN_COLLISION');
+            $claimed[$lower] = true;
             foreach (ClassLoader::getRegisteredLoaders() as $loader) {
                 GenerationFailure::require(valid: $loader->findFile($class) === false, rule: 'GENERATION_FQCN_EXISTS');
-                foreach (array_keys($loader->getClassMap()) as $existing) {
-                    GenerationFailure::require(valid: strtolower($existing) !== strtolower($class), rule: 'GENERATION_FQCN_EXISTS');
-                }
             }
+            GenerationFailure::require(valid: ! isset($classMap[$lower]), rule: 'GENERATION_FQCN_EXISTS');
         }
         foreach ([...get_declared_classes(), ...get_declared_interfaces(), ...get_declared_traits()] as $class) {
             GenerationFailure::require(valid: ! isset($claimed[strtolower($class)]), rule: 'GENERATION_FQCN_EXISTS');

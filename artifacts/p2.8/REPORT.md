@@ -1,7 +1,0 @@
-# P2.8 — panel-scoped runtime commands
-
-`sockit:doctor` и `sockit:relay` зарегистрированы в provider и ownership manifest. Обе команды требуют `--panel`; relay требует `--once`, ограничивает проход и получает явные доверенные handles от host binding `sockit.relay.handles`. Relay использует P2.7 `OutboxRelay::poll`, сообщает результаты и возвращает ненулевой код для retry, unknown и quarantine. Ошибки конфигурации, контекста и хранилища не считаются успехом.
-
-Doctor выполняет read-only проверки resolver, карты таблиц, PostgreSQL connection и deployment identity, наличия таблиц и состояний outbox. Вывод содержит коды и счётчики без credentials или содержимого событий. Проверки installation/schema compiler относятся к P3 и обозначены как `not_checked_p3`; DDL или repair отсутствуют.
-
-V1 проверяет зарегистрированные команды, usage и отсутствие SQL и подключений при list/help. V2 использует отдельный PostgreSQL 16 с проверенными marker, database и backend PID; свежие процессы Artisan обрабатывают настоящие события: A с limit 1, B остаётся pending, retry сохраняет event ID и digest, затем доставляется; отсутствие identity, handles или таблицы даёт ошибку. V3 проверяет архитектурные границы. V90 и V91 проверяют PHPStan и Pint. Все пять завершились с exit 0; команды, окружение, время, хеши и полный вывод находятся в V*.json и V*.log. PHPStan выводит предупреждение загрузки необязательного turbo extension, но анализ выполнен и ошибок не обнаружил.

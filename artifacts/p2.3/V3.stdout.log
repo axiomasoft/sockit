@@ -1,8 +1,0 @@
-private container=1d48821531282b772a562e1c68493caab378b3bd974fac3a14fedeb74801c2a5 owner=sockit_p2_add4b04c6bc41b0c_test decoy=sockit_p2_decoy_add4b04c6bc41b0c_test port=32798
-
-  [30;42;1m PASS [39;49;22m[39m Tests\Fixtures\Runtime\TargetFencePgTest[39m
-  [32;1m✓[39;22m[90m [39m[90mit fences local host generation on the owner connection and never r[39m[90m…[39m [90m0.18s[39m  
-
-  [90mTests:[39m    [32;1m1 passed[39;22m[90m (28 assertions)[39m
-  [90mDuration:[39m [39m0.23s[39m
-

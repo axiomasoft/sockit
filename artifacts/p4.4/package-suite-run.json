@@ -1,9 +1,0 @@
-{
-  "cmd": "python3 scripts/testing/pg-run.py composer test -- --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky",
-  "cwd": ".",
-  "exit": 0,
-  "started_at": "2026-10-29T05:43:36Z",
-  "finished_at": "2026-10-29T05:44:04Z",
-  "source": "sha256:c5a70366efe7314e2f4c47badcd89a91555a9a4abcbd6e4c416c42d70a6d8be2",
-  "log_sha256": "99145256ae0215b1bdc1037363bf916f72b0692d446f87b4f3718ec27a7aebba"
-}

@@ -45,14 +45,15 @@ final readonly class OutboxStore
         }
         $query = $this->owner->table('outbox');
         $grammar = $query->getGrammar();
+        $envelope = CanonicalJson::encode($event->toWire());
         $columns = [...$this->identity(), 'id' => Ids::uuid7(), 'source_generation' => $event->sourceGeneration, 'event_id' => $event->eventId,
-            'digest' => $event->digest->value, 'envelope' => CanonicalJson::encode($event->toWire()), 'deliveries' => json_encode($delivery, JSON_THROW_ON_ERROR)];
+            'digest' => $event->digest->value, 'envelope' => $envelope, 'deliveries' => json_encode($delivery, JSON_THROW_ON_ERROR)];
         $names = implode(', ', array_map($grammar->wrap(...), array_keys($columns)));
         $sql = 'INSERT INTO '.$grammar->wrapTable($query->from).' ('.$names.') VALUES ('.implode(', ', array_fill(0, count($columns), '?')).') ON CONFLICT (installation,panel,source_generation,event_id) DO NOTHING RETURNING id';
         $inserted = $query->getConnection()->select(query: $sql, bindings: array_values($columns));
         if ($inserted === []) {
             $existing = $this->query()->where(column: 'source_generation', operator: '=', value: $event->sourceGeneration)->where(column: 'event_id', operator: '=', value: $event->eventId)->first();
-            if ($existing === null || $existing->digest !== $event->digest->value || $existing->envelope !== CanonicalJson::encode($event->toWire())) {
+            if ($existing === null || $existing->digest !== $event->digest->value || $existing->envelope !== $envelope) {
                 throw new OutboxException(ProblemCode::EventIdentityConflict);
             }
         }

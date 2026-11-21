@@ -1,1 +1,0 @@
-> pest 'tests/Unit/Operations/OperationHandleTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'

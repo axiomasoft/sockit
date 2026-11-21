@@ -14,7 +14,7 @@ php artisan sockit:make-panel Article --id=acme.article --host=article --modules
 php artisan sockit:panel:migrations acme.article
 ```
 
-Зарегистрируйте выданный panel provider в конфигурации и примените конкретный migration path из manifest на проверенной owner connection. Для additive posts enable выберите `sockit.posts` и используйте `sockit:panel:migrations acme.article --upgrade`; проверьте manifest и примените выданный path. Не перезаписывайте consumer files или старые миграции. Подробности recovery и rollback: [runbook](../guides/panel-install-upgrade.md). Production reactions consumer и две схемы изоляции проверены в [P4.8](../../artifacts/p4.8/REPORT.md).
+Зарегистрируйте выданный panel provider в конфигурации и примените конкретный migration path из manifest на проверенной owner connection. Для additive posts enable выберите `sockit.posts` и используйте `sockit:panel:migrations acme.article --upgrade`; проверьте manifest и примените выданный path. Не перезаписывайте consumer files или старые миграции. Подробности recovery и rollback: [runbook](../guides/panel-install-upgrade.md). Production reactions consumer и изоляция схем проверяются `tests/Integration/Social` и `tests/Feature/Consumer`.
 
 ## Команды и чтение
 

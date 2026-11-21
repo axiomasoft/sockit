@@ -1,6 +1,0 @@
-command=composer lint
-cwd=/home/vostrikov/projects/packages/sockit
-stdout:
-{"tool":"pint","result":"passed"}
-stderr:
-> pint --test

@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: PHP 8.4
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout SocKit
+        uses: actions/checkout@v4
+
+      - name: Checkout Packman v0.1.2
+        run: git clone --depth 1 --branch v0.1.2 https://github.com/axiomasoft/packman.git "${GITHUB_WORKSPACE}/../packman"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pcntl, tokenizer, xml, zip, intl, bcmath, pdo_sqlite, sqlite3, pdo_pgsql
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Cache PHPStan
+        uses: actions/cache@v4
+        with:
+          path: .phpstan.cache
+          key: phpstan-${{ runner.os }}-${{ hashFiles('composer.lock', 'phpstan.neon') }}
+          restore-keys: phpstan-${{ runner.os }}-
+
+      - name: Lint
+        run: composer lint
+
+      - name: Static analysis
+        run: composer analyse
+
+      - name: Documentation
+        run: composer docs
+
+      - name: Rector
+        run: composer refactor:check
+
+      - name: SQLite and architecture tests
+        run: composer test
+
+      - name: Feature tests on disposable PostgreSQL
+        run: python3 scripts/testing/pg-run.py vendor/bin/pest tests/Feature --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+
+      - name: Integration tests on disposable PostgreSQL
+        run: python3 scripts/testing/pg-run.py vendor/bin/pest -c phpunit.pg.xml tests/Integration --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+
+      - name: Architecture gate
+        run: composer gate

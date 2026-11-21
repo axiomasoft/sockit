@@ -1,6 +1,0 @@
-{
-  "ok": true,
-  "data": {
-    "message": "warning execution_prompt_heavy: phases/P1/P1.9.json: rules, guidance and whole-file reads weigh 161936 bytes (warning threshold 16384); audit whether this item fits one or two executor rounds\nwarning execution_prompt_heavy: phases/P1/P1.10.json: rules, guidance and whole-file reads weigh 95247 bytes (warning threshold 16384); audit whether this item fits one or two executor rounds\nwarning execution_prompt_heavy: phases/P1/P1.12.json: rules, guidance and whole-file reads weigh 75948 bytes (warning threshold 16384); audit whether this item fits one or two executor rounds\nwarning execution_prompt_heavy: phases/P1/P1.13.json: rules, guidance and whole-file reads weigh 78920 bytes (warning threshold 16384); audit whether this item fits one or two executor rounds\n0 error(s), 4 warning(s)"
-  }
-}

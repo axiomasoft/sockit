@@ -1,4 +1,0 @@
-=== stdout ===
-{"tool":"pint","result":"passed"}
-=== stderr ===
-> pint --test

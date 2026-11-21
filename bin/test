@@ -3,5 +3,5 @@ set -eu
 if [ "$#" -gt 0 ]; then
     exec vendor/bin/pest "$@"
 fi
-vendor/bin/pest --testsuite=Arch,Unit,Testkit
-exec vendor/bin/pest tests/Feature/Schema/SqlitePanelModelTest.php
+vendor/bin/pest --testsuite=Arch,Unit,Testkit --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky
+exec vendor/bin/pest tests/Feature/Schema/SqlitePanelModelTest.php --fail-on-skipped --fail-on-incomplete --fail-on-warning --fail-on-risky

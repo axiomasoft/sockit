@@ -1,1 +1,0 @@
-> pest 'tests/Feature/Targets' 'tests/Unit/Contracts' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'

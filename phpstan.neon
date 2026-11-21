@@ -1,6 +1,7 @@
 includes:
     - vendor/larastan/larastan/extension.neon
 parameters:
+    tmpDir: .phpstan.cache
     level: max
     paths:
         - packages/testkit/src

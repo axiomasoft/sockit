@@ -41,6 +41,7 @@ final class PanelSchemaCompiler
         SchemaValues::require(valid: array_diff(array_keys($tables), array_keys($entities)) === [], key: 'tables', rule: 'SCHEMA_ENTITY_UNKNOWN');
         SchemaValues::require(valid: array_diff(array_keys($models), array_keys($entities)) === [], key: 'models', rule: 'SCHEMA_ENTITY_UNKNOWN');
         $history = $specifications = [];
+        $generatedNamespace = $modelNamespace.'SocKit\\Generated\\Panel'.substr(hash('sha256', $panel->id->value), 0, 16).'\\';
         foreach ($ordered as $id => $component) {
             $steps = [];
             foreach ($component->steps as $step) {
@@ -53,7 +54,7 @@ final class PanelSchemaCompiler
             $tables[$entity] = $table;
             $model = $spec['model'];
             // The hash distinguishes panel IDs that would otherwise normalize to the same namespace.
-            $models[$entity] ??= $modelNamespace.'SocKit\\Generated\\Panel'.substr(hash('sha256', $panel->id->value), 0, 16).'\\'.$model->name;
+            $models[$entity] ??= $generatedNamespace.$model->name;
             $indexes = $foreignKeys = $checks = [];
             foreach ($spec['indexes'] as $name => $index) {
                 $indexes[$name] = ['name' => $this->constraint(panel: $panel, entity: $entity, kind: 'idx', key: $name), 'columns' => $index->columns, 'unique' => $index->unique];

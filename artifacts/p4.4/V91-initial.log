@@ -1,5 +1,0 @@
-=== stdout ===
-{"tool":"pint","result":"fail","files":[{"path":"artifacts\/p4.4\/diagnose.php","fixers":["single_space_around_construct","method_argument_space","fully_qualified_strict_types","no_multiple_statements_per_line","space_after_semicolon","braces_position","statement_indentation","cast_spaces","single_line_after_imports","binary_operator_spaces"]}]}
-=== stderr ===
-> pint --test
-Script pint --test handling the lint event returned with error code 1

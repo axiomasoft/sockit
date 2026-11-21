@@ -62,16 +62,19 @@
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true
-        }
+        },
+        "optimize-autoloader": true
     },
     "scripts": {
         "test": "bin/test",
         "analyse": "phpstan analyse --no-progress",
         "lint": "pint --test",
+        "docs": "@php scripts/check-docs.php",
         "refactor:check": "rector process --dry-run",
         "check": [
             "@lint",
             "@analyse",
+            "@docs",
             "@test",
             "@gate"
         ],

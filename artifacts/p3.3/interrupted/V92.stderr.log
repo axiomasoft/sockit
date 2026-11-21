@@ -1,5 +1,0 @@
-> pest 'tests/Unit/Schema' 'tests/Integration/Schema' 'tests/Integration/Runtime' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'
-PG identity database=sockit_p2_ddfa67c568719bdc_test server_version_num=160014 marker=sockit-p21-ddfa67c568719bdc backend_pid=102
-PG identity database=sockit_p2_ddfa67c568719bdc_test server_version_num=160014 marker=sockit-p21-ddfa67c568719bdc backend_pid=103
-PG identity database=sockit_p2_decoy_ddfa67c568719bdc_test server_version_num=160014 marker=sockit-p21-ddfa67c568719bdc backend_pid=104
-PG identity database=sockit_p2_decoy_ddfa67c568719bdc_test server_version_num=160014 marker=sockit-p21-ddfa67c568719bdc backend_pid=105

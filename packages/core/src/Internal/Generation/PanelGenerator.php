@@ -78,10 +78,10 @@ final readonly class PanelGenerator
         $providerSource = strtr($stub, ['{{NAMESPACE}}' => $namespace.'Panels', '{{CLASS}}' => $name.'PanelProvider', '{{ID}}' => var_export($id, true),
             '{{HOST}}' => var_export($host, true), '{{CONNECTION}}' => var_export($connection, true), '{{SCHEMA}}' => var_export($schema, true), '{{PREFIX}}' => var_export($prefix, true),
             '{{MODULES}}' => implode(', ', array_map(fn (string $module): string => var_export($module, true), $modules)), '{{MODELS}}' => $modelMap, '{{MODEL_OWNERS}}' => var_export($owners, true)]);
-        $sources = $classes = [];
+        $sources = $classes = $listings = [];
         foreach ([$provider => $providerSource, ...new ModelEmitter()->render($draft)] as $class => $source) {
             $path = $directory.'/'.str_replace('\\', '/', substr($class, strlen($namespace))).'.php';
-            GenerationPaths::check(root: $root, relative: $path);
+            GenerationPaths::check(root: $root, relative: $path, listings: $listings);
             \PhpToken::tokenize($source, TOKEN_PARSE);
             $sources[$path] = $source;
             $classes[$path] = $class;

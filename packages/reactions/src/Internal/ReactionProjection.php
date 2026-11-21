@@ -85,25 +85,27 @@ final readonly class ReactionProjection
     private function read(OperationHandle $handle, TargetRef $target): array
     {
         [$surface, $resolved] = $this->guard(handle: $handle, target: $target, action: 'reactions.summary');
-        $counts = $own = [];
-        foreach ($this->kinds($handle) as $kind) {
-            $identity = new ReactionIdentity(installation: $handle->actor->installation, surface: $handle->surface, target: $target, kind: $kind);
-            $row = $this->table(handle: $handle, entity: 'reaction_counts')->where('identity_digest', $identity->digest())->first();
+        $kinds = $this->kinds($handle);
+        $counts = [];
+        $countIdentities = $ownIdentities = [];
+        foreach ($kinds as $kind) {
             $counts[$kind] = 0;
-            if ($row !== null) {
-                $identity->verify($this->values($row));
-                if (! is_int($row->count) || $row->count < 0) {
-                    throw new ReactionException(ProblemCode::PayloadInvalid);
-                }
-                $counts[$kind] = $row->count;
+            $countIdentities[$kind] = new ReactionIdentity(installation: $handle->actor->installation, surface: $handle->surface, target: $target, kind: $kind);
+            $ownIdentities[$kind] = new ReactionIdentity(installation: $handle->actor->installation, surface: $handle->surface, target: $target, kind: $kind, actor: $handle->actor->actor);
+        }
+        $countKinds = $this->rowsByDigest(handle: $handle, entity: 'reaction_counts', identities: $countIdentities);
+        foreach ($countKinds as $kind => $row) {
+            $count = $row->count;
+            if (! is_int($count) || $count < 0) {
+                throw new ReactionException(ProblemCode::PayloadInvalid);
             }
-            $identity = new ReactionIdentity(installation: $handle->actor->installation, surface: $handle->surface, target: $target, kind: $kind, actor: $handle->actor->actor);
-            $row = $this->table(handle: $handle, entity: 'reactions')->where('identity_digest', $identity->digest())->first();
-            if ($row !== null) {
-                $identity->verify($this->values($row));
-                if ($row->active === true) {
-                    $own[] = $kind;
-                }
+            $counts[$kind] = $count;
+        }
+        $memberships = $this->rowsByDigest(handle: $handle, entity: 'reactions', identities: $ownIdentities);
+        $own = [];
+        foreach ($kinds as $kind) {
+            if (isset($memberships[$kind]) && $this->active($memberships[$kind]->active)) {
+                $own[] = $kind;
             }
         }
 
@@ -172,13 +174,14 @@ final readonly class ReactionProjection
             $totals = [];
             foreach ($members as $row) {
                 $kind = $row->reaction_kind;
-                if (! is_string($kind) || ! is_string($row->actor_ref) || ! is_bool($row->active)) {
+                if (! is_string($kind) || ! is_string($row->actor_ref)) {
                     throw new ReactionException(ProblemCode::PayloadInvalid);
                 }
+                $active = $this->active($row->active);
                 $identity = new ReactionIdentity(installation: $handle->actor->installation, surface: $handle->surface, target: $target, kind: $kind,
                     actor: ActorRef::fromWire($row->actor_ref));
                 $identity->verify($this->values($row));
-                if ($row->active) {
+                if ($active) {
                     $totals[$kind] = ($totals[$kind] ?? 0) + 1;
                 }
             }
@@ -230,6 +233,49 @@ final readonly class ReactionProjection
         }
 
         return $result;
+    }
+
+    /**
+     * @param  array<string, ReactionIdentity>  $identities
+     * @return array<string, \stdClass>
+     */
+    private function rowsByDigest(OperationHandle $handle, string $entity, array $identities): array
+    {
+        $kinds = [];
+        foreach ($identities as $kind => $identity) {
+            $digest = $identity->digest();
+            if (isset($kinds[$digest])) {
+                throw new ReactionException(ProblemCode::PayloadInvalid);
+            }
+            $kinds[$digest] = $kind;
+        }
+        $found = [];
+        if ($kinds === []) {
+            return [];
+        }
+        foreach ($this->table(handle: $handle, entity: $entity)->whereIn('identity_digest', array_keys($kinds))->get() as $row) {
+            $digest = $row->identity_digest ?? null;
+            if (! is_string($digest) || ! isset($kinds[$digest]) || isset($found[$kinds[$digest]])) {
+                throw new ReactionException(ProblemCode::PayloadInvalid);
+            }
+            $kind = $kinds[$digest];
+            $identities[$kind]->verify($this->values($row));
+            $found[$kind] = $row;
+        }
+
+        return $found;
+    }
+
+    private function active(mixed $value): bool
+    {
+        if ($value === true || $value === 1 || $value === '1') {
+            return true;
+        }
+        if ($value === false || $value === 0 || $value === '0') {
+            return false;
+        }
+
+        throw new ReactionException(ProblemCode::PayloadInvalid);
     }
 
     /** @return array<string, mixed> */

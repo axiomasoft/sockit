@@ -1,6 +1,0 @@
-{
-  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
-  "php": "8.4.1",
-  "database": "Private owned PostgreSQL16 via P2.1 run manifest",
-  "session": "01a182f8-ea14-73d1-b32e-5bb6d4f39f54"
-}

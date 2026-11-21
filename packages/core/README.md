@@ -1,6 +1,6 @@
 # axiomasoft/sockit
 
-SocKit embeds panel-scoped social features in Laravel. Applications declare panel and surface providers, configure actor and audience resolvers, and enable the domain modules used by each panel.
+SocKit embeds panel-scoped social features in Laravel. Applications declare panel and surface providers, configure actor and audience resolvers, and enable the domain modules used by each panel. Generated Eloquent models persist rows. They do not decide who may read or write.
 
 Use `sockit:make-panel` to generate the application-owned models and `sockit:panel:migrations` to generate the initial or additive snapshot. PostgreSQL provides the locking, catalog introspection and receipt isolation used by the mutation and relay protocols. The configured application owns its generated migrations.
 

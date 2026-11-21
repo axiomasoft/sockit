@@ -1,8 +1,0 @@
-{
-  "type": "item.completed",
-  "item": {
-    "id": "item_10",
-    "type": "agent_message",
-    "text": "**PLAN1.P2.7, targeted round 2/2: GREEN.** F1/F2 исправлены; новых findings в пределах исправлений и связанных инвариантов нет. Открытых Major/Blocker: **0/0**.\n\n- **F1 — corrected:** [Envelope.php:120](/home/vostrikov/projects/packages/sockit/packages/core/src/Operations/Internal/Envelope/Envelope.php:120). Composite authority fence проверяется после owner locks, до persist, включая target-less lifecycle. V2 подтверждает реальные UNIQUE wait + revoke + holder rollback для module/archive: effects=0, confirmed receipts=0, outbox=0. Stale generation откатывается; успешен только отдельный повтор с исходным key.\n- **F2 — corrected:** [Envelope.php:207](/home/vostrikov/projects/packages/sockit/packages/core/src/Operations/Internal/Envelope/Envelope.php:207). Existing lookup авторизует сохранённый action; absent/foreign-actor key проходит явную policy. V3 подтверждает различные commandType/action, revoke и fail-closed при missing/unmapped policy.\n\nТочный fingerprint повторно подтверждён:\n\n- HEAD/base: `03c852c9ef08bb0294a4facb17394d5453d3fabd`\n- Digest: `sha256:3632920a06b541e0939e275f5d526a65f7da4ed39bc15bd0f54aa5ec0db62d74`\n- Все **148 путей**, архив и evidence V1–V8/V90/V91 соответствуют текущим исходникам.\n\n**Фактический route:** `codex/gpt-6.1-sol/high`.  \n**Session:** `01a1837a-61ea-7db3-bb67-66043bbba52e`, отличается от writer; подтверждён runtime `turn_context`.\n\nГраница принятия: host обязан реализовать документированный local authority fence с участием revoke writers. Receipt проверен по native schema в памяти. Файлы/native state не изменялись; suite и PG-тесты повторно не запускались."
-  }
-}

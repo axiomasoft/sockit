@@ -1,4 +1,0 @@
-command=composer lint
-cwd=/home/vostrikov/projects/packages/sockit
-> pint --test
-{"tool":"pint","result":"passed"}

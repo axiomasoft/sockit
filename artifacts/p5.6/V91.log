@@ -1,9 +1,0 @@
-check=V91
-cmd=composer lint
-cwd=/home/vostrikov/projects/packages/sockit
-source_fingerprint=2fa536cc774adacddec40a1bad89258df8822b5730e5d0b00cac6c611ce66648
-started_at=2026-10-29T11:26:05Z
-> pint --test
-{"tool":"pint","result":"passed"}
-exit=0
-finished_at=2026-10-29T11:26:06Z

@@ -1,1 +1,0 @@
-{"tool":"pint","result":"fixed","files":[{"path":"packages\/core\/src\/Schema\/Internal\/KernelSchema.php","fixers":["ordered_imports"]},{"path":"packages\/core\/src\/Schema\/SchemaCheck.php","fixers":["phpdoc_separation"]},{"path":"tests\/Unit\/Schema\/CompilerTest.php","fixers":["fully_qualified_strict_types","ordered_imports"]}]}

@@ -156,6 +156,10 @@ final readonly class AudienceGate
             if ($content->decision === VerdictDecision::AllowReadOnly) {
                 return AudienceVerdict::deny('audience.denied.author_outside_audience');
             }
+            // An expired allow still reports canRead/canWrite. Reads already fail closed; publish must too.
+            if (! $admission->isCurrent() || ($content->canRead() && ! $content->isCurrent())) {
+                return AudienceVerdict::deny('audience.unknown');
+            }
 
             return $content;
         } catch (\Throwable) {

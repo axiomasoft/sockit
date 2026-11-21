@@ -1,1 +1,0 @@
-> pest 'tests/Feature/BootTest.php' 'tests/Feature/Configuration' 'tests/Feature/Modules' 'tests/Feature/Panels' 'tests/Feature/Surfaces' 'tests/Unit/Modules' 'tests/Unit/Operations' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'

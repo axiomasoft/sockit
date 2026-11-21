@@ -1,1 +1,0 @@
-> pest 'tests/Unit/Schema/CompilerTest.php' 'tests/Feature/Schema/CompilationTest.php' '--fail-on-skipped' '--fail-on-incomplete' '--fail-on-warning' '--fail-on-risky'

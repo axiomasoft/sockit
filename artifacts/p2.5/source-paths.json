@@ -1,9 +1,0 @@
-[
-  "packages/core/src/Operations/Data/ReceiptSnapshot.php",
-  "packages/core/src/Operations/Internal/Receipts/ReceiptException.php",
-  "packages/core/src/Operations/Internal/Receipts/ReceiptLedger.php",
-  "tests/Fixtures/Runtime/ReceiptScenario.php",
-  "tests/Fixtures/Runtime/receipt-child.php",
-  "tests/Integration/Runtime/ReceiptClaimsTest.php",
-  "tests/Integration/Runtime/ReceiptConflictRecoveryTest.php"
-]

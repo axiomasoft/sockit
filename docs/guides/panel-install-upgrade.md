@@ -1,6 +1,6 @@
 # Установка и обновление панели
 
-Это воспроизводимые наблюдения P3.5/P3.6/P3.8, а не инструкция по включению production reactions. `acme.demo-targets` — исключительно тестовый schema module fixture; production reactions e2e остаётся pending в P4. Команды ниже выполнялись в корне отдельного Laravel consumer, с его конфигурацией и PSR-4 mapping `Acme\\ => app/`. Заменять значения следует только после собственной проверки окружения. Подробности и пределы доказательства: [P3.5](../../artifacts/p3.5/REPORT.md), [P3.6](../../artifacts/p3.6/REPORT.md), [P3.8](../../artifacts/p3.8/REPORT.md).
+Это воспроизводимые наблюдения генерации и upgrade панели, а не инструкция по включению production reactions. `acme.demo-targets` — исключительно тестовый schema module fixture. Команды ниже выполнялись в корне отдельного Laravel consumer, с его конфигурацией и PSR-4 mapping `Acme\\ => app/`. Заменять значения следует только после собственной проверки окружения. Автоматические пределы доказательства: `tests/Feature/Generation`, `tests/Feature/Consumer` и `tests/Integration/Schema`.
 
 ## Подготовка и генерация
 

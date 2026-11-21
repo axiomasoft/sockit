@@ -59,6 +59,8 @@ final readonly class PostFeed
         $context = $this->context($handle, $query);
         $position = $query->cursor === null ? null : $codec->decode($query->cursor, $context);
         $surface = $this->app->make(Operations::class)->surface($handle);
+        $surfaceDigest = hash('sha256', CanonicalJson::encode($handle->surface->toWire()));
+        $utc = new \DateTimeZone('UTC');
         $items = [];
         $scanned = 0;
         $exhausted = false;
@@ -67,7 +69,7 @@ final readonly class PostFeed
                 // Never fetch beyond remaining output capacity: an unprocessed tail cannot become the cursor.
                 $size = min($chunk, $budget - $scanned, $limit - count($items));
                 $candidates = $store->table($handle, 'posts')->where($store->identity($handle))
-                    ->where('surface_digest', hash('sha256', CanonicalJson::encode($handle->surface->toWire())))
+                    ->where('surface_digest', $surfaceDigest)
                     ->where('publication_state', 'published')->where('visibility', 'visible')->where('content_state', 'retained')->whereNotNull('published_at');
                 if (isset($query->filters['author'])) {
                     $candidates->where('author_ref', $query->filters['author']);
@@ -92,7 +94,7 @@ final readonly class PostFeed
                 foreach ($rows as $raw) {
                     $candidate = $store->columns($raw);
                     $id = $store->text($candidate, 'id');
-                    $position = ['time' => new \DateTimeImmutable($store->text($candidate, 'published_at'), new \DateTimeZone('UTC'))->format('Y-m-d H:i:s.u'), 'id' => $id];
+                    $position = ['time' => new \DateTimeImmutable($store->text($candidate, 'published_at'), $utc)->format('Y-m-d H:i:s.u'), 'id' => $id];
                     $scanned++;
                     $verdict = $verdicts[$id] ?? null;
                     if ($verdict === null || ! $this->fresh($verdict)) {
@@ -152,6 +154,10 @@ final readonly class PostFeed
                     && $this->hostVersion($host) === $this->hostVersion($currentHost)) {
                     return new FeedCandidate(view: $view, row: $current, surface: $currentSurface, admission: $admission);
                 }
+            }
+        } catch (PostException $exception) {
+            if (in_array($exception->problem(), [ProblemCode::ProviderUnavailable, ProblemCode::PayloadInvalid, ProblemCode::ConfigurationInvalid], true)) {
+                throw $exception;
             }
         } catch (\Throwable) {
             // Missing, denied, expired and unstable candidates never materialize in the returned page.

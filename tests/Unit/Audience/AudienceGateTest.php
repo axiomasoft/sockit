@@ -99,6 +99,36 @@ it('preserves content read-only verdicts and metadata through the gate', functio
         ->and($gate->publish(author: $viewer, subject: $subject, floor: Scenario::floor(Scenario::floorWire()))->canWrite())->toBeFalse();
 });
 
+it('rejects an expired allow on publish the same way reads already fail closed', function (): void {
+    $viewer = Scenario::viewer();
+    $subject = Scenario::subject(Scenario::subjectWire());
+    $expired = new AudienceVerdict(decision: VerdictDecision::Allow, reason: 'audience.allowed.platform', expiresAt: new DateTimeImmutable('-1 minute'));
+    $resolver = (new FakeAudienceResolver)->verdict(key: 'p1', verdict: AudienceVerdict::allow('audience.allowed.contour_live'));
+    $policy = (new FakeSurfaceAudiencePolicy)->allow(viewer: $viewer, surface: $subject->surface)
+        ->containment(actor: $viewer, surface: $subject->surface, proposed: $subject->spec, decision: AuthorizationDecision::allow('host.contained'));
+    $gate = new AudienceGate(resolver: $resolver, surfacePolicy: new readonly class($policy, $expired) implements SurfaceAudiencePolicy
+    {
+        public function __construct(private SurfaceAudiencePolicy $policy, private AudienceVerdict $admission) {}
+
+        public function admit(ActorContext $viewer, SurfaceRef $surface): AudienceVerdict
+        {
+            return $this->admission;
+        }
+
+        public function contains(ActorContext $actor, SurfaceRef $surface, AudienceSpec $proposed): AuthorizationDecision
+        {
+            return $this->policy->contains(actor: $actor, surface: $surface, proposed: $proposed);
+        }
+    });
+    expect($gate->read(viewer: $viewer, subject: $subject)->reason)->toBe('audience.unknown')
+        ->and($gate->publish(author: $viewer, subject: $subject, floor: Scenario::floor(Scenario::floorWire()))->reason)->toBe('audience.unknown');
+
+    $current = (new FakeSurfaceAudiencePolicy)->allow(viewer: $viewer, surface: $subject->surface)
+        ->containment(actor: $viewer, surface: $subject->surface, proposed: $subject->spec, decision: AuthorizationDecision::allow('host.contained'));
+    $resolver->verdict(key: 'p1', verdict: $expired);
+    expect(new AudienceGate(resolver: $resolver, surfacePolicy: $current)->publish(author: $viewer, subject: $subject, floor: Scenario::floor(Scenario::floorWire()))->reason)->toBe('audience.unknown');
+});
+
 it('keeps mandatory floor and containment checks even for an allowing custom resolver', function (): void {
     $viewer = Scenario::viewer();
     $subject = Scenario::subject(Scenario::subjectWire());

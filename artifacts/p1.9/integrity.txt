@@ -1,6 +1,0 @@
-V1 schema/log integrity OK
-V2 schema/log integrity OK
-V90 schema/log integrity OK
-V91 schema/log integrity OK
-V99 schema/log integrity OK
-Source manifest verified: 31 owned paths + reused SocKitFake

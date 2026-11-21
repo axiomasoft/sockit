@@ -19,7 +19,21 @@ it('releases PostgreSQL sessions across repeated complete scenario teardowns', f
         $scenario->cleanup();
         unset($scenario);
         gc_collect_cycles();
-        expect(countPgClientBackends($monitor))->toBe($baseline);
+        $actual = countPgClientBackends($monitor);
+        if ($actual !== $baseline) {
+            // A backend we already closed can remain listed for a moment. A retained PDO stays.
+            $deadline = microtime(true) + 1;
+            do {
+                gc_collect_cycles();
+                usleep(20000);
+                $actual = countPgClientBackends($monitor);
+            } while ($actual !== $baseline && microtime(true) < $deadline);
+        }
+        if ($actual !== $baseline) {
+            $rows = PgTarget::query($monitor, 'SELECT pid, state, backend_type, application_name, wait_event_type, left(query, 240) AS query FROM pg_stat_activity WHERE datname=current_database() AND pid <> pg_backend_pid()')->fetchAll(PDO::FETCH_ASSOC);
+            fwrite(STDERR, 'retained client backends i='.$i.' baseline='.$baseline.' actual='.$actual.' rows='.json_encode($rows, JSON_THROW_ON_ERROR).PHP_EOL);
+        }
+        expect($actual)->toBe($baseline);
     }
     fwrite(STDERR, 'Repeated teardown: baseline='.$baseline.' final='.countPgClientBackends($monitor).PHP_EOL);
 });

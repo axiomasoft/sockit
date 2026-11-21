@@ -82,4 +82,14 @@ final readonly class PgTarget
 
         return $statement;
     }
+
+    /** Ends the server session even when the driver keeps the PDO handle. */
+    public static function release(PDO $pdo): void
+    {
+        try {
+            self::query($pdo, 'SELECT pg_terminate_backend(pg_backend_pid())')->fetchColumn();
+        } catch (\PDOException) {
+            // The backend exits before the driver can read the result.
+        }
+    }
 }

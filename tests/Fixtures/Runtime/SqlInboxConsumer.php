@@ -31,7 +31,10 @@ final class SqlInboxConsumer implements OutboxConsumer
 
     public function close(): void
     {
-        unset($this->consumer);
+        if (isset($this->consumer)) {
+            PgTarget::release($this->consumer);
+            unset($this->consumer);
+        }
     }
 
     public function backendPid(): int

@@ -88,8 +88,21 @@ final class RuntimeDatabase
 
     public function close(): void
     {
+        $manager = $this->capsule->getDatabaseManager();
         foreach (['owner_a', 'owner_b', 'decoy'] as $name) {
-            $this->capsule->getDatabaseManager()->disconnect($name);
+            $connection = $manager->connection($name);
+            foreach ([$connection->getRawPdo(), $connection->getRawReadPdo(), $connection->getRawDirectPdo()] as $pdo) {
+                if ($pdo instanceof PDO) {
+                    PgTarget::release($pdo);
+                }
+            }
+            $manager->disconnect($name);
+        }
+        if (isset($this->owner)) {
+            PgTarget::release($this->owner);
+        }
+        if (isset($this->decoy)) {
+            PgTarget::release($this->decoy);
         }
         unset($this->owner, $this->decoy);
     }
